@@ -1,0 +1,16 @@
+Package: fastbeta
+Version: 0.0.0.9000
+Title: Fast Estimation of Time-Varying Transmission Rates
+Authors@R: 
+    person("Mikael", "Jagan", email = "mjagan@uwaterloo.ca",
+           role = c("aut", "cre"))
+URL: https://github.com/davidearn/fastbeta
+Description: This package implements methods for estimation of 
+    time-varying transmission rates from disease incidence time
+    series. These methods are described in the manuscript
+    "Fast estimation of time-varying transmission rates for 
+    infectious diseases".
+License: MIT + file LICENSE
+Encoding: UTF-8
+LazyData: true
+RoxygenNote: 7.0.2
