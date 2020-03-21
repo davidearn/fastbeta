@@ -23,7 +23,7 @@
 #'
 #' PTPI can be used in conjunction with the FC, S, and SI methods,
 #' which require users to specify an estimate of
-#' \ifelse{latex}{\out{$S_0$}}{\ifelse{html}{\out{<i>S<sub>0</sub></i>}}{S_0}}.
+#' \ifelse{latex}{\out{$S_0$}}{\ifelse{html}{\out{<i>S</i><sub>0</sub>}}{S_0}}.
 #'
 #' \pkg{fastbeta} includes functions useful for simulating incidence
 #' time series with an underlying, seasonally forced transmission rate.
@@ -34,7 +34,7 @@
 #' * [compute_rrmse()]
 #'
 #' All methods are based on the SIR model with time-varying rates of
-#' birth, death, and transmission,
+#' birth, death, and transmission:
 #'
 #' \ifelse{latex}{
 #'   \out{
@@ -47,11 +47,9 @@
 #' }{
 #'   \ifelse{html}{
 #'     \out{
-#'       <i>
-#'       S&prime; = &nu;(t)&Ntilde;<sub>0</sub> &minus; &beta;(t)SI &minus; &mu;(t)S<br>
-#'       I&prime; = &beta;(t)SI &minus; &gamma;I &minus; &mu;(t)I<br>
-#'       R&prime; = &gamma;I &minus; &mu;(t)R
-#'       </i>
+#'       <i>S</i>&prime; = <i>&nu;</i>(<i>t</i>)<i>&Ntilde;</i><sub>0</sub> &minus; <i>&beta;</i>(<i>t</i>)<i>SI</i> &minus; <i>&mu;</i>(<i>t</i>)<i>S</i><br>
+#'       <i>I</i>&prime; = <i>&beta;</i>(<i>t</i>)<i>SI</i> &minus; <i>&gamma;I</i> &minus; <i>&mu;</i>(<i>t</i>)<i>I</i><br>
+#'       <i>R</i>&prime; = <i>&gamma;I</i> &minus; <i>&mu;</i>(<i>t</i>)<i>R</i>
 #'     }
 #'   }{
 #'     % S' = nu(t)*hatN_0 - beta(t)*S*I - mu(t)*S \cr
@@ -60,7 +58,7 @@
 #'   }
 #' }
 #'
-#' and are fully described in the referenced manuscript.
+#' They are all fully described in the referenced manuscript.
 #'
 #' @references
 #' deJonge MS, Jagan M, Krylova O, Earn DJD. Fast estimation of

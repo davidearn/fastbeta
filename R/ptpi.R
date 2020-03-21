@@ -120,6 +120,7 @@
 #' time-varying transmission rates for infectious diseases.
 #'
 #' @md
+#' @export
 ptpi <- function(df = data.frame(), par_list = list(),
                  a, b,
                  initial_S0_est,

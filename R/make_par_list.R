@@ -145,6 +145,7 @@
 #' function call (see Details).
 #'
 #' @md
+#' @export
 make_par_list <- function(dt_weeks  = 1,
                           t0        = 2000 * (365 / 7) / dt_weeks,
                           prep      = 1,

@@ -17,6 +17,7 @@
 #' `sqrt(sum(act[cc] - est[cc])^2 / length(cc)) / mean(act[cc])`.
 #'
 #' @md
+#' @export
 compute_rrmse <- function(act, est, na_rm = TRUE) {
 
 df <- data.frame(act, est)

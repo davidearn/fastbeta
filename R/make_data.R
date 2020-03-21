@@ -197,6 +197,7 @@
 #' attributes.
 #'
 #' @md
+#' @export
 make_data <- function(par_list       = list(),
                       n              = floor(20 * 365 / 7),
                       with_dem_stoch = FALSE,

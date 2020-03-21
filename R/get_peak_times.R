@@ -63,6 +63,7 @@
 #' attribute.
 #'
 #' @md
+#' @export
 get_peak_times <- function(x, period, bw_mavg, bw_peakid) {
 
 ## 1. Apply moving average ---------------------------------------------

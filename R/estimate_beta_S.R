@@ -132,6 +132,7 @@
 #' time-varying transmission rates for infectious diseases.
 #'
 #' @md
+#' @export
 estimate_beta_S <- function(df       = data.frame(),
                             par_list = list()) {
 
