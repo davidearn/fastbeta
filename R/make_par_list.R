@@ -11,24 +11,25 @@
 #' * [ptpi()] to estimate the initial number of susceptibles
 #'   \ifelse{latex}{\out{$S_0$}}{\ifelse{html}{\out{<i>S</i><sub>0</sub>}}{S_0}}.
 #'
-#' Time (or rate) parameters are defined in units (or per unit)
+#' As these methods deal with equally spaced time series data
+#' with fixed observation interval
 #' \ifelse{latex}{\out{$\Delta t$}}{\ifelse{html}{\out{<i>&Delta;t</i>}}{Dt}},
-#' where
-#' \ifelse{latex}{\out{$\Delta t$}}{\ifelse{html}{\out{<i>&Delta;t</i>}}{Dt}}
-#' denotes the observation interval in equally spaced time series data.
+#' `make_par_list()` defines time (or rate) parameters in units
+#' (or per unit)
+#' \ifelse{latex}{\out{$\Delta t$}}{\ifelse{html}{\out{<i>&Delta;t</i>}}{Dt}}.
 #'
 #' @details
 #' `make_par_list()` enforces the identity
 #'
 #' \ifelse{latex}{\out{$\mathcal{R}_0 = \frac{\nu_\text{c} \widehat{N}_0}{\mu_\text{c}} \cdot \frac{\langle\beta\rangle}{\gamma + \mu}$}}{\ifelse{html}{\out{<i>&Rscr;</i><sub>0</sub> = (<i>&nu;</i><sub>c</sub> <i>&Ntilde;</i> / <i>&mu;</i><sub>c</sub>)(&langle;<i>&beta;</i>&rangle; / (<i>&gamma;</i> + <i>&mu;</i><sub>c</sub>))}}{calR_0 = ((nu_c*hatN0)/mu_c)*(<beta>/(gamma + mu))}}
 #'
-#' as follows. If exactly one of `Rnaught` and `beta_mean` is specified
-#' in the function call, them the parameter not specified is internally
-#' assigned the value satisfying the identity. If both are specified in
+#' as follows. If exactly one of `Rnaught` and `beta_mean` is defined
+#' in the function call, then the parameter not defined is internally
+#' assigned the value satisfying the identity. If both are defined in
 #' the function call, then the value of `beta_mean` is replaced with the
 #' value satisfying the identity.
 #'
-#' If `N0`, `S0`, or `I0` are undefined in the function call, then
+#' If `N0`, `S0`, or `I0` are not defined in the function call, then
 #' `make_par_list()` numerically integrates the system of SIR equations
 #'
 #' \ifelse{latex}{
@@ -141,9 +142,26 @@
 #'
 #' @return
 #' A list of the arguments of `make_par_list()`, including values for
-#' `Rnaught`, `beta_mean`, `N0`, `S0`, and `I0` if not specified in the
+#' `Rnaught`, `beta_mean`, `N0`, `S0`, and `I0` if not defined in the
 #' function call (see Details).
 #'
+#' @examples
+#' # All arguments have default values
+#' par_list <- make_par_list()
+#' unlist(par_list)
+#'
+#' # Time and rate parameters must be specified
+#' # in terms of the observation interval
+#' dt_weeks <- 1
+#' nu_peryear <- 0.04
+#' tgen_days <- 13
+#' par_list <- make_par_list(
+#'   dt_weeks = dt_weeks,
+#'   nu       = nu_peryear * (7 / 365) * dt_weeks,
+#'   tgen     = tgen_days * (1 / 7) / dt_weeks
+#' )
+#' unlist(par_list)
+#' 
 #' @md
 #' @export
 make_par_list <- function(dt_weeks  = 1,
@@ -162,23 +180,19 @@ make_par_list <- function(dt_weeks  = 1,
                           alpha     = 0.08,
                           epsilon   = 0.5) {
 
-# Convenience variables
+# Derived quantities
 gamma <- 1 / tgen
 one_year <- (365 / 7) / dt_weeks
 
-
-# If `Rnaught` was defined but not `beta_mean`,
-# then define `beta_mean`
+# If `Rnaught` was defined but not `beta_mean`
 if (!is.null(Rnaught) && is.null(beta_mean)) {
   beta_mean <- (mu / (nu * hatN0)) * Rnaught * (gamma + mu)
 
-# If `beta_mean` was defined but not Rnaught`,
-# then define `Rnaught`
+# If `beta_mean` was defined but not Rnaught`
 } else if (!is.null(beta_mean) && is.null(Rnaught)) {
   Rnaught <- ((nu * hatN0) / mu) * beta_mean / (gamma + mu)
 
-# If `Rnaught` and `beta_mean` are both defined,
-# then redefine `beta_mean`
+# If `Rnaught` and `beta_mean` were both defined
 } else if (!is.null(Rnaught) && !is.null(beta_mean)) {
   beta_mean <- (mu / (nu * hatN0)) * Rnaught * (gamma + mu)
 
@@ -191,7 +205,7 @@ if (!is.null(Rnaught) && is.null(beta_mean)) {
 }
 
 
-# If `N0`, `S0`, or `I0` was not defined, then
+# If `N0`, `S0`, or `I0` was not specified, then
 # obtain a value from the state of a system of
 # SIR equations after a transient of length `t0`
 if (is.null(N0) || is.null(S0) || is.null(I0)) {

@@ -4,25 +4,31 @@
 \alias{compute_rrmse}
 \title{Compute RRMSE in a time series estimate}
 \usage{
-compute_rrmse(act, est, na_rm = TRUE)
+compute_rrmse(x, y, na_rm = TRUE)
 }
 \arguments{
-\item{act}{Numeric vector. A time series.}
+\item{x}{Numeric vector. A time series.}
 
-\item{est}{Numeric vector with length equal to \code{length(act)}.
-A time series estimate of \code{act}.}
+\item{y}{Numeric vector with length equal to \code{length(x)}.
+A time series estimate of \code{x}.}
 
 \item{na_rm}{Logical. If \code{TRUE}, then missing values
 (\code{NA}, \code{NaN}, \code{Inf}) are ignored.}
 }
 \value{
 Let \code{cc} ("complete cases") be the vector of indices \code{i} such that
-neither \code{act[i]} nor \code{est[i]} is missing. If \code{length(cc) = 0} or if
-\code{length(cc) < length(act)} and \code{na_rm = FALSE}, then \code{NA}. Otherwise,
-the RRMSE in \code{est} given by
-\code{sqrt(sum(act[cc] - est[cc])^2 / length(cc)) / mean(act[cc])}.
+neither \code{x[i]} nor \code{y[i]} is missing. If \code{length(cc) = 0} or if
+\code{length(cc) < length(x)} and \code{na_rm = FALSE}, then \code{NA}. Otherwise,
+the RRMSE in \code{y} given by
+\code{sqrt(sum((x[cc] - y[cc])^2) / length(cc)) / mean(x[cc])}.
 }
 \description{
 \code{compute_rrmse()} computes the relative root mean square error
 (RRMSE) in a time series estimate of a known time-varying quantity.
+}
+\examples{
+x <- rep(c(0, 1, 0, -1), 100)
+y <- x + rnorm(x, 0, 0.01)
+compute_rrmse(x, y) # RRMSE in `y`
+
 }

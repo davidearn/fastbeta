@@ -21,7 +21,7 @@ applied to \code{x}. \code{x_mavg[i]} will be the mean of observations
 \item{bw_peakid}{Numeric scalar. Bandwidth for peak identification.
 \code{i} will be a peak time if and only if \code{x_mavg[i] > x_mavg[j]}
 for all \code{j} with
-\ifelse{latex}{\out{$0 < |i - j| \leq bandwidth$}}{\ifelse{html}{\out{0 &lt; &vert;<i>i</i> &minus; <i>j</i>&vert; &le; bandwidth}}{0 < |i - j| <= bandwidth}}..}
+\ifelse{latex}{\out{$0 < |i - j| \leq bandwidth$}}{\ifelse{html}{\out{0 &lt; &vert;<i>i</i> &minus; <i>j</i>&vert; &le; bandwidth}}{0 < |i - j| <= bandwidth}}.}
 }
 \value{
 A list containing:
@@ -45,33 +45,61 @@ series with known period. It applies a central moving average to the
 raw time series, identifies when peaks occur in the resulting smooth
 time series, and subsets those peaks in phase with the first peak.
 }
-\details{
+\section{Bandwidth tuning}{
+
 The bandwidths \code{bw_mavg} and \code{bw_peakid} must be iteratively tuned
 so as to disqualify peaks caused by noise in \code{x} (choose \code{bw_mavg}
 large enough) without disqualifying true peaks (choose \code{bw_peakid}
-not too large).
+not too large). Tuning is not done internally.
+}
 
-\code{get_peak_times()} will not detect a peak at time \code{i} if
+\section{Missed peaks}{
+
+\code{get_peak_times()} will not detect peaks at the edges of \code{x}.
+Specifically, it will not detect a peak at index \code{i} if:
 \itemize{
-\item \code{i <= floor(bw_mavg) + floor(bw_peakid)}, or
-\item \code{i >= length(x) - floor(bw_mavg) - floor(bw_peakid) + 1}.
+\item \code{i <= floor(bw_mavg) + floor(bw_peakid)}
+\item \code{i >= length(x) - floor(bw_mavg) - floor(bw_peakid) + 1}
 }
 
-These peaks are systematically disqualified for two reasons:
-\enumerate{
-\item The moving average performed by \code{\link[stats:filter]{stats::filter()}} assigns
-\code{x_mavg[i]} the value \code{NA} if there are any missing values
-in the band centered at \code{x[i]}. Hence \code{x_mavg[i]} is always
-\code{NA} if
-\itemize{
-\item \code{i <= floor(bw_mavg)} or
-\item \code{i >= length(x) - floor(bw_mavg) + 1}.
-}
-\item Missing values in the band centered at \code{x_mavg[i]} disqualify
-\code{i} as a peak time.
+\code{get_peak_times()} will miss peaks in other, typically rare
+situations. For example, a peak at index \code{i} will be missed
+if, by chance, \code{x_mavg[i] = x_mavg[i+1]} (i.e., there are two
+points of equal height at the top of the peak instead of a
+single highest point). See the definition of \code{bw_peakid}.
 }
 
-For example, if \code{bw_mavg = 1} and \code{bw_peakid = 2}, then \code{x_mavg[1]}
-is assigned the value \code{NA}, and this disqualifies any peak at index
-1, 2, or 3.
+\examples{
+# Simulate 20 years of disease incidence,
+# observed weekly
+par_list <- make_par_list(dt_weeks = 1)
+df <- make_data(
+  par_list = par_list,
+  n = 1042, # 20 years is 1042 weeks
+  with_dem_stoch = TRUE
+)
+
+# Plot incidence time series, and note the
+# apparent 1-year period
+plot(Z ~ t_years, df,
+  type = "l",
+  xlab = "Time (years)",
+  ylab = "Incidence"
+)
+
+# Find peaks in incidence time series
+peaks <- get_peak_times(
+  x = df$Z,
+  period = 365 / 7, # 1 year is 365 / 7 weeks
+  bw_mavg = 6,
+  bw_peakid = 8
+)
+
+# Verify that peaks were identified correctly
+abline(v = df$t_years[peaks$all], lty = 2, col = "red")
+
+}
+\references{
+deJonge MS, Jagan M, Krylova O, Earn DJD. Fast estimation of
+time-varying transmission rates for infectious diseases.
 }

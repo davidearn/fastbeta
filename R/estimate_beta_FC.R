@@ -11,18 +11,11 @@
 #' \ifelse{latex}{\out{$\Delta t$}}{\ifelse{html}{\out{<i>&Delta;t</i>}}{Dt}}
 #' denotes the observation interval.
 #'
-#' @details
-#' In the output, every `with(par_list, round(tgen))` rows are
-#' complete. The remaining rows contain `NA` in columns `S`, `I`,
-#' `beta`, `Z_agg`, and `B_agg`. This is a limitation of the FC
-#' method, which aggregates incidence and births over the mean
-#' generation interval, making `with(par_list, round(tgen))` the
-#' *effective* observation interval. If this number is zero, then
-#' the method fails.
-#'
+#' @section Mock birth data:
 #' If `df$B` is undefined in the function call, then `df$B[i]`
 #' gets the value `with(par_list, nu * hatN0 * 1)` for all `i`.
 #'
+#' @section Missing data:
 #' Missing values in `df[, c("C", "B")]` are not tolerated by
 #' the FC method. They are imputed via linear interpolation
 #' between observed values. If there are no observations
@@ -35,8 +28,19 @@
 #' no nonzero observations before the first zero, then complete
 #' imputation is impossible. In this case, the FC method may fail,
 #' but only locally: column `beta` in the output may contain some
-#' `NaN` and `Inf`, but give estimates everywhere else.
+#' `NaN` and `Inf` where an estimate would otherwise be expected.
+#' (Estimates are not expected everywhere. See "Effective
+#' observation interval".)
 #'
+#' @section Effective observation interval:
+#' In the output, every `with(par_list, round(tgen))` rows are
+#' complete. The remaining rows contain `NA` in columns `S`, `I`,
+#' `beta`, `Z_agg`, and `B_agg`. This is a limitation of the FC
+#' method, which aggregates incidence and births over the mean
+#' generation interval, making `with(par_list, round(tgen))` the
+#' *effective* observation interval. If this number is zero, then
+#' the method fails.
+#' 
 #' @param df A data frame with numeric columns:
 #'
 #'   \describe{
@@ -130,6 +134,31 @@
 #'
 #' It possesses `par_list` as an attribute.
 #'
+#' @examples
+#' # Simulate a reported incidence time series using
+#' # a seasonally forced transmission rate
+#' par_list <- make_par_list(dt_weeks = 1, prep = 0.25)
+#' df <- make_data(
+#'   par_list = par_list,
+#'   n = 1042, # 20 years is 1042 weeks
+#'   with_dem_stoch = TRUE,
+#'   seeds = c(5, 3, 9)
+#' )
+#' head(df)
+#'
+#' # Reconstruct incidence, susceptibles, infecteds,
+#' # and the seasonally forced transmission rate
+#' df_FC <- estimate_beta_FC(df, par_list)
+#' head(df_FC)
+#'
+#' # Reconstruction of susceptibles and transmission rate
+#' # fails because the FC method ignores susceptible mortality
+#' df_FC$t_years <- df$t_years
+#' plot(S ~ t_years, df, type = "l", ylim = 1e03 * c(43, 83))
+#' lines(S ~ t_years, df_FC[!is.na(df_FC$S), ], col = "red")
+#' plot(beta ~ t_years, df, type = "l", ylim = 1e-05 * c(0.5, 1.2))
+#' lines(beta ~ t_years, df_FC[!is.na(df_FC$beta), ], col = "red")
+#' 
 #' @references
 #' deJonge MS, Jagan M, Krylova O, Earn DJD. Fast estimation of
 #' time-varying transmission rates for infectious diseases.

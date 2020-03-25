@@ -97,7 +97,7 @@ forced transmission rate
 }
 \value{
 A list of the arguments of \code{make_par_list()}, including values for
-\code{Rnaught}, \code{beta_mean}, \code{N0}, \code{S0}, and \code{I0} if not specified in the
+\code{Rnaught}, \code{beta_mean}, \code{N0}, \code{S0}, and \code{I0} if not defined in the
 function call (see Details).
 }
 \description{
@@ -112,24 +112,25 @@ to estimate time-varying transmission rates
 \ifelse{latex}{\out{$S_0$}}{\ifelse{html}{\out{<i>S</i><sub>0</sub>}}{S_0}}.
 }
 
-Time (or rate) parameters are defined in units (or per unit)
+As these methods deal with equally spaced time series data
+with fixed observation interval
 \ifelse{latex}{\out{$\Delta t$}}{\ifelse{html}{\out{<i>&Delta;t</i>}}{Dt}},
-where
-\ifelse{latex}{\out{$\Delta t$}}{\ifelse{html}{\out{<i>&Delta;t</i>}}{Dt}}
-denotes the observation interval in equally spaced time series data.
+\code{make_par_list()} defines time (or rate) parameters in units
+(or per unit)
+\ifelse{latex}{\out{$\Delta t$}}{\ifelse{html}{\out{<i>&Delta;t</i>}}{Dt}}.
 }
 \details{
 \code{make_par_list()} enforces the identity
 
 \ifelse{latex}{\out{$\mathcal{R}_0 = \frac{\nu_\text{c} \widehat{N}_0}{\mu_\text{c}} \cdot \frac{\langle\beta\rangle}{\gamma + \mu}$}}{\ifelse{html}{\out{<i>&Rscr;</i><sub>0</sub> = (<i>&nu;</i><sub>c</sub> <i>&Ntilde;</i> / <i>&mu;</i><sub>c</sub>)(&langle;<i>&beta;</i>&rangle; / (<i>&gamma;</i> + <i>&mu;</i><sub>c</sub>))}}{calR_0 = ((nu_c*hatN0)/mu_c)*(<beta>/(gamma + mu))}}
 
-as follows. If exactly one of \code{Rnaught} and \code{beta_mean} is specified
-in the function call, them the parameter not specified is internally
-assigned the value satisfying the identity. If both are specified in
+as follows. If exactly one of \code{Rnaught} and \code{beta_mean} is defined
+in the function call, then the parameter not defined is internally
+assigned the value satisfying the identity. If both are defined in
 the function call, then the value of \code{beta_mean} is replaced with the
 value satisfying the identity.
 
-If \code{N0}, \code{S0}, or \code{I0} are undefined in the function call, then
+If \code{N0}, \code{S0}, or \code{I0} are not defined in the function call, then
 \code{make_par_list()} numerically integrates the system of SIR equations
 
 \ifelse{latex}{
@@ -181,4 +182,22 @@ Then \code{make_par_list()} defines \code{N0}, \code{S0}, and \code{I0} as follo
 \ifelse{latex}{\out{$I(t_0)$}}{\ifelse{html}{\out{<i>I</i>(<i>t</i><sub>0</sub>)}}{I(t_0)}}.
 }
 }
+}
+\examples{
+# All arguments have default values
+par_list <- make_par_list()
+unlist(par_list)
+
+# Time and rate parameters must be specified
+# in terms of the observation interval
+dt_weeks <- 1
+nu_peryear <- 0.04
+tgen_days <- 13
+par_list <- make_par_list(
+  dt_weeks = dt_weeks,
+  nu       = nu_peryear * (7 / 365) * dt_weeks,
+  tgen     = tgen_days * (1 / 7) / dt_weeks
+)
+unlist(par_list)
+
 }

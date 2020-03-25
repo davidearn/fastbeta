@@ -110,23 +110,83 @@ A list of the arguments of \code{ptpi()} is included as an attribute.
 Using the method of peak-to-peak iteration (PTPI, see References),
 \code{ptpi()} estimates the initial number of susceptibles
 \ifelse{latex}{\out{$S_0 = S(t_0)$}}{\ifelse{html}{\out{<i>S</i><sub>0</sub> = <i>S</i>(<i>t</i><sub>0</sub>)}}{S_0 = S(t_0)}}
-from time series of incidence (\emph{periodic}), births, and
-natural mortality, observed at equally spaced time points
+from time series of incidence (\emph{must be roughly periodic}), births,
+and natural mortality, observed at equally spaced time points
 \ifelse{latex}{\out{$t_k = t_0 + k \Delta t$}}{\ifelse{html}{\out{<i>t<sub>k</sub></i> = <i>t</i><sub>0</sub>+<i>k&Delta;t</i>}}{t_k = t_0 + k*Dt}}
 (for \ifelse{latex}{\out{$k = 0,\ldots,n$}}{\ifelse{html}{\out{<i>k</i> = 0,...,<i>n</i>}}{k = 0,...,n}}),
 where
 \ifelse{latex}{\out{$\Delta t$}}{\ifelse{html}{\out{<i>&Delta;t</i>}}{Dt}}
 denotes the observation interval.
 }
-\details{
+\section{Mock vital data}{
+
 If \code{df$B} is undefined in the function call, then \code{df$B[i]} gets the
 value \code{with(par_list, nu * hatN0 * 1)} for all \code{i}. If \code{df$mu} is
 undefined in the function call, then \code{df$mu[i]} gets the value
 \code{with(par_list, mu)} for all \code{i}.
+}
+
+\section{Missing data}{
 
 Missing values in \code{df[, c("Z", "B", "mu")]} are mostly not tolerated.
 At the moment, \code{ptpi()} makes no effort to impute them, so imputation
 must be done beforehand.
+}
+
+\examples{
+# Simulate 20 years of disease incidence,
+# observed weekly
+par_list <- make_par_list(dt_weeks = 1)
+df <- make_data(
+  par_list = par_list,
+  n = 1042, # 20 years is 1042 weeks
+  with_dem_stoch = TRUE,
+  seeds = c(9, 3, 5)
+)
+
+# Plot incidence time series, and note the
+# apparent 1-year period
+plot(Z ~ t_years, df,
+  type = "l",
+  xlab = "Time (years)",
+  ylab = "Incidence"
+)
+
+# Find peaks in incidence time series
+peaks <- get_peak_times(
+  x = df$Z,
+  period = 365 / 7, # 1 year is 365 / 7 weeks
+  bw_mavg = 6,
+  bw_peakid = 8
+)
+
+# Verify that peaks were identified correctly
+abline(v = df$t_years[peaks$all], lty = 2, col = "red")
+
+# Index of first peak
+a <- with(peaks, phase[1])
+
+# Index of last peak in phase with first
+b <- with(peaks, phase[length(phase)])
+
+# Estimate `S0` from incidence via PTPI,
+# starting from an erroneous initial guess
+# (will use mock vital data)
+ptpi_out <- ptpi(
+  df = df["Z"],
+  par_list = par_list,
+  a = a,
+  b = b,
+  initial_S0_est <- df$S[1] * 4,
+  iter = 25
+)
+
+# Sequence of estimates
+ptpi_out$S0
+
+# Relative error in final estimate
+(ptpi_out$S0_final - df$S[1]) / df$S[1]
+
 }
 \references{
 deJonge MS, Jagan M, Krylova O, Earn DJD. Fast estimation of

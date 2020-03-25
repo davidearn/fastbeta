@@ -11,12 +11,13 @@
 #' \ifelse{latex}{\out{$\Delta t$}}{\ifelse{html}{\out{<i>&Delta;t</i>}}{Dt}}
 #' denotes the observation interval.
 #'
-#' @details
+#' @section Mock vital data:
 #' If `df$B` is undefined in the function call, then `df$B[i]`
 #' gets the value `with(par_list, nu * hatN0 * 1)` for all `i`.
 #' If `df$mu` is undefined the function call, then `df$mu[i]`
 #' gets the value `with(par_list, mu)` for all `i`.
 #'
+#' @section Missing data:
 #' Missing values in `df[, c("C", "B", "mu")]` are not tolerated
 #' by the S method. They are imputed via linear interpolation
 #' between observed values. If there are no observations before
@@ -127,6 +128,41 @@
 #'
 #' It possesses `par_list` as an attribute.
 #'
+#' @examples
+#' # Simulate a reported incidence time series using
+#' # a seasonally forced transmission rate
+#' par_list <- make_par_list(dt_weeks = 1, prep = 0.25)
+#' df <- make_data(
+#'   par_list = par_list,
+#'   n = 1042, # 20 years is 1042 weeks
+#'   with_dem_stoch = TRUE,
+#'   seeds = c(5, 3, 9)
+#' )
+#' head(df)
+#'
+#' # Reconstruct incidence, susceptibles, infecteds,
+#' # and the seasonally forced transmission rate
+#' df_S <- estimate_beta_S(df, par_list)
+#' head(df_S)
+#'
+#' # Fit a smooth loess curve to the transmission rate
+#' # time series
+#' loess_fit <- loess(
+#'   formula   = beta ~ t,
+#'   data      = df_S,
+#'   span      = 65 / nrow(df_S),
+#'   degree    = 2,
+#'   na.action = "na.exclude"
+#' )
+#' df_S$beta <- predict(loess_fit)
+#'
+#' # Inspect
+#' df_S$t_years <- df$t_years
+#' plot(S ~ t_years, df, type = "l", ylim = 1e03 * c(43, 58))
+#' lines(S ~ t_years, df_S, col = "red")
+#' plot(beta ~ t_years, df, type = "l", ylim = 1e-05 * c(0.95, 1.25))
+#' lines(beta ~ t_years, df_S, col = "red")
+#' 
 #' @references
 #' deJonge MS, Jagan M, Krylova O, Earn DJD. Fast estimation of
 #' time-varying transmission rates for infectious diseases.
