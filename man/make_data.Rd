@@ -199,8 +199,11 @@ Randomness is introduced by choosing \code{epsilon} greater than 0.
 \itemize{
 \item If \code{with_dem_stoch = TRUE}, then observations are generated
 by realizing a continuous-time stochastic process, in which
-event probabilities are determined by terms in the ODE. See
-\code{\link[adaptivetau:ssa.adaptivetau]{adaptivetau::ssa.adaptivetau()}}.
+event probabilities are determined by terms in the ODE.
+See \code{\link[adaptivetau:ssa.adaptivetau]{adaptivetau::ssa.adaptivetau()}}.
+\item Probability of infected removal or death is set to zero
+whenever the number of infecteds is 1, in order to prevent
+disease fadeout.
 \item Made reproducible by specifying \code{seeds[2]}.
 \item If \code{with_dem_stoch = FALSE}, then observations are generated
 by numerically integrating the ODE. See \code{\link[deSolve:lsoda]{deSolve::lsoda()}}.
