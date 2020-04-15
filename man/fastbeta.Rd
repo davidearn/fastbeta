@@ -68,7 +68,7 @@ birth, death, and transmission:
   }
 }
 
-They are all fully described in the referenced manuscript.
+They are fully described in the referenced manuscript.
 }
 \references{
 deJonge MS, Jagan M, Krylova O, Earn DJD. Fast estimation of
