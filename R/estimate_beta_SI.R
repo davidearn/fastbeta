@@ -102,11 +102,6 @@
 #'
 #'   `hatN0` and `nu` are optional if `B` is defined in `df`, and
 #'   `mu` is optional if `mu` is defined in `df` (see Details).
-#' @param method Character scalar. One of `"trapezoid"` (recommended),
-#'   `"forward"`, and `"backward"`, indicating that estimates of
-#'   `S`, `I`, and `beta` should be calculated as derived using
-#'   the trapezoidal method, forward Euler method, or backward Euler
-#'   method.
 #'
 #' @return
 #' A data frame with numeric columns:
@@ -138,7 +133,7 @@
 #'   }
 #' }
 #'
-#' It possesses `par_list` and `method` as attributes.
+#' It possesses `par_list` as an attribute.
 #'
 #' @examples
 #' # Simulate a reported incidence time series using
@@ -182,8 +177,7 @@
 #' @md
 #' @export
 estimate_beta_SI <- function(df       = data.frame(),
-                             par_list = list(),
-                             method   = "trapezoid") {
+                             par_list = list()) {
 
 ## 1. Set-up -----------------------------------------------------------
 
@@ -297,33 +291,13 @@ df[c("S", "I", "beta")] <- with(df,
   {
     S[1] <- S0
     I[1] <- I0
-    if (method == "trapezoid") {
-      for (i in 2:nrow(df)) {
-        S[i] <- ((1 - 0.5 * mu[i-1] * 1) * S[i-1] + B[i] - Z[i]) /
-          (1 + 0.5 * mu[i] * 1)
-        I[i] <- ((1 - 0.5 * (gamma + mu[i-1]) * 1) * I[i-1] + Z[i]) /
-          (1 + 0.5 * (gamma + mu[i]) * 1)
-      }
-      beta <- (Z + c(Z[-1], NA)) / (2 * S * I * 1)
-    } else if (method == "backward") {
-      for (i in 2:nrow(df)) {
-        S[i] <- (S[i-1] + B[i] - Z[i]) / (1 + mu[i] * 1)
-        I[i] <- (I[i-1] + Z[i]) / (1 + (gamma + mu[i]) * 1)
-      }
-      beta <- Z / (S * I * 1)
-    } else if (method == "forward") {
-      for (i in 2:nrow(df)) {
-        S[i] <- (1 - mu[i-1] * 1) * S[i-1] + B[i] - Z[i]
-        I[i] <- (1 - (gamma - mu[i-1]) * 1) * I[i-1] + Z[i]
-      }
-      beta <- c(Z[-1], NA) / (S * I * 1)
-    } else {
-      stop(
-        "SI method: `method` must be ",
-        "\"trapezoid\", \"forward\", or \"backward\".",
-        call. = FALSE
-      )
+    for (i in 2:nrow(df)) {
+      S[i] <- ((1 - 0.5 * mu[i-1] * 1) * S[i-1] + B[i] - Z[i]) /
+        (1 + 0.5 * mu[i] * 1)
+      I[i] <- ((1 - 0.5 * (gamma + mu[i-1]) * 1) * I[i-1] + Z[i]) /
+        (1 + 0.5 * (gamma + mu[i]) * 1)
     }
+    beta <- (Z + c(Z[-1], NA)) / (2 * S * I * 1)
     list(S, I, beta)
   }
 )
@@ -363,6 +337,5 @@ if (any(df$I < 0, na.rm = TRUE)) {
 
 
 attr(df, "par_list") <- par_list
-attr(df, "method")   <- method
 df
 }

@@ -4,7 +4,7 @@
 \alias{estimate_beta_SI}
 \title{Estimate time-varying transmission rates (SI method)}
 \usage{
-estimate_beta_SI(df = data.frame(), par_list = list(), method = "trapezoid")
+estimate_beta_SI(df = data.frame(), par_list = list())
 }
 \arguments{
 \item{df}{A data frame with numeric columns:
@@ -75,12 +75,6 @@ Mean generation interval of the disease of interest in units
 
 \code{hatN0} and \code{nu} are optional if \code{B} is defined in \code{df}, and
 \code{mu} is optional if \code{mu} is defined in \code{df} (see Details).}
-
-\item{method}{Character scalar. One of \code{"trapezoid"} (recommended),
-\code{"forward"}, and \code{"backward"}, indicating that estimates of
-\code{S}, \code{I}, and \code{beta} should be calculated as derived using
-the trapezoidal method, forward Euler method, or backward Euler
-method.}
 }
 \value{
 A data frame with numeric columns:
@@ -112,7 +106,7 @@ per susceptible per infected.
 }
 }
 
-It possesses \code{par_list} and \code{method} as attributes.
+It possesses \code{par_list} as an attribute.
 }
 \description{
 \code{estimate_beta_SI()} applies the SI method (see References)

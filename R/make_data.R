@@ -63,8 +63,11 @@
 #'
 #'    * If `with_dem_stoch = TRUE`, then observations are generated
 #'      by realizing a continuous-time stochastic process, in which
-#'      event probabilities are determined by terms in the ODE. See
-#'      [adaptivetau::ssa.adaptivetau()].
+#'      event probabilities are determined by terms in the ODE.
+#'      See [adaptivetau::ssa.adaptivetau()].
+#'    * Probability of infected removal or death is set to zero
+#'      whenever the number of infecteds is 1, in order to prevent
+#'      disease fadeout.
 #'    * Made reproducible by specifying `seeds[2]`.
 #'    * If `with_dem_stoch = FALSE`, then observations are generated
 #'      by numerically integrating the ODE. See [deSolve::lsoda()].
@@ -310,9 +313,9 @@ if (with_dem_stoch) {
         c(
           nu * hatN0,               # birth
           beta_phi(t + t0) * S * I, # infection
-          gamma * I,                # removal
+          gamma * I * (I > 1),      # removal
           mu * S,                   # natural mortality
-          mu * I,
+          mu * I * (I > 1),
           mu * R
         )
       }
@@ -441,4 +444,11 @@ df <- df[, c("t", "t_years", "beta", "beta_phi",
 attr(df, "arg_list") <-
   as.list(environment())[names(formals(make_data))]
 df
+}
+
+if (getRversion() >= "2.15.1") {
+  utils::globalVariables(
+    c("dt_weeks", "t0", "prep", "trep", "hatN0", "N0", "S0", "I0",
+      "nu", "mu", "tgen", "beta_mean", "alpha", "epsilon", "S", "R")
+  )
 }
