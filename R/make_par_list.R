@@ -43,7 +43,7 @@
 #' }{
 #'   \ifelse{html}{
 #'     \out{
-#'       <i>S</i>&prime; = <i>&nu;</i><sub>c</sub><i>&Ntilde;</i><sub>0</sub> &minus; <i>&beta;</i>(<i>t</i>)<i>SI</i> &minus; &<i>mu;</i><sub>c</sub><i>S</i><br>
+#'       <i>S</i>&prime; = <i>&nu;</i><sub>c</sub><i>&Ntilde;</i><sub>0</sub> &minus; <i>&beta;</i>(<i>t</i>)<i>SI</i> &minus; <i>&mu;</i><sub>c</sub><i>S</i><br>
 #'       <i>I</i>&prime; = <i>&beta;</i>(<i>t</i>)<i>SI</i> &minus; <i>&gamma;I</i> &minus; <i>&mu;</i><sub>c</sub><i>I</i><br>
 #'       <i>R</i>&prime; = <i>&gamma;I</i> &minus; <i>&mu;</i><sub>c</sub><i>R</i>
 #'     }
@@ -122,15 +122,15 @@
 #'   Mean generation interval of the disease of interest in units
 #'   \ifelse{latex}{\out{$\Delta t$}}{\ifelse{html}{\out{<i>&Delta;t</i>}}{Dt}}.
 #' @param Rnaught \[ \ifelse{latex}{\out{$\mathcal{R}_0$}}{\ifelse{html}{\out{<i>&Rscr;</i><sub>0</sub>}}{calR_0}} \]
-#'   Basic reproduction number of the disease of interest. Must be set
+#'   Basic reproduction number of the disease of interest. Should be set
 #'   to `NULL` when specifying `beta_mean` (see Details).
 #' @param beta_mean \[ \ifelse{latex}{\out{$\langle\beta\rangle$}}{\ifelse{html}{\out{&langle;<i>&beta;</i>&rangle;}}{<beta>}} \]
 #'   Mean of the seasonally forced transmission rate
 #'   \ifelse{latex}{\out{$\beta(t)$}}{\ifelse{html}{\out{<i>&beta;</i>(<i>t</i>)}}{beta(t)}}
 #'   expressed per unit
 #'   \ifelse{latex}{\out{$\Delta t$}}{\ifelse{html}{\out{<i>&Delta;t</i>}}{Dt}}
-#'   per susceptible per infected. Must be set to `NULL` when specifying
-#'   `Rnaught` (see Details).
+#'   per susceptible per infected. Should be set to `NULL` when
+#'   specifying `Rnaught` (see Details).
 #' @param alpha \[ \ifelse{latex}{\out{$\alpha$}}{\ifelse{html}{\out{<i>&alpha;</i>}}{alpha}} \]
 #'   Amplitude of the seasonally forced transmission rate
 #'   \ifelse{latex}{\out{$\beta(t)$}}{\ifelse{html}{\out{<i>&beta;</i>(<i>t</i>)}}{beta(t)}}
@@ -184,19 +184,16 @@ make_par_list <- function(dt_weeks  = 1,
 gamma <- 1 / tgen
 one_year <- (365 / 7) / dt_weeks
 
-# If `Rnaught` was defined but not `beta_mean`
+# If `Rnaught` is defined but not `beta_mean`
 if (!is.null(Rnaught) && is.null(beta_mean)) {
   beta_mean <- (mu / (nu * hatN0)) * Rnaught * (gamma + mu)
-
-# If `beta_mean` was defined but not Rnaught`
+# If `beta_mean` is defined but not Rnaught`
 } else if (!is.null(beta_mean) && is.null(Rnaught)) {
   Rnaught <- ((nu * hatN0) / mu) * beta_mean / (gamma + mu)
-
-# If `Rnaught` and `beta_mean` were both defined
+# If `Rnaught` and `beta_mean` are both defined
 } else if (!is.null(Rnaught) && !is.null(beta_mean)) {
   beta_mean <- (mu / (nu * hatN0)) * Rnaught * (gamma + mu)
-
-# Otherwise stop
+# Otherwise
 } else {
   stop(
     "At least one of `Rnaught` and `beta_mean` must be specified.",
@@ -205,7 +202,7 @@ if (!is.null(Rnaught) && is.null(beta_mean)) {
 }
 
 
-# If `N0`, `S0`, or `I0` was not specified, then
+# If `N0`, `S0`, or `I0` is not defined, then
 # obtain a value from the state of a system of
 # SIR equations after a transient of length `t0`
 if (is.null(N0) || is.null(S0) || is.null(I0)) {

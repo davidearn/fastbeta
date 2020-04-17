@@ -74,7 +74,7 @@ Mean generation interval of the disease of interest in units
 \ifelse{latex}{\out{$\Delta t$}}{\ifelse{html}{\out{<i>&Delta;t</i>}}{Dt}}.}
 
 \item{Rnaught}{[ \ifelse{latex}{\out{$\mathcal{R}_0$}}{\ifelse{html}{\out{<i>&Rscr;</i><sub>0</sub>}}{calR_0}} ]
-Basic reproduction number of the disease of interest. Must be set
+Basic reproduction number of the disease of interest. Should be set
 to \code{NULL} when specifying \code{beta_mean} (see Details).}
 
 \item{beta_mean}{[ \ifelse{latex}{\out{$\langle\beta\rangle$}}{\ifelse{html}{\out{&langle;<i>&beta;</i>&rangle;}}{<beta>}} ]
@@ -82,8 +82,8 @@ Mean of the seasonally forced transmission rate
 \ifelse{latex}{\out{$\beta(t)$}}{\ifelse{html}{\out{<i>&beta;</i>(<i>t</i>)}}{beta(t)}}
 expressed per unit
 \ifelse{latex}{\out{$\Delta t$}}{\ifelse{html}{\out{<i>&Delta;t</i>}}{Dt}}
-per susceptible per infected. Must be set to \code{NULL} when specifying
-\code{Rnaught} (see Details).}
+per susceptible per infected. Should be set to \code{NULL} when
+specifying \code{Rnaught} (see Details).}
 
 \item{alpha}{[ \ifelse{latex}{\out{$\alpha$}}{\ifelse{html}{\out{<i>&alpha;</i>}}{alpha}} ]
 Amplitude of the seasonally forced transmission rate
@@ -144,7 +144,7 @@ If \code{N0}, \code{S0}, or \code{I0} are not defined in the function call, then
 }{
   \ifelse{html}{
     \out{
-      <i>S</i>&prime; = <i>&nu;</i><sub>c</sub><i>&Ntilde;</i><sub>0</sub> &minus; <i>&beta;</i>(<i>t</i>)<i>SI</i> &minus; &<i>mu;</i><sub>c</sub><i>S</i><br>
+      <i>S</i>&prime; = <i>&nu;</i><sub>c</sub><i>&Ntilde;</i><sub>0</sub> &minus; <i>&beta;</i>(<i>t</i>)<i>SI</i> &minus; <i>&mu;</i><sub>c</sub><i>S</i><br>
       <i>I</i>&prime; = <i>&beta;</i>(<i>t</i>)<i>SI</i> &minus; <i>&gamma;I</i> &minus; <i>&mu;</i><sub>c</sub><i>I</i><br>
       <i>R</i>&prime; = <i>&gamma;I</i> &minus; <i>&mu;</i><sub>c</sub><i>R</i>
     }
