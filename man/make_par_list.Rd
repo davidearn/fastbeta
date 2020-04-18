@@ -10,16 +10,16 @@ make_par_list(
   prep = 1,
   trep = 0,
   hatN0 = 1e+06,
-  N0 = NULL,
-  S0 = NULL,
-  I0 = NULL,
+  N0 = NA,
+  S0 = NA,
+  I0 = NA,
   nu = 0.04 * (7/365) * dt_weeks,
   mu = 0.04 * (7/365) * dt_weeks,
   tgen = 13 * (1/7)/dt_weeks,
   Rnaught = 20,
-  beta_mean = NULL,
+  beta_mean = NA,
   alpha = 0.08,
-  epsilon = 0.5
+  epsilon = 0
 )
 }
 \arguments{
@@ -45,17 +45,17 @@ years (see Details).}
 \item{N0}{[ \ifelse{latex}{\out{$N_0$}}{\ifelse{html}{\out{<i>N</i><sub>0</sub>}}{N_0}} ]
 Population size at time
 \ifelse{latex}{\out{$t = t_0$}}{\ifelse{html}{\out{<i>t</i> = <i>t</i><sub>0</sub>}}{t = t_0}}.
-Can be set to \code{NULL} (see Details).}
+Can be set to \code{NA} (see Details).}
 
 \item{S0}{[ \ifelse{latex}{\out{$S_0$}}{\ifelse{html}{\out{<i>S</i><sub>0</sub>}}{S_0}} ]
 Number of susceptibles at time
 \ifelse{latex}{\out{$t = t_0$}}{\ifelse{html}{\out{<i>t</i> = <i>t</i><sub>0</sub>}}{t = t_0}}.
-Can be set to \code{NULL} (see Details).}
+Can be set to \code{NA} (see Details).}
 
 \item{I0}{[ \ifelse{latex}{\out{$I_0$}}{\ifelse{html}{\out{<i>I</i><sub>0</sub>}}{I_0}} ]
 Number of infecteds at time
 \ifelse{latex}{\out{$t = t_0$}}{\ifelse{html}{\out{<i>t</i> = <i>t</i><sub>0</sub>}}{t = t_0}}.
-Can be set to \code{NULL} (see Details).}
+Can be set to \code{NA} (see Details).}
 
 \item{nu}{[ \ifelse{latex}{\out{$\nu_\text{c}$}}{\ifelse{html}{\out{<i>&nu;<sub>c</sub></i>}}{nu_c}} ]
 Birth rate expressed per unit
@@ -75,15 +75,15 @@ Mean generation interval of the disease of interest in units
 
 \item{Rnaught}{[ \ifelse{latex}{\out{$\mathcal{R}_0$}}{\ifelse{html}{\out{<i>&Rscr;</i><sub>0</sub>}}{calR_0}} ]
 Basic reproduction number of the disease of interest. Should be set
-to \code{NULL} when specifying \code{beta_mean} (see Details).}
+to \code{NA} when specifying \code{beta_mean} (see Details).}
 
 \item{beta_mean}{[ \ifelse{latex}{\out{$\langle\beta\rangle$}}{\ifelse{html}{\out{&langle;<i>&beta;</i>&rangle;}}{<beta>}} ]
 Mean of the seasonally forced transmission rate
 \ifelse{latex}{\out{$\beta(t)$}}{\ifelse{html}{\out{<i>&beta;</i>(<i>t</i>)}}{beta(t)}}
 expressed per unit
 \ifelse{latex}{\out{$\Delta t$}}{\ifelse{html}{\out{<i>&Delta;t</i>}}{Dt}}
-per susceptible per infected. Should be set to \code{NULL} when
-specifying \code{Rnaught} (see Details).}
+per susceptible per infected. Should be set
+to \code{NA} when specifying \code{Rnaught} (see Details).}
 
 \item{alpha}{[ \ifelse{latex}{\out{$\alpha$}}{\ifelse{html}{\out{<i>&alpha;</i>}}{alpha}} ]
 Amplitude of the seasonally forced transmission rate
@@ -124,13 +124,13 @@ with fixed observation interval
 
 \ifelse{latex}{\out{$\mathcal{R}_0 = \frac{\nu_\text{c} \widehat{N}_0}{\mu_\text{c}} \cdot \frac{\langle\beta\rangle}{\gamma + \mu}$}}{\ifelse{html}{\out{<i>&Rscr;</i><sub>0</sub> = (<i>&nu;</i><sub>c</sub> <i>&Ntilde;</i> / <i>&mu;</i><sub>c</sub>)(&langle;<i>&beta;</i>&rangle; / (<i>&gamma;</i> + <i>&mu;</i><sub>c</sub>))}}{calR_0 = ((nu_c*hatN0)/mu_c)*(<beta>/(gamma + mu))}}
 
-as follows. If exactly one of \code{Rnaught} and \code{beta_mean} is defined
-in the function call, then the parameter not defined is internally
-assigned the value satisfying the identity. If both are defined in
-the function call, then the value of \code{beta_mean} is replaced with the
-value satisfying the identity.
+as follows. If exactly one of \code{Rnaught} and \code{beta_mean} is \code{NA} in
+in the function call, then that parameter is internally assigned the
+value satisfying the identity. If both are \code{NA}, then an error is
+thrown. If neither is \code{NA}, then the value of \code{beta_mean} is replaced
+with the value satisfying the identity.
 
-If \code{N0}, \code{S0}, or \code{I0} are not defined in the function call, then
+If any of \code{N0}, \code{S0}, and \code{I0} is \code{NA} in the function call, then
 \code{make_par_list()} numerically integrates the system of SIR equations
 
 \ifelse{latex}{
@@ -169,7 +169,8 @@ the endemic equilibrium of the system with
 \ifelse{latex}{\out{$\beta(t) \equiv \langle\beta\rangle$}}{\ifelse{html}{\out{<i>&beta;</i>(<i>t</i>) &equiv; &langle;<i>&beta;</i>&rangle;}}{beta(t) = <beta>}}
 and
 \ifelse{latex}{\out{$\nu_\text{c} = \mu_\text{c}$}}{\ifelse{html}{\out{<i>&nu;</i><sub>c</sub> = <i>&mu;</i><sub>c</sub>}}{nu_c = mu_c}}.
-Then \code{make_par_list()} defines \code{N0}, \code{S0}, and \code{I0} as follows:
+Then \code{make_par_list()} defines \code{N0}, \code{S0}, and \code{I0}
+(only those that were \code{NA} in the function call) as follows:
 
 \describe{
 \item{\code{N0}}{The value of

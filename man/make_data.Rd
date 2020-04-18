@@ -244,7 +244,7 @@ par_list <- make_par_list(
 df <- make_data(
   par_list = par_list,   # list of parameter values
   n = 1042,              # number of observation intervals
-  with_dem_stoch = TRUE, # stochastic realization of SIR
+  with_dem_stoch = TRUE, # stochastic simulation of SIR
   seeds = c(5, 3, 9)     # seeds for RNG
 )
 head(df)
