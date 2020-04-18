@@ -23,13 +23,13 @@
 #'
 #' \ifelse{latex}{\out{$\mathcal{R}_0 = \frac{\nu_\text{c} \widehat{N}_0}{\mu_\text{c}} \cdot \frac{\langle\beta\rangle}{\gamma + \mu}$}}{\ifelse{html}{\out{<i>&Rscr;</i><sub>0</sub> = (<i>&nu;</i><sub>c</sub> <i>&Ntilde;</i> / <i>&mu;</i><sub>c</sub>)(&langle;<i>&beta;</i>&rangle; / (<i>&gamma;</i> + <i>&mu;</i><sub>c</sub>))}}{calR_0 = ((nu_c*hatN0)/mu_c)*(<beta>/(gamma + mu))}}
 #'
-#' as follows. If exactly one of `Rnaught` and `beta_mean` is defined
-#' in the function call, then the parameter not defined is internally
-#' assigned the value satisfying the identity. If both are defined in
-#' the function call, then the value of `beta_mean` is replaced with the
-#' value satisfying the identity.
+#' as follows. If exactly one of `Rnaught` and `beta_mean` is `NA` in
+#' in the function call, then that parameter is internally assigned the
+#' value satisfying the identity. If both are `NA`, then an error is
+#' thrown. If neither is `NA`, then the value of `beta_mean` is replaced
+#' with the value satisfying the identity.
 #'
-#' If `N0`, `S0`, or `I0` are not defined in the function call, then
+#' If any of `N0`, `S0`, and `I0` is `NA` in the function call, then
 #' `make_par_list()` numerically integrates the system of SIR equations
 #'
 #' \ifelse{latex}{
@@ -68,7 +68,8 @@
 #' \ifelse{latex}{\out{$\beta(t) \equiv \langle\beta\rangle$}}{\ifelse{html}{\out{<i>&beta;</i>(<i>t</i>) &equiv; &langle;<i>&beta;</i>&rangle;}}{beta(t) = <beta>}}
 #' and
 #' \ifelse{latex}{\out{$\nu_\text{c} = \mu_\text{c}$}}{\ifelse{html}{\out{<i>&nu;</i><sub>c</sub> = <i>&mu;</i><sub>c</sub>}}{nu_c = mu_c}}.
-#' Then `make_par_list()` defines `N0`, `S0`, and `I0` as follows:
+#' Then `make_par_list()` defines `N0`, `S0`, and `I0`
+#' (only those that were `NA` in the function call) as follows:
 #'
 #' \describe{
 #'   \item{`N0`}{The value of
@@ -99,15 +100,15 @@
 #' @param N0 \[ \ifelse{latex}{\out{$N_0$}}{\ifelse{html}{\out{<i>N</i><sub>0</sub>}}{N_0}} \]
 #'   Population size at time
 #'   \ifelse{latex}{\out{$t = t_0$}}{\ifelse{html}{\out{<i>t</i> = <i>t</i><sub>0</sub>}}{t = t_0}}.
-#'   Can be set to `NULL` (see Details).
+#'   Can be set to `NA` (see Details).
 #' @param S0 \[ \ifelse{latex}{\out{$S_0$}}{\ifelse{html}{\out{<i>S</i><sub>0</sub>}}{S_0}} \]
 #'   Number of susceptibles at time
 #'   \ifelse{latex}{\out{$t = t_0$}}{\ifelse{html}{\out{<i>t</i> = <i>t</i><sub>0</sub>}}{t = t_0}}.
-#'   Can be set to `NULL` (see Details).
+#'   Can be set to `NA` (see Details).
 #' @param I0 \[ \ifelse{latex}{\out{$I_0$}}{\ifelse{html}{\out{<i>I</i><sub>0</sub>}}{I_0}} \]
 #'   Number of infecteds at time
 #'   \ifelse{latex}{\out{$t = t_0$}}{\ifelse{html}{\out{<i>t</i> = <i>t</i><sub>0</sub>}}{t = t_0}}.
-#'   Can be set to `NULL` (see Details).
+#'   Can be set to `NA` (see Details).
 #' @param nu \[ \ifelse{latex}{\out{$\nu_\text{c}$}}{\ifelse{html}{\out{<i>&nu;<sub>c</sub></i>}}{nu_c}} \]
 #'   Birth rate expressed per unit
 #'   \ifelse{latex}{\out{$\Delta t$}}{\ifelse{html}{\out{<i>&Delta;t</i>}}{Dt}}
@@ -123,14 +124,14 @@
 #'   \ifelse{latex}{\out{$\Delta t$}}{\ifelse{html}{\out{<i>&Delta;t</i>}}{Dt}}.
 #' @param Rnaught \[ \ifelse{latex}{\out{$\mathcal{R}_0$}}{\ifelse{html}{\out{<i>&Rscr;</i><sub>0</sub>}}{calR_0}} \]
 #'   Basic reproduction number of the disease of interest. Should be set
-#'   to `NULL` when specifying `beta_mean` (see Details).
+#'   to `NA` when specifying `beta_mean` (see Details).
 #' @param beta_mean \[ \ifelse{latex}{\out{$\langle\beta\rangle$}}{\ifelse{html}{\out{&langle;<i>&beta;</i>&rangle;}}{<beta>}} \]
 #'   Mean of the seasonally forced transmission rate
 #'   \ifelse{latex}{\out{$\beta(t)$}}{\ifelse{html}{\out{<i>&beta;</i>(<i>t</i>)}}{beta(t)}}
 #'   expressed per unit
 #'   \ifelse{latex}{\out{$\Delta t$}}{\ifelse{html}{\out{<i>&Delta;t</i>}}{Dt}}
-#'   per susceptible per infected. Should be set to `NULL` when
-#'   specifying `Rnaught` (see Details).
+#'   per susceptible per infected. Should be set
+#'   to `NA` when specifying `Rnaught` (see Details).
 #' @param alpha \[ \ifelse{latex}{\out{$\alpha$}}{\ifelse{html}{\out{<i>&alpha;</i>}}{alpha}} \]
 #'   Amplitude of the seasonally forced transmission rate
 #'   \ifelse{latex}{\out{$\beta(t)$}}{\ifelse{html}{\out{<i>&beta;</i>(<i>t</i>)}}{beta(t)}}
@@ -169,34 +170,34 @@ make_par_list <- function(dt_weeks  = 1,
                           prep      = 1,
                           trep      = 0,
                           hatN0     = 1e06,
-                          N0        = NULL,
-                          S0        = NULL,
-                          I0        = NULL,
+                          N0        = NA,
+                          S0        = NA,
+                          I0        = NA,
                           nu        = 0.04 * (7 / 365) * dt_weeks,
                           mu        = 0.04 * (7 / 365) * dt_weeks,
                           tgen      = 13 * (1 / 7) / dt_weeks,
                           Rnaught   = 20,
-                          beta_mean = NULL,
+                          beta_mean = NA,
                           alpha     = 0.08,
-                          epsilon   = 0.5) {
+                          epsilon   = 0) {
 
 # Derived quantities
 gamma <- 1 / tgen
 one_year <- (365 / 7) / dt_weeks
 
-# If `Rnaught` is defined but not `beta_mean`
-if (!is.null(Rnaught) && is.null(beta_mean)) {
+# If `Rnaught` was given but not `beta_mean`
+if (!is.na(Rnaught) && is.na(beta_mean)) {
   beta_mean <- (mu / (nu * hatN0)) * Rnaught * (gamma + mu)
-# If `beta_mean` is defined but not Rnaught`
-} else if (!is.null(beta_mean) && is.null(Rnaught)) {
+# If `beta_mean` was given but not Rnaught`
+} else if (!is.na(beta_mean) && is.na(Rnaught)) {
   Rnaught <- ((nu * hatN0) / mu) * beta_mean / (gamma + mu)
-# If `Rnaught` and `beta_mean` are both defined
-} else if (!is.null(Rnaught) && !is.null(beta_mean)) {
+# If `Rnaught` and `beta_mean` were both given
+} else if (!is.na(Rnaught) && !is.na(beta_mean)) {
   beta_mean <- (mu / (nu * hatN0)) * Rnaught * (gamma + mu)
 # Otherwise
 } else {
   stop(
-    "At least one of `Rnaught` and `beta_mean` must be specified.",
+    "At most one of `Rnaught` and `beta_mean` can be `NA`.",
     call. = FALSE
   )
 }
@@ -205,7 +206,7 @@ if (!is.null(Rnaught) && is.null(beta_mean)) {
 # If `N0`, `S0`, or `I0` is not defined, then
 # obtain a value from the state of a system of
 # SIR equations after a transient of length `t0`
-if (is.null(N0) || is.null(S0) || is.null(I0)) {
+if (any(is.na(c(N0, S0, I0)))) {
 
   # Initial state
   x_init <- c(
@@ -243,13 +244,13 @@ if (is.null(N0) || is.null(S0) || is.null(I0)) {
   )
 
   # Assign final values of `S+I+R`, `S`, and `I`, if necessary
-  if (is.null(N0)) {
+  if (is.na(N0)) {
     N0 <- sum(tsir_mat[nrow(tsir_mat), c("S", "I", "R")])
   }
-  if (is.null(S0)) {
+  if (is.na(S0)) {
     S0 <- as.numeric(tsir_mat[nrow(tsir_mat), "S"])
   }
-  if (is.null(I0)) {
+  if (is.na(I0)) {
     I0 <- as.numeric(tsir_mat[nrow(tsir_mat), "I"])
   }
 
