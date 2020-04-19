@@ -378,7 +378,7 @@ if (with_dem_stoch) {
       deSolve::lsoda(
         x_init, t_out, compute_sir_rates,
         parms    = NULL,
-        rtol     = 1e-16,
+        rtol     = 1e-12,
         maxsteps = 1e05
       )
     }
