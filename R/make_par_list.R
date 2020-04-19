@@ -239,7 +239,8 @@ if (any(is.na(c(N0, S0, I0)))) {
   tsir_mat <- deSolve::lsoda(
     x_init, t_out, compute_sir_rates,
     parms    = NULL,
-    rtol     = 1e-12,
+    rtol     = 1e-14,
+    atol     = 1e-14,
     maxsteps = 1e05
   )
 
