@@ -371,18 +371,12 @@ if (with_dem_stoch) {
     )
   }
 
-  # Numerically integrate system using solver `lsoda()`,
-  # supressing Fortran warnings
-  df_as_matrix <- suppressWarnings(
-    {
-      deSolve::lsoda(
-        x_init, t_out, compute_sir_rates,
-        parms    = NULL,
-        rtol     = 1e-14,
-        atol     = 1e-14,
-        maxsteps = 1e05
-      )
-    }
+  # Numerically integrate system using solver `lsoda()`
+  df_as_matrix <- deSolve::lsoda(
+    x_init, t_out, compute_sir_rates,
+    parms = NULL,
+    rtol  = 1e-15,
+    atol  = 1e-15
   )
   df <- as.data.frame(df_as_matrix)
   colnames(df) <- c("t", "S", "I", "R", "Q")

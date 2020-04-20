@@ -6,7 +6,7 @@
 \usage{
 make_par_list(
   dt_weeks = 1,
-  t0 = 2000 * (365/7)/dt_weeks,
+  t0 = 1000 * (365/7)/dt_weeks,
   prep = 1,
   trep = 0,
   hatN0 = 1e+06,

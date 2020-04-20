@@ -166,7 +166,7 @@
 #' @md
 #' @export
 make_par_list <- function(dt_weeks  = 1,
-                          t0        = 2000 * (365 / 7) / dt_weeks,
+                          t0        = 1000 * (365 / 7) / dt_weeks,
                           prep      = 1,
                           trep      = 0,
                           hatN0     = 1e06,
@@ -238,10 +238,9 @@ if (any(is.na(c(N0, S0, I0)))) {
   # Numerical solution of system
   tsir_mat <- deSolve::lsoda(
     x_init, t_out, compute_sir_rates,
-    parms    = NULL,
-    rtol     = 1e-14,
-    atol     = 1e-14,
-    maxsteps = 1e05
+    parms = NULL,
+    rtol  = 1e-15,
+    atol  = 1e-15
   )
 
   # Assign final values of `S+I+R`, `S`, and `I`, if necessary
