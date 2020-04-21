@@ -18,7 +18,7 @@
 #' (or per unit)
 #' \ifelse{latex}{\out{$\Delta t$}}{\ifelse{html}{\out{<i>&Delta;t</i>}}{Dt}}.
 #'
-#' @details
+#' @section Concordance of \ifelse{latex}{\out{$\mathcal{R}_0$}}{\ifelse{html}{\out{<i>&Rscr;</i><sub>0</sub>}}{calR_0}} and \ifelse{latex}{\out{$\langle\beta\rangle$}}{\ifelse{html}{\out{&langle;<i>&beta;</i>&rangle;}}{<beta>}}:
 #' `make_par_list()` enforces the identity
 #'
 #' \ifelse{latex}{\out{$\mathcal{R}_0 = \frac{\nu_\text{c} \widehat{N}_0}{\mu_\text{c}} \cdot \frac{\langle\beta\rangle}{\gamma + \mu}$}}{\ifelse{html}{\out{<i>&Rscr;</i><sub>0</sub> = (<i>&nu;</i><sub>c</sub> <i>&Ntilde;</i> / <i>&mu;</i><sub>c</sub>)(&langle;<i>&beta;</i>&rangle; / (<i>&gamma;</i> + <i>&mu;</i><sub>c</sub>))}}{calR_0 = ((nu_c*hatN0)/mu_c)*(<beta>/(gamma + mu))}}
@@ -29,8 +29,10 @@
 #' thrown. If neither is `NA`, then the value of `beta_mean` is replaced
 #' with the value satisfying the identity.
 #'
-#' If any of `N0`, `S0`, and `I0` is `NA` in the function call, then
-#' `make_par_list()` numerically integrates the system of SIR equations
+#' @section Missing \ifelse{latex}{\out{$N_0$}}{\ifelse{html}{\out{<i>N</i><sub>0</sub>}}{N_0}}, \ifelse{latex}{\out{$S_0$}}{\ifelse{html}{\out{<i>S</i><sub>0</sub>}}{S_0}}, and \ifelse{latex}{\out{$I_0$}}{\ifelse{html}{\out{<i>I</i><sub>0</sub>}}{I_0}}:
+#' If any of `N0`, `S0`, and `I0` is `NA` in the function call,
+#' then, via a call to [deSolve::ode()], `make_par_list()`
+#' numerically integrates the system of SIR equations
 #'
 #' \ifelse{latex}{
 #'   \out{
@@ -82,6 +84,11 @@
 #'     \ifelse{latex}{\out{$I(t_0)$}}{\ifelse{html}{\out{<i>I</i>(<i>t</i><sub>0</sub>)}}{I(t_0)}}.
 #'   }
 #' }
+#'
+#' A warning is issued if the ODE solver cannot complete the integration,
+#' A different solver may have more success (e.g., consider `method = "ode45"`
+#' instead of the default `method = "lsoda"`). Using different `rtol` and
+#' `atol` may also help.
 #'
 #' @param dt_weeks \[ \ifelse{latex}{\out{$\Delta t$}}{\ifelse{html}{\out{<i>&Delta;t</i>}}{Dt}} \]
 #'   Observation interval in weeks.
@@ -140,11 +147,14 @@
 #'   Standard deviation of the random phase shift in the seasonally
 #'   forced transmission rate
 #'   \ifelse{latex}{\out{$\beta(t)$}}{\ifelse{html}{\out{<i>&beta;</i>(<i>t</i>)}}{beta(t)}}.
+#' @param ode_control A list of arguments to be passed to
+#'   [deSolve::ode()], specifying options for numerical integration
+#'   (see Details), such as `method`, `rtol`, and `atol`.
 #'
 #' @return
-#' A list of the arguments of `make_par_list()`, including values for
-#' `Rnaught`, `beta_mean`, `N0`, `S0`, and `I0` if not defined in the
-#' function call (see Details).
+#' A list of the arguments of `make_par_list()` (not counting `...`),
+#' including values for `Rnaught`, `beta_mean`, `N0`, `S0`, and `I0`
+#' if not defined in the function call (see Details).
 #'
 #' @examples
 #' # All arguments have default values
@@ -166,7 +176,7 @@
 #' @md
 #' @export
 make_par_list <- function(dt_weeks  = 1,
-                          t0        = 1000 * (365 / 7) / dt_weeks,
+                          t0        = 2000 * (365 / 7) / dt_weeks,
                           prep      = 1,
                           trep      = 0,
                           hatN0     = 1e06,
@@ -179,22 +189,24 @@ make_par_list <- function(dt_weeks  = 1,
                           Rnaught   = 20,
                           beta_mean = NA,
                           alpha     = 0.08,
-                          epsilon   = 0) {
+                          epsilon   = 0,
+                          ode_control = list(
+                            method = "lsoda",
+                            rtol   = 1e-06,
+                            atol   = 1e-06
+                          )) {
 
 # Derived quantities
 gamma <- 1 / tgen
 one_year <- (365 / 7) / dt_weeks
 
-# If `Rnaught` was given but not `beta_mean`
-if (!is.na(Rnaught) && is.na(beta_mean)) {
+# If `Rnaught` was defined
+if (!is.na(Rnaught)) {
   beta_mean <- (mu / (nu * hatN0)) * Rnaught * (gamma + mu)
-# If `beta_mean` was given but not Rnaught`
-} else if (!is.na(beta_mean) && is.na(Rnaught)) {
+# If `Rnaught` was not defined but `beta_mean` was
+} else if (is.na(Rnaught) && !is.na(beta_mean)) {
   Rnaught <- ((nu * hatN0) / mu) * beta_mean / (gamma + mu)
-# If `Rnaught` and `beta_mean` were both given
-} else if (!is.na(Rnaught) && !is.na(beta_mean)) {
-  beta_mean <- (mu / (nu * hatN0)) * Rnaught * (gamma + mu)
-# Otherwise
+# If neither was defined
 } else {
   stop(
     "At most one of `Rnaught` and `beta_mean` can be `NA`.",
@@ -211,12 +223,12 @@ if (any(is.na(c(N0, S0, I0)))) {
   # Initial state
   x_init <- c(
     S = hatN0 * (1 / Rnaught),
-    I = hatN0 * (1 - 1 / Rnaught) * (mu / (gamma + mu)),
+    logI = log(hatN0 * (1 - 1 / Rnaught) * (mu / (gamma + mu))),
     R = hatN0 * (1 - 1 / Rnaught) * (gamma / (gamma + mu))
   )
 
   # Time points
-  t_out <- 0:floor(t0)
+  t_out <- 0:t0
 
   # Seasonally forced transmission rate
   beta <- function(t) {
@@ -227,35 +239,50 @@ if (any(is.na(c(N0, S0, I0)))) {
   compute_sir_rates <- function(t, y, parms) {
     with(as.list(c(y, parms)),
       {
-        dS <- nu * hatN0 - beta(t) * S * I - mu * S
-        dI <- beta(t) * S * I - gamma * I - mu * I
-        dR <- gamma * I - mu * R
-        list(c(dS, dI, dR))
+        dS <- nu * hatN0 - beta(t) * S * exp(logI) - mu * S
+        dlogI <- beta(t) * S - gamma - mu
+        dR <- gamma * exp(logI) - mu * R
+        list(c(dS, dlogI, dR))
       }
     )
   }
 
-  # Numerical solution of system
-  tsir_mat <- deSolve::lsoda(
-    x_init, t_out, compute_sir_rates,
-    parms = NULL,
-    rtol  = 1e-15,
-    atol  = 1e-15
+  # List of arguments to be passed to `ode()`
+  ode_args <- within(ode_control,
+    {
+      y     <- x_init
+      times <- t_out
+      func  <- compute_sir_rates
+      parms <- NULL # already in environment
+    }
   )
+    
+  # Numerically integrate the system of SIR equations
+  df <- as.data.frame(do.call(deSolve::ode, ode_args))
 
-  # Assign final values of `S+I+R`, `S`, and `I`, if necessary
+  # Assign final values of `S+I+R`, `S`, and `I`
   if (is.na(N0)) {
-    N0 <- sum(tsir_mat[nrow(tsir_mat), c("S", "I", "R")])
+    N0 <- sum(df[nrow(df), c("S", "R")]) + exp(df[nrow(df), "logI"])
   }
   if (is.na(S0)) {
-    S0 <- as.numeric(tsir_mat[nrow(tsir_mat), "S"])
+    S0 <- df[nrow(df), "S"]
   }
   if (is.na(I0)) {
-    I0 <- as.numeric(tsir_mat[nrow(tsir_mat), "I"])
+    I0 <- exp(df[nrow(df), "logI"])
   }
 
+  # Warn if `ode()` returned early with unrecoverable error 
+  if (any(is.na(df))) {
+    warning(
+      "`ode()` could not complete the integration. ",
+      "Retry with modified `ode_control`.",
+      call. = FALSE
+    )
+  }
 }
 
 
-as.list(environment())[names(formals(make_par_list))]
+out <- as.list(environment())[names(formals(make_par_list))]
+out$ode_control <- NULL
+out
 }

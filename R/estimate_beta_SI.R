@@ -102,6 +102,16 @@
 #'
 #'   `hatN0` and `nu` are optional if `B` is defined in `df`, and
 #'   `mu` is optional if `mu` is defined in `df` (see Details).
+#' @param method Character vector of length 2. `method[1]` must be one
+#'   of `"forward"`, `"backward"`, and `"trapezoid"` (recommended),
+#'   indicating the method used to numerically integrate the ODE for
+#'   susceptibles and infecteds: forward Euler, backward Euler, or
+#'   trapezoidal. `method[2]` must be one of `"forward"`, `"backward"`,
+#'   and `"both"` (recommended), indicating the method used to
+#'   numerically integrate the ODE for cumulative incidence: forward
+#'   Euler, backward Euler, or both. If both, then the transmission
+#'   rate estimate is the average of the two estimates calculated via
+#'   forward and backward Euler.
 #'
 #' @return
 #' A data frame with numeric columns:
@@ -133,21 +143,21 @@
 #'   }
 #' }
 #'
-#' It possesses `par_list` as an attribute.
+#' It possesses `par_list` and `method` as attributes.
 #'
 #' @examples
 #' # Simulate a reported incidence time series using
 #' # a seasonally forced transmission rate
-#' par_list <- make_par_list(dt_weeks = 1, prep = 0.25)
+#' par_list <- make_par_list(dt_weeks = 1, epsilon = 0.5, prep = 0.5)
 #' df <- make_data(
 #'   par_list = par_list,
-#'   n = 1042, # 20 years is 1042 weeks
+#'   n = 20 * 365 / 7, # 20 years is ~1042 weeks
 #'   with_dem_stoch = TRUE,
-#'   seeds = c(5, 3, 9)
+#'   seed = 5
 #' )
 #' head(df)
 #'
-#' # Reconstruct incidence, susceptibles, infecteds,
+#' # Estimate incidence, susceptibles, infecteds,
 #' # and the seasonally forced transmission rate
 #' df_SI <- estimate_beta_SI(df, par_list)
 #' head(df_SI)
@@ -161,14 +171,14 @@
 #'   degree    = 2,
 #'   na.action = "na.exclude"
 #' )
-#' df_SI$beta <- predict(loess_fit)
+#' df_SI$beta_loess <- predict(loess_fit)
 #'
 #' # Inspect
 #' df_SI$t_years <- df$t_years
-#' plot(S ~ t_years, df, type = "l", ylim = 1e03 * c(43, 58))
+#' plot(S ~ t_years, df, type = "l", ylim = c(43, 58) * 1e03)
 #' lines(S ~ t_years, df_SI, col = "red")
-#' plot(beta ~ t_years, df, type = "l", ylim = 1e-05 * c(0.95, 1.25))
-#' lines(beta ~ t_years, df_SI, col = "red")
+#' plot(beta ~ t_years, df, type = "l", ylim = c(0.95, 1.25) * 1e-05)
+#' lines(beta_loess ~ t_years, df_SI, col = "red")
 #' 
 #' @references
 #' deJonge MS, Jagan M, Krylova O, Earn DJD. Fast estimation of
@@ -177,7 +187,8 @@
 #' @md
 #' @export
 estimate_beta_SI <- function(df       = data.frame(),
-                             par_list = list()) {
+                             par_list = list(),
+                             method   = c("trapezoid", "both")) {
 
 ## 1. Set-up -----------------------------------------------------------
 
@@ -283,27 +294,69 @@ df$Z <- c(
 )
 
 
-## 5. Estimate susceptibles, infecteds, transmission rate --------------
+## 5. Estimate susceptibles and infecteds ------------------------------
 
 gamma <- 1 / tgen
 
-df[c("S", "I", "beta")] <- with(df,
+df[c("S", "I")] <- with(df,
   {
     S[1] <- S0
     I[1] <- I0
-    for (i in 2:nrow(df)) {
-      S[i] <- ((1 - 0.5 * mu[i-1] * 1) * S[i-1] + B[i] - Z[i]) /
-        (1 + 0.5 * mu[i] * 1)
-      I[i] <- ((1 - 0.5 * (gamma + mu[i-1]) * 1) * I[i-1] + Z[i]) /
-        (1 + 0.5 * (gamma + mu[i]) * 1)
+    if (method[1] == "trapezoid") {
+      for (i in 2:nrow(df)) {
+        S[i] <- ((1 - 0.5 * mu[i-1] * 1) * S[i-1] + B[i] - Z[i]) /
+          (1 + 0.5 * mu[i] * 1)
+        I[i] <- ((1 - 0.5 * (gamma + mu[i-1]) * 1) * I[i-1] + Z[i]) /
+          (1 + 0.5 * (gamma + mu[i]) * 1)
+      }
+      beta <- (Z + c(Z[-1], NA)) / (2 * S * I * 1)
+    } else if (method[1] == "backward") {
+      for (i in 2:nrow(df)) {
+        S[i] <- (S[i-1] + B[i] - Z[i]) / (1 + mu[i] * 1)
+        I[i] <- (I[i-1] + Z[i]) / (1 + (gamma + mu[i]) * 1)
+      }
+      beta <- Z / (S * I * 1)
+    } else if (method[1] == "forward") {
+      for (i in 2:nrow(df)) {
+        S[i] <- (1 - mu[i-1] * 1) * S[i-1] + B[i] - Z[i]
+        I[i] <- (1 - (gamma - mu[i-1]) * 1) * I[i-1] + Z[i]
+      }
+      beta <- c(Z[-1], NA) / (S * I * 1)
+    } else {
+      stop(
+        "SI method: `method[1]` must be ",
+        "\"forward\", \"backward\", or \"trapezoid\".",
+        call. = FALSE
+      )
     }
-    beta <- (Z + c(Z[-1], NA)) / (2 * S * I * 1)
-    list(S, I, beta)
+    list(S, I)
   }
 )
 
 
-## 6. Warn if `S` ever negative ----------------------------------------
+## 6. Estimate transmission rate ---------------------------------------
+
+df$beta <- with(df,
+  {
+    if (method[2] == "both") {
+      beta <- (Z + c(Z[-1], NA)) / (2 * S * I * 1)
+    } else if (method[2] == "backward") {
+      beta <- Z / (S * I * 1)
+    } else if (method[2] == "forward") {
+      beta <- c(Z[-1], NA) / (S * I * 1)
+    } else {
+      stop(
+        "SI method: `method[2]` must be ",
+        "\"forward\", \"backward\", or \"both\".",
+        call. = FALSE
+      )
+    }
+    beta
+  }
+)
+
+
+## 7. Warn if `S` ever negative ----------------------------------------
 
 if (any(df$S < 0, na.rm = TRUE)) {
   # May have underestimated `prep` or `nu`
@@ -319,7 +372,7 @@ if (any(df$S < 0, na.rm = TRUE)) {
 }
 
 
-## 7. Warn if `I` is ever negative -------------------------------------
+## 8. Warn if `I` is ever negative -------------------------------------
 
 if (any(df$I < 0, na.rm = TRUE)) {
   # May have overestimated `prep` or `mu`, underestimated `tgen`
@@ -337,5 +390,6 @@ if (any(df$I < 0, na.rm = TRUE)) {
 
 
 attr(df, "par_list") <- par_list
+attr(df, "method")   <- method
 df
 }

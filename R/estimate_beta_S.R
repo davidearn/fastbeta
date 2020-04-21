@@ -131,16 +131,16 @@
 #' @examples
 #' # Simulate a reported incidence time series using
 #' # a seasonally forced transmission rate
-#' par_list <- make_par_list(dt_weeks = 1, prep = 0.25)
+#' par_list <- make_par_list(dt_weeks = 1, epsilon = 0.5, prep = 0.5)
 #' df <- make_data(
 #'   par_list = par_list,
-#'   n = 1042, # 20 years is 1042 weeks
+#'   n = 20 * 365 / 7, # 20 years is ~1042 weeks
 #'   with_dem_stoch = TRUE,
-#'   seeds = c(5, 3, 9)
+#'   seed = 5
 #' )
 #' head(df)
 #'
-#' # Reconstruct incidence, susceptibles, infecteds,
+#' # Estimate incidence, susceptibles, infecteds,
 #' # and the seasonally forced transmission rate
 #' df_S <- estimate_beta_S(df, par_list)
 #' head(df_S)
@@ -154,14 +154,14 @@
 #'   degree    = 2,
 #'   na.action = "na.exclude"
 #' )
-#' df_S$beta <- predict(loess_fit)
+#' df_S$beta_loess <- predict(loess_fit)
 #'
 #' # Inspect
 #' df_S$t_years <- df$t_years
-#' plot(S ~ t_years, df, type = "l", ylim = 1e03 * c(43, 58))
+#' plot(S ~ t_years, df, type = "l", ylim = c(43, 58) * 1e03)
 #' lines(S ~ t_years, df_S, col = "red")
-#' plot(beta ~ t_years, df, type = "l", ylim = 1e-05 * c(0.95, 1.25))
-#' lines(beta ~ t_years, df_S, col = "red")
+#' plot(beta ~ t_years, df, type = "l", ylim = c(0.95, 1.25) * 1e-05)
+#' lines(beta_loess ~ t_years, df_S, col = "red")
 #' 
 #' @references
 #' deJonge MS, Jagan M, Krylova O, Earn DJD. Fast estimation of

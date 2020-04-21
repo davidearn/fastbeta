@@ -152,26 +152,25 @@ the method fails.
 \examples{
 # Simulate a reported incidence time series using
 # a seasonally forced transmission rate
-par_list <- make_par_list(dt_weeks = 1, prep = 0.25)
+par_list <- make_par_list(dt_weeks = 1)
 df <- make_data(
   par_list = par_list,
-  n = 1042, # 20 years is 1042 weeks
-  with_dem_stoch = TRUE,
-  seeds = c(5, 3, 9)
+  n = 20 * 365 / 7, # 20 years is ~1042 weeks
+  with_dem_stoch = FALSE
 )
 head(df)
 
-# Reconstruct incidence, susceptibles, infecteds,
+# Estimate incidence, susceptibles, infecteds,
 # and the seasonally forced transmission rate
 df_FC <- estimate_beta_FC(df, par_list)
 head(df_FC)
 
-# Reconstruction of susceptibles and transmission rate
-# fails because the FC method ignores susceptible mortality
+# Estimation of susceptibles and transmission rate fails
+# because the FC method ignores susceptible mortality
 df_FC$t_years <- df$t_years
-plot(S ~ t_years, df, type = "l", ylim = 1e03 * c(43, 83))
+plot(S ~ t_years, df, type = "l", ylim = c(43, 83) * 1e03)
 lines(S ~ t_years, df_FC[!is.na(df_FC$S), ], col = "red")
-plot(beta ~ t_years, df, type = "l", ylim = 1e-05 * c(0.5, 1.2))
+plot(beta ~ t_years, df, type = "l", ylim = c(0.5, 1.2) * 1e-05)
 lines(beta ~ t_years, df_FC[!is.na(df_FC$beta), ], col = "red")
 
 }

@@ -122,9 +122,9 @@
 #' par_list <- make_par_list(dt_weeks = 1)
 #' df <- make_data(
 #'   par_list = par_list,
-#'   n = 1042, # 20 years is 1042 weeks
+#'   n = 20 * 365 / 7, # 20 years is ~1042 weeks
 #'   with_dem_stoch = TRUE,
-#'   seeds = c(9, 3, 5)
+#'   seed = 5
 #' )
 #'
 #' # Plot incidence time series, and note the
@@ -138,7 +138,7 @@
 #' # Find peaks in incidence time series
 #' peaks <- get_peak_times(
 #'   x = df$Z,
-#'   period = 365 / 7, # 1 year is 365 / 7 weeks
+#'   period = 365 / 7, # 1 year is ~52 weeks
 #'   bw_mavg = 6,
 #'   bw_peakid = 8
 #' )
@@ -154,7 +154,7 @@
 #'
 #' # Estimate `S0` from incidence via PTPI,
 #' # starting from an erroneous initial guess
-#' # (will use mock vital data)
+#' # (mock vital data generated internally)
 #' ptpi_out <- ptpi(
 #'   df = df["Z"],
 #'   par_list = par_list,

@@ -4,7 +4,11 @@
 \alias{estimate_beta_SI}
 \title{Estimate time-varying transmission rates (SI method)}
 \usage{
-estimate_beta_SI(df = data.frame(), par_list = list())
+estimate_beta_SI(
+  df = data.frame(),
+  par_list = list(),
+  method = c("trapezoid", "both")
+)
 }
 \arguments{
 \item{df}{A data frame with numeric columns:
@@ -75,6 +79,17 @@ Mean generation interval of the disease of interest in units
 
 \code{hatN0} and \code{nu} are optional if \code{B} is defined in \code{df}, and
 \code{mu} is optional if \code{mu} is defined in \code{df} (see Details).}
+
+\item{method}{Character vector of length 2. \code{method[1]} must be one
+of \code{"forward"}, \code{"backward"}, and \code{"trapezoid"} (recommended),
+indicating the method used to numerically integrate the ODE for
+susceptibles and infecteds: forward Euler, backward Euler, or
+trapezoidal. \code{method[2]} must be one of \code{"forward"}, \code{"backward"},
+and \code{"both"} (recommended), indicating the method used to
+numerically integrate the ODE for cumulative incidence: forward
+Euler, backward Euler, or both. If both, then the transmission
+rate estimate is the average of the two estimates calculated via
+forward and backward Euler.}
 }
 \value{
 A data frame with numeric columns:
@@ -106,7 +121,7 @@ per susceptible per infected.
 }
 }
 
-It possesses \code{par_list} as an attribute.
+It possesses \code{par_list} and \code{method} as attributes.
 }
 \description{
 \code{estimate_beta_SI()} applies the SI method (see References)
@@ -151,16 +166,16 @@ the output should be scanned for outliers.
 \examples{
 # Simulate a reported incidence time series using
 # a seasonally forced transmission rate
-par_list <- make_par_list(dt_weeks = 1, prep = 0.25)
+par_list <- make_par_list(dt_weeks = 1, epsilon = 0.5, prep = 0.5)
 df <- make_data(
   par_list = par_list,
-  n = 1042, # 20 years is 1042 weeks
+  n = 20 * 365 / 7, # 20 years is ~1042 weeks
   with_dem_stoch = TRUE,
-  seeds = c(5, 3, 9)
+  seed = 5
 )
 head(df)
 
-# Reconstruct incidence, susceptibles, infecteds,
+# Estimate incidence, susceptibles, infecteds,
 # and the seasonally forced transmission rate
 df_SI <- estimate_beta_SI(df, par_list)
 head(df_SI)
@@ -174,14 +189,14 @@ loess_fit <- loess(
   degree    = 2,
   na.action = "na.exclude"
 )
-df_SI$beta <- predict(loess_fit)
+df_SI$beta_loess <- predict(loess_fit)
 
 # Inspect
 df_SI$t_years <- df$t_years
-plot(S ~ t_years, df, type = "l", ylim = 1e03 * c(43, 58))
+plot(S ~ t_years, df, type = "l", ylim = c(43, 58) * 1e03)
 lines(S ~ t_years, df_SI, col = "red")
-plot(beta ~ t_years, df, type = "l", ylim = 1e-05 * c(0.95, 1.25))
-lines(beta ~ t_years, df_SI, col = "red")
+plot(beta ~ t_years, df, type = "l", ylim = c(0.95, 1.25) * 1e-05)
+lines(beta_loess ~ t_years, df_SI, col = "red")
 
 }
 \references{

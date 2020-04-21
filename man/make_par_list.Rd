@@ -6,7 +6,7 @@
 \usage{
 make_par_list(
   dt_weeks = 1,
-  t0 = 1000 * (365/7)/dt_weeks,
+  t0 = 2000 * (365/7)/dt_weeks,
   prep = 1,
   trep = 0,
   hatN0 = 1e+06,
@@ -19,7 +19,8 @@ make_par_list(
   Rnaught = 20,
   beta_mean = NA,
   alpha = 0.08,
-  epsilon = 0
+  epsilon = 0,
+  ode_control = list(method = "lsoda", rtol = 1e-06, atol = 1e-06)
 )
 }
 \arguments{
@@ -94,11 +95,15 @@ relative to the mean.}
 Standard deviation of the random phase shift in the seasonally
 forced transmission rate
 \ifelse{latex}{\out{$\beta(t)$}}{\ifelse{html}{\out{<i>&beta;</i>(<i>t</i>)}}{beta(t)}}.}
+
+\item{ode_control}{A list of arguments to be passed to
+\code{\link[deSolve:ode]{deSolve::ode()}}, specifying options for numerical integration
+(see Details), such as \code{method}, \code{rtol}, and \code{atol}.}
 }
 \value{
-A list of the arguments of \code{make_par_list()}, including values for
-\code{Rnaught}, \code{beta_mean}, \code{N0}, \code{S0}, and \code{I0} if not defined in the
-function call (see Details).
+A list of the arguments of \code{make_par_list()} (not counting \code{...}),
+including values for \code{Rnaught}, \code{beta_mean}, \code{N0}, \code{S0}, and \code{I0}
+if not defined in the function call (see Details).
 }
 \description{
 \code{make_par_list()} creates a list of parameter values that may be
@@ -119,7 +124,8 @@ with fixed observation interval
 (or per unit)
 \ifelse{latex}{\out{$\Delta t$}}{\ifelse{html}{\out{<i>&Delta;t</i>}}{Dt}}.
 }
-\details{
+\section{Concordance of \ifelse{latex}{\out{$\mathcal{R}_0$}}{\ifelse{html}{\out{<i>&Rscr;</i><sub>0</sub>}}{calR_0}} and \ifelse{latex}{\out{$\langle\beta\rangle$}}{\ifelse{html}{\out{&langle;<i>&beta;</i>&rangle;}}{<beta>}}}{
+
 \code{make_par_list()} enforces the identity
 
 \ifelse{latex}{\out{$\mathcal{R}_0 = \frac{\nu_\text{c} \widehat{N}_0}{\mu_\text{c}} \cdot \frac{\langle\beta\rangle}{\gamma + \mu}$}}{\ifelse{html}{\out{<i>&Rscr;</i><sub>0</sub> = (<i>&nu;</i><sub>c</sub> <i>&Ntilde;</i> / <i>&mu;</i><sub>c</sub>)(&langle;<i>&beta;</i>&rangle; / (<i>&gamma;</i> + <i>&mu;</i><sub>c</sub>))}}{calR_0 = ((nu_c*hatN0)/mu_c)*(<beta>/(gamma + mu))}}
@@ -129,9 +135,13 @@ in the function call, then that parameter is internally assigned the
 value satisfying the identity. If both are \code{NA}, then an error is
 thrown. If neither is \code{NA}, then the value of \code{beta_mean} is replaced
 with the value satisfying the identity.
+}
 
-If any of \code{N0}, \code{S0}, and \code{I0} is \code{NA} in the function call, then
-\code{make_par_list()} numerically integrates the system of SIR equations
+\section{Missing \ifelse{latex}{\out{$N_0$}}{\ifelse{html}{\out{<i>N</i><sub>0</sub>}}{N_0}}, \ifelse{latex}{\out{$S_0$}}{\ifelse{html}{\out{<i>S</i><sub>0</sub>}}{S_0}}, and \ifelse{latex}{\out{$I_0$}}{\ifelse{html}{\out{<i>I</i><sub>0</sub>}}{I_0}}}{
+
+If any of \code{N0}, \code{S0}, and \code{I0} is \code{NA} in the function call,
+then, via a call to \code{\link[deSolve:ode]{deSolve::ode()}}, \code{make_par_list()}
+numerically integrates the system of SIR equations
 
 \ifelse{latex}{
   \out{
@@ -183,7 +193,13 @@ Then \code{make_par_list()} defines \code{N0}, \code{S0}, and \code{I0}
 \ifelse{latex}{\out{$I(t_0)$}}{\ifelse{html}{\out{<i>I</i>(<i>t</i><sub>0</sub>)}}{I(t_0)}}.
 }
 }
+
+A warning is issued if the ODE solver cannot complete the integration,
+A different solver may have more success (e.g., consider \code{method = "ode45"}
+instead of the default \code{method = "lsoda"}). Using different \code{rtol} and
+\code{atol} may also help.
 }
+
 \examples{
 # All arguments have default values
 par_list <- make_par_list()
