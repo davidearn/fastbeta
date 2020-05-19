@@ -13,9 +13,9 @@ Time points are taken to be \code{seq_along(x)}.}
 \item{period}{Numeric scalar. The period of \code{x} in units of the
 observation interval.}
 
-\item{bw_mavg}{Numeric scalar. Bandwidth for the moving average
-applied to \code{x}. \code{x_mavg[i]} will be the mean of observations
-\code{x[j]} with
+\item{bw_mavg}{Numeric scalar. Bandwidth for the central moving
+average applied to \code{x}. \code{x_mavg[i]} will be the mean of the set
+of observations \code{x[j]} with
 \ifelse{latex}{\out{$|i - j| \leq bandwidth$}}{\ifelse{html}{\out{&vert;<i>i</i> &minus; <i>j</i>&vert; &le; bandwidth}}{|i - j| <= bandwidth}}.}
 
 \item{bw_peakid}{Numeric scalar. Bandwidth for peak identification.
@@ -27,6 +27,8 @@ for all \code{j} with
 A list containing:
 
 \describe{
+\item{\code{x_mavg}}{Numeric vector. The result of applying a
+\code{2 * bw_mavg + 1} point central moving average to \code{x}.
 \item{\code{all}}{Numeric vector. A subset of \code{seq_along(x)}
 listing the times of all identified peaks.
 }

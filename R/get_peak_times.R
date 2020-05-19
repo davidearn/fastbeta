@@ -28,9 +28,9 @@
 #'   Time points are taken to be `seq_along(x)`.
 #' @param period Numeric scalar. The period of `x` in units of the
 #'   observation interval.
-#' @param bw_mavg Numeric scalar. Bandwidth for the moving average
-#'   applied to `x`. `x_mavg[i]` will be the mean of observations
-#'   `x[j]` with
+#' @param bw_mavg Numeric scalar. Bandwidth for the central moving
+#'   average applied to `x`. `x_mavg[i]` will be the mean of the set
+#'   of observations `x[j]` with
 #'   \ifelse{latex}{\out{$|i - j| \leq bandwidth$}}{\ifelse{html}{\out{&vert;<i>i</i> &minus; <i>j</i>&vert; &le; bandwidth}}{|i - j| <= bandwidth}}.
 #' @param bw_peakid Numeric scalar. Bandwidth for peak identification.
 #'   `i` will be a peak time if and only if `x_mavg[i] > x_mavg[j]`
@@ -41,6 +41,8 @@
 #' A list containing:
 #'
 #' \describe{
+#'   \item{`x_mavg`}{Numeric vector. The result of applying a
+#'     `2 * bw_mavg + 1` point central moving average to `x`.
 #'   \item{`all`}{Numeric vector. A subset of `seq_along(x)`
 #'     listing the times of all identified peaks.
 #'   }
@@ -166,8 +168,9 @@ peak_times_phase <- sapply(peak_times_phase,
 
 
 out <- list(
-  all   = peak_times_all,
-  phase = peak_times_phase
+  x_mavg = x_mavg,
+  all    = peak_times_all,
+  phase  = peak_times_phase
 )
 attr(out, "arg_list") <-
   as.list(environment())[names(formals(get_peak_times))]
