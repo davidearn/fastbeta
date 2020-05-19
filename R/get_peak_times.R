@@ -43,6 +43,7 @@
 #' \describe{
 #'   \item{`x_mavg`}{Numeric vector. The result of applying a
 #'     `2 * bw_mavg + 1` point central moving average to `x`.
+#'   }
 #'   \item{`all`}{Numeric vector. A subset of `seq_along(x)`
 #'     listing the times of all identified peaks.
 #'   }

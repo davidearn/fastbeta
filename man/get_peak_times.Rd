@@ -29,6 +29,7 @@ A list containing:
 \describe{
 \item{\code{x_mavg}}{Numeric vector. The result of applying a
 \code{2 * bw_mavg + 1} point central moving average to \code{x}.
+}
 \item{\code{all}}{Numeric vector. A subset of \code{seq_along(x)}
 listing the times of all identified peaks.
 }
