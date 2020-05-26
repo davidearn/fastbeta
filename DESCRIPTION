@@ -5,16 +5,18 @@ Authors@R:
     person("Mikael", "Jagan", email = "mjagan@uwaterloo.ca",
            role = c("aut", "cre"))
 URL: https://github.com/davidearn/fastbeta
-Description: This package implements methods for estimation of 
-    time-varying transmission rates from disease incidence time
-    series. These methods are described in the manuscript
+Description: This package implements methods for fast estimation
+    of time-varying transmission rates from disease incidence
+    time series. These methods are described in the manuscript
     "Fast estimation of time-varying transmission rates for 
     infectious diseases".
 Imports:
     stats,
     adaptivetau (>= 2.2-3),
-    deSolve (>= 1.27.1)
+    deSolve (>= 1.27.1),
+    mathjaxr (>= 0.3-8)
 License: MIT + file LICENSE
 Encoding: UTF-8
 LazyData: true
 RoxygenNote: 7.0.2
+RdMacros: mathjaxr
