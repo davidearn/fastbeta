@@ -2,10 +2,11 @@
 % Please edit documentation in R/make_data.R
 \name{make_data}
 \alias{make_data}
-\title{Simulate time series data}
+\title{\loadmathjax
+Simulate epidemic time series data}
 \usage{
 make_data(
-  par_list = list(),
+  par_list = make_par_list(),
   n = 20 * 365/7,
   with_dem_stoch = TRUE,
   seed = NA,
@@ -13,217 +14,187 @@ make_data(
 )
 }
 \arguments{
-\item{par_list}{A list containing:
-
+\item{par_list}{A list of parameter values containing:
 \describe{
-\item{\code{dt_weeks}}{[ \ifelse{latex}{\out{$\Delta t$}}{\ifelse{html}{\out{<i>&Delta;t</i>}}{Dt}} ]
-Observation interval in weeks.
+\item{\code{dt_weeks}}{\mjeqn{\lbrack \Delta t \rbrack}{[dt]}
+Numeric scalar. Observation interval in weeks.
 }
-\item{\code{t0}}{[ \ifelse{latex}{\out{$t_0$}}{\ifelse{html}{\out{<i>t</i><sub>0</sub>}}{t_0}} ]
-Time of the first observation in units
-\ifelse{latex}{\out{$\Delta t$}}{\ifelse{html}{\out{<i>&Delta;t</i>}}{Dt}}.
+\item{\code{t0}}{\mjeqn{\lbrack t_0 \rbrack}{[t_0]}
+Numeric scalar. Time of the first observation
+in units \mjeqn{\Delta t}{dt}.
 }
-\item{\code{prep}}{[ \ifelse{latex}{\out{$p_\text{rep}$}}{\ifelse{html}{\out{<i>p</i><sub>rep</sub>}}{p_rep}} ]
-Case reporting probability.
+\item{\code{prep}}{\mjeqn{\lbrack p_\text{rep} \rbrack}{[p_rep]}
+Numeric scalar. Case reporting probability.
 }
-\item{\code{trep}}{[ \ifelse{latex}{\out{$t_\text{rep}$}}{\ifelse{html}{\out{<i>t</i><sub>rep</sub>}}{t_rep}} ]
-Case reporting delay in units
-\ifelse{latex}{\out{$\Delta t$}}{\ifelse{html}{\out{<i>&Delta;t</i>}}{Dt}}.
+\item{\code{trep}}{\mjeqn{\lbrack t_\text{rep} \rbrack}{[t_rep]}
+Numeric scalar. Case reporting delay in units
+\mjeqn{\Delta t}{dt}.
 }
-\item{\code{hatN0}}{[ \ifelse{latex}{\out{$\widehat{N}_0$}}{\ifelse{html}{\out{<i>&Ntilde;</i><sub>0</sub>}}{hatN_0}} ]
-Population size at time
-\ifelse{latex}{\out{$t = 0$}}{\ifelse{html}{\out{<i>t</i> = 0}}{t = 0}}
-years.
+\item{\code{hatN0}}{\mjeqn{\lbrack \out{\widehat{N}_0} \rbrack}{[hatN_0]}
+Numeric scalar. Population size at time \mjseqn{t = 0} years.
 }
-\item{\code{N0}}{[ \ifelse{latex}{\out{$N_0$}}{\ifelse{html}{\out{<i>N</i><sub>0</sub>}}{N_0}} ]
-Population size at time
-\ifelse{latex}{\out{$t = t_0$}}{\ifelse{html}{\out{<i>t</i> = <i>t</i><sub>0</sub>}}{t = t_0}}.
+\item{\code{N0}}{\mjeqn{\lbrack N_0 \rbrack}{[N_0]}
+Numeric scalar. Population size at time \mjseqn{t = t_0}.
 }
-\item{\code{S0}}{[ \ifelse{latex}{\out{$S_0$}}{\ifelse{html}{\out{<i>S</i><sub>0</sub>}}{S_0}} ]
-Number of susceptibles at time
-\ifelse{latex}{\out{$t = t_0$}}{\ifelse{html}{\out{<i>t</i> = <i>t</i><sub>0</sub>}}{t = t_0}}.
+\item{\code{S0}}{\mjeqn{\lbrack S_0 \rbrack}{[S_0]}
+Numeric scalar. Number of susceptibles at time \mjseqn{t = t_0}.
 }
-\item{\code{I0}}{[ \ifelse{latex}{\out{$I_0$}}{\ifelse{html}{\out{<i>I</i><sub>0</sub>}}{I_0}} ]
-Number of infecteds at time
-\ifelse{latex}{\out{$t = t_0$}}{\ifelse{html}{\out{<i>t</i> = <i>t</i><sub>0</sub>}}{t = t_0}}.
+\item{\code{I0}}{\mjeqn{\lbrack I_0 \rbrack}{[I_0]}
+Numeric scalar. Number of infecteds at time \mjseqn{t = t_0}.
 }
-\item{\code{nu}}{[ \ifelse{latex}{\out{$\nu_\text{c}$}}{\ifelse{html}{\out{<i>&nu;<sub>c</sub></i>}}{nu_c}} ]
-Birth rate expressed per unit
-\ifelse{latex}{\out{$\Delta t$}}{\ifelse{html}{\out{<i>&Delta;t</i>}}{Dt}}
-and relative to
-\ifelse{latex}{\out{$\hat{N}_0$}}{\ifelse{html}{\out{<i>&Ntilde;</i><sub>0</sub>}}{hatN_0}}.
+\item{\code{nu}}{\mjeqn{\lbrack \nu_\text{c} \rbrack}{[nu_c]}
+Numeric scalar. Birth rate expressed
+per unit \mjeqn{\Delta t}{dt} and
+relative to \mjeqn{\out{\widehat{N}_0}}{hatN_0}.
 }
-\item{\code{mu}}{[ \ifelse{latex}{\out{$\mu_\text{c}$}}{\ifelse{html}{\out{<i>&mu;</i><sub>c</sub>}}{mu_c}} ]
-Natural mortality rate expressed per unit
-\ifelse{latex}{\out{$\Delta t$}}{\ifelse{html}{\out{<i>&Delta;t</i>}}{Dt}}
-and per capita.
+\item{\code{mu}}{\mjeqn{\lbrack \mu_\text{c} \rbrack}{[mu_c]}
+Numeric scalar. Natural mortality rate expressed
+per unit \mjeqn{\Delta t}{dt} and per capita.
 }
-\item{\code{tgen}}{[ \ifelse{latex}{\out{$t_\text{gen}$}}{\ifelse{html}{\out{<i>t</i><sub>gen</sub>}}{t_gen}} ]
-Mean generation interval of the disease of interest in units
-\ifelse{latex}{\out{$\Delta t$}}{\ifelse{html}{\out{<i>&Delta;t</i>}}{Dt}}.
+\item{\code{tgen}}{\mjeqn{\lbrack t_\text{gen} \rbrack}{[t_gen]}
+Numeric scalar. Mean generation interval of the disease
+of interest in units \mjeqn{\Delta t}{dt}.
 }
-\item{\code{beta_mean}}{[ \ifelse{latex}{\out{$\langle\beta\rangle$}}{\ifelse{html}{\out{&langle;<i>&beta;</i>&rangle;}}{<beta>}} ]
-Mean of the seasonally forced transmission rate
-\ifelse{latex}{\out{$\beta(t)$}}{\ifelse{html}{\out{<i>&beta;</i>(<i>t</i>)}}{beta(t)}}
-expressed per unit
-\ifelse{latex}{\out{$\Delta t$}}{\ifelse{html}{\out{<i>&Delta;t</i>}}{Dt}}
-per susceptible per infected.
+\item{\code{beta_mean}}{\mjeqn{\lbrack \langle\beta\rangle \rbrack}{[<beta>]}
+Numeric scalar. Mean (long-term average) of the seasonally
+forced transmission rate \mjeqn{\beta(t)}{beta(t)} expressed
+per unit \mjeqn{\Delta t}{dt} per susceptible per infected.
 }
-\item{\code{alpha}}{[ \ifelse{latex}{\out{$\alpha$}}{\ifelse{html}{\out{<i>&alpha;</i>}}{alpha}} ]
-Amplitude of the seasonally forced transmission rate
-\ifelse{latex}{\out{$\beta(t)$}}{\ifelse{html}{\out{<i>&beta;</i>(<i>t</i>)}}{beta(t)}}
-relative to the mean.
+\item{\code{alpha}}{\mjeqn{\lbrack \alpha \rbrack}{[alpha]}
+Numeric scalar. Amplitude of the seasonally forced transmission
+rate \mjeqn{\beta(t)}{beta(t)} relative to the mean.
 }
-\item{\code{epsilon}}{[ \ifelse{latex}{\out{$\epsilon$}}{\ifelse{html}{\out{<i>&straightepsilon;</i>}}{epsilon}} ]
-Standard deviation of the random phase shift in the seasonally
-forced transmission rate
-\ifelse{latex}{\out{$\beta(t)$}}{\ifelse{html}{\out{<i>&beta;</i>(<i>t</i>)}}{beta(t)}}.
+\item{\code{epsilon}}{\mjeqn{\lbrack \epsilon \rbrack}{[epsilon]}
+Numeric scalar. Standard deviation of the random phase shift
+introduced to the seasonally forced transmission rate
+\mjeqn{\beta(t)}{beta(t)}.
 }
 }}
 
-\item{n}{Numeric scalar. Time between the first and last observations
-in units
-\ifelse{latex}{\out{$\Delta t$}}{\ifelse{html}{\out{<i>&Delta;t</i>}}{Dt}},
-so that simulated time series have \code{n+1} observations.}
+\item{n}{Integer scalar. Time between the first and last observations
+in units \mjeqn{\Delta t}{dt}, so that simulated time series have
+\code{n+1} observations. (If numeric but not integer, then behavior is
+identical to if \code{floor(n)} were specified.)}
 
 \item{with_dem_stoch}{Logical scalar. If \code{TRUE}, then the simulation
-is generated by \code{\link[adaptivetau:ssa.adaptivetau]{adaptivetau::ssa.adaptivetau()}}. Otherwise, it is
-generated by \code{\link[deSolve:ode]{deSolve::ode()}} (see Details).}
+is generated using \code{\link[adaptivetau:ssa.adaptivetau]{adaptivetau::ssa.adaptivetau()}}. Otherwise, it
+is generated using \code{\link[deSolve:ode]{deSolve::ode()}} (see Details).}
 
 \item{seed}{Integer scalar or \code{NA}. If an integer, then \code{seed}
-is passed to \code{set.seed()} internally, making the simulation,
-which is randomly generated (see Details), reproducible with
-an identical call to \code{make_data()}.}
+is passed to \code{set.seed()} internally to make the simulation
+reproducible with an identical call to \code{make_data()}. If \code{NA},
+then no seed is set.}
 
-\item{ode_control}{A list of arguments to be passed to
-\code{\link[deSolve:ode]{deSolve::ode()}}, specifying options for numerical integration,
-such as \code{method}, \code{rtol}, and \code{atol}. Not used if
-\code{with_dem_stoch = TRUE}.}
+\item{ode_control}{A list of optional arguments of \code{\link[deSolve:ode]{deSolve::ode()}},
+specifying options for numerical integration, such as \code{method},
+\code{rtol}, and \code{atol}. Not used if \code{with_dem_stoch = TRUE}.}
 }
 \value{
 A data frame with numeric columns:
 
 \describe{
-\item{\code{t}}{Time in units
-\ifelse{latex}{\out{$\Delta t$}}{\ifelse{html}{\out{<i>&Delta;t</i>}}{Dt}}.
-Equal to \code{t0 + seq(0, n, by = 1)}.
+\item{\code{t}}{Time in units \mjeqn{\Delta t}{dt}. Equal to
+\code{par_list$t0 + 0:n}.
 }
 \item{\code{t_years}}{Time in years. Equal to
-\code{(t0 + seq(0, n, by = 1)) * dt_weeks * (7 / 365)}.
+\code{(par_list$t0 + 0:n) * dt_weeks * (7 / 365)}.
 }
-\item{\code{beta}}{Seasonally forced transmission rate expressed per
-unit
-\ifelse{latex}{\out{$\Delta t$}}{\ifelse{html}{\out{<i>&Delta;t</i>}}{Dt}},
-per susceptible per infected, without environmental noise.
+\item{\code{beta}}{Seasonally forced transmission rate expressed
+per unit \mjeqn{\Delta t}{dt} per susceptible per infected,
+without environmental noise.
 }
-\item{\code{beta_phi}}{Seasonally forced transmission rate expressed per
-unit
-\ifelse{latex}{\out{$\Delta t$}}{\ifelse{html}{\out{<i>&Delta;t</i>}}{Dt}}
-per susceptible per infected, with environmental noise.
+\item{\code{beta_phi}}{Seasonally forced transmission rate expressed
+per unit \mjeqn{\Delta t}{dt} per susceptible per infected,
+with environmental noise.
 }
 \item{\code{N}}{Population size.}
 \item{\code{S}}{Number of susceptibles.}
 \item{\code{I}}{Number of infecteds.}
-\item{\code{R}}{Number of removeds.}
-\item{\code{Q}}{Cumulative incidence. \code{Q[i]} is the number of infections
-between times \code{t[1]} and \code{t[i]}.
-}
 \item{\code{Z}}{Incidence. \code{Z[i]} is the number of infections
-between times \code{t[i-1]} and \code{t[i]}, computed as \code{Q[i] - Q[i-1]}.
+between times \code{t[i-1]} and \code{t[i]}.
 }
 \item{\code{C}}{Reported incidence. \code{C[i]} is the number of infections
 reported between times \code{t[i-1]} and \code{t[i]}, equal to the number
-of successes in \code{Z[i-round(trep)]} independent Bernoulli trials,
-with success probability
-\ifelse{latex}{\out{$p_\text{rep}$}}{\ifelse{html}{\out{<i>p</i><sub>rep</sub>}}{p_rep}}.
+of successes in \code{Z[i-round(par_list$trep)]} independent Bernoulli
+trials, each with success probability \code{par_list$prep}.
+}
+\item{\code{B}}{Births. \code{B[i]} is the number of births between times
+\code{t[i-1]} and \code{t[i]}.
+}
+\item{\code{mu}}{Per capita natural mortality rate. \code{mu[i]} is rate
+at time \code{t[i]}. Equal to \code{rep(par_list$mu, n + 1)} and included
+mainly for convenience, as \code{\link[=estimate_beta]{estimate_beta()}} requires a data
+frame with columns \code{C}, \code{B}, and \code{mu}.
 }
 }
 
 A list of the arguments of \code{make_data()} is included as an attribute.
 }
 \description{
-\code{make_data()} simulates time series data according to a system of
+\code{make_data()} simulates epidemic time series data using a system of
 SIR equations and a supplied list of parameter values. Observations
 are recorded at equally spaced time points
-\ifelse{latex}{\out{$t_k = t_0 + k \Delta t$}}{\ifelse{html}{\out{<i>t<sub>k</sub></i> = <i>t</i><sub>0</sub>+<i>k&Delta;t</i>}}{t_k = t_0 + k*Dt}}
-(for \ifelse{latex}{\out{$k = 0,\ldots,n$}}{\ifelse{html}{\out{<i>k</i> = 0,...,<i>n</i>}}{k = 0,...,n}}),
-where
-\ifelse{latex}{\out{$\Delta t$}}{\ifelse{html}{\out{<i>&Delta;t</i>}}{Dt}}
-denotes the observation interval.
+\mjeqn{t_k = t_0 + k \Delta t}{t_k = t_0 + k dt},
+for \mjeqn{k = 0, \ldots, n}{k = 0,...,n}.
+Among other things, the simulation model assumes:
+\itemize{
+\item A seasonally forced transmission rate.
+\item Constant birth and per capita natural mortality rates.
+\item Cases reported after a fixed delay since infection,
+with a fixed probability.
 }
-\section{Model}{
-
-\code{make_data()} generates data at times
-\ifelse{latex}{\out{$t_k = t_0 + k \Delta t$}}{\ifelse{html}{\out{<i>t<sub>k</sub></i> = <i>t</i><sub>0</sub>+<i>k&Delta;t</i>}}{t_k = t_0 + k*Dt}}
-(for \ifelse{latex}{\out{$k = 0,\ldots,n$}}{\ifelse{html}{\out{<i>k</i> = 0,...,<i>n</i>}}{k = 0,...,n}})
-using the system of SIR equations
-
-\ifelse{latex}{
-  \out{
-    \begin{array}[rlc]
-      S' & = & \nu_\text{c} \hat{N}_0 - \beta(t) S I - \mu_\text{c} S \\
-      I' & = & \beta(t) S I - \gamma I - \mu_\text{c} I \\
-      R' & = & \gamma I - \mu_\text{c} R \\
-    \end{array}
-  }
-}{
-  \ifelse{html}{
-    \out{
-      <i>S</i>&prime; = <i>&nu;</i><sub>c</sub><i>&Ntilde;</i><sub>0</sub> &minus; <i>&beta;</i>(<i>t</i>)<i>SI</i> &minus; <i>&mu;</i><sub>c</sub><i>S</i><br>
-      <i>I</i>&prime; = <i>&beta;</i>(<i>t</i>)<i>SI</i> &minus; <i>&gamma;I</i> &minus; <i>&mu;</i><sub>c</sub><i>I</i><br>
-      <i>R</i>&prime; = <i>&gamma;I</i> &minus; <i>&mu;</i><sub>c</sub><i>R</i>
-    }
-  }{
-    % S' = nu_c*hatN_0 - beta(t)*S*I - mu_c*S \cr
-    % I' = beta(t)*S*I - gamma*I - mu_c*I \cr
-    % R' = gamma*I - mu_c*R
-  }
 }
+\section{Simulation model}{
 
+\code{make_data()} simulates epidemic time series data using the system of
+SIR equations below, which includes a fourth equation for cumulative
+births and a fifth equation for cumulative incidence:
+
+\mjdeqn{\out{\begin{align} \frac{\text{d}S}{\text{d}t} &= \nu \widehat{N}_0 - \beta_\phi(t) S I - \mu S, \cr \frac{\text{d}I}{\text{d}t} &= \beta_\phi(t) S I - \gamma I - \mu I, \cr \frac{\text{d}R}{\text{d}t} &= \gamma I - \mu R, \cr \frac{\text{d}B_\text{cum}}{\text{d}t} &= \nu \widehat{N}_0, \cr \frac{\text{d}Z_\text{cum}}{\text{d}t} &= \beta_\phi(t) S I. \end{align}}}{(1) dS/dt = nu hatN_0 - beta_phi(t) S I - mu S,    (2) dI/dt = beta_phi(t) S I - gamma I - mu I,    (3) dR/dt = gamma I - mu R,    (4) dB_cum/dt = nu hatN_0,    (5) dZ_cum/dt = beta_phi(t).}
+
+Here, \mjeqn{\gamma = 1 / t_\text{gen}}{gamma = 1 / t_gen},
+
+\mjdeqn{\beta_\phi(t) = \langle\beta\rangle \left\lbrack 1 + \alpha \cos\left(\frac{2 \pi t}{\text{1 year}} + \phi(t;\epsilon)\right) \right\rbrack,}{beta(t) = <beta> (1 + alpha cos(2 pi t / (1 year) + phi(t;epsilon))),}
+
+and \mjeqn{\phi(t;\epsilon)}{phi(t;epsilon)}
+is the linear interpolant of noise
+\mjeqn{\lbrace(t_k;\Phi_k)\rbrace_{k=0}^n}{{(t_k,Phi_k)}}
 with
-\ifelse{latex}{\out{$\gamma = 1 / t_\text{gen}$}}{\ifelse{html}{\out{<i>&gamma;</i> = 1 / <i>t</i><sub>gen</sub>}}{gamma = 1/t_gen}}
-and
-\ifelse{latex}{\out{$\beta(t) = \langle\beta\rangle \left(1 + \alpha \cos\left(\frac{2 \pi t}{\text{1 year}}\right)\right)$}}{\ifelse{html}{\out{<i>&beta;</i>(<i>t</i>) = &langle;<i>&beta;</i>&rangle; (1 + <i>&alpha;</i> cos(2<i>&pi;t</i> / (1 year) + <i>&straightphi;</i>(<i>t</i>;<i>&straightepsilon;</i>)))}}{beta(t) = <beta>*(1 + alpha*cos(2*pi*t/(1 year)+phi(t;epsilon)))}},
-where
-\ifelse{latex}{\out{$\phi(t;\epsilon)$}}{\ifelse{html}{\out{<i>&straightphi;</i>(<i>t</i>;<i>&straightepsilon;</i>)}}{phi(t;epsilon)}}
-is the linear interpolant of random noise
-\ifelse{latex}{\out{$\{(t_k,\Phi_k)\}$}}{\ifelse{html}{\out{{(<i>t<sub>k</sub></i>,<i>&Phi;<sub>k</sub></i>)}}}{{(t_k,Phi_k)}}}
-with
-\ifelse{latex}{\out{$\Phi_k \sim \mathrm{Normal}(0,\epsilon^2)$}}{\ifelse{html}{\out{<i>&Phi;<sub>k</sub></i> ~ Normal(0,<i>&straightepsilon;</i><sup>2</sup>)}}{Phi_k ~ Normal(0,epsilon^2)}}.
-}
 
-\section{Randomness}{
+\mjdeqn{\Phi_k \sim \mathrm{Normal}(0,\epsilon^2),}{Phi_k ~ Normal(0,epsilon^2),}
 
-Simulations have three sources of randomness:
-\enumerate{
-\item Environmental stochasticity
-\itemize{
-\item The seasonal forcing function contains a randomly generated
-phase shift
-\ifelse{latex}{\out{$\phi(t;\epsilon)$}}{\ifelse{html}{\out{<i>&straightphi;</i>(<i>t</i>;<i>&straightepsilon;</i>)}}{phi(t;epsilon)}}.
-Randomness is introduced by choosing \code{epsilon} greater than 0.
-}
-\item Demographic stochasticity
-\itemize{
-\item If \code{with_dem_stoch = TRUE}, then observations are generated
-by realizing a continuous-time stochastic process, in which
-event probabilities are determined by terms in the ODE.
-See \code{\link[adaptivetau:ssa.adaptivetau]{adaptivetau::ssa.adaptivetau()}}.
-\item Probability of infected decrease is set to zero whenever the
-number of infecteds is 1, in order to prevent disease fadeout.
-\item If \code{with_dem_stoch = FALSE}, then observations are generated
-by numerically integrating the ODE. See \code{\link[deSolve:ode]{deSolve::ode()}}.
-}
-\item Under-reporting of cases
-\itemize{
-\item Reported incidence \code{C} is obtained from incidence \code{Z}
-by modeling \code{C[i]} as the number of successes in
-\code{Z[i-round(trep)]} independent Bernoulli trials,
-with success probability
-\ifelse{latex}{\out{$p_\text{rep}$}}{\ifelse{html}{\out{<i>p</i><sub>rep</sub>}}{p_rep}}.
-Randomness is introduced by choosing \code{prep} in (0,1).
-}
-}
+modeling \strong{environmental stochasticity}.
+
+\code{make_data()} generates observations of the above system at equally
+spaced times \mjeqn{t_k = t_0 + k \Delta t}{t_k = t_0 + k dt}, for
+\mjeqn{k = 0, \ldots, n}{k = 0,...,n}, by either (i) numerically
+integrating the ODE using \code{\link[deSolve:ode]{deSolve::ode()}} (\code{with_dem_stoch = FALSE}),
+or (ii) realizing a corresponding continuous-time stochastic process
+using \code{\link[adaptivetau:ssa.adaptivetau]{adaptivetau::ssa.adaptivetau()}} (\code{with_dem_stoch = TRUE}).
+Both methods use initial state
+
+\mjdeqn{\begin{bmatrix} S(t_0) \cr I(t_0) \cr R(t_0) \cr B_\text{cum}(t_0) \cr Z_\text{cum}(t_0) \end{bmatrix} = \begin{bmatrix} S_0 \cr I_0 \cr N_0 - S_0 - I_0 \cr 0 \cr 0 \end{bmatrix}.}{(S(t_0),I(t_0),R(t_0),B_cum(t_0),Z_cum(t_0)) = (S_0,I_0,N_0 - S_0 - I_0,0,0).}
+
+The latter method defines event probabilities as proportional to
+terms in the ODE and models \strong{demographic stochasticity}. Disease
+fadeout in simulations with demographic stochasticity is prevented
+by setting the probability of infected decrease to zero whenever
+the number of infecteds is 1.
+
+\code{make_data()} calculates births \mjseqn{B} and incidence \mjseqn{Z}
+from cumulative births \mjseqn{B_\text{cum}}{B_cum} and cumulative
+incidence \mjeqn{Z_\text{cum}}{Z_cum} via first differences,
+
+\mjdeqn{\begin{align} B(t_k) &= B_\text{cum}(t_k) - B_\text{cum}(t_{k-1}), \cr Z(t_k) &= Q(t_k) - Q(t_{k-1}), \end{align}}{(1) B(t_k) = B_cum(t_k) - B_cum(t_{k-1}),    (2) Z(t_k) = Z_cum(t_k) - Z_cum(t_{k-1}),}
+
+then simulates reported incidence \mjseqn{C} from
+incidence \mjseqn{Z} via lagged binomial sampling,
+
+\mjdeqn{C(t_{k+r}) \sim \mathrm{Binomial}\big(Z(t_k),p_\text{rep}\big),}{C(t_{k+r}) ~ Binomial(Z(t_k), p_rep),}
+
+modeling \strong{observation error} (random under-reporting of cases with
+a delay between infection and reporting). Here,
+\mjeqn{r = \mathrm{nint}(t_\text{rep} / \Delta t)}{r = nint(t_rep / dt)}.
 }
 
 \examples{
@@ -231,22 +202,22 @@ Randomness is introduced by choosing \code{prep} in (0,1).
 par_list <- make_par_list(dt_weeks = 1)
 df <- make_data(
   par_list = par_list,
-  n = 20 * 365 / 7,       # 20 years is ~1042 weeks
-  with_dem_stoch = FALSE  # numerical integration of d(S,I,R)/dt
+  n = 20 * 365 / 7, # number of weeks in 20 years
+  with_dem_stoch = FALSE
 )
 head(df)
 
 # Reproducible stochastic simulation
 par_list <- make_par_list(
   dt_weeks = 1,
-  epsilon = 0.5, # s.d. of environmental noise
-  prep = 0.5     # case reporting probability
+  epsilon = 0.5, # environmental stochasticity
+  prep = 0.5 # random under-reporting of cases
 )
 df <- make_data(
   par_list = par_list,
-  n = 20 * 365 / 7,      # 20 years is ~1042 weeks
-  with_dem_stoch = TRUE, # stochastic simulation of d(S,I,R)/dt
-  seed = 5               # seed for RNG
+  n = 20 * 365 / 7,
+  with_dem_stoch = TRUE, # demographic stochasticity
+  seed = 5 # seed for RNG
 )
 head(df)
 

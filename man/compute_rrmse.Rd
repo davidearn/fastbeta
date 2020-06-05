@@ -2,33 +2,40 @@
 % Please edit documentation in R/compute_rrmse.R
 \name{compute_rrmse}
 \alias{compute_rrmse}
-\title{Compute RRMSE in a time series estimate}
+\title{Compute RRMSE in a vector}
 \usage{
-compute_rrmse(x, y, na_rm = TRUE)
+compute_rrmse(x, xhat, na_rm = FALSE)
 }
 \arguments{
-\item{x}{Numeric vector. A time series.}
+\item{x}{Numeric vector.}
 
-\item{y}{Numeric vector with length equal to \code{length(x)}.
-A time series estimate of \code{x}.}
+\item{xhat}{Numeric vector with length equal to \code{length(x)}.
+An estimate of \code{x}.}
 
 \item{na_rm}{Logical. If \code{TRUE}, then missing values
 (\code{NA}, \code{NaN}, \code{Inf}) are ignored.}
 }
 \value{
-Let \code{cc} ("complete cases") be the vector of indices \code{i} such that
-neither \code{x[i]} nor \code{y[i]} is missing. If \code{length(cc) = 0} or if
-\code{length(cc) < length(x)} and \code{na_rm = FALSE}, then \code{NA}. Otherwise,
-the RRMSE in \code{y} given by
-\code{sqrt(sum((x[cc] - y[cc])^2) / length(cc)) / mean(x[cc])}.
+A numeric scalar indicating the RRMSE in \code{xhat}, with exceptions
+(see Details).
 }
 \description{
 \code{compute_rrmse()} computes the relative root mean square error
-(RRMSE) in a time series estimate of a known time-varying quantity.
+(RRMSE) in a vector.
+}
+\details{
+Let \code{cc} ("complete cases") be the vector of indices \code{i} such that
+neither \code{x[i]} nor \code{xhat[i]} is missing (\code{NA}, \code{NaN}, \code{Inf}). If
+\code{length(cc) = 0} or if \code{na_rm = FALSE} and \code{length(cc) < length(x)},
+then \code{compute_rrmse()} returns \code{NA}. Otherwise, it returns
+\code{sqrt(sum((xhat[cc] - x[cc])^2) / length(cc)) / mean(x[cc])}.
+This is the RRMSE in \code{xhat[cc]} unless \code{mean(x[cc]) = 0},
+in which case RRMSE is not defined and the expression is
+(correctly) evaluated as \code{Inf} or \code{NaN}.
 }
 \examples{
-x <- rep(c(0, 1, 0, -1), 100)
-y <- x + rnorm(x, 0, 0.01)
-compute_rrmse(x, y) # RRMSE in `y`
+x <- rep(10, 100)
+xhat <- x + rnorm(x, 0, 1)
+compute_rrmse(x, xhat) # RRMSE in `xhat`
 
 }

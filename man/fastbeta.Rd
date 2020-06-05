@@ -22,16 +22,16 @@ series data:
 The SI method is substantially more robust than the FC and S methods
 and should be preferred in practice.
 
-\pkg{fastbeta} additionally implements peak-to-peak iteration (PTPI),
-a method for estimating the initial number of susceptibles
-\mjeqn{S_0}{S_0} from time series data:
+\pkg{fastbeta} additionally implements peak-to-peak iteration
+(PTPI), a method for estimating the initial number of susceptibles
+\mjseqn{S_0} from time series data:
 \itemize{
 \item \code{\link[=ptpi]{ptpi()}}
 \item \code{\link[=get_peak_times]{get_peak_times()}}
 }
 
 PTPI can be used in conjunction with the FC, S, and SI methods,
-which require users to specify an estimate of \mjeqn{S_0}{S_0}.
+which require users to specify an estimate of \mjseqn{S_0}.
 
 \pkg{fastbeta} includes functions useful for simulating incidence
 time series with an underlying, seasonally forced transmission rate.
@@ -45,7 +45,7 @@ These may be useful in testing:
 All methods are based on the SIR model with time-varying rates of
 birth, death, and transmission:
 
-\mjdeqn{\begin{align} \frac{\text{d}S}{\text{d}t} &= \nu(t) - \beta(t) S I - \mu(t) S \cr \frac{\text{d}I}{\text{d}t} &= \beta(t) S I - \gamma I - \mu(t) I \cr \frac{\text{d}R}{\text{d}t} &= \gamma I - \mu(t) \end{align}}{(1) dS/dt = nu(t) - beta(t) S I - mu(t) S    (2) dI/dt = beta(t) S I - gamma I - mu(t) I    (3) dR/dt = gamma I - mu(t) R}
+\mjdeqn{\begin{align} \frac{\text{d}S}{\text{d}t} &= \nu(t) \widehat{N}_0 - \beta(t) S I - \mu(t) S \cr \frac{\text{d}I}{\text{d}t} &= \beta(t) S I - \gamma I - \mu(t) I \cr \frac{\text{d}R}{\text{d}t} &= \gamma I - \mu(t) R \end{align}}{(1) dS/dt = nu(t) hatN_0 - beta(t) S I - mu(t) S    (2) dI/dt = beta(t) S I - gamma I - mu(t) I    (3) dR/dt = gamma I - mu(t) R}
 
 They are fully described in the referenced manuscript.
 }
