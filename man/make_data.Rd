@@ -9,7 +9,6 @@ make_data(
   par_list = make_par_list(),
   n = 20 * 365/7,
   with_dem_stoch = TRUE,
-  seed = NA,
   ode_control = list(method = "lsoda", rtol = 1e-06, atol = 1e-06)
 )
 }
@@ -73,31 +72,28 @@ introduced to the seasonally forced transmission rate
 
 \item{n}{Integer scalar. Time between the first and last observations
 in units \mjeqn{\Delta t}{dt}, so that simulated time series have
-\code{n+1} observations. (If numeric but not integer, then behavior is
-identical to if \code{floor(n)} were specified.)}
+\code{n + 1} observations. (If numeric but not integer, then \code{n} is
+replaced by \code{floor(n)}.)}
 
 \item{with_dem_stoch}{Logical scalar. If \code{TRUE}, then the simulation
 is generated using \code{\link[adaptivetau:ssa.adaptivetau]{adaptivetau::ssa.adaptivetau()}}. Otherwise, it
 is generated using \code{\link[deSolve:ode]{deSolve::ode()}} (see Details).}
-
-\item{seed}{Integer scalar or \code{NA}. If an integer, then \code{seed}
-is passed to \code{set.seed()} internally to make the simulation
-reproducible with an identical call to \code{make_data()}. If \code{NA},
-then no seed is set.}
 
 \item{ode_control}{A list of optional arguments of \code{\link[deSolve:ode]{deSolve::ode()}},
 specifying options for numerical integration, such as \code{method},
 \code{rtol}, and \code{atol}. Not used if \code{with_dem_stoch = TRUE}.}
 }
 \value{
-A data frame with numeric columns:
+A data frame with \code{n + 1} rows corresponding to equally spaced times
+\mjeqn{t_k = t_0 + k \Delta t}{t_k = t_0 + k dt}
+(for \mjeqn{k = 0, \ldots, n}{k = 0,...,n}), and numeric columns:
 
 \describe{
 \item{\code{t}}{Time in units \mjeqn{\Delta t}{dt}. Equal to
 \code{par_list$t0 + 0:n}.
 }
 \item{\code{t_years}}{Time in years. Equal to
-\code{(par_list$t0 + 0:n) * dt_weeks * (7 / 365)}.
+\code{(par_list$t0 + 0:n) * par_list$dt_weeks * (7 / 365)}.
 }
 \item{\code{beta}}{Seasonally forced transmission rate expressed
 per unit \mjeqn{\Delta t}{dt} per susceptible per infected,
@@ -123,8 +119,8 @@ trials, each with success probability \code{par_list$prep}.
 }
 \item{\code{mu}}{Per capita natural mortality rate. \code{mu[i]} is rate
 at time \code{t[i]}. Equal to \code{rep(par_list$mu, n + 1)} and included
-mainly for convenience, as \code{\link[=estimate_beta]{estimate_beta()}} requires a data
-frame with columns \code{C}, \code{B}, and \code{mu}.
+for convenience, mainly because \code{\link[=estimate_beta_SI]{estimate_beta_SI()}} requires
+a data frame with columns \code{C}, \code{B}, and \code{mu}.
 }
 }
 
@@ -134,8 +130,8 @@ A list of the arguments of \code{make_data()} is included as an attribute.
 \code{make_data()} simulates epidemic time series data using a system of
 SIR equations and a supplied list of parameter values. Observations
 are recorded at equally spaced time points
-\mjeqn{t_k = t_0 + k \Delta t}{t_k = t_0 + k dt},
-for \mjeqn{k = 0, \ldots, n}{k = 0,...,n}.
+\mjeqn{t_k = t_0 + k \Delta t}{t_k = t_0 + k dt}
+(for \mjeqn{k = 0, \ldots, n}{k = 0,...,n}).
 Among other things, the simulation model assumes:
 \itemize{
 \item A seasonally forced transmission rate.
@@ -166,8 +162,8 @@ with
 modeling \strong{environmental stochasticity}.
 
 \code{make_data()} generates observations of the above system at equally
-spaced times \mjeqn{t_k = t_0 + k \Delta t}{t_k = t_0 + k dt}, for
-\mjeqn{k = 0, \ldots, n}{k = 0,...,n}, by either (i) numerically
+spaced times \mjeqn{t_k = t_0 + k \Delta t}{t_k = t_0 + k dt} (for
+\mjeqn{k = 0, \ldots, n}{k = 0,...,n}) by either (i) numerically
 integrating the ODE using \code{\link[deSolve:ode]{deSolve::ode()}} (\code{with_dem_stoch = FALSE}),
 or (ii) realizing a corresponding continuous-time stochastic process
 using \code{\link[adaptivetau:ssa.adaptivetau]{adaptivetau::ssa.adaptivetau()}} (\code{with_dem_stoch = TRUE}).
@@ -182,10 +178,10 @@ by setting the probability of infected decrease to zero whenever
 the number of infecteds is 1.
 
 \code{make_data()} calculates births \mjseqn{B} and incidence \mjseqn{Z}
-from cumulative births \mjseqn{B_\text{cum}}{B_cum} and cumulative
+from cumulative births \mjeqn{B_\text{cum}}{B_cum} and cumulative
 incidence \mjeqn{Z_\text{cum}}{Z_cum} via first differences,
 
-\mjdeqn{\begin{align} B(t_k) &= B_\text{cum}(t_k) - B_\text{cum}(t_{k-1}), \cr Z(t_k) &= Q(t_k) - Q(t_{k-1}), \end{align}}{(1) B(t_k) = B_cum(t_k) - B_cum(t_{k-1}),    (2) Z(t_k) = Z_cum(t_k) - Z_cum(t_{k-1}),}
+\mjdeqn{\begin{align} B(t_k) &= B_\text{cum}(t_k) - B_\text{cum}(t_{k-1}), \cr Z(t_k) &= Z_\text{cum}(t_k) - Z_\text{cum}(t_{k-1}), \end{align}}{(1) B(t_k) = B_cum(t_k) - B_cum(t_{k-1}),    (2) Z(t_k) = Z_cum(t_k) - Z_cum(t_{k-1}),}
 
 then simulates reported incidence \mjseqn{C} from
 incidence \mjseqn{Z} via lagged binomial sampling,
@@ -207,17 +203,17 @@ df <- make_data(
 )
 head(df)
 
-# Reproducible stochastic simulation
+# Stochastic simulation
 par_list <- make_par_list(
   dt_weeks = 1,
   epsilon = 0.5, # environmental stochasticity
   prep = 0.5 # random under-reporting of cases
 )
+set.seed(2146)
 df <- make_data(
   par_list = par_list,
   n = 20 * 365 / 7,
-  with_dem_stoch = TRUE, # demographic stochasticity
-  seed = 5 # seed for RNG
+  with_dem_stoch = TRUE # demographic stochasticity
 )
 head(df)
 

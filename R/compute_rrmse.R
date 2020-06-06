@@ -33,7 +33,7 @@
 compute_rrmse <- function(x, xhat, na_rm = FALSE) {
 
 cc <- !is.na(x) & !is.na(xhat) & !is.infinite(x) & !is.infinite(xhat)
-if (sum(cc) == 0 || (sum(cc) < nrow(df) && !na_rm)) {
+if (sum(cc) == 0 || (sum(cc) < length(x) && !na_rm)) {
   return(NA)
 }
 mse <- sum((xhat[cc] - x[cc])^2) / sum(cc)

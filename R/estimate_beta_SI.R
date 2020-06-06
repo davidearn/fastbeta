@@ -152,8 +152,7 @@
 #' df <- make_data(
 #'   par_list = par_list,
 #'   n = 20 * 365 / 7, # 20 years is ~1042 weeks
-#'   with_dem_stoch = TRUE,
-#'   seed = 5
+#'   with_dem_stoch = TRUE
 #' )
 #' head(df)
 #'

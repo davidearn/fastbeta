@@ -166,7 +166,7 @@
 #'   }
 #'   \item{`mu`}{Per capita natural mortality rate. `mu[i]` is rate
 #'     at time `t[i]`. Equal to `rep(par_list$mu, n + 1)` and included
-#'     for convenience, mainly because [estimate_beta()] requires
+#'     for convenience, mainly because [estimate_beta_SI()] requires
 #'     a data frame with columns `C`, `B`, and `mu`.
 #'   }
 #' }
@@ -226,7 +226,6 @@ n <- floor(n)
 t_out <- t0 + 0:n
 
 # Environmental noise
-if (!is.na(seed)) set.seed(seeds[1])
 phi <- stats::rnorm(
   n    = length(t_out),
   mean = 0,
@@ -238,7 +237,7 @@ interpolate_phi <- stats::approxfun(
   x      = t_out,
   y      = phi,
   method = "linear",
-  rule   = 2 # return `y[1]` and `y[length(y)]` outside range of `x`
+  rule   = 1 # return `NA` outside range of `x`
 )
 
 # Seasonally forced transmission rate
@@ -294,7 +293,6 @@ if (with_dem_stoch) {
   }
 
   # Generate a realization of the stochastic process
-  if (!is.na(seed)) set.seed(seeds[2])
   df <- as.data.frame(adaptivetau::ssa.adaptivetau(
     x_init, event_list, compute_event_rates,
     params    = NULL, # already in environment
@@ -395,7 +393,6 @@ df <- transform(df,
 # `C` from `Z` via lagged binomial sampling. `rbinom()`
 # warning about `NA` in `size` argument is safe to suppress.
 df$C <- suppressWarnings({
-  if (!is.na(seed)) set.seed(seeds[3])
   stats::rbinom(
     n    = nrow(df),    # number of experiments
     size = round(df$Z), # number of Bernoulli trials
@@ -416,6 +413,7 @@ df
 if (getRversion() >= "2.15.1") {
   utils::globalVariables(
     c("dt_weeks", "t0", "prep", "trep", "hatN0", "N0", "S0", "I0",
-      "nu", "mu", "tgen", "beta_mean", "alpha", "epsilon")
+      "nu", "mu", "tgen", "beta_mean", "alpha", "epsilon",
+      "S", "R", "Zcum", "Bcum")
   )
 }

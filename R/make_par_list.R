@@ -171,7 +171,7 @@ if (!is.null(Rnaught)) {
 # If `N0`, `S0`, or `I0` was not specified, then
 # obtain a value from the state of a system of
 # SIR equations after a transient of length `t0`
-if (any(is.na(c(N0, S0, I0)))) {
+if (any(is.null(c(N0, S0, I0)))) {
 
   # Initial state
   x_init <- c(
@@ -202,21 +202,21 @@ if (any(is.na(c(N0, S0, I0)))) {
   })
     
   # Numerically integrate the system of SIR equations
-  mat <- do.call(deSolve::ode, ode_args)
+  df <- as.data.frame(do.call(deSolve::ode, ode_args))
 
   # Assign final values of `S+I+R`, `S`, and `I`
   if (is.null(N0)) {
-    N0 <- sum(mat[nrow(mat), c("S", "R")]) + exp(mat[nrow(mat), "logI"])
+    N0 <- sum(df[nrow(df), c("S", "R")]) + exp(df[nrow(df), "logI"])
   }
   if (is.null(S0)) {
-    S0 <- mat[nrow(mat), "S"]
+    S0 <- df[nrow(df), "S"]
   }
   if (is.null(I0)) {
-    I0 <- exp(mat[nrow(mat), "logI"])
+    I0 <- exp(df[nrow(df), "logI"])
   }
 
   # Warn if `ode()` returned early with unrecoverable error 
-  if (any(is.na(mat[nrow(mat), ]))) {
+  if (any(is.na(df[nrow(df), ]))) {
     warning(
       "`deSolve::ode()` could not complete the integration. ",
       "Retry with modified `ode_control`.",

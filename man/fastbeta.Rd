@@ -6,10 +6,6 @@
 \title{\loadmathjax
 The \pkg{fastbeta} package}
 \description{
-\loadmathjax
-The \pkg{fastbeta} package
-}
-\details{
 \pkg{fastbeta} implements the FC, S, and SI methods for estimating
 time-varying transmission rates \mjeqn{\beta(t)}{beta(t)} from time
 series data:
