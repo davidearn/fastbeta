@@ -140,7 +140,8 @@ Among other things, the simulation model assumes:
 with a fixed probability.
 }
 }
-\section{Simulation model}{
+\section{Details}{
+\subsection{Simulation model}{
 
 \code{make_data()} simulates epidemic time series data using the system of
 SIR equations below, which includes a fourth equation for cumulative
@@ -191,6 +192,7 @@ incidence \mjseqn{Z} via lagged binomial sampling,
 modeling \strong{observation error} (random under-reporting of cases with
 a delay between infection and reporting). Here,
 \mjeqn{r = \mathrm{nint}(t_\text{rep} / \Delta t)}{r = nint(t_rep / dt)}.
+}
 }
 
 \examples{

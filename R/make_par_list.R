@@ -6,7 +6,11 @@
 #' as an argument of [make_data()], which simulates epidemic time series
 #' data using an SIR model.
 #'
-#' @section Concordance of \mjeqn{\mathcal{R}_0}{calR_0} and \mjeqn{\langle\beta\rangle}{<beta>}:
+#' @details
+#' # Details
+#'
+#' ## 1. Concordance of \mjeqn{\mathcal{R}_0}{calR_0} and \mjeqn{\langle\beta\rangle}{<beta>}
+#' 
 #' `make_par_list()` enforces the identity
 #'
 #' \mjdeqn{\mathcal{R}_0 = \frac{\nu \widehat{N}_0}{\mu} \cdot \frac{\langle\beta\rangle}{\gamma + \mu},}{calR_0 = ((nu hatN_0) / mu) (<beta> / (gamma + mu)),}
@@ -19,7 +23,8 @@
 #' \mjeqn{\langle\beta\rangle}{<beta>}. Hence argument `beta_mean`
 #' is optional if `Rnaught` is specified, but mandatory otherwise.
 #' 
-#' @section Missing \mjseqn{N_0}, \mjseqn{S_0}, or \mjseqn{I_0}:
+#' ## 2. Missing \mjseqn{N_0}, \mjseqn{S_0}, or \mjseqn{I_0}
+#'
 #' If \mjseqn{N_0}, \mjseqn{S_0}, or \mjseqn{I_0} (`N0`, `S0`, or `I0`)
 #' is not specified in the function call, then, with a call to
 #' [deSolve::ode()], `make_par_list()` numerically integrates the
@@ -69,17 +74,16 @@
 #' @param trep \mjeqn{\lbrack t_\text{rep} \rbrack}{\[t_rep\]}
 #'   Numeric scalar. Case reporting delay in units \mjeqn{\Delta t}{dt}.
 #' @param hatN0 \mjeqn{\lbrack \widehat{N}_0 \rbrack}{\[hatN_0\]}
-#'   Numeric scalar. Population size at time \mjseqn{t = 0} years
-#'   (see Details).
+#'   Numeric scalar. Population size at time \mjseqn{t = 0} years.
 #' @param N0 \mjeqn{\lbrack N_0 \rbrack}{\[N_0\]}
 #'   Numeric scalar. Population size at time \mjseqn{t = t_0}.
-#'   This argument is optional (see Details).
+#'   This argument is optional (see Details 2).
 #' @param S0 \mjeqn{\lbrack S_0 \rbrack}{\[S_0\]}
 #'   Numeric scalar. Number of susceptibles at time \mjseqn{t = t_0}.
-#'   This argument is optional (see Details).
+#'   This argument is optional (see Details 2).
 #' @param I0 \mjeqn{\lbrack I_0 \rbrack}{\[I_0\]}
 #'   Numeric scalar. Number of infecteds at time \mjseqn{t = t_0}.
-#'   This argument is optional (see Details).
+#'   This argument is optional (see Details 2).
 #' @param nu \mjeqn{\lbrack \nu \rbrack}{\[nu\]}
 #'   Numeric scalar. Birth rate expressed per unit \mjeqn{\Delta t}{dt}
 #'   and relative to \mjeqn{\widehat{N}_0}{hatN_0}.
@@ -92,12 +96,12 @@
 #' @param Rnaught \mjeqn{\lbrack \mathcal{R}_0 \rbrack}{\[calR_0\]}
 #'   Numeric scalar. Basic reproduction number of the disease
 #'   of interest. If specified (not `NULL`), then `beta_mean` is
-#'   calculated internally as a function of `Rnaught` (see Details).
+#'   calculated internally as a function of `Rnaught` (see Details 1).
 #' @param beta_mean \mjeqn{\lbrack \langle\beta\rangle \rbrack}{\[<beta>\]}
 #'   Numeric scalar. Mean (long-term average) of the seasonally
 #'   forced transmission rate \mjeqn{\beta(t)}{beta(t)} expressed
 #'   per unit \mjeqn{\Delta t}{dt} per susceptible per infected.
-#'   Ignored if `Rnaught` is specified (not `NULL`) (see Details).
+#'   Ignored if `Rnaught` is specified (not `NULL`) (see Details 1).
 #' @param alpha \mjeqn{\lbrack \alpha \rbrack}{\[alpha\]}
 #'   Numeric scalar. Amplitude of the seasonally forced transmission
 #'   rate \mjeqn{\beta(t)}{beta(t)} relative to the mean.
@@ -107,13 +111,13 @@
 #'   \mjeqn{\beta(t)}{beta(t)}.
 #' @param ode_control A list of optional arguments of [deSolve::ode()],
 #'   specifying options for numerical integration, such as `method`,
-#'   `rtol`, and `atol` (see Details).
+#'   `rtol`, and `atol` (see Details 2).
 #'
 #' @return
 #' A list of the arguments of `make_par_list()` (excluding
 #' `ode_control`) with values for `Rnaught`, `beta_mean`,
 #' `N0`, `S0`, and `I0` if not supplied in the function call
-#' (see Details).
+#' (see Details 1 and 2).
 #'
 #' @examples
 #' # Creates a reasonable list without user input

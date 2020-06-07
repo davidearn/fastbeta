@@ -39,20 +39,19 @@ Numeric scalar. Case reporting probability.}
 Numeric scalar. Case reporting delay in units \mjeqn{\Delta t}{dt}.}
 
 \item{hatN0}{\mjeqn{\lbrack \widehat{N}_0 \rbrack}{[hatN_0]}
-Numeric scalar. Population size at time \mjseqn{t = 0} years
-(see Details).}
+Numeric scalar. Population size at time \mjseqn{t = 0} years.}
 
 \item{N0}{\mjeqn{\lbrack N_0 \rbrack}{[N_0]}
 Numeric scalar. Population size at time \mjseqn{t = t_0}.
-This argument is optional (see Details).}
+This argument is optional (see Details 2).}
 
 \item{S0}{\mjeqn{\lbrack S_0 \rbrack}{[S_0]}
 Numeric scalar. Number of susceptibles at time \mjseqn{t = t_0}.
-This argument is optional (see Details).}
+This argument is optional (see Details 2).}
 
 \item{I0}{\mjeqn{\lbrack I_0 \rbrack}{[I_0]}
 Numeric scalar. Number of infecteds at time \mjseqn{t = t_0}.
-This argument is optional (see Details).}
+This argument is optional (see Details 2).}
 
 \item{nu}{\mjeqn{\lbrack \nu \rbrack}{[nu]}
 Numeric scalar. Birth rate expressed per unit \mjeqn{\Delta t}{dt}
@@ -69,13 +68,13 @@ of interest in units \mjeqn{\Delta t}{dt}.}
 \item{Rnaught}{\mjeqn{\lbrack \mathcal{R}_0 \rbrack}{[calR_0]}
 Numeric scalar. Basic reproduction number of the disease
 of interest. If specified (not \code{NULL}), then \code{beta_mean} is
-calculated internally as a function of \code{Rnaught} (see Details).}
+calculated internally as a function of \code{Rnaught} (see Details 1).}
 
 \item{beta_mean}{\mjeqn{\lbrack \langle\beta\rangle \rbrack}{[<beta>]}
 Numeric scalar. Mean (long-term average) of the seasonally
 forced transmission rate \mjeqn{\beta(t)}{beta(t)} expressed
 per unit \mjeqn{\Delta t}{dt} per susceptible per infected.
-Ignored if \code{Rnaught} is specified (not \code{NULL}) (see Details).}
+Ignored if \code{Rnaught} is specified (not \code{NULL}) (see Details 1).}
 
 \item{alpha}{\mjeqn{\lbrack \alpha \rbrack}{[alpha]}
 Numeric scalar. Amplitude of the seasonally forced transmission
@@ -88,20 +87,21 @@ introduced to the seasonally forced transmission rate
 
 \item{ode_control}{A list of optional arguments of \code{\link[deSolve:ode]{deSolve::ode()}},
 specifying options for numerical integration, such as \code{method},
-\code{rtol}, and \code{atol} (see Details).}
+\code{rtol}, and \code{atol} (see Details 2).}
 }
 \value{
 A list of the arguments of \code{make_par_list()} (excluding
 \code{ode_control}) with values for \code{Rnaught}, \code{beta_mean},
 \code{N0}, \code{S0}, and \code{I0} if not supplied in the function call
-(see Details).
+(see Details 1 and 2).
 }
 \description{
 \code{make_par_list()} creates a list of parameter values to be passed
 as an argument of \code{\link[=make_data]{make_data()}}, which simulates epidemic time series
 data using an SIR model.
 }
-\section{Concordance of \mjeqn{\mathcal{R}_0}{calR_0} and \mjeqn{\langle\beta\rangle}{<beta>}}{
+\section{Details}{
+\subsection{1. Concordance of \mjeqn{\mathcal{R}_0}{calR_0} and \mjeqn{\langle\beta\rangle}{<beta>}}{
 
 \code{make_par_list()} enforces the identity
 
@@ -116,7 +116,7 @@ explicitly sets \code{Rnaught = NULL}, in which case it calculates
 is optional if \code{Rnaught} is specified, but mandatory otherwise.
 }
 
-\section{Missing \mjseqn{N_0}, \mjseqn{S_0}, or \mjseqn{I_0}}{
+\subsection{2. Missing \mjseqn{N_0}, \mjseqn{S_0}, or \mjseqn{I_0}}{
 
 If \mjseqn{N_0}, \mjseqn{S_0}, or \mjseqn{I_0} (\code{N0}, \code{S0}, or \code{I0})
 is not specified in the function call, then, with a call to
@@ -156,6 +156,7 @@ the integration. A different solver may have more success
 (e.g., consider \code{ode_control = list(method = "ode45")}
 to override the default \code{method = "lsoda"}).
 Using different \code{rtol} and \code{atol} might also help.
+}
 }
 
 \examples{

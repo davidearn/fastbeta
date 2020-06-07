@@ -2,7 +2,8 @@
 % Please edit documentation in R/estimate_beta_FC.R
 \name{estimate_beta_FC}
 \alias{estimate_beta_FC}
-\title{Estimate time-varying transmission rates (FC method)}
+\title{\loadmathjax
+Estimate time-varying transmission rates (FC method)}
 \usage{
 estimate_beta_FC(df = data.frame(), par_list = list())
 }
@@ -102,23 +103,14 @@ per susceptible per infected.
 It possesses \code{par_list} as an attribute.
 }
 \description{
-\code{estimate_beta_FC()} applies the FC method (see References)
-to estimate the time-varying transmission rate
-\ifelse{latex}{\out{$\beta(t)$}}{\ifelse{html}{\out{<i>&beta;</i>(<i>t</i>)}}{beta(t)}}
-from time series of reported incidence and births, observed at
-equally spaced time points
-\ifelse{latex}{\out{$t_k = t_0 + k \Delta t$}}{\ifelse{html}{\out{<i>t<sub>k</sub></i> = <i>t</i><sub>0</sub>+<i>k&Delta;t</i>}}{t_k = t_0 + k*Dt}}
-(for \ifelse{latex}{\out{$k = 0,\ldots,n$}}{\ifelse{html}{\out{<i>k</i> = 0,...,<i>n</i>}}{k = 0,...,n}}),
-where
-\ifelse{latex}{\out{$\Delta t$}}{\ifelse{html}{\out{<i>&Delta;t</i>}}{Dt}}
-denotes the observation interval.
+\code{estimate_beta_FC()} implements the FC method (see Details) for estimating
+time-varying transmission rates \mjeqn{\beta(t)}{beta(t)} from time series
+of reported incidence and births, observed at equally spaced time points
+\mjeqn{t_k = t_0 + k \Delta t}{t_k = t_0 + k dt}
+(for \mjeqn{k = 0, \ldots, n}{k = 0,...,n}).
+The FC method is deprecated and outperformed by the more robust SI method.
+See \code{\link[=estimate_beta_SI]{estimate_beta_SI()}}.
 }
-\section{Mock birth data}{
-
-If \code{df$B} is undefined in the function call, then \code{df$B[i]}
-gets the value \code{with(par_list, nu * hatN0 * 1)} for all \code{i}.
-}
-
 \section{Missing data}{
 
 Missing values in \code{df[, c("C", "B")]} are not tolerated by

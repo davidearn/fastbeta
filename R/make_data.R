@@ -12,7 +12,11 @@
 #' * Cases reported after a fixed delay since infection,
 #'   with a fixed probability.
 #'
-#' @section Simulation model:
+#' @details
+#' # Details
+#'
+#' ## Simulation model
+#' 
 #' `make_data()` simulates epidemic time series data using the system of
 #' SIR equations below, which includes a fourth equation for cumulative
 #' births and a fifth equation for cumulative incidence:
@@ -128,7 +132,7 @@
 #'   is generated using [deSolve::ode()] (see Details).
 #' @param ode_control A list of optional arguments of [deSolve::ode()],
 #'   specifying options for numerical integration, such as `method`,
-#'   `rtol`, and `atol`. Not used if `with_dem_stoch = TRUE`.
+#'   `rtol`, and `atol`. Not used if `with_dem_stoch = TRUE` (see Details).
 #'
 #' @return
 #' A data frame with `n + 1` rows corresponding to equally spaced times
@@ -237,7 +241,7 @@ interpolate_phi <- stats::approxfun(
   x      = t_out,
   y      = phi,
   method = "linear",
-  rule   = 1 # return `NA` outside range of `x`
+  rule   = 2 # return `y[1]` and `y[length(y)]` outside range of `x`
 )
 
 # Seasonally forced transmission rate
@@ -266,8 +270,8 @@ if (with_dem_stoch) {
     S = ceiling(S0),                             # susceptibles
     I = ceiling(I0),                             # infecteds
     R = ceiling(N0) - ceiling(S0) - ceiling(I0), # removeds
-    Bcum = 0,                                    # cum. births
-    Zcum = 0                                     # cum. incidence
+    Bcum = 0,                                    # cumulative births
+    Zcum = 0                                     # cumulative incidence
   )
   
   # Transition events
@@ -328,11 +332,11 @@ if (with_dem_stoch) {
 
   # Initial state
   x_init <- c(
-    S = ceiling(S0),                             # susceptibles
-    logI = log(ceiling(I0)),                     # log infecteds
-    R = ceiling(N0) - ceiling(S0) - ceiling(I0), # removeds
-    Bcum = 0,                                    # cum. births
-    Zcum = 0                                     # cum. incidence
+    S    = S0,           # susceptibles
+    logI = log(I0),      # log infecteds
+    R    = N0 - S0 - I0, # removeds
+    Bcum = 0,            # cumulative births
+    Zcum = 0             # cumulative incidence
   )
   
   # System of SIR equations with additional equations for
