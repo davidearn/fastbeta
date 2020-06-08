@@ -2,7 +2,9 @@
 title: "$\\LaTeX{}$ in R package documentation with mathjaxr"
 author: "Mikael Jagan"
 date: "07/06/2020"
-output: rmarkdown::github_document
+output:
+  github_document:
+    pandoc_args: --webtex
 ---
 
 This document contains evolving notes on the
