@@ -14,7 +14,7 @@
 #'
 #' @details
 #' # Details
-#'
+#' 
 #' ## Simulation model
 #' 
 #' `make_data()` simulates epidemic time series data using the system of

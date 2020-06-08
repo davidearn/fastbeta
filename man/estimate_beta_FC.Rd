@@ -103,15 +103,22 @@ per susceptible per infected.
 It possesses \code{par_list} as an attribute.
 }
 \description{
-\code{estimate_beta_FC()} implements the FC method (see Details) for estimating
+\code{estimate_beta_FC()} implements the FC method (see Details 1) for estimating
 time-varying transmission rates \mjeqn{\beta(t)}{beta(t)} from time series
-of reported incidence and births, observed at equally spaced time points
+of reported incidence and births with equally spaced time points
 \mjeqn{t_k = t_0 + k \Delta t}{t_k = t_0 + k dt}
 (for \mjeqn{k = 0, \ldots, n}{k = 0,...,n}).
 The FC method is deprecated and outperformed by the more robust SI method.
 See \code{\link[=estimate_beta_SI]{estimate_beta_SI()}}.
 }
-\section{Missing data}{
+\section{Details}{
+\subsection{1. Algorithm}{
+
+We use the notation \mjseqn{x_k} to refer to the supplied value of
+\mjseqn{x(t_k)} in
+}
+
+\subsection{Missing data:}{
 
 Missing values in \code{df[, c("C", "B")]} are not tolerated by
 the FC method. They are imputed via linear interpolation
@@ -128,6 +135,7 @@ but only locally: column \code{beta} in the output may contain some
 \code{NaN} and \code{Inf} where an estimate would otherwise be expected.
 (Estimates are not expected everywhere. See "Effective
 observation interval".)
+}
 }
 
 \section{Effective observation interval}{

@@ -81,7 +81,7 @@ is generated using \code{\link[deSolve:ode]{deSolve::ode()}} (see Details).}
 
 \item{ode_control}{A list of optional arguments of \code{\link[deSolve:ode]{deSolve::ode()}},
 specifying options for numerical integration, such as \code{method},
-\code{rtol}, and \code{atol}. Not used if \code{with_dem_stoch = TRUE}.}
+\code{rtol}, and \code{atol}. Not used if \code{with_dem_stoch = TRUE} (see Details).}
 }
 \value{
 A data frame with \code{n + 1} rows corresponding to equally spaced times
