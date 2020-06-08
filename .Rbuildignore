@@ -1,1 +1,6 @@
 fastbeta.Rproj
+notes_mathjaxr.Rmd
+R/impute_na.R
+R/impute_zeros.R
+R/estimate_beta.R
+git_push

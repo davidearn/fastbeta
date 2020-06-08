@@ -243,7 +243,7 @@ help (literally).
 
 Some of my equations were typeset fine until I tried to include something 
 like $\widehat{N}_0$ (`\widehat{N}_0`), $\beta_\phi$ (`\beta_\phi`), or
-$Z_\text{cum}$ (`Z_\text{cum}`), at which point raw \LaTeX code appeared 
+$Z_\text{cum}$ (`Z_\text{cum}`), at which point raw $\LaTeX{}$ code appeared 
 in the HTML help instead of typeset math. Curiously, those three terms 
 are typeset fine individually. Including them as part of a longer line of 
 $\LaTeX{}$ code is what seems to, in some instances but not others, break 
