@@ -4,7 +4,7 @@ author: "Mikael Jagan"
 date: "07/06/2020"
 output:
   github_document:
-    pandoc_args: --webtex
+    pandoc_args: --webtex=https://latex.codecogs.com/svg.latex?
 ---
 
 This document contains evolving notes on the

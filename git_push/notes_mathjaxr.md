@@ -1,4 +1,4 @@
-![\\LaTeX{}](https://latex.codecogs.com/png.latex?%5CLaTeX%7B%7D
+![\\LaTeX{}](https://latex.codecogs.com/svg.latex?%5CLaTeX%7B%7D
 "\\LaTeX{}") in R package documentation with mathjaxr
 ================
 Mikael Jagan
@@ -115,14 +115,14 @@ Use at your own risk. I like it because it’s preamble-y.
 
 The workhorse macros are `\mjeqn{}{}` and `\mjdeqn{}{}` for inline math
 and display math, respectively. The first argument is the desired
-![\\LaTeX{}](https://latex.codecogs.com/png.latex?%5CLaTeX%7B%7D
+![\\LaTeX{}](https://latex.codecogs.com/svg.latex?%5CLaTeX%7B%7D
 "\\LaTeX{}") code *without* dollar ($) delimiters. The second argument
 is the desired plain text alternative, which will appear in the plain
 text (not HTML) help. If these two arguments happen to be identical
 (perhaps you are just typing
-![a+b](https://latex.codecogs.com/png.latex?a%2Bb "a+b"), or perhaps you
+![a+b](https://latex.codecogs.com/svg.latex?a%2Bb "a+b"), or perhaps you
 are fine with raw
-![\\LaTeX{}](https://latex.codecogs.com/png.latex?%5CLaTeX%7B%7D
+![\\LaTeX{}](https://latex.codecogs.com/svg.latex?%5CLaTeX%7B%7D
 "\\LaTeX{}") code in the plain text help), then you can use the single
 argument macros `\mjseqn{}` and `\mjsdeqn{}` instead.
 
@@ -147,7 +147,7 @@ several methods for calculating or approximating unity.
 ```
 
 A list of supported
-![\\LaTeX{}](https://latex.codecogs.com/png.latex?%5CLaTeX%7B%7D
+![\\LaTeX{}](https://latex.codecogs.com/svg.latex?%5CLaTeX%7B%7D
 "\\LaTeX{}") macros and environments can be found
 [here](https://docs.mathjax.org/en/latest/input/tex/macros/index.html).
 
@@ -158,7 +158,7 @@ instead of `\\`. To get
 
   
 ![\\begin{align} x &= r \\cos \\theta \\\\ y &= r \\sin \\theta
-\\end{align}](https://latex.codecogs.com/png.latex?%5Cbegin%7Balign%7D%20x%20%26%3D%20r%20%5Ccos%20%5Ctheta%20%5C%5C%20y%20%26%3D%20r%20%5Csin%20%5Ctheta%20%5Cend%7Balign%7D
+\\end{align}](https://latex.codecogs.com/svg.latex?%5Cbegin%7Balign%7D%20x%20%26%3D%20r%20%5Ccos%20%5Ctheta%20%5C%5C%20y%20%26%3D%20r%20%5Csin%20%5Ctheta%20%5Cend%7Balign%7D
 "\\begin{align} x &= r \\cos \\theta \\\\ y &= r \\sin \\theta \\end{align}")  
 in the HTML help, I would write something like
 this:
@@ -211,7 +211,7 @@ instead of `[` and `]`.
 ### Breaking long lines
 
 Breaking long lines of
-![\\LaTeX{}](https://latex.codecogs.com/png.latex?%5CLaTeX%7B%7D
+![\\LaTeX{}](https://latex.codecogs.com/svg.latex?%5CLaTeX%7B%7D
 "\\LaTeX{}") code over multiple lines in my source file caused the
 typeset math to vanish. I have addressed this simply by ensuring that
 any instance of a mathjaxr macro (e.g., `\mjsdeqn{}`) starts and ends on
@@ -255,23 +255,23 @@ the plain text help (literally).
 
 Some of my equations were typeset fine until I tried to include
 something like
-![\\widehat{N}\_0](https://latex.codecogs.com/png.latex?%5Cwidehat%7BN%7D_0
+![\\widehat{N}\_0](https://latex.codecogs.com/svg.latex?%5Cwidehat%7BN%7D_0
 "\\widehat{N}_0") (`\widehat{N}_0`),
-![\\beta\_\\phi](https://latex.codecogs.com/png.latex?%5Cbeta_%5Cphi
+![\\beta\_\\phi](https://latex.codecogs.com/svg.latex?%5Cbeta_%5Cphi
 "\\beta_\\phi") (`\beta_\phi`), or
-![Z\_\\text{cum}](https://latex.codecogs.com/png.latex?Z_%5Ctext%7Bcum%7D
+![Z\_\\text{cum}](https://latex.codecogs.com/svg.latex?Z_%5Ctext%7Bcum%7D
 "Z_\\text{cum}") (`Z_\text{cum}`), at which point raw
-![\\LaTeX{}](https://latex.codecogs.com/png.latex?%5CLaTeX%7B%7D
+![\\LaTeX{}](https://latex.codecogs.com/svg.latex?%5CLaTeX%7B%7D
 "\\LaTeX{}") code appeared in the HTML help instead of typeset math.
 Curiously, those three terms are typeset fine individually. Including
 them as part of a longer line of
-![\\LaTeX{}](https://latex.codecogs.com/png.latex?%5CLaTeX%7B%7D
+![\\LaTeX{}](https://latex.codecogs.com/svg.latex?%5CLaTeX%7B%7D
 "\\LaTeX{}") code is what seems to, in some instances but not others,
 break the interpreter.
 
 I haven’t deduced exactly what’s going wrong, but I have found that
 enclosing all of the
-![\\LaTeX{}](https://latex.codecogs.com/png.latex?%5CLaTeX%7B%7D
+![\\LaTeX{}](https://latex.codecogs.com/svg.latex?%5CLaTeX%7B%7D
 "\\LaTeX{}") code in `\out{}` solves the issue, except for the fact that
 “\\out” is also typeset (literally) before the desired math.
 
