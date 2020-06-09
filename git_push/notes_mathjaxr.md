@@ -92,9 +92,9 @@ including `@title`, `@details`, and `@param`. However,
 @tag Use of inline HTML is not currently supported
 ```
 
-if you have typed inline (not display) math outside of the description
-section. I’ve been ignoring the warning, because the math appears
-correctly typeset in the HTML help regardless of the section it is in.
+if you have typed inline (not display) math in other sections. I’ve been
+ignoring the warning, because the math appears correctly typeset in the
+HTML help regardless of the section it is in.
 
 Note that I have been using this (roxygen2) configuration without issue:
 
@@ -125,7 +125,7 @@ Here is an example of a roxygen block using the mathjaxr macros. It
 comes from my package oneRous, which implements methods for
 approximating unity in R.
 
-``` r
+``` text
 #' Partial sum of negative powers of two
 #' 
 #' \loadmathjax
@@ -232,7 +232,7 @@ I have not figured out how to type newlines in plain text, making it
 difficult to get something like a system of equations in the plain text
 help. Typical escapes like `\n` and `\cr` haven’t worked for me.
 
-``` r
+``` text
 #' Good in HTML help, bad in plain text help
 #' \mjdeqn{\begin{align} x - 2y &= 1 \cr 4x + 3y &= 5 \end{align}}{ x - 2y = 1 \cr 4x + 3y = 5}
 ```
@@ -270,7 +270,7 @@ wrapping all of the
 in `\out{}` solves the issue, except for the fact that “\\out” is also
 typeset before the desired math.
 
-``` r
+``` text
 #' Sometimes good, sometimes bad
 #' \mjeqn{Z_\text{cum}}{Z_cum}
 #'
