@@ -12,8 +12,8 @@ compute_rrmse(x, xhat, na_rm = FALSE)
 \item{xhat}{Numeric vector with length equal to \code{length(x)}.
 An estimate of \code{x}.}
 
-\item{na_rm}{Logical. If \code{TRUE}, then missing values
-(\code{NA}, \code{NaN}, \code{Inf}) are ignored.}
+\item{na_rm}{Logical. If \code{TRUE}, then missing and infinite values
+are ignored.}
 }
 \value{
 A numeric scalar indicating the RRMSE in \code{xhat}, with exceptions
@@ -24,14 +24,14 @@ A numeric scalar indicating the RRMSE in \code{xhat}, with exceptions
 (RRMSE) in a vector.
 }
 \details{
-Let \code{cc} ("complete cases") be the vector of indices \code{i} such that
-neither \code{x[i]} nor \code{xhat[i]} is missing (\code{NA}, \code{NaN}, \code{Inf}). If
-\code{length(cc) = 0} or if \code{na_rm = FALSE} and \code{length(cc) < length(x)},
-then \code{compute_rrmse()} returns \code{NA}. Otherwise, it returns
-\code{sqrt(sum((xhat[cc] - x[cc])^2) / length(cc)) / mean(x[cc])}.
-This is the RRMSE in \code{xhat[cc]} unless \code{mean(x[cc]) = 0},
-in which case RRMSE is not defined and the expression is
-(correctly) evaluated as \code{Inf} or \code{NaN}.
+Let \code{cc = is.finite(x) & is.finite(xhat)} ("complete cases"). \code{cc} is the
+vector of indices \code{i} such that both \code{x[i]} and \code{xhat[i]} are finite
+(not missing and not infinite). If \code{length(cc) = 0} or if \code{na_rm = FALSE}
+and \code{length(cc) < length(x)}, then \code{compute_rrmse()} returns \code{NA}. Otherwise,
+it returns \code{sqrt(sum((xhat[cc] - x[cc])^2) / length(cc)) / mean(x[cc])}.
+This is the RRMSE in \code{xhat[cc]} unless \code{mean(x[cc]) = 0}, in which case
+RRMSE is not defined and the expression is evaluated accordingly as \code{Inf}
+or \code{NaN}.
 }
 \examples{
 x <- rep(10, 100)

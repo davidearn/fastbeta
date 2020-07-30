@@ -1,5 +1,3 @@
-fastbeta.Rproj
-R/impute_na.R
-R/impute_zeros.R
+TODO.md
 R/estimate_beta.R
-
+fastbeta.Rproj

@@ -170,10 +170,8 @@
 #' (ptpi_out$S0_final - df$S[1]) / df$S[1]
 #' 
 #' @references
-#' deJonge MS, Jagan M, Krylova O, Earn DJD. Fast estimation of
-#' time-varying transmission rates for infectious diseases.
+#' \insertRef{deJo+20}{fastbeta}
 #'
-#' @md
 #' @export
 ptpi <- function(df = data.frame(), par_list = list(),
                  a, b,

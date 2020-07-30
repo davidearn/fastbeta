@@ -7,7 +7,7 @@ Create a list of parameter values for simulations}
 \usage{
 make_par_list(
   dt_weeks = 1,
-  t0 = 2000 * (365/7)/dt_weeks,
+  t0 = 1000 * (365/7)/dt_weeks,
   prep = 1,
   trep = 0,
   hatN0 = 1e+06,
@@ -25,65 +25,65 @@ make_par_list(
 )
 }
 \arguments{
-\item{dt_weeks}{\mjeqn{\lbrack \Delta t \rbrack}{[dt]}
+\item{dt_weeks}{\mjseqn{\lbrack \Delta t \rbrack}
 Numeric scalar. Observation interval in weeks.}
 
-\item{t0}{\mjeqn{\lbrack t_0 \rbrack}{[t_0]}
+\item{t0}{\mjseqn{\lbrack t_0 \rbrack}
 Numeric scalar. Time of the first observation
-in units \mjeqn{\Delta t}{dt}.}
+in units \mjseqn{\Delta t}.}
 
-\item{prep}{\mjeqn{\lbrack p_\text{rep} \rbrack}{[p_rep]}
+\item{prep}{\mjseqn{\lbrack p_\text{rep} \rbrack}
 Numeric scalar. Case reporting probability.}
 
-\item{trep}{\mjeqn{\lbrack t_\text{rep} \rbrack}{[t_rep]}
-Numeric scalar. Case reporting delay in units \mjeqn{\Delta t}{dt}.}
+\item{trep}{\mjseqn{\lbrack m \rbrack}
+Numeric scalar. Case reporting delay in units \mjseqn{\Delta t}.}
 
-\item{hatN0}{\mjeqn{\lbrack \widehat{N}_0 \rbrack}{[hatN_0]}
+\item{hatN0}{\mjseqn{\lbrack \widehat{N}_0 \rbrack}
 Numeric scalar. Population size at time \mjseqn{t = 0} years.}
 
-\item{N0}{\mjeqn{\lbrack N_0 \rbrack}{[N_0]}
+\item{N0}{\mjseqn{\lbrack N_0 \rbrack}
 Numeric scalar. Population size at time \mjseqn{t = t_0}.
 This argument is optional (see Details 2).}
 
-\item{S0}{\mjeqn{\lbrack S_0 \rbrack}{[S_0]}
+\item{S0}{\mjseqn{\lbrack S_0 \rbrack}
 Numeric scalar. Number of susceptibles at time \mjseqn{t = t_0}.
 This argument is optional (see Details 2).}
 
-\item{I0}{\mjeqn{\lbrack I_0 \rbrack}{[I_0]}
+\item{I0}{\mjseqn{\lbrack I_0 \rbrack}
 Numeric scalar. Number of infecteds at time \mjseqn{t = t_0}.
 This argument is optional (see Details 2).}
 
-\item{nu}{\mjeqn{\lbrack \nu \rbrack}{[nu]}
-Numeric scalar. Birth rate expressed per unit \mjeqn{\Delta t}{dt}
-and relative to \mjeqn{\widehat{N}_0}{hatN_0}.}
+\item{nu}{\mjseqn{\lbrack \nu \rbrack}
+Numeric scalar. Birth rate expressed per unit \mjseqn{\Delta t}
+and relative to \mjseqn{\widehat{N}_0}.}
 
-\item{mu}{\mjeqn{\lbrack \mu \rbrack}{[mu]}
+\item{mu}{\mjseqn{\lbrack \mu \rbrack}
 Numeric scalar. Natural mortality rate expressed per unit
-\mjeqn{\Delta t}{dt} and per capita.}
+\mjseqn{\Delta t} and per capita.}
 
-\item{tgen}{\mjeqn{\lbrack t_\text{gen} \rbrack}{[t_gen]}
+\item{tgen}{\mjseqn{\lbrack t_\text{gen} \rbrack}
 Numeric scalar. Mean generation interval of the disease
-of interest in units \mjeqn{\Delta t}{dt}.}
+of interest in units \mjseqn{\Delta t}.}
 
-\item{Rnaught}{\mjeqn{\lbrack \mathcal{R}_0 \rbrack}{[calR_0]}
+\item{Rnaught}{\mjseqn{\lbrack \mathcal{R}_0 \rbrack}
 Numeric scalar. Basic reproduction number of the disease
 of interest. If specified (not \code{NULL}), then \code{beta_mean} is
 calculated internally as a function of \code{Rnaught} (see Details 1).}
 
-\item{beta_mean}{\mjeqn{\lbrack \langle\beta\rangle \rbrack}{[<beta>]}
+\item{beta_mean}{\mjseqn{\lbrack \langle\beta\rangle \rbrack}
 Numeric scalar. Mean (long-term average) of the seasonally
-forced transmission rate \mjeqn{\beta(t)}{beta(t)} expressed
-per unit \mjeqn{\Delta t}{dt} per susceptible per infected.
+forced transmission rate \mjseqn{\beta(t)} expressed per unit
+\mjseqn{\Delta t} per susceptible per infected.
 Ignored if \code{Rnaught} is specified (not \code{NULL}) (see Details 1).}
 
-\item{alpha}{\mjeqn{\lbrack \alpha \rbrack}{[alpha]}
+\item{alpha}{\mjseqn{\lbrack \alpha \rbrack}
 Numeric scalar. Amplitude of the seasonally forced transmission
-rate \mjeqn{\beta(t)}{beta(t)} relative to the mean.}
+rate \mjseqn{\beta(t)} relative to the mean.}
 
-\item{epsilon}{\mjeqn{\lbrack \epsilon \rbrack}{[epsilon]}
+\item{epsilon}{\mjseqn{\lbrack \epsilon \rbrack}
 Numeric scalar. Standard deviation of the random phase shift
 introduced to the seasonally forced transmission rate
-\mjeqn{\beta(t)}{beta(t)}.}
+\mjseqn{\beta(t)}.}
 
 \item{ode_control}{A list of optional arguments of \code{\link[deSolve:ode]{deSolve::ode()}},
 specifying options for numerical integration, such as \code{method},
@@ -96,24 +96,23 @@ A list of the arguments of \code{make_par_list()} (excluding
 (see Details 1 and 2).
 }
 \description{
-\code{make_par_list()} creates a list of parameter values to be passed
-as an argument of \code{\link[=make_data]{make_data()}}, which simulates epidemic time series
-data using an SIR model.
+\code{make_par_list()} creates a list of parameter values to be passed as
+an argument of \code{\link[=make_data]{make_data()}}, which simulates epidemic time series data
+using an SIR model.
 }
 \section{Details}{
-\subsection{1. Concordance of \mjeqn{\mathcal{R}_0}{calR_0} and \mjeqn{\langle\beta\rangle}{<beta>}}{
+\subsection{1. Concordance of \mjseqn{\mathcal{R}_0} and \mjseqn{\langle\beta\rangle}}{
 
 \code{make_par_list()} enforces the identity
 
-\mjdeqn{\mathcal{R}_0 = \frac{\nu \widehat{N}_0}{\mu} \cdot \frac{\langle\beta\rangle}{\gamma + \mu},}{calR_0 = ((nu hatN_0) / mu) (<beta> / (gamma + mu)),}
+\mjsdeqn{\mathcal{R}_0 = \frac{\nu \widehat{N}_0}{\mu} \cdot \frac{\langle\beta\rangle}{\gamma + \mu}\,,}
 
-where \mjeqn{\gamma = 1 / t_\text{gen}}{gamma = 1 / t_gen}.
-This means that it calculates \mjeqn{\langle\beta\rangle}{<beta>}
-as a function of \mjeqn{\mathcal{R}_0}{calR_0}, unless the user
-explicitly sets \code{Rnaught = NULL}, in which case it calculates
-\mjeqn{\mathcal{R}_0}{calR_0} as a function of
-\mjeqn{\langle\beta\rangle}{<beta>}. Hence argument \code{beta_mean}
-is optional if \code{Rnaught} is specified, but mandatory otherwise.
+where \mjseqn{\gamma = 1 / t_\text{gen}}. This means that it calculates
+\mjseqn{\langle\beta\rangle} as a function of \mjseqn{\mathcal{R}_0}, unless
+the user explicitly sets \code{Rnaught = NULL}, in which case it calculates
+\mjseqn{\mathcal{R}_0} as a function of \mjseqn{\langle\beta\rangle}. Hence
+argument \code{beta_mean} is optional if \code{Rnaught} is specified, but mandatory
+otherwise.
 }
 
 \subsection{2. Missing \mjseqn{N_0}, \mjseqn{S_0}, or \mjseqn{I_0}}{
@@ -123,32 +122,29 @@ is not specified in the function call, then, with a call to
 \code{\link[deSolve:ode]{deSolve::ode()}}, \code{make_par_list()} numerically integrates the
 system of SIR equations
 
-\mjdeqn{\begin{align} \frac{\text{d}S}{\text{d}t} &= \nu \widehat{N}_0 - \beta(t) S I - \mu S \cr \frac{\text{d}I}{\text{d}t} &= \beta(t) S I - \gamma I - \mu I \cr \frac{\text{d}R}{\text{d}t} &= \gamma I - \mu R \end{align}}{(1) dS/dt = nu hatN_0 - beta(t) S I - mu S    (2) dI/dt = beta(t) S I - gamma I - mu I    (3) dR/dt = gamma I - mu R}
+\mjsdeqn{\begin{align} \frac{\text{d}S}{\text{d}t} &= \nu \widehat{N}_0 - \beta(t) S I - \mu S \cr \frac{\text{d}I}{\text{d}t} &= \beta(t) S I - \gamma I - \mu I \cr \frac{\text{d}R}{\text{d}t} &= \gamma I - \mu R \end{align}}
 
-with \mjeqn{\gamma = 1 / t_\text{gen}}{gamma = 1 / t_gen} and
+with \mjseqn{\gamma = 1 / t_\text{gen}} and
 
-\mjdeqn{\beta(t) = \langle\beta\rangle \left\lbrack 1 + \alpha \cos\left(\frac{2 \pi t}{\text{1 year}}\right) \right\rbrack}{beta(t) = <beta> (1 + alpha cos(2 pi t / (1 year)))}
+\mjsdeqn{\beta(t) = \langle\beta\rangle \left\lbrack 1 + \alpha \cos\left(\frac{2 \pi t}{\text{1 year}}\right) \right\rbrack}
 
 between times \mjseqn{t = 0} years and \mjseqn{t = t_0}, taking
 
-\mjdeqn{\begin{bmatrix} S(0) \cr I(0) \cr R(0) \end{bmatrix} = \widehat{N}_0 \begin{bmatrix} \frac{1}{\mathcal{R}_0} \cr \big(1 - \frac{1}{\mathcal{R}_0}\big) \frac{\mu}{\gamma + \mu} \cr \big(1 - \frac{1}{\mathcal{R}_0}\big) \frac{\gamma}{\gamma + \mu} \end{bmatrix},}{(S(0),I(0),R(0)) = (hatS,hatI,hatR),}
+\mjsdeqn{\begin{bmatrix} S(0) \cr I(0) \cr R(0) \end{bmatrix} = \widehat{N}_0 \begin{bmatrix} \frac{1}{\mathcal{R}_0} \cr \big(1 - \frac{1}{\mathcal{R}_0}\big) \frac{\mu}{\gamma + \mu} \cr \big(1 - \frac{1}{\mathcal{R}_0}\big) \frac{\gamma}{\gamma + \mu} \end{bmatrix}}
 
-for the initial state. This is the endemic equilibrium
-of the above system with constant transmission rate
-\mjeqn{\beta(t) \equiv \langle\beta\rangle}{beta(t) = <beta>},
-scaled by \mjeqn{\mu/\nu}{mu/nu}
-to enforce
-
-\mjdeqn{S(0) + I(0) + R(0) = \widehat{N}_0}{S(0) + I(0) + R(0) = hatN_0}
+for the initial state. This is the endemic equilibrium of the above system
+with constant transmission rate \mjseqn{\beta(t) \equiv \langle\beta\rangle},
+scaled by \mjseqn{\mu/\nu} to enforce
+\mjseqn{S(0) + I(0) + R(0) = \widehat{N}_0}
 
 as the initial population size. Then \code{make_par_list()} assigns \code{N0},
 \code{S0}, and \code{I0} (only those not specified in the function call) the
 values
 
 \describe{
-\item{\code{N0}}{\mjseqn{S(t_0) + I(t_0) + R(t_0).}}
-\item{\code{S0}}{\mjseqn{S(t_0).}}
-\item{\code{I0}}{\mjseqn{I(t_0).}}
+\item{\code{N0}}{\mjseqn{S(t_0) + I(t_0) + R(t_0)}}
+\item{\code{S0}}{\mjseqn{S(t_0)}}
+\item{\code{I0}}{\mjseqn{I(t_0)}}
 }
 
 A warning is issued if the ODE solver cannot complete

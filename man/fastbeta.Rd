@@ -7,12 +7,12 @@
 The \pkg{fastbeta} package}
 \description{
 \pkg{fastbeta} implements the FC, S, and SI methods for estimating
-time-varying transmission rates \mjeqn{\beta(t)}{beta(t)} from time
-series data:
+time-varying infectious disease transmission rates \mjseqn{\beta(t)}
+from disease incidence and mortality data:
 \itemize{
-\item \code{\link[=estimate_beta_FC]{estimate_beta_FC()}}
-\item \code{\link[=estimate_beta_S]{estimate_beta_S()}}
-\item \code{\link[=estimate_beta_SI]{estimate_beta_SI()}}
+\item \code{\link[=estimate_beta_fc]{estimate_beta_fc()}}
+\item \code{\link[=estimate_beta_s]{estimate_beta_s()}}
+\item \code{\link[=estimate_beta_si]{estimate_beta_si()}}
 }
 
 The SI method is substantially more robust than the FC and S methods
@@ -26,12 +26,12 @@ and should be preferred in practice.
 \item \code{\link[=get_peak_times]{get_peak_times()}}
 }
 
-PTPI can be used in conjunction with the FC, S, and SI methods,
-which require users to specify an estimate of \mjseqn{S_0}.
+PTPI can be used in conjunction with the SI method, which requires
+users to specify an estimate of \mjseqn{S_0}.
 
 \pkg{fastbeta} includes functions useful for simulating incidence
 time series with an underlying, seasonally forced transmission rate.
-These may be useful in testing:
+These may be helpful in testing:
 \itemize{
 \item \code{\link[=make_par_list]{make_par_list()}}
 \item \code{\link[=make_data]{make_data()}}
@@ -41,11 +41,10 @@ These may be useful in testing:
 All methods are based on the SIR model with time-varying rates of
 birth, death, and transmission:
 
-\mjdeqn{\begin{align} \frac{\text{d}S}{\text{d}t} &= \nu(t) \widehat{N}_0 - \beta(t) S I - \mu(t) S \cr \frac{\text{d}I}{\text{d}t} &= \beta(t) S I - \gamma I - \mu(t) I \cr \frac{\text{d}R}{\text{d}t} &= \gamma I - \mu(t) R \end{align}}{(1) dS/dt = nu(t) hatN_0 - beta(t) S I - mu(t) S    (2) dI/dt = beta(t) S I - gamma I - mu(t) I    (3) dR/dt = gamma I - mu(t) R}
+\mjsdeqn{\begin{align} \frac{\text{d}S}{\text{d}t} &= \nu(t) \widehat{N}_0 - \beta(t) S I - \mu(t) S \cr \frac{\text{d}I}{\text{d}t} &= \beta(t) S I - \gamma I - \mu(t) I \cr \frac{\text{d}R}{\text{d}t} &= \gamma I - \mu(t) R \end{align}}
 
-They are fully described in the referenced manuscript.
+See References for details.
 }
 \references{
-deJonge MS, Jagan M, Krylova O, Earn DJD. Fast estimation of
-time-varying transmission rates for infectious diseases.
+\insertRef{deJo+20}{fastbeta}
 }

@@ -86,10 +86,8 @@
 #' abline(v = df$t_years[peaks$all], lty = 2, col = "red")
 #'
 #' @references
-#' deJonge MS, Jagan M, Krylova O, Earn DJD. Fast estimation of
-#' time-varying transmission rates for infectious diseases.
+#' \insertRef{deJo+20}{fastbeta}
 #' 
-#' @md
 #' @export
 get_peak_times <- function(x, period, bw_mavg, bw_peakid) {
 

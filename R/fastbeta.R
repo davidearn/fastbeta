@@ -3,12 +3,12 @@
 #'
 #' @description
 #' \pkg{fastbeta} implements the FC, S, and SI methods for estimating
-#' time-varying transmission rates \mjeqn{\beta(t)}{beta(t)} from time
-#' series data:
+#' time-varying infectious disease transmission rates \mjseqn{\beta(t)}
+#' from disease incidence and mortality data:
 #'
-#' * [estimate_beta_FC()]
-#' * [estimate_beta_S()]
-#' * [estimate_beta_SI()]
+#' * [estimate_beta_fc()]
+#' * [estimate_beta_s()]
+#' * [estimate_beta_si()]
 #'
 #' The SI method is substantially more robust than the FC and S methods
 #' and should be preferred in practice.
@@ -20,12 +20,12 @@
 #' * [ptpi()]
 #' * [get_peak_times()]
 #'
-#' PTPI can be used in conjunction with the FC, S, and SI methods,
-#' which require users to specify an estimate of \mjseqn{S_0}.
+#' PTPI can be used in conjunction with the SI method, which requires
+#' users to specify an estimate of \mjseqn{S_0}.
 #'
 #' \pkg{fastbeta} includes functions useful for simulating incidence
 #' time series with an underlying, seasonally forced transmission rate.
-#' These may be useful in testing:
+#' These may be helpful in testing:
 #'
 #' * [make_par_list()]
 #' * [make_data()]
@@ -34,15 +34,15 @@
 #' All methods are based on the SIR model with time-varying rates of
 #' birth, death, and transmission:
 #'
-#' \mjdeqn{\begin{align} \frac{\text{d}S}{\text{d}t} &= \nu(t) \widehat{N}_0 - \beta(t) S I - \mu(t) S \cr \frac{\text{d}I}{\text{d}t} &= \beta(t) S I - \gamma I - \mu(t) I \cr \frac{\text{d}R}{\text{d}t} &= \gamma I - \mu(t) R \end{align}}{(1) dS/dt = nu(t) hatN_0 - beta(t) S I - mu(t) S    (2) dI/dt = beta(t) S I - gamma I - mu(t) I    (3) dR/dt = gamma I - mu(t) R}
+#' \mjsdeqn{\begin{align} \frac{\text{d}S}{\text{d}t} &= \nu(t) \widehat{N}_0 - \beta(t) S I - \mu(t) S \cr \frac{\text{d}I}{\text{d}t} &= \beta(t) S I - \gamma I - \mu(t) I \cr \frac{\text{d}R}{\text{d}t} &= \gamma I - \mu(t) R \end{align}}
 #'
-#' They are fully described in the referenced manuscript.
+#' See References for details.
 #'
 #' @references
-#' deJonge MS, Jagan M, Krylova O, Earn DJD. Fast estimation of
-#' time-varying transmission rates for infectious diseases.
+#' \insertRef{deJo+20}{fastbeta}
 #'
-#' @md
 #' @docType package
 #' @name fastbeta
+#' @importFrom Rdpack reprompt
+#' @importFrom mathjaxr preview_rd
 NULL
