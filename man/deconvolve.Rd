@@ -22,8 +22,8 @@ an infection that is eventually reported is reported after \code{i-1} days.
 An error is thrown if \code{sum(delay_dist) != 1}.}
 
 \item{p}{Reporting probability. Either
-(i) a numeric scalar giving a positive probability that an infection
-is reported, or
+(i) a numeric scalar giving a constant positive probability that an
+infection is reported, or
 (ii) a numeric vector giving a positive probability for each day
 from day \code{-b} to day \code{length(x)-1},
 where \code{b = max(which(delay_dist > 0)) - 1} is the maximum number of
@@ -33,26 +33,24 @@ probability that an infection on day \code{i-1-b} is reported.}
 \item{max_it}{Maximum number of iterations. A non-negative integer.}
 }
 \value{
-A numeric vector of length \code{b+length(x)} giving an estimate of the
-number of infections on each day from day \code{-b} to day \code{length(x)-1},
-where \code{b = max(which(delay_dist > 0)) - 1} is the maximum number of
-days from infection to reporting. It is the last Richardson-Lucy
-iterate, scaled by \code{1 / p}.
+A numeric matrix with \code{b+length(x)} rows and \code{1+it} columns, where \code{it}
+is the number of iterations performed, containing the full output of the
+Richardson-Lucy iteration (scaled by \code{1 / p}). There is one row for each
+day from day \code{-b} to day \code{length(x)-1}, where
+\code{b = max(which(delay_dist > 0)) - 1} is the maximum number of days from
+infection to reporting. There is one column for each iteration, so that
+column \code{j} is the incidence time series generated after \code{j-1} iterations.
+The first column is the initial value for the iteration (scaled by \code{1 / p}).
+The initial value is \code{x} binned according to \code{delay_dist}.
 
-The returned vector has attributes \code{call} and \code{arg_list}, making it
-reproducible with \code{eval(call)} or \code{do.call(deconvolve, arg_list)}.
-It has a third attribute \code{mat}, a matrix containing the full output
-of the Richardson-Lucy iteration, prior to scaling by \code{1 / p}. There
-is one row for each day from day \code{-b} to day \code{length(x)-1} and one
-column for each iteration (not counting the first column, which gives
-the initial value for the iteration). Hence the returned vector is
-the last column of \code{mat}, scaled by \code{1 / p}.
+The matrix has attributes \code{call} and \code{arg_list}, making it reproducible
+with \code{eval(call)} or \code{do.call(deconvolve, arg_list)}.
 }
 \description{
 \code{deconvolve()} employs a Richardson-Lucy iteration to deconvolve a reported
 incidence time series. The supplied delay distribution is used to carry out
-the deconvolution, and the result is scaled by the supplied
-reporting probability to generate an incidence time series.
+the deconvolution, and the result is scaled by the supplied reporting
+probability to generate an incidence time series.
 }
 \references{
 \insertRef{Gold+09}{fastbeta}
