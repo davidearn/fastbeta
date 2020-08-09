@@ -9,8 +9,6 @@
 
 ### Debug
 
-* divide-by-zero in `deconvolve()`
-
 ### Documentation
 
 * `impute()` functions
