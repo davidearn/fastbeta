@@ -3,14 +3,9 @@
 \name{deconvolve}
 \alias{deconvolve}
 \title{\loadmathjax
-Reconstruct incidence from reported incidence}
+Deconvolve a time series of reported incidence}
 \usage{
-deconvolve(
-  x,
-  delay_dist = c(1),
-  p = rep(1, length(x) + length(delay_dist) - 1),
-  max_it = 20L
-)
+deconvolve(x, delay_dist = c(1), p = 1, it_max = 20L)
 }
 \arguments{
 \item{x}{Reported incidence time series. A numeric vector giving the
@@ -30,27 +25,164 @@ where \code{b = max(which(delay_dist > 0)) - 1} is the maximum number of
 days from infection to reporting. In the latter case, \code{p[i]} is the
 probability that an infection on day \code{i-1-b} is reported.}
 
-\item{max_it}{Maximum number of iterations. A non-negative integer.}
+\item{it_max}{Number of iterations. A non-negative integer.}
 }
 \value{
-A numeric matrix with \code{b+length(x)} rows and \code{1+it} columns, where \code{it}
-is the number of iterations performed, containing the full output of the
-Richardson-Lucy iteration (scaled by \code{1 / p}). There is one row for each
-day from day \code{-b} to day \code{length(x)-1}, where
-\code{b = max(which(delay_dist > 0)) - 1} is the maximum number of days from
-infection to reporting. There is one column for each iteration, so that
-column \code{j} is the incidence time series generated after \code{j-1} iterations.
-The first column is the initial value for the iteration (scaled by \code{1 / p}).
-The initial value is \code{x} binned according to \code{delay_dist}.
+A list with elements:
 
-The matrix has attributes \code{call} and \code{arg_list}, making it reproducible
-with \code{eval(call)} or \code{do.call(deconvolve, arg_list)}.
+\describe{
+\item{\code{times}}{A numeric vector equal to \code{-b:(length(x)-1)},
+where \code{b = max(which(delay_dist > 0)) - 1} is the maximum number
+of days from infection to reporting, giving time points (days)
+for deconvolved incidence.
+}
+\item{\code{poisson}}{A numeric matrix. \code{poisson[i, j]} is the estimate,
+obtained after \code{j-1} iterations, of the expected number of infections
+on day \code{times[i]} that are eventually reported. See Details for the
+initial estimate.
+}
+\item{\code{inc}}{A numeric matrix. \code{inc[i, j]} is the expected number
+of infections on day \code{times[i]} conditional on \code{poisson[, j]}.
+Hence \code{inc[, j]} gives deconvolved incidence after \code{j-1} iterations.
+}
+\item{\code{inc_rep}}{A numeric matrix. \code{inc_rep[i, j]} is the expected
+number of cases reported on day \code{times[i]} conditional on \verb{poisson[, j].}
+}
+\item{\code{chi2}}{A numeric vector. \code{chi2[j]} is the normalized chi-squared
+statistic corresponding to \code{inc_rep[, j]}, computed as
+\code{mean((x - y)^2 / y)}, where \code{y = inc_rep[b+1:length(x), j]}.
+}
+\item{\code{it_chi2_lt1}}{An integer scalar equal to \code{min(which(chi2 < 1)) - 1}
+if \code{any(chi2 < 1)} is \code{TRUE} (and \code{NA} otherwise), giving the number of
+iterations performed before the chi-squared criterion suggested
+by \insertCite{Gold+09;textual}{fastbeta} (namely \code{chi2 < 1}) was
+satisfied. Note that the corresponding incidence time series is
+\code{inc[, 1+it_chi2_lt1]}.
+}
+\item{\code{x_pad}}{A numeric vector, equal to \code{c(rep(NA, b), x)}.
+A convenience allowing one to plot the observed reported incidence
+time series with \code{lines(times, x_pad, ...)}.
+}
+}
+
+Note that \code{poisson}, \code{inc}, and \code{inc_rep} all have \code{b+length(x)} rows
+(corresponding to the elements of \code{times}) and \code{1+it_max} columns
+(one for each iteration, starting from an initial value).
+
+The list has attributes \code{call} and \code{arg_list}, making it reproducible with
+\code{eval(call)} or \code{do.call(deconvolve, arg_list)}.
 }
 \description{
-\code{deconvolve()} employs a Richardson-Lucy iteration to deconvolve a reported
-incidence time series. The supplied delay distribution is used to carry out
-the deconvolution, and the result is scaled by the supplied reporting
-probability to generate an incidence time series.
+Deconvolves a time series of reported incidence using a Richardson-Lucy
+iteration, generating an estimate of the underlying incidence time series.
+}
+\section{Details}{
+\subsection{1. Differences compared to \insertCite{Gold+09;textual}{fastbeta}}{
+
+The algorithm follows \insertCite{Gold+09;textual}{fastbeta} with the
+following differences:
+\itemize{
+\item Reported incidence is observed from day 0 to day \code{length(x)-1},
+not from day 1 to day \code{length(x)}.
+\item Infection and reporting can happen on the same day,
+i.e., \code{delay_dist[1] > 0} is allowed.
+\item The initial value for the Richardson-Lucy iteration is obtained by
+binning all \code{sum(x)} cases between day \code{-b} and day \code{length(x)-1},
+where \code{b = max(which(delay_dist > 0)) - 1} is the maximum number
+of days from infection to reporting. Binning follows \code{delay_dist},
+so that \code{delay_dist[i]} is the fraction of \code{x[j]} placed into the
+bin for day \code{j-i}. This differs from
+\insertCite{Gold+09;textual}{fastbeta}, whose initial value is \code{x}
+shifted backwards in time by \code{s = which.max(delay_dist)-1} days.
+An undesired consequence of their choice is that deconvolved
+incidence is necessarily zero from day \code{-b} to day \code{-s-1} and
+from day \code{length(x)-s} to day \code{length(x)-1}.
+}
+}
+
+\subsection{2. Noise in deconvolved incidence and choosing when to stop}{
+
+\insertCite{Gold+09;textual}{fastbeta} suggest to stop iterating once
+\code{chi2 < 1} and to use the last generated incidence time series
+(see \code{chi2} and \code{it_chi2_lt1} in Value). The reason for this criterion
+is that deconvolved incidence tends to acquire undesired noise after
+several iterations, and it is typically better to stop before this
+happens; see the supplement to \insertCite{Gold+09;textual}{fastbeta}
+for a discussion. However, this criterion is not guaranteed to produce
+an optimal result, hence a decision about which incidence time series to
+use should be based on a graphical exploration of the full \code{deconvolve()}
+output (see Examples).
+}
+
+\subsection{3. Missing values in output}{
+
+The last \code{a} rows of \code{poisson} and \code{inc} are \code{NA}, where
+\code{a = min(which(delay_dist > 0)) - 1} is the minimum number of days from
+infection to reporting. The probability that an infection between day
+\code{length(x)-a} and day \code{length(x)-1} is reported between day \code{0} and day
+\code{length(x)-1} is zero, so the supplied reported incidence time series
+provides no information about incidence on those \code{a} days.
+}
+
+\subsection{4. Time step}{
+
+The algorithm does not explicitly require a time step of one day. Longer
+time steps are tolerated provided \code{x}, \code{delay_dist}, and \code{p} are defined
+appropriately.
+}
+}
+
+\examples{
+x <- 420 - (-20:20)^2
+delay_dist <- rep(1 / 11, 11)
+p <- 0.5
+it_max <- 20
+dcv_out <- deconvolve(x, delay_dist, p, it_max)
+
+plot.new()
+plot.window(xlim = c(-10, 40), ylim = c(0, 1000))
+box()
+axis(side = 1, at = seq(-10, 40, by = 10))
+title(xlab = "Time (days)")
+axis(side = 2, at = seq(0, 1000, by = 200), las = 1)
+title(ylab = "Deconvolved incidence")
+with(dcv_out, {
+  for (j in 1:(1+it_max)) {
+    # Deconvolved incidence after `j` iterations
+    lines(times, inc[, j])
+  }
+  # Deconvolved incidence after `it_max` iterations
+  lines(times, inc[, 1+it_max], lwd = 2, col = "red")
+  # Deconvolved incidence after `it_chi2_lt1` iterations
+  lines(times, inc[, 1+it_chi2_lt1], lwd = 2, col = "blue")
+  # Observed reported incidence
+  lines(times, x_pad, lwd = 2, col = "green")
+})
+
+plot.new()
+plot.window(xlim = c(-10, 40), ylim = c(0, 500))
+box()
+axis(side = 1, at = seq(-10, 40, by = 10))
+title(xlab = "Time (days)")
+axis(side = 2, at = seq(0, 500, by = 100), las = 1)
+title(ylab = "Expected reported incidence")
+with(dcv_out, {
+  for (j in 1:(1+it_max)) {
+    # Expected reported incidence after `j` iterations
+    lines(times, inc_rep[, j])
+  }
+  # Expected reported incidence after `it_max` iterations
+  lines(times, inc_rep[, 1+it_max], lwd = 2, col = "red")
+  # Expected reported incidence after `it_chi2_lt1` iterations
+  lines(times, inc_rep[, 1+it_chi2_lt1], lwd = 2, col = "blue")
+  # Observed reported incidence
+  lines(times, x_pad, lwd = 2, col = "green")
+})
+
+# Normalized chi-squared statistic
+plot(0:it_max, dcv_out$chi2, las = 1, xlab = "Iterations", ylab = "chi2")
+abline(h = 1, lty = 2)
+
 }
 \references{
 \insertRef{Gold+09}{fastbeta}
