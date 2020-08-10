@@ -2,7 +2,7 @@
 #' Deconvolve a time series of reported incidence
 #'
 #' @description
-#' Deconvolves a time series of reported incidence using a Richardson-Lucy
+#' Deconvolves a reported incidence time series using a Richardson-Lucy
 #' iteration, generating an estimate of the underlying incidence time series.
 #'
 #' @param x Reported incidence time series. A numeric vector giving the
@@ -30,14 +30,14 @@
 #'     of days from infection to reporting, giving time points (days)
 #'     for deconvolved incidence.
 #'   }
-#'   \item{`poisson`}{A numeric matrix. `poisson[i, j]` is the estimate,
-#'     obtained after `j-1` iterations, of the expected number of infections
-#'     on day `times[i]` that are eventually reported. See Details for the
-#'     initial estimate.
+#'   \item{`poisson`}{A numeric matrix. `poisson[i, j]` is the estimate
+#'     after `j-1` iterations of the expected number of infections on day
+#'     `times[i]` that are eventually reported. See Details for the initial
+#'     estimate.
 #'   }
 #'   \item{`inc`}{A numeric matrix. `inc[i, j]` is the expected number
 #'     of infections on day `times[i]` conditional on `poisson[, j]`.
-#'     Hence `inc[, j]` gives deconvolved incidence after `j-1` iterations.
+#'     `inc[, j]` gives deconvolved incidence after `j-1` iterations.
 #'   }
 #'   \item{`inc_rep`}{A numeric matrix. `inc_rep[i, j]` is the expected
 #'     number of cases reported on day `times[i]` conditional on `poisson[, j].`
@@ -47,7 +47,7 @@
 #'     `mean((x - y)^2 / y)`, where `y = inc_rep[b+1:length(x), j]`.
 #'   }
 #'   \item{`it_chi2_lt1`}{An integer scalar equal to `min(which(chi2 < 1)) - 1`
-#'     if `any(chi2 < 1)` is `TRUE` (and `NA` otherwise), giving the number of
+#'     if `any(chi2 < 1)` is `TRUE` (`NA` otherwise), giving the number of
 #'     iterations performed before the chi-squared criterion suggested
 #'     by \insertCite{Gold+09;textual}{fastbeta} (namely `chi2 < 1`) was
 #'     satisfied. Note that the corresponding incidence time series is
@@ -80,24 +80,24 @@
 #'   binning all `sum(x)` cases between day `-b` and day `length(x)-1`,
 #'   where `b = max(which(delay_dist > 0)) - 1` is the maximum number
 #'   of days from infection to reporting. Binning follows `delay_dist`,
-#'   so that `delay_dist[i]` is the fraction of `x[j]` placed into the
+#'   so that `delay_dist[i]` is the fraction of `x[j]` placed in the
 #'   bin for day `j-i`. This differs from
 #'   \insertCite{Gold+09;textual}{fastbeta}, whose initial value is `x`
-#'   shifted backwards in time by `s = which.max(delay_dist)-1` days.
+#'   shifted backwards in time by `s = which.max(delay_dist) - 1` days.
 #'   An undesired consequence of their choice is that deconvolved
 #'   incidence is necessarily zero from day `-b` to day `-s-1` and
 #'   from day `length(x)-s` to day `length(x)-1`.
 #'
 #' ## 2. Noise in deconvolved incidence and choosing when to stop
 #' \insertCite{Gold+09;textual}{fastbeta} suggest to stop iterating once
-#' `chi2 < 1` and to use the last generated incidence time series
+#' `chi2 < 1` and to keep the last generated incidence time series
 #' (see `chi2` and `it_chi2_lt1` in Value). The reason for this criterion
 #' is that deconvolved incidence tends to acquire undesired noise after
 #' several iterations, and it is typically better to stop before this
 #' happens; see the supplement to \insertCite{Gold+09;textual}{fastbeta}
 #' for a discussion. However, this criterion is not guaranteed to produce
 #' an optimal result, hence a decision about which incidence time series to
-#' use should be based on a graphical exploration of the full `deconvolve()`
+#' keep should be based on a graphical exploration of the full `deconvolve()`
 #' output (see Examples).
 #'
 #' ## 3. Missing values in output

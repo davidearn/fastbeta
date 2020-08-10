@@ -36,14 +36,14 @@ where \code{b = max(which(delay_dist > 0)) - 1} is the maximum number
 of days from infection to reporting, giving time points (days)
 for deconvolved incidence.
 }
-\item{\code{poisson}}{A numeric matrix. \code{poisson[i, j]} is the estimate,
-obtained after \code{j-1} iterations, of the expected number of infections
-on day \code{times[i]} that are eventually reported. See Details for the
-initial estimate.
+\item{\code{poisson}}{A numeric matrix. \code{poisson[i, j]} is the estimate
+after \code{j-1} iterations of the expected number of infections on day
+\code{times[i]} that are eventually reported. See Details for the initial
+estimate.
 }
 \item{\code{inc}}{A numeric matrix. \code{inc[i, j]} is the expected number
 of infections on day \code{times[i]} conditional on \code{poisson[, j]}.
-Hence \code{inc[, j]} gives deconvolved incidence after \code{j-1} iterations.
+\code{inc[, j]} gives deconvolved incidence after \code{j-1} iterations.
 }
 \item{\code{inc_rep}}{A numeric matrix. \code{inc_rep[i, j]} is the expected
 number of cases reported on day \code{times[i]} conditional on \verb{poisson[, j].}
@@ -53,7 +53,7 @@ statistic corresponding to \code{inc_rep[, j]}, computed as
 \code{mean((x - y)^2 / y)}, where \code{y = inc_rep[b+1:length(x), j]}.
 }
 \item{\code{it_chi2_lt1}}{An integer scalar equal to \code{min(which(chi2 < 1)) - 1}
-if \code{any(chi2 < 1)} is \code{TRUE} (and \code{NA} otherwise), giving the number of
+if \code{any(chi2 < 1)} is \code{TRUE} (\code{NA} otherwise), giving the number of
 iterations performed before the chi-squared criterion suggested
 by \insertCite{Gold+09;textual}{fastbeta} (namely \code{chi2 < 1}) was
 satisfied. Note that the corresponding incidence time series is
@@ -73,7 +73,7 @@ The list has attributes \code{call} and \code{arg_list}, making it reproducible 
 \code{eval(call)} or \code{do.call(deconvolve, arg_list)}.
 }
 \description{
-Deconvolves a time series of reported incidence using a Richardson-Lucy
+Deconvolves a reported incidence time series using a Richardson-Lucy
 iteration, generating an estimate of the underlying incidence time series.
 }
 \section{Details}{
@@ -90,10 +90,10 @@ i.e., \code{delay_dist[1] > 0} is allowed.
 binning all \code{sum(x)} cases between day \code{-b} and day \code{length(x)-1},
 where \code{b = max(which(delay_dist > 0)) - 1} is the maximum number
 of days from infection to reporting. Binning follows \code{delay_dist},
-so that \code{delay_dist[i]} is the fraction of \code{x[j]} placed into the
+so that \code{delay_dist[i]} is the fraction of \code{x[j]} placed in the
 bin for day \code{j-i}. This differs from
 \insertCite{Gold+09;textual}{fastbeta}, whose initial value is \code{x}
-shifted backwards in time by \code{s = which.max(delay_dist)-1} days.
+shifted backwards in time by \code{s = which.max(delay_dist) - 1} days.
 An undesired consequence of their choice is that deconvolved
 incidence is necessarily zero from day \code{-b} to day \code{-s-1} and
 from day \code{length(x)-s} to day \code{length(x)-1}.
@@ -103,14 +103,14 @@ from day \code{length(x)-s} to day \code{length(x)-1}.
 \subsection{2. Noise in deconvolved incidence and choosing when to stop}{
 
 \insertCite{Gold+09;textual}{fastbeta} suggest to stop iterating once
-\code{chi2 < 1} and to use the last generated incidence time series
+\code{chi2 < 1} and to keep the last generated incidence time series
 (see \code{chi2} and \code{it_chi2_lt1} in Value). The reason for this criterion
 is that deconvolved incidence tends to acquire undesired noise after
 several iterations, and it is typically better to stop before this
 happens; see the supplement to \insertCite{Gold+09;textual}{fastbeta}
 for a discussion. However, this criterion is not guaranteed to produce
 an optimal result, hence a decision about which incidence time series to
-use should be based on a graphical exploration of the full \code{deconvolve()}
+keep should be based on a graphical exploration of the full \code{deconvolve()}
 output (see Examples).
 }
 
