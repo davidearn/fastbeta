@@ -12,5 +12,4 @@
 ### Documentation
 
 * `impute()` functions
-* `deconvolve()` algorithm and examples
 * vignette

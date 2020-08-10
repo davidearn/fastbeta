@@ -12,7 +12,7 @@ References: DeJonge MS, Jagan M, Krylova O, Earn DJD. Fast estimation of
     in press.
 Imports:
     stats,
-    Rdpack,
+    Rdpack (>= 0.7),
     mathjaxr (>= 1.0-1),
     adaptivetau (>= 2.2-3),
     deSolve (>= 1.27.1)
