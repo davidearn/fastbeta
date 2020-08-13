@@ -107,6 +107,8 @@
 #' # Inspect
 #' plot(S ~ I(t - t[1]), df, type = "l", ylim = c(43, 58) * 1e03)
 #' lines(S ~ I(t - t[1]), df_si, col = "red")
+#' plot(I ~ I(t - t[1]), df, type = "l", ylim = c(3, 3) * 1e03)
+#' lines(I ~ I(t - t[1]), df_si, col = "red")
 #' plot(beta ~ I(t - t[1]), df, type = "l", ylim = c(0.95, 1.25) * 1e-05)
 #' lines(beta ~ I(t - t[1]), df_si, col = "red")
 #'
@@ -144,7 +146,7 @@ estimate_beta_si <- function(df       = data.frame(),
           (1 + 0.5 * (gamma + mu[i]) * 1)
       }
       beta <- (Z + c(Z[-1], NA)) / (2 * S * I * 1)
-      list(S, I)
+      list(S, I, beta)
     }
   )
 

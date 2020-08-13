@@ -114,6 +114,8 @@
 #' # Inspect
 #' plot(S ~ I(t - t[1]), df, type = "l", ylim = c(43, 58) * 1e03)
 #' lines(S ~ I(t - t[1]), df_s, col = "red")
+#' plot(I ~ I(t - t[1]), df, type = "l", ylim = c(0, 3) * 1e03)
+#' lines(I ~ I(t - t[1]), df_s, col = "red")
 #' plot(beta ~ I(t - t[1]), df, type = "l", ylim = c(0.95, 1.25) * 1e-05)
 #' lines(beta ~ I(t - t[1]), df_s, col = "red")
 #' 
