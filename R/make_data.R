@@ -4,68 +4,77 @@
 #' @description
 #' `make_data()` simulates epidemic time series data using a system of
 #' SIR equations and a supplied list of parameter values. Observations
-#' are recorded at equally spaced time points \mjseqn{t_k = t_0 + k \Delta t}
-#' (for \mjseqn{k = 0, \ldots, n}). Among other things, the simulation model
+#' are recorded at equally spaced time points \mjseqn{t_i = t_0 + i \Delta t}
+#' (for \mjseqn{i = 0, \ldots, n}). Among other things, the simulation model
 #' assumes:
 #' * A seasonally forced transmission rate.
 #' * Constant birth and per capita natural mortality rates.
-#' * Cases reported after a fixed delay since infection,
-#'   with a fixed probability.
+#' * Infections reported with a fixed probability after a
+#'   delay that either (i) is fixed or (ii) follows a
+#'   negative binomial distribution.
 #'
-#' @param par_list A list of parameter values containing:
+#' @param par_list A list of parameter values with elements:
 #'   \describe{
-#'     \item{`dt_weeks`}{\mjseqn{\lbrack \Delta t \rbrack}
+#'     \item{`dt_weeks`}{\mjseqn{\lbrace\,\Delta t\,\rbrace}
 #'       Numeric scalar. Observation interval in weeks.
 #'     }
-#'     \item{`t0`}{\mjseqn{\lbrack t_0 \rbrack}
+#'     \item{`t0`}{\mjseqn{\lbrace\,t_0/\Delta t\,\rbrace}
 #'       Numeric scalar. Time of the first observation
 #'       in units \mjseqn{\Delta t}.
 #'     }
-#'     \item{`prep`}{\mjseqn{\lbrack p_\text{rep} \rbrack}
-#'       Numeric scalar. Case reporting probability.
+#'     \item{`prep`}{\mjseqn{\lbrace\,p_\text{rep}\,\rbrace}
+#'       Numeric scalar. Probability that an infection is reported.
 #'     }
-#'     \item{`trep`}{\mjseqn{\lbrack t_\text{rep} \rbrack}
-#'       Numeric scalar. Case reporting delay in units
-#'       \mjseqn{\Delta t}.
+#'     \item{`trep`}{\mjseqn{\lbrace\,t_\text{rep}/\Delta t\,\rbrace}
+#'       Numeric scalar. Mean time between infection and reporting
+#'       in units \mjseqn{\Delta t}.
 #'     }
-#'     \item{`hatN0`}{\mjseqn{\lbrack \out{\widehat{N}_0} \rbrack}
+#'     \item{`k`}{\mjseqn{\lbrace\,k\,\rbrace}
+#'       Numeric scalar. An optional dispersion parameter.
+#'       If specified, then the time between infection and reporting
+#'       in units \mjseqn{\Delta t} will be modeled as a negative
+#'       binomially distributed random variable with dispersion `k`
+#'       and mean `trep`. If not, then the delay will be fixed equal
+#'       to `round(trep)`.
+#'     }
+#'     \item{`hatN0`}{\mjseqn{\lbrace\,\out{\widehat{N}_0}\,\rbrace}
 #'       Numeric scalar. Population size at time \mjseqn{t = 0} years.
 #'     }
-#'     \item{`N0`}{\mjseqn{\lbrack N_0 \rbrack}
+#'     \item{`N0`}{\mjseqn{\lbrace\,N_0\,\rbrace}
 #'       Numeric scalar. Population size at time \mjseqn{t = t_0}.
 #'     }
-#'     \item{`S0`}{\mjseqn{\lbrack S_0 \rbrack}
+#'     \item{`S0`}{\mjseqn{\lbrace\,S_0\,\rbrace}
 #'       Numeric scalar. Number of susceptibles at time \mjseqn{t = t_0}.
 #'     }
-#'     \item{`I0`}{\mjseqn{\lbrack I_0 \rbrack}
+#'     \item{`I0`}{\mjseqn{\lbrace\,I_0\,\rbrace}
 #'       Numeric scalar. Number of infecteds at time \mjseqn{t = t_0}.
 #'     }
-#'     \item{`nu`}{\mjseqn{\lbrack \nu_\text{c} \rbrack}
+#'     \item{`nu`}{\mjseqn{\lbrace\,\nu \Delta t\,\rbrace}
 #'       Numeric scalar. Birth rate expressed
 #'       per unit \mjseqn{\Delta t} and relative to
 #'       \mjseqn{\out{\widehat{N}_0}}.
 #'     }
-#'     \item{`mu`}{\mjseqn{\lbrack \mu_\text{c} \rbrack}
+#'     \item{`mu`}{\mjseqn{\lbrace\,\mu \Delta t\,\rbrace}
 #'       Numeric scalar. Natural mortality rate expressed
 #'       per unit \mjseqn{\Delta t} and per capita.
 #'     }
-#'     \item{`tgen`}{\mjseqn{\lbrack t_\text{gen} \rbrack}
+#'     \item{`tgen`}{\mjseqn{\lbrace\,t_\text{gen}/\Delta t\,\rbrace}
 #'       Numeric scalar. Mean generation interval of the disease
 #'       of interest in units \mjseqn{\Delta t}.
 #'     }
-#'     \item{`beta_mean`}{\mjseqn{\lbrack \langle\beta\rangle \rbrack}
+#'     \item{`beta_mean`}{\mjseqn{\lbrace\,\langle\beta\rangle \Delta t\,\rbrace}
 #'       Numeric scalar. Mean (long-term average) of the seasonally
 #'       forced transmission rate \mjseqn{\beta(t)} expressed per unit
 #'       \mjseqn{\Delta t} per susceptible per infected.
 #'     }
-#'     \item{`alpha`}{\mjseqn{\lbrack \alpha \rbrack}
-#'       Numeric scalar. Amplitude of the seasonally forced transmission
-#'       rate \mjseqn{\beta(t)} relative to the mean.
+#'     \item{`alpha`}{\mjseqn{\lbrace\,\alpha\,\rbrace}
+#'       Numeric scalar. Amplitude of the seasonally forced
+#'       transmission rate \mjseqn{\beta(t)} relative to the mean.
 #'     }
-#'     \item{`epsilon`}{\mjseqn{\lbrack \epsilon \rbrack}
-#'       Numeric scalar. Standard deviation of the random phase shift
-#'       introduced to the seasonally forced transmission rate
-#'       \mjseqn{\beta(t)}.
+#'     \item{`epsilon2`}{\mjseqn{\lbrace\,\epsilon^2\,\rbrace}
+#'       Numeric scalar. Variance of the normally distributed
+#'       phase shift introduced to the seasonally forced
+#'       transmission rate \mjseqn{\beta(t)}.
 #'     }
 #'   }
 #' @param n Integer scalar. Time between the first and last observations
@@ -75,14 +84,11 @@
 #' @param with_dem_stoch Logical scalar. If `TRUE`, then the simulation
 #'   is generated using [adaptivetau::ssa.adaptivetau()]. Otherwise, it
 #'   is generated using [deSolve::ode()] (see Details).
-#' @param ode_control A list of optional arguments of [deSolve::ode()],
-#'   specifying options for numerical integration, such as `method`,
-#'   `rtol`, and `atol`. Not used if `with_dem_stoch = TRUE` (see Details).
 #'
 #' @return
-#' A data frame with `n + 1` rows corresponding to equally spaced times
-#' \mjseqn{t_k = t_0 + k \Delta t} (for \mjseqn{k = 0, \ldots, n}), and
-#' numeric columns:
+#' A data frame with `n + 1` rows corresponding to equally spaced time
+#' points \mjseqn{t_i = t_0 + i \Delta t} (for \mjseqn{i = 0, \ldots, n}),
+#' and numeric columns:
 #'
 #' \describe{
 #'   \item{`t`}{Time in units \mjseqn{\Delta t}. Equal to `par_list$t0 + 0:n`.}
@@ -94,7 +100,7 @@
 #'     without environmental noise.
 #'   }
 #'   \item{`beta_phi`}{Seasonally forced transmission rate expressed
-#'     per unit \mjseqn{\Delta t}{dt} per susceptible per infected,
+#'     per unit \mjseqn{\Delta t} per susceptible per infected,
 #'     with environmental noise.
 #'   }
 #'   \item{`N`}{Population size.}
@@ -103,18 +109,19 @@
 #'   \item{`Z`}{Incidence. `Z[i]` is the number of infections
 #'     between times `t[i-1]` and `t[i]`.
 #'   }
+#'   \item{`Zrep`}{Incidence conditional on reporting.
+#'     `Zrep[i]` is the number of infections between times `t[i-1]` and `t[i]`
+#'     that are eventually reported.
+#'   }
 #'   \item{`C`}{Reported incidence. `C[i]` is the number of infections
-#'     reported between times `t[i-1]` and `t[i]`, equal to the number
-#'     of successes in `Z[i-round(par_list$trep)]` independent Bernoulli
-#'     trials, each with success probability `par_list$prep`.
+#'     reported between times `t[i-1]` and `t[i]`.
 #'   }
 #'   \item{`B`}{Births. `B[i]` is the number of births between times
-#'     `t[i-1]` and `t[i]`.
+#'     `t[i-1]` and `t[i]`. Equal to `with(par_list, rep(nu * hatN0, n + 1))`
+#'     if `with_dem_stoch = FALSE`.
 #'   }
 #'   \item{`mu`}{Per capita natural mortality rate. `mu[i]` is rate
-#'     at time `t[i]`. Equal to `rep(par_list$mu, n + 1)` and included
-#'     for convenience, mainly because [estimate_beta_si()] requires
-#'     a data frame with columns `Z`, `B`, and `mu`.
+#'     at time `t[i]`. Equal to `with(par_list, rep(mu, n + 1))`.
 #'   }
 #' }
 #'
@@ -137,7 +144,7 @@
 #' 
 #' \mjsdeqn{\beta_\phi(t) = \langle\beta\rangle \left\lbrack 1 + \alpha \cos\left(\frac{2 \pi t}{\text{1 year}} + \phi(t;\epsilon)\right) \right\rbrack\,,}
 #' 
-#' and \mjseqn{\phi(t;\epsilon)} is the linear interpolant of noise
+#' and \mjseqn{\phi(t;\epsilon^2)} is the linear interpolant of noise
 #' \mjseqn{\lbrace(t_k;\Phi_k)\rbrace_{k=0}^n} with
 #' 
 #' \mjsdeqn{\Phi_k \sim \mathrm{Normal}(0,\epsilon^2)\,,}
@@ -145,7 +152,7 @@
 #' modeling **environmental stochasticity**.
 #'
 #' `make_data()` generates observations of the above system at equally spaced
-#' times \mjseqn{t_k = t_0 + k \Delta t} (for \mjseqn{k = 0, \ldots, n}) by
+#' times \mjseqn{t_i = t_0 + i \Delta t} (for \mjseqn{i = 0, \ldots, n}) by
 #' either
 #' (i) numerically integrating the ODE using [deSolve::ode()]
 #' (`with_dem_stoch = FALSE`), or
@@ -163,18 +170,32 @@
 #'
 #' `make_data()` calculates births \mjseqn{B} and incidence \mjseqn{Z}
 #' from cumulative births \mjseqn{B_\text{cum}} and cumulative incidence
-#' \mjseqn{Z_\text{cum}} via first differences,
+#' \mjseqn{Z_\text{cum}} via first differences:
 #'
-#' \mjsdeqn{\begin{align} B(t_k) &= B_\text{cum}(t_k) - B_\text{cum}(t_{k-1}), \cr Z(t_k) &= Z_\text{cum}(t_k) - Z_\text{cum}(t_{k-1}), \end{align}}
+#' \mjsdeqn{\begin{align} B(t_i) &= B_\text{cum}(t_i) - B_\text{cum}(t_{i-1}), \cr Z(t_i) &= Z_\text{cum}(t_i) - Z_\text{cum}(t_{i-1}). \end{align}}
 #'
-#' then simulates reported incidence \mjseqn{C} from
-#' incidence \mjseqn{Z} via lagged binomial sampling,
+#' It then does binomial sampling to generate, for each observation
+#' of \mjseqn{Z}, a number of infections that is eventually reported:
 #'
-#' \mjsdeqn{C(t_{k+r}) \sim \mathrm{Binomial}\big(Z(t_k),p_\text{rep}\big)\,,}
+#' \mjsdeqn{Z_\text{rep}(t_i) \sim \mathrm{Binomial}\big(Z(t_i),p_\text{rep}\big)\,.}
+#' 
+#' Finally, it generates reported incidence \mjseqn{C} by sampling
+#' from a reporting delay distribution and binning infections counted
+#' by \mjseqn{Z_\text{rep}} forward in time. Compared to \mjseqn{Z},
+#' \mjseqn{C} models **observation error**, i.e., under-reporting of
+#' cases with a delay between infection and reporting. If `par_list$k`
+#' is non-`NULL`, then the reporting delay in units \mjseqn{\Delta t}
+#' is modeled as
 #'
-#' modeling **observation error** (random under-reporting of cases with
-#' a delay between infection and reporting). Here,
-#' \mjseqn{r = \mathrm{nint}(t_\text{rep} / \Delta t)}.
+#' \mjsdeqn{D \sim \mathrm{NegativeBinomial}\left(k,\frac{k}{m+k}\right)\,,}
+#'
+#' where \mjseqn{k} is a dispersion parameter and
+#' \mjseqn{m = t_\text{rep}/\Delta t} is the mean reporting delay.
+#' In this case, infections counted in \mjseqn{Z_\text{rep}(t_i)}
+#' are reported in \mjseqn{C(t_{i+D})}. On the other hand, if
+#' `par_list$k` is `NULL`, then the reporting delay is fixed equal
+#' to \mjseqn{d = \mathrm{nint}(t_\text{rep}/\Delta t)}, and so
+#' \mjseqn{C(t_{i+d}) = Z_\text{rep}(t_i)\,.}
 #'
 #' @examples
 #' # Deterministic simulation
@@ -189,8 +210,10 @@
 #' # Stochastic simulation
 #' par_list <- make_par_list(
 #'   dt_weeks = 1,
-#'   epsilon = 0.5, # environmental stochasticity
-#'   prep = 0.5 # random under-reporting of cases
+#'   epsilon2 = 1, # environmental sxtochasticity
+#'   prep = 0.5, # random under-reporting of infections
+#'   trep = 2, # random reporting delays
+#'   k = 4
 #' )
 #' set.seed(2146)
 #' df <- make_data(
@@ -203,12 +226,7 @@
 #' @export
 make_data <- function(par_list       = make_par_list(),
                       n              = 20 * 365 / 7,
-                      with_dem_stoch = TRUE,
-                      ode_control    = list(
-                        method = "lsoda",
-                        rtol   = 1e-06,
-                        atol   = 1e-06
-                      )) {
+                      with_dem_stoch = TRUE) {
   ## 1. Set-up -----------------------------------------------------------
 
   # Save arguments in a list
@@ -216,12 +234,13 @@ make_data <- function(par_list       = make_par_list(),
 
   # Load necessary elements of `par_list` into the execution environment
   list2env(
-    par_list[c("dt_weeks", "t0", "prep", "trep", "hatN0", "N0", "S0", "I0",
-               "nu", "mu", "tgen", "beta_mean", "alpha", "epsilon")],
+    par_list[c("dt_weeks", "t0", "prep", "trep", "k",
+               "hatN0", "N0", "S0", "I0", "nu", "mu", "tgen",
+               "beta_mean", "alpha", "epsilon2")],
     envir = environment()
   )
 
-  # Derived quantities
+  # Some derived quantities
   gamma <- 1 / tgen
   one_year <- (365 / 7) / dt_weeks
 
@@ -233,7 +252,7 @@ make_data <- function(par_list       = make_par_list(),
   phi <- stats::rnorm(
     n    = length(t_out),
     mean = 0,
-    sd   = epsilon
+    sd   = sqrt(epsilon2)
   )
 
   # Linear interpolant of noise
@@ -297,18 +316,20 @@ make_data <- function(par_list       = make_par_list(),
     }
 
     # Generate a realization of the stochastic process
-    df <- as.data.frame(adaptivetau::ssa.adaptivetau(
-      x_init, event_list, compute_event_rates,
-      params    = NULL, # already in environment
-      tf        = n,    # final time point
-      tl.params = list( # other instructions:
-        epsilon     = 0.05,
-        delta       = 0.05,
-        maxtau      = 0.5, # adaptive time step must not exceed 1
-        extraChecks = TRUE
+    df <- as.data.frame(
+      adaptivetau::ssa.adaptivetau(
+        x_init, event_list, compute_event_rates,
+        params    = NULL, # in enclosing environment of `compute_event_rates()`
+        tf        = n,    # final time point
+        tl.params = list( # other instructions:
+          epsilon     = 0.05,
+          delta       = 0.05,
+          maxtau      = 0.5, # adaptive time step must not exceed 1
+          extraChecks = TRUE
+        )
       )
-    ))
-    colnames(df) <- c("t", "S", "I", "R", "Bcum", "Zcum")
+    )
+    colnames(df)[1] <- "t"
     df$t <- df$t + t0
 
     ## NOTE: `ssa.adaptivetau()` returns time series with unequal spacing
@@ -352,31 +373,17 @@ make_data <- function(par_list       = make_par_list(),
       list(c(dS, dlogI, dR, dBcum, dZcum))
     }
 
-    # Create a list of arguments to be passed to `ode()`
-    ode_args <- within(ode_control, {
-      y <- x_init
-      times <- t_out
-      func <- compute_sir_rates
-      parms <- NULL # already in environment
-    })
-
     # Numerically integrate the system of SIR equations
-    df <- as.data.frame(do.call(deSolve::ode, ode_args))
-    colnames(df) <- c("t", "S", "logI", "R", "Bcum", "Zcum")
-    df$I <- exp(df$logI)
-
-    # Warn if `ode()` returned early with unrecoverable error.
-    # Append rows of `NA` until `nrow(df) = length(t_out)`.
-    if (any(is.na(df[nrow(df), ]))) {
-      warning(
-        "`deSolve::ode()` could not complete the integration. ",
-        "Retry with modified `ode_control`."
+    df <- as.data.frame(
+      deSolve::ode(
+        y     = x_init,
+        times = t_out,
+        func  = compute_sir_rates,
+        parms = NULL # in enclosing environment of `compute_sir_rates()`
       )
-    }  
-    if (nrow(df) < length(t_out)) {
-      df[(nrow(df)+1):length(t_out), ] <- NA
-      df$t <- t_out
-    }
+    )
+    colnames(df)[1] <- "t"
+    df$I <- exp(df$logI)
 
   }
 
@@ -393,21 +400,36 @@ make_data <- function(par_list       = make_par_list(),
     mu       = mu
   )
 
-  # `C` from `Z` via lagged binomial sampling. `rbinom()`
-  # warning about `NA` in `size` argument is safe to suppress.
-  df$C <- suppressWarnings({
+
+  ## 4. Introduce observation error --------------------------------------
+
+  # `Zrep` from `Z` via binomial sampling
+  df$Zrep <- c(NA,
     stats::rbinom(
-      n    = nrow(df),    # number of experiments
-      size = round(df$Z), # number of Bernoulli trials
-      p    = prep         # success probability
+      n    = nrow(df) - 1,    # number of experiments
+      size = round(df$Z[-1]), # numbers of Bernoulli trials
+      p    = prep             # success probability
     )
-  })
-  trepr <- round(trep)
-  df$C <- c(rep(NA, trepr), df$C[1:(nrow(df)-trepr)])
+  )
 
-
+  # `C` from `Zrep` with a fixed shift forward
+  if (!exists("k", inherits = FALSE) || is.null(k)) {
+    trepr <- round(trep)
+    df$C <- c(rep(NA, trepr), df$Zrep[1:(nrow(df)-trepr)])
+  # `C` from `Zrep` via negative binomial sampling
+  } else {
+    counts <- df$Zrep[-1]
+    delays <- stats::rnbinom(sum(counts), size = k, mu = trep)
+    index_counts <- rep(seq_along(counts), times = counts)
+    index_counts_with_delays <- index_counts + delays
+    counts_with_delays <- rep(0, max(index_counts_with_delays))
+    counts_with_delays[sort(unique(index_counts_with_delays))] <-
+      table(index_counts_with_delays)
+    df$C <- c(NA, counts_with_delays[1:(nrow(df)-1)])
+  }
+    
   df <- df[, c("t", "t_years", "beta", "beta_phi",
-               "N", "S", "I", "Z", "C", "B", "mu")]
+               "N", "S", "I", "Z", "Zrep", "C", "B", "mu")]
   attr(df, "call") <- match.call()
   attr(df, "arg_list") <- arg_list
   df
@@ -416,8 +438,9 @@ make_data <- function(par_list       = make_par_list(),
 # For `R CMD check`
 if (getRversion() >= "2.15.1") {
   utils::globalVariables(
-    c("dt_weeks", "t0", "prep", "trep", "hatN0", "N0", "S0", "I0",
-      "nu", "mu", "tgen", "beta_mean", "alpha", "epsilon", "S", "R",
-      "Zcum", "Bcum")
+    c("dt_weeks", "t0", "prep", "trep", "k",
+      "hatN0", "N0", "S0", "I0", "nu", "mu", "tgen",
+      "beta_mean", "alpha", "epsilon2",
+      "S", "R", "Zcum", "Bcum")
   )
 }

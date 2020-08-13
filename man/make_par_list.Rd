@@ -10,6 +10,7 @@ make_par_list(
   t0 = 1000 * (365/7)/dt_weeks,
   prep = 1,
   trep = 0,
+  k = NULL,
   hatN0 = 1e+06,
   N0 = NULL,
   S0 = NULL,
@@ -20,85 +21,87 @@ make_par_list(
   Rnaught = 20,
   beta_mean = NULL,
   alpha = 0.08,
-  epsilon = 0,
-  ode_control = list(method = "lsoda", rtol = 1e-06, atol = 1e-06)
+  epsilon2 = 0
 )
 }
 \arguments{
-\item{dt_weeks}{\mjseqn{\lbrack \Delta t \rbrack}
+\item{dt_weeks}{\mjseqn{\lbrace\,\Delta t\,\rbrace}
 Numeric scalar. Observation interval in weeks.}
 
-\item{t0}{\mjseqn{\lbrack t_0 \rbrack}
+\item{t0}{\mjseqn{\lbrace\,t_0/\Delta t\,\rbrace}
 Numeric scalar. Time of the first observation
 in units \mjseqn{\Delta t}.}
 
-\item{prep}{\mjseqn{\lbrack p_\text{rep} \rbrack}
-Numeric scalar. Case reporting probability.}
+\item{prep}{\mjseqn{\lbrace\,p_\text{rep}\,\rbrace}
+Numeric scalar. Probability that an infection is reported.}
 
-\item{trep}{\mjseqn{\lbrack m \rbrack}
-Numeric scalar. Case reporting delay in units \mjseqn{\Delta t}.}
+\item{trep}{\mjseqn{\lbrace\,t_\text{rep}/\Delta t\,\rbrace}
+Numeric scalar. Mean time between infection and reporting
+in units \mjseqn{\Delta t}.}
 
-\item{hatN0}{\mjseqn{\lbrack \widehat{N}_0 \rbrack}
+\item{k}{\mjseqn{\lbrace\,k\,\rbrace}
+Numeric scalar. An optional dispersion parameter.
+If specified, then the time between infection and reporting in
+units \mjseqn{\Delta t} will be modeled by \code{\link[=make_data]{make_data()}} as a
+negative binomially distributed random variable with dispersion
+\code{k} and mean \code{trep}. If not, then the delay will be fixed equal
+to \code{round(trep)}.}
+
+\item{hatN0}{\mjseqn{\lbrace\,\widehat{N}_0\,\rbrace}
 Numeric scalar. Population size at time \mjseqn{t = 0} years.}
 
-\item{N0}{\mjseqn{\lbrack N_0 \rbrack}
+\item{N0}{\mjseqn{\lbrace\,N_0\,\rbrace}
 Numeric scalar. Population size at time \mjseqn{t = t_0}.
 This argument is optional (see Details 2).}
 
-\item{S0}{\mjseqn{\lbrack S_0 \rbrack}
+\item{S0}{\mjseqn{\lbrace\,S_0\,\rbrace}
 Numeric scalar. Number of susceptibles at time \mjseqn{t = t_0}.
 This argument is optional (see Details 2).}
 
-\item{I0}{\mjseqn{\lbrack I_0 \rbrack}
+\item{I0}{\mjseqn{\lbrace\,I_0\,\rbrace}
 Numeric scalar. Number of infecteds at time \mjseqn{t = t_0}.
 This argument is optional (see Details 2).}
 
-\item{nu}{\mjseqn{\lbrack \nu \rbrack}
+\item{nu}{\mjseqn{\lbrace\,\nu \Delta t\,\rbrace}
 Numeric scalar. Birth rate expressed per unit \mjseqn{\Delta t}
 and relative to \mjseqn{\widehat{N}_0}.}
 
-\item{mu}{\mjseqn{\lbrack \mu \rbrack}
+\item{mu}{\mjseqn{\lbrace\,\mu \Delta t\,\rbrace}
 Numeric scalar. Natural mortality rate expressed per unit
 \mjseqn{\Delta t} and per capita.}
 
-\item{tgen}{\mjseqn{\lbrack t_\text{gen} \rbrack}
+\item{tgen}{\mjseqn{\lbrace\,t_\text{gen}/\Delta t\,\rbrace}
 Numeric scalar. Mean generation interval of the disease
 of interest in units \mjseqn{\Delta t}.}
 
-\item{Rnaught}{\mjseqn{\lbrack \mathcal{R}_0 \rbrack}
+\item{Rnaught}{\mjseqn{\lbrace\,\mathcal{R}_0\,\rbrace}
 Numeric scalar. Basic reproduction number of the disease
-of interest. If specified (not \code{NULL}), then \code{beta_mean} is
+of interest. If specified (non-\code{NULL}), then \code{beta_mean} is
 calculated internally as a function of \code{Rnaught} (see Details 1).}
 
-\item{beta_mean}{\mjseqn{\lbrack \langle\beta\rangle \rbrack}
-Numeric scalar. Mean (long-term average) of the seasonally
-forced transmission rate \mjseqn{\beta(t)} expressed per unit
-\mjseqn{\Delta t} per susceptible per infected.
-Ignored if \code{Rnaught} is specified (not \code{NULL}) (see Details 1).}
+\item{beta_mean}{\mjseqn{\lbrace\,\langle\beta\rangle \Delta t\,\rbrace}
+Numeric scalar. Mean (long-term average) of the seasonally forced
+transmission rate \mjseqn{\beta(t)},
+expressed per unit \mjseqn{\Delta t} per susceptible per infected.
+This argument is ignored if \code{Rnaught} is specified (non-\code{NULL})
+(see Details 1).}
 
-\item{alpha}{\mjseqn{\lbrack \alpha \rbrack}
-Numeric scalar. Amplitude of the seasonally forced transmission
-rate \mjseqn{\beta(t)} relative to the mean.}
+\item{alpha}{\mjseqn{\lbrace\,\alpha\,\rbrace}
+Numeric scalar. Amplitude of the seasonally forced transmission rate
+\mjseqn{\beta(t)}, relative to its mean.}
 
-\item{epsilon}{\mjseqn{\lbrack \epsilon \rbrack}
-Numeric scalar. Standard deviation of the random phase shift
-introduced to the seasonally forced transmission rate
-\mjseqn{\beta(t)}.}
-
-\item{ode_control}{A list of optional arguments of \code{\link[deSolve:ode]{deSolve::ode()}},
-specifying options for numerical integration, such as \code{method},
-\code{rtol}, and \code{atol} (see Details 2).}
+\item{epsilon2}{\mjseqn{\lbrace\,\epsilon^2\,\rbrace}
+Numeric scalar. Variance of the normally distributed phase shift
+introduced to the seasonally forced transmission rate \mjseqn{\beta(t)}.}
 }
 \value{
-A list of the arguments of \code{make_par_list()} (excluding
-\code{ode_control}) with values for \code{Rnaught}, \code{beta_mean},
-\code{N0}, \code{S0}, and \code{I0} if not supplied in the function call
+A list of the arguments of \code{make_par_list()} with values for \code{Rnaught},
+\code{beta_mean}, \code{N0}, \code{S0}, and \code{I0} if not supplied in the function call
 (see Details 1 and 2).
 }
 \description{
 \code{make_par_list()} creates a list of parameter values to be passed as
-an argument of \code{\link[=make_data]{make_data()}}, which simulates epidemic time series data
-using an SIR model.
+an argument of \code{\link[=make_data]{make_data()}}.
 }
 \section{Details}{
 \subsection{1. Concordance of \mjseqn{\mathcal{R}_0} and \mjseqn{\langle\beta\rangle}}{
@@ -107,20 +110,21 @@ using an SIR model.
 
 \mjsdeqn{\mathcal{R}_0 = \frac{\nu \widehat{N}_0}{\mu} \cdot \frac{\langle\beta\rangle}{\gamma + \mu}\,,}
 
-where \mjseqn{\gamma = 1 / t_\text{gen}}. This means that it calculates
-\mjseqn{\langle\beta\rangle} as a function of \mjseqn{\mathcal{R}_0}, unless
-the user explicitly sets \code{Rnaught = NULL}, in which case it calculates
-\mjseqn{\mathcal{R}_0} as a function of \mjseqn{\langle\beta\rangle}. Hence
-argument \code{beta_mean} is optional if \code{Rnaught} is specified, but mandatory
-otherwise.
+where \mjseqn{\gamma = 1 / t_\text{gen}}. This means that
+it calculates \mjseqn{\langle\beta\rangle} (\code{beta_mean})
+as a function of \mjseqn{\mathcal{R}_0} (\code{Rnaught}) unless
+\code{Rnaught} is \code{NULL} in the function call, in which case it
+calculates \mjseqn{\mathcal{R}_0} as a function of
+\mjseqn{\langle\beta\rangle}. Hence argument \code{beta_mean}
+is optional if \code{Rnaught} is specified (non-\code{NULL}), but
+mandatory otherwise.
 }
 
 \subsection{2. Missing \mjseqn{N_0}, \mjseqn{S_0}, or \mjseqn{I_0}}{
 
 If \mjseqn{N_0}, \mjseqn{S_0}, or \mjseqn{I_0} (\code{N0}, \code{S0}, or \code{I0})
-is not specified in the function call, then, with a call to
-\code{\link[deSolve:ode]{deSolve::ode()}}, \code{make_par_list()} numerically integrates the
-system of SIR equations
+is \code{NULL} in the function call, then \code{make_par_list()} uses
+\code{\link[deSolve:ode]{deSolve::ode()}} to numerically integrate the system of SIR equations
 
 \mjsdeqn{\begin{align} \frac{\text{d}S}{\text{d}t} &= \nu \widehat{N}_0 - \beta(t) S I - \mu S \cr \frac{\text{d}I}{\text{d}t} &= \beta(t) S I - \gamma I - \mu I \cr \frac{\text{d}R}{\text{d}t} &= \gamma I - \mu R \end{align}}
 
@@ -136,22 +140,15 @@ for the initial state. This is the endemic equilibrium of the above system
 with constant transmission rate \mjseqn{\beta(t) \equiv \langle\beta\rangle},
 scaled by \mjseqn{\mu/\nu} to enforce
 \mjseqn{S(0) + I(0) + R(0) = \widehat{N}_0}
-
-as the initial population size. Then \code{make_par_list()} assigns \code{N0},
-\code{S0}, and \code{I0} (only those not specified in the function call) the
-values
+as the initial population size. Then \code{make_par_list()} assigns
+\code{N0}, \code{S0}, and \code{I0} (only those \code{NULL} in the function call)
+the values
 
 \describe{
 \item{\code{N0}}{\mjseqn{S(t_0) + I(t_0) + R(t_0)}}
 \item{\code{S0}}{\mjseqn{S(t_0)}}
 \item{\code{I0}}{\mjseqn{I(t_0)}}
 }
-
-A warning is issued if the ODE solver cannot complete
-the integration. A different solver may have more success
-(e.g., consider \code{ode_control = list(method = "ode45")}
-to override the default \code{method = "lsoda"}).
-Using different \code{rtol} and \code{atol} might also help.
 }
 }
 

@@ -143,6 +143,7 @@
 #' lines(beta ~ I(t - t[1]), df_fc[!is.na(df_fc$beta), ], col = "red")
 #' 
 #' @references
+#' \insertRef{FineClar82}{fastbeta}
 #' \insertRef{deJo+20}{fastbeta}
 #'
 #' @export

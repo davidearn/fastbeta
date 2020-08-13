@@ -27,7 +27,7 @@
 #' \describe{
 #'   \item{`times`}{A numeric vector equal to `-b:(length(x)-1)`,
 #'     where `b = max(which(delay_dist > 0)) - 1` is the maximum number
-#'     of days from infection to reporting, giving time points (days)
+#'     of days from infection to reporting, giving time points (in days)
 #'     for deconvolved incidence.
 #'   }
 #'   \item{`poisson`}{A numeric matrix. `poisson[i, j]` is the estimate
@@ -47,13 +47,13 @@
 #'     `mean((x - y)^2 / y)`, where `y = inc_rep[b+1:length(x), j]`.
 #'   }
 #'   \item{`it_chi2_lt1`}{An integer scalar equal to `min(which(chi2 < 1)) - 1`
-#'     if `any(chi2 < 1)` is `TRUE` (`NA` otherwise), giving the number of
+#'     if `any(chi2 < 1)` is `TRUE` and `NA` otherwise, giving the number of
 #'     iterations performed before the chi-squared criterion suggested
 #'     by \insertCite{Gold+09;textual}{fastbeta} (namely `chi2 < 1`) was
 #'     satisfied. Note that the corresponding incidence time series is
 #'     `inc[, 1+it_chi2_lt1]`.
 #'   }
-#'   \item{`x_pad`}{A numeric vector, equal to `c(rep(NA, b), x)`.
+#'   \item{`x_pad`}{A numeric vector equal to `c(rep(NA, b), x)`.
 #'     A convenience allowing one to plot the observed reported incidence
 #'     time series with `lines(times, x_pad, ...)`.
 #'   }
@@ -74,8 +74,9 @@
 #' following differences:
 #' * Reported incidence is observed from day 0 to day `length(x)-1`,
 #'   not from day 1 to day `length(x)`.
-#' * Infection and reporting can happen on the same day,
-#'   i.e., `delay_dist[1] > 0` is allowed.
+#' * Infection and reporting can happen on the same day. A delay
+#'   of zero days can be assigned nonzero probability by setting
+#'   `delay_dist[1] > 0`.
 #' * The initial value for the Richardson-Lucy iteration is obtained by
 #'   binning all `sum(x)` cases between day `-b` and day `length(x)-1`,
 #'   where `b = max(which(delay_dist > 0)) - 1` is the maximum number
@@ -89,16 +90,17 @@
 #'   from day `length(x)-s` to day `length(x)-1`.
 #'
 #' ## 2. Noise in deconvolved incidence and choosing when to stop
-#' \insertCite{Gold+09;textual}{fastbeta} suggest to stop iterating once
-#' `chi2 < 1` and to keep the last generated incidence time series
-#' (see `chi2` and `it_chi2_lt1` in Value). The reason for this criterion
-#' is that deconvolved incidence tends to acquire undesired noise after
-#' several iterations, and it is typically better to stop before this
-#' happens; see the supplement to \insertCite{Gold+09;textual}{fastbeta}
-#' for a discussion. However, this criterion is not guaranteed to produce
-#' an optimal result, hence a decision about which incidence time series to
-#' keep should be based on a graphical exploration of the full `deconvolve()`
-#' output (see Examples).
+#' \insertCite{Gold+09;textual}{fastbeta} suggest to stop iterating
+#' once `chi2 < 1` and to keep the last generated incidence time series
+#' (see Value, under `chi2` and `it_chi2_lt1`). The reason for this
+#' criterion is that deconvolved incidence tends to acquire undesired
+#' noise after several iterations, and it is typically better to stop
+#' before this happens;
+#' see the supplement to \insertCite{Gold+09;textual}{fastbeta} for
+#' a discussion. However, this criterion is not guaranteed to produce
+#' an optimal result, hence a decision about which incidence time series
+#' to keep should be based on a graphical exploration of the entire
+#' `deconvolve()` output (see Examples).
 #'
 #' ## 3. Missing values in output
 #' The last `a` rows of `poisson` and `inc` are `NA`, where
@@ -117,7 +119,7 @@
 #' \insertRef{Gold+09}{fastbeta}
 #'
 #' @examples
-#' x <- 420 - (-20:20)^2
+#' x <- 400 * exp(-seq(-2, 2, by = 0.1)^2)
 #' delay_dist <- rep(1 / 11, 11)
 #' p <- 0.5
 #' it_max <- 20

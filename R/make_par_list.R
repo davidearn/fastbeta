@@ -3,62 +3,65 @@
 #'
 #' @description
 #' `make_par_list()` creates a list of parameter values to be passed as
-#' an argument of [make_data()], which simulates epidemic time series data
-#' using an SIR model.
+#' an argument of [make_data()].
 #'
-#' @param dt_weeks \mjseqn{\lbrack \Delta t \rbrack}
+#' @param dt_weeks \mjseqn{\lbrace\,\Delta t\,\rbrace}
 #'   Numeric scalar. Observation interval in weeks.
-#' @param t0 \mjseqn{\lbrack t_0 \rbrack}
+#' @param t0 \mjseqn{\lbrace\,t_0/\Delta t\,\rbrace}
 #'   Numeric scalar. Time of the first observation
 #'   in units \mjseqn{\Delta t}.
-#' @param prep \mjseqn{\lbrack p_\text{rep} \rbrack}
-#'   Numeric scalar. Case reporting probability.
-#' @param trep \mjseqn{\lbrack m \rbrack}
-#'   Numeric scalar. Case reporting delay in units \mjseqn{\Delta t}.
-#' @param hatN0 \mjseqn{\lbrack \widehat{N}_0 \rbrack}
+#' @param prep \mjseqn{\lbrace\,p_\text{rep}\,\rbrace}
+#'   Numeric scalar. Probability that an infection is reported.
+#' @param trep \mjseqn{\lbrace\,t_\text{rep}/\Delta t\,\rbrace}
+#'   Numeric scalar. Mean time between infection and reporting
+#'   in units \mjseqn{\Delta t}.
+#' @param k \mjseqn{\lbrace\,k\,\rbrace}
+#'   Numeric scalar. An optional dispersion parameter.
+#'   If specified, then the time between infection and reporting in
+#'   units \mjseqn{\Delta t} will be modeled by [make_data()] as a
+#'   negative binomially distributed random variable with dispersion
+#'   `k` and mean `trep`. If not, then the delay will be fixed equal
+#'   to `round(trep)`.
+#' @param hatN0 \mjseqn{\lbrace\,\widehat{N}_0\,\rbrace}
 #'   Numeric scalar. Population size at time \mjseqn{t = 0} years.
-#' @param N0 \mjseqn{\lbrack N_0 \rbrack}
+#' @param N0 \mjseqn{\lbrace\,N_0\,\rbrace}
 #'   Numeric scalar. Population size at time \mjseqn{t = t_0}.
 #'   This argument is optional (see Details 2).
-#' @param S0 \mjseqn{\lbrack S_0 \rbrack}
+#' @param S0 \mjseqn{\lbrace\,S_0\,\rbrace}
 #'   Numeric scalar. Number of susceptibles at time \mjseqn{t = t_0}.
 #'   This argument is optional (see Details 2).
-#' @param I0 \mjseqn{\lbrack I_0 \rbrack}
+#' @param I0 \mjseqn{\lbrace\,I_0\,\rbrace}
 #'   Numeric scalar. Number of infecteds at time \mjseqn{t = t_0}.
 #'   This argument is optional (see Details 2).
-#' @param nu \mjseqn{\lbrack \nu \rbrack}
+#' @param nu \mjseqn{\lbrace\,\nu \Delta t\,\rbrace}
 #'   Numeric scalar. Birth rate expressed per unit \mjseqn{\Delta t}
 #'   and relative to \mjseqn{\widehat{N}_0}.
-#' @param mu \mjseqn{\lbrack \mu \rbrack}
+#' @param mu \mjseqn{\lbrace\,\mu \Delta t\,\rbrace}
 #'   Numeric scalar. Natural mortality rate expressed per unit
 #'   \mjseqn{\Delta t} and per capita.
-#' @param tgen \mjseqn{\lbrack t_\text{gen} \rbrack}
+#' @param tgen \mjseqn{\lbrace\,t_\text{gen}/\Delta t\,\rbrace}
 #'   Numeric scalar. Mean generation interval of the disease
 #'   of interest in units \mjseqn{\Delta t}.
-#' @param Rnaught \mjseqn{\lbrack \mathcal{R}_0 \rbrack}
+#' @param Rnaught \mjseqn{\lbrace\,\mathcal{R}_0\,\rbrace}
 #'   Numeric scalar. Basic reproduction number of the disease
-#'   of interest. If specified (not `NULL`), then `beta_mean` is
+#'   of interest. If specified (non-`NULL`), then `beta_mean` is
 #'   calculated internally as a function of `Rnaught` (see Details 1).
-#' @param beta_mean \mjseqn{\lbrack \langle\beta\rangle \rbrack}
-#'   Numeric scalar. Mean (long-term average) of the seasonally
-#'   forced transmission rate \mjseqn{\beta(t)} expressed per unit
-#'   \mjseqn{\Delta t} per susceptible per infected.
-#'   Ignored if `Rnaught` is specified (not `NULL`) (see Details 1).
-#' @param alpha \mjseqn{\lbrack \alpha \rbrack}
-#'   Numeric scalar. Amplitude of the seasonally forced transmission
-#'   rate \mjseqn{\beta(t)} relative to the mean.
-#' @param epsilon \mjseqn{\lbrack \epsilon \rbrack}
-#'   Numeric scalar. Standard deviation of the random phase shift
-#'   introduced to the seasonally forced transmission rate
-#'   \mjseqn{\beta(t)}.
-#' @param ode_control A list of optional arguments of [deSolve::ode()],
-#'   specifying options for numerical integration, such as `method`,
-#'   `rtol`, and `atol` (see Details 2).
+#' @param beta_mean \mjseqn{\lbrace\,\langle\beta\rangle \Delta t\,\rbrace}
+#'   Numeric scalar. Mean (long-term average) of the seasonally forced
+#'   transmission rate \mjseqn{\beta(t)},
+#'   expressed per unit \mjseqn{\Delta t} per susceptible per infected.
+#'   This argument is ignored if `Rnaught` is specified (non-`NULL`)
+#'   (see Details 1).
+#' @param alpha \mjseqn{\lbrace\,\alpha\,\rbrace}
+#'   Numeric scalar. Amplitude of the seasonally forced transmission rate
+#'   \mjseqn{\beta(t)}, relative to its mean.
+#' @param epsilon2 \mjseqn{\lbrace\,\epsilon^2\,\rbrace}
+#'   Numeric scalar. Variance of the normally distributed phase shift
+#'   introduced to the seasonally forced transmission rate \mjseqn{\beta(t)}.
 #'
 #' @return
-#' A list of the arguments of `make_par_list()` (excluding
-#' `ode_control`) with values for `Rnaught`, `beta_mean`,
-#' `N0`, `S0`, and `I0` if not supplied in the function call
+#' A list of the arguments of `make_par_list()` with values for `Rnaught`,
+#' `beta_mean`, `N0`, `S0`, and `I0` if not supplied in the function call
 #' (see Details 1 and 2).
 #'
 #' @details
@@ -70,19 +73,20 @@
 #'
 #' \mjsdeqn{\mathcal{R}_0 = \frac{\nu \widehat{N}_0}{\mu} \cdot \frac{\langle\beta\rangle}{\gamma + \mu}\,,}
 #'
-#' where \mjseqn{\gamma = 1 / t_\text{gen}}. This means that it calculates
-#' \mjseqn{\langle\beta\rangle} as a function of \mjseqn{\mathcal{R}_0}, unless
-#' the user explicitly sets `Rnaught = NULL`, in which case it calculates
-#' \mjseqn{\mathcal{R}_0} as a function of \mjseqn{\langle\beta\rangle}. Hence
-#' argument `beta_mean` is optional if `Rnaught` is specified, but mandatory
-#' otherwise.
+#' where \mjseqn{\gamma = 1 / t_\text{gen}}. This means that
+#' it calculates \mjseqn{\langle\beta\rangle} (`beta_mean`)
+#' as a function of \mjseqn{\mathcal{R}_0} (`Rnaught`) unless
+#' `Rnaught` is `NULL` in the function call, in which case it
+#' calculates \mjseqn{\mathcal{R}_0} as a function of
+#' \mjseqn{\langle\beta\rangle}. Hence argument `beta_mean`
+#' is optional if `Rnaught` is specified (non-`NULL`), but
+#' mandatory otherwise.
 #' 
 #' ## 2. Missing \mjseqn{N_0}, \mjseqn{S_0}, or \mjseqn{I_0}
 #'
 #' If \mjseqn{N_0}, \mjseqn{S_0}, or \mjseqn{I_0} (`N0`, `S0`, or `I0`)
-#' is not specified in the function call, then, with a call to
-#' [deSolve::ode()], `make_par_list()` numerically integrates the
-#' system of SIR equations
+#' is `NULL` in the function call, then `make_par_list()` uses
+#' [deSolve::ode()] to numerically integrate the system of SIR equations
 #'
 #' \mjsdeqn{\begin{align} \frac{\text{d}S}{\text{d}t} &= \nu \widehat{N}_0 - \beta(t) S I - \mu S \cr \frac{\text{d}I}{\text{d}t} &= \beta(t) S I - \gamma I - \mu I \cr \frac{\text{d}R}{\text{d}t} &= \gamma I - \mu R \end{align}}
 #' 
@@ -98,23 +102,16 @@
 #' with constant transmission rate \mjseqn{\beta(t) \equiv \langle\beta\rangle},
 #' scaled by \mjseqn{\mu/\nu} to enforce
 #' \mjseqn{S(0) + I(0) + R(0) = \widehat{N}_0}
-#'
-#' as the initial population size. Then `make_par_list()` assigns `N0`,
-#' `S0`, and `I0` (only those not specified in the function call) the
-#' values
+#' as the initial population size. Then `make_par_list()` assigns
+#' `N0`, `S0`, and `I0` (only those `NULL` in the function call)
+#' the values
 #'
 #' \describe{
 #'   \item{`N0`}{\mjseqn{S(t_0) + I(t_0) + R(t_0)}}
 #'   \item{`S0`}{\mjseqn{S(t_0)}}
 #'   \item{`I0`}{\mjseqn{I(t_0)}}
 #' }
-#'
-#' A warning is issued if the ODE solver cannot complete
-#' the integration. A different solver may have more success
-#' (e.g., consider `ode_control = list(method = "ode45")`
-#' to override the default `method = "lsoda"`).
-#' Using different `rtol` and `atol` might also help.
-#'
+#' 
 #' @examples
 #' # Creates a reasonable list without user input
 #' par_list <- make_par_list()
@@ -137,6 +134,7 @@ make_par_list <- function(dt_weeks  = 1,
                           t0        = 1000 * (365 / 7) / dt_weeks,
                           prep      = 1,
                           trep      = 0,
+                          k         = NULL,
                           hatN0     = 1e06,
                           N0        = NULL,
                           S0        = NULL,
@@ -147,13 +145,8 @@ make_par_list <- function(dt_weeks  = 1,
                           Rnaught   = 20,
                           beta_mean = NULL,
                           alpha     = 0.08,
-                          epsilon   = 0,
-                          ode_control = list(
-                            method = "lsoda",
-                            rtol   = 1e-06,
-                            atol   = 1e-06
-                          )) {
-  # Derived quantities
+                          epsilon2  = 0) {
+  # Some derived quantities
   gamma <- 1 / tgen
   one_year <- (365 / 7) / dt_weeks
 
@@ -164,7 +157,6 @@ make_par_list <- function(dt_weeks  = 1,
   } else {
     Rnaught <- ((nu * hatN0) / mu) * beta_mean / (gamma + mu)
   }
-
 
   # If `N0`, `S0`, or `I0` was not specified, then
   # obtain a value from the state of a system of
@@ -191,39 +183,29 @@ make_par_list <- function(dt_weeks  = 1,
       list(c(dS, dlogI, dR))
     }
 
-    # List of arguments to be passed to `ode()`
-    ode_args <- within(ode_control, {
-      y <- x_init
-      times <- t_out
-      func <- compute_sir_rates
-      parms <- NULL # already in environment
-    })
-
     # Numerically integrate the system of SIR equations
-    df <- as.data.frame(do.call(deSolve::ode, ode_args))
+    df <- as.data.frame(
+      deSolve::ode(
+        y     = x_init,
+        times = t_out,
+        func  = compute_sir_rates,
+        parms = NULL # in enclosing environment of `compute_sir_rates()`
+      )
+    )
 
     # Assign final values of `S+I+R`, `S`, and `I`
+    m <- nrow(df)  
     if (is.null(N0)) {
-      N0 <- sum(df[nrow(df), c("S", "R")]) + exp(df[nrow(df), "logI"])
+      N0 <- df[m, "S"] + exp(df[m, "logI"]) + df[m, "R"]
     }
     if (is.null(S0)) {
-      S0 <- df[nrow(df), "S"]
+      S0 <- df[m, "S"]
     }
     if (is.null(I0)) {
-      I0 <- exp(df[nrow(df), "logI"])
+      I0 <- exp(df[m, "logI"])
     }
 
-    # Warn if `ode()` returned early with unrecoverable error 
-    if (any(is.na(df[nrow(df), ]))) {
-      warning(
-        "`deSolve::ode()` could not complete the integration. ",
-        "Retry with modified `ode_control`."
-      )
-    }
   }
 
-
-  out <- as.list(environment())[names(formals(make_par_list))]
-  out$ode_control <- NULL
-  out
+  as.list(environment())[names(formals(make_par_list))]
 }

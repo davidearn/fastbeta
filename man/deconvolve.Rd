@@ -33,7 +33,7 @@ A list with elements:
 \describe{
 \item{\code{times}}{A numeric vector equal to \code{-b:(length(x)-1)},
 where \code{b = max(which(delay_dist > 0)) - 1} is the maximum number
-of days from infection to reporting, giving time points (days)
+of days from infection to reporting, giving time points (in days)
 for deconvolved incidence.
 }
 \item{\code{poisson}}{A numeric matrix. \code{poisson[i, j]} is the estimate
@@ -53,13 +53,13 @@ statistic corresponding to \code{inc_rep[, j]}, computed as
 \code{mean((x - y)^2 / y)}, where \code{y = inc_rep[b+1:length(x), j]}.
 }
 \item{\code{it_chi2_lt1}}{An integer scalar equal to \code{min(which(chi2 < 1)) - 1}
-if \code{any(chi2 < 1)} is \code{TRUE} (\code{NA} otherwise), giving the number of
+if \code{any(chi2 < 1)} is \code{TRUE} and \code{NA} otherwise, giving the number of
 iterations performed before the chi-squared criterion suggested
 by \insertCite{Gold+09;textual}{fastbeta} (namely \code{chi2 < 1}) was
 satisfied. Note that the corresponding incidence time series is
 \code{inc[, 1+it_chi2_lt1]}.
 }
-\item{\code{x_pad}}{A numeric vector, equal to \code{c(rep(NA, b), x)}.
+\item{\code{x_pad}}{A numeric vector equal to \code{c(rep(NA, b), x)}.
 A convenience allowing one to plot the observed reported incidence
 time series with \code{lines(times, x_pad, ...)}.
 }
@@ -84,8 +84,9 @@ following differences:
 \itemize{
 \item Reported incidence is observed from day 0 to day \code{length(x)-1},
 not from day 1 to day \code{length(x)}.
-\item Infection and reporting can happen on the same day,
-i.e., \code{delay_dist[1] > 0} is allowed.
+\item Infection and reporting can happen on the same day. A delay
+of zero days can be assigned nonzero probability by setting
+\code{delay_dist[1] > 0}.
 \item The initial value for the Richardson-Lucy iteration is obtained by
 binning all \code{sum(x)} cases between day \code{-b} and day \code{length(x)-1},
 where \code{b = max(which(delay_dist > 0)) - 1} is the maximum number
@@ -102,16 +103,17 @@ from day \code{length(x)-s} to day \code{length(x)-1}.
 
 \subsection{2. Noise in deconvolved incidence and choosing when to stop}{
 
-\insertCite{Gold+09;textual}{fastbeta} suggest to stop iterating once
-\code{chi2 < 1} and to keep the last generated incidence time series
-(see \code{chi2} and \code{it_chi2_lt1} in Value). The reason for this criterion
-is that deconvolved incidence tends to acquire undesired noise after
-several iterations, and it is typically better to stop before this
-happens; see the supplement to \insertCite{Gold+09;textual}{fastbeta}
-for a discussion. However, this criterion is not guaranteed to produce
-an optimal result, hence a decision about which incidence time series to
-keep should be based on a graphical exploration of the full \code{deconvolve()}
-output (see Examples).
+\insertCite{Gold+09;textual}{fastbeta} suggest to stop iterating
+once \code{chi2 < 1} and to keep the last generated incidence time series
+(see Value, under \code{chi2} and \code{it_chi2_lt1}). The reason for this
+criterion is that deconvolved incidence tends to acquire undesired
+noise after several iterations, and it is typically better to stop
+before this happens;
+see the supplement to \insertCite{Gold+09;textual}{fastbeta} for
+a discussion. However, this criterion is not guaranteed to produce
+an optimal result, hence a decision about which incidence time series
+to keep should be based on a graphical exploration of the entire
+\code{deconvolve()} output (see Examples).
 }
 
 \subsection{3. Missing values in output}{

@@ -5,68 +5,71 @@
 \title{\loadmathjax
 Simulate epidemic time series data}
 \usage{
-make_data(
-  par_list = make_par_list(),
-  n = 20 * 365/7,
-  with_dem_stoch = TRUE,
-  ode_control = list(method = "lsoda", rtol = 1e-06, atol = 1e-06)
-)
+make_data(par_list = make_par_list(), n = 20 * 365/7, with_dem_stoch = TRUE)
 }
 \arguments{
-\item{par_list}{A list of parameter values containing:
+\item{par_list}{A list of parameter values with elements:
 \describe{
-\item{\code{dt_weeks}}{\mjseqn{\lbrack \Delta t \rbrack}
+\item{\code{dt_weeks}}{\mjseqn{\lbrace\,\Delta t\,\rbrace}
 Numeric scalar. Observation interval in weeks.
 }
-\item{\code{t0}}{\mjseqn{\lbrack t_0 \rbrack}
+\item{\code{t0}}{\mjseqn{\lbrace\,t_0/\Delta t\,\rbrace}
 Numeric scalar. Time of the first observation
 in units \mjseqn{\Delta t}.
 }
-\item{\code{prep}}{\mjseqn{\lbrack p_\text{rep} \rbrack}
-Numeric scalar. Case reporting probability.
+\item{\code{prep}}{\mjseqn{\lbrace\,p_\text{rep}\,\rbrace}
+Numeric scalar. Probability that an infection is reported.
 }
-\item{\code{trep}}{\mjseqn{\lbrack t_\text{rep} \rbrack}
-Numeric scalar. Case reporting delay in units
-\mjseqn{\Delta t}.
+\item{\code{trep}}{\mjseqn{\lbrace\,t_\text{rep}/\Delta t\,\rbrace}
+Numeric scalar. Mean time between infection and reporting
+in units \mjseqn{\Delta t}.
 }
-\item{\code{hatN0}}{\mjseqn{\lbrack \out{\widehat{N}_0} \rbrack}
+\item{\code{k}}{\mjseqn{\lbrace\,k\,\rbrace}
+Numeric scalar. An optional dispersion parameter.
+If specified, then the time between infection and reporting
+in units \mjseqn{\Delta t} will be modeled as a negative
+binomially distributed random variable with dispersion \code{k}
+and mean \code{trep}. If not, then the delay will be fixed equal
+to \code{round(trep)}.
+}
+\item{\code{hatN0}}{\mjseqn{\lbrace\,\out{\widehat{N}_0}\,\rbrace}
 Numeric scalar. Population size at time \mjseqn{t = 0} years.
 }
-\item{\code{N0}}{\mjseqn{\lbrack N_0 \rbrack}
+\item{\code{N0}}{\mjseqn{\lbrace\,N_0\,\rbrace}
 Numeric scalar. Population size at time \mjseqn{t = t_0}.
 }
-\item{\code{S0}}{\mjseqn{\lbrack S_0 \rbrack}
+\item{\code{S0}}{\mjseqn{\lbrace\,S_0\,\rbrace}
 Numeric scalar. Number of susceptibles at time \mjseqn{t = t_0}.
 }
-\item{\code{I0}}{\mjseqn{\lbrack I_0 \rbrack}
+\item{\code{I0}}{\mjseqn{\lbrace\,I_0\,\rbrace}
 Numeric scalar. Number of infecteds at time \mjseqn{t = t_0}.
 }
-\item{\code{nu}}{\mjseqn{\lbrack \nu_\text{c} \rbrack}
+\item{\code{nu}}{\mjseqn{\lbrace\,\nu \Delta t\,\rbrace}
 Numeric scalar. Birth rate expressed
 per unit \mjseqn{\Delta t} and relative to
 \mjseqn{\out{\widehat{N}_0}}.
 }
-\item{\code{mu}}{\mjseqn{\lbrack \mu_\text{c} \rbrack}
+\item{\code{mu}}{\mjseqn{\lbrace\,\mu \Delta t\,\rbrace}
 Numeric scalar. Natural mortality rate expressed
 per unit \mjseqn{\Delta t} and per capita.
 }
-\item{\code{tgen}}{\mjseqn{\lbrack t_\text{gen} \rbrack}
+\item{\code{tgen}}{\mjseqn{\lbrace\,t_\text{gen}/\Delta t\,\rbrace}
 Numeric scalar. Mean generation interval of the disease
 of interest in units \mjseqn{\Delta t}.
 }
-\item{\code{beta_mean}}{\mjseqn{\lbrack \langle\beta\rangle \rbrack}
+\item{\code{beta_mean}}{\mjseqn{\lbrace\,\langle\beta\rangle \Delta t\,\rbrace}
 Numeric scalar. Mean (long-term average) of the seasonally
 forced transmission rate \mjseqn{\beta(t)} expressed per unit
 \mjseqn{\Delta t} per susceptible per infected.
 }
-\item{\code{alpha}}{\mjseqn{\lbrack \alpha \rbrack}
-Numeric scalar. Amplitude of the seasonally forced transmission
-rate \mjseqn{\beta(t)} relative to the mean.
+\item{\code{alpha}}{\mjseqn{\lbrace\,\alpha\,\rbrace}
+Numeric scalar. Amplitude of the seasonally forced
+transmission rate \mjseqn{\beta(t)} relative to the mean.
 }
-\item{\code{epsilon}}{\mjseqn{\lbrack \epsilon \rbrack}
-Numeric scalar. Standard deviation of the random phase shift
-introduced to the seasonally forced transmission rate
-\mjseqn{\beta(t)}.
+\item{\code{epsilon2}}{\mjseqn{\lbrace\,\epsilon^2\,\rbrace}
+Numeric scalar. Variance of the normally distributed
+phase shift introduced to the seasonally forced
+transmission rate \mjseqn{\beta(t)}.
 }
 }}
 
@@ -78,15 +81,11 @@ observations. (If numeric but not integer, then \code{n} is replaced by
 \item{with_dem_stoch}{Logical scalar. If \code{TRUE}, then the simulation
 is generated using \code{\link[adaptivetau:ssa.adaptivetau]{adaptivetau::ssa.adaptivetau()}}. Otherwise, it
 is generated using \code{\link[deSolve:ode]{deSolve::ode()}} (see Details).}
-
-\item{ode_control}{A list of optional arguments of \code{\link[deSolve:ode]{deSolve::ode()}},
-specifying options for numerical integration, such as \code{method},
-\code{rtol}, and \code{atol}. Not used if \code{with_dem_stoch = TRUE} (see Details).}
 }
 \value{
-A data frame with \code{n + 1} rows corresponding to equally spaced times
-\mjseqn{t_k = t_0 + k \Delta t} (for \mjseqn{k = 0, \ldots, n}), and
-numeric columns:
+A data frame with \code{n + 1} rows corresponding to equally spaced time
+points \mjseqn{t_i = t_0 + i \Delta t} (for \mjseqn{i = 0, \ldots, n}),
+and numeric columns:
 
 \describe{
 \item{\code{t}}{Time in units \mjseqn{\Delta t}. Equal to \code{par_list$t0 + 0:n}.}
@@ -98,7 +97,7 @@ per unit \mjseqn{\Delta t} per susceptible per infected,
 without environmental noise.
 }
 \item{\code{beta_phi}}{Seasonally forced transmission rate expressed
-per unit \mjseqn{\Delta t}{dt} per susceptible per infected,
+per unit \mjseqn{\Delta t} per susceptible per infected,
 with environmental noise.
 }
 \item{\code{N}}{Population size.}
@@ -107,18 +106,19 @@ with environmental noise.
 \item{\code{Z}}{Incidence. \code{Z[i]} is the number of infections
 between times \code{t[i-1]} and \code{t[i]}.
 }
+\item{\code{Zrep}}{Incidence conditional on reporting.
+\code{Zrep[i]} is the number of infections between times \code{t[i-1]} and \code{t[i]}
+that are eventually reported.
+}
 \item{\code{C}}{Reported incidence. \code{C[i]} is the number of infections
-reported between times \code{t[i-1]} and \code{t[i]}, equal to the number
-of successes in \code{Z[i-round(par_list$trep)]} independent Bernoulli
-trials, each with success probability \code{par_list$prep}.
+reported between times \code{t[i-1]} and \code{t[i]}.
 }
 \item{\code{B}}{Births. \code{B[i]} is the number of births between times
-\code{t[i-1]} and \code{t[i]}.
+\code{t[i-1]} and \code{t[i]}. Equal to \code{with(par_list, rep(nu * hatN0, n + 1))}
+if \code{with_dem_stoch = FALSE}.
 }
 \item{\code{mu}}{Per capita natural mortality rate. \code{mu[i]} is rate
-at time \code{t[i]}. Equal to \code{rep(par_list$mu, n + 1)} and included
-for convenience, mainly because \code{\link[=estimate_beta_si]{estimate_beta_si()}} requires
-a data frame with columns \code{Z}, \code{B}, and \code{mu}.
+at time \code{t[i]}. Equal to \code{with(par_list, rep(mu, n + 1))}.
 }
 }
 
@@ -129,14 +129,15 @@ preceded by a call to \code{set.seed()}.
 \description{
 \code{make_data()} simulates epidemic time series data using a system of
 SIR equations and a supplied list of parameter values. Observations
-are recorded at equally spaced time points \mjseqn{t_k = t_0 + k \Delta t}
-(for \mjseqn{k = 0, \ldots, n}). Among other things, the simulation model
+are recorded at equally spaced time points \mjseqn{t_i = t_0 + i \Delta t}
+(for \mjseqn{i = 0, \ldots, n}). Among other things, the simulation model
 assumes:
 \itemize{
 \item A seasonally forced transmission rate.
 \item Constant birth and per capita natural mortality rates.
-\item Cases reported after a fixed delay since infection,
-with a fixed probability.
+\item Infections reported with a fixed probability after a
+delay that either (i) is fixed or (ii) follows a
+negative binomial distribution.
 }
 }
 \section{Details}{
@@ -152,7 +153,7 @@ Here, \mjseqn{\gamma = 1 / t_\text{gen}},
 
 \mjsdeqn{\beta_\phi(t) = \langle\beta\rangle \left\lbrack 1 + \alpha \cos\left(\frac{2 \pi t}{\text{1 year}} + \phi(t;\epsilon)\right) \right\rbrack\,,}
 
-and \mjseqn{\phi(t;\epsilon)} is the linear interpolant of noise
+and \mjseqn{\phi(t;\epsilon^2)} is the linear interpolant of noise
 \mjseqn{\lbrace(t_k;\Phi_k)\rbrace_{k=0}^n} with
 
 \mjsdeqn{\Phi_k \sim \mathrm{Normal}(0,\epsilon^2)\,,}
@@ -160,7 +161,7 @@ and \mjseqn{\phi(t;\epsilon)} is the linear interpolant of noise
 modeling \strong{environmental stochasticity}.
 
 \code{make_data()} generates observations of the above system at equally spaced
-times \mjseqn{t_k = t_0 + k \Delta t} (for \mjseqn{k = 0, \ldots, n}) by
+times \mjseqn{t_i = t_0 + i \Delta t} (for \mjseqn{i = 0, \ldots, n}) by
 either
 (i) numerically integrating the ODE using \code{\link[deSolve:ode]{deSolve::ode()}}
 (\code{with_dem_stoch = FALSE}), or
@@ -178,18 +179,32 @@ the number of infecteds is one.
 
 \code{make_data()} calculates births \mjseqn{B} and incidence \mjseqn{Z}
 from cumulative births \mjseqn{B_\text{cum}} and cumulative incidence
-\mjseqn{Z_\text{cum}} via first differences,
+\mjseqn{Z_\text{cum}} via first differences:
 
-\mjsdeqn{\begin{align} B(t_k) &= B_\text{cum}(t_k) - B_\text{cum}(t_{k-1}), \cr Z(t_k) &= Z_\text{cum}(t_k) - Z_\text{cum}(t_{k-1}), \end{align}}
+\mjsdeqn{\begin{align} B(t_i) &= B_\text{cum}(t_i) - B_\text{cum}(t_{i-1}), \cr Z(t_i) &= Z_\text{cum}(t_i) - Z_\text{cum}(t_{i-1}). \end{align}}
 
-then simulates reported incidence \mjseqn{C} from
-incidence \mjseqn{Z} via lagged binomial sampling,
+It then does binomial sampling to generate, for each observation
+of \mjseqn{Z}, a number of infections that is eventually reported:
 
-\mjsdeqn{C(t_{k+r}) \sim \mathrm{Binomial}\big(Z(t_k),p_\text{rep}\big)\,,}
+\mjsdeqn{Z_\text{rep}(t_i) \sim \mathrm{Binomial}\big(Z(t_i),p_\text{rep}\big)\,.}
 
-modeling \strong{observation error} (random under-reporting of cases with
-a delay between infection and reporting). Here,
-\mjseqn{r = \mathrm{nint}(t_\text{rep} / \Delta t)}.
+Finally, it generates reported incidence \mjseqn{C} by sampling
+from a reporting delay distribution and binning infections counted
+by \mjseqn{Z_\text{rep}} forward in time. Compared to \mjseqn{Z},
+\mjseqn{C} models \strong{observation error}, i.e., under-reporting of
+cases with a delay between infection and reporting. If \code{par_list$k}
+is non-\code{NULL}, then the reporting delay in units \mjseqn{\Delta t}
+is modeled as
+
+\mjsdeqn{D \sim \mathrm{NegativeBinomial}\left(k,\frac{k}{m+k}\right)\,,}
+
+where \mjseqn{k} is a dispersion parameter and
+\mjseqn{m = t_\text{rep}/\Delta t} is the mean reporting delay.
+In this case, infections counted in \mjseqn{Z_\text{rep}(t_i)}
+are reported in \mjseqn{C(t_{i+D})}. On the other hand, if
+\code{par_list$k} is \code{NULL}, then the reporting delay is fixed equal
+to \mjseqn{d = \mathrm{nint}(t_\text{rep}/\Delta t)}, and so
+\mjseqn{C(t_{i+d}) = Z_\text{rep}(t_i)\,.}
 }
 }
 
@@ -206,8 +221,10 @@ head(df)
 # Stochastic simulation
 par_list <- make_par_list(
   dt_weeks = 1,
-  epsilon = 0.5, # environmental stochasticity
-  prep = 0.5 # random under-reporting of cases
+  epsilon2 = 1, # environmental stochasticity
+  prep = 0.5, # random under-reporting of infections
+  trep = 2, # random reporting delays
+  k = 4
 )
 set.seed(2146)
 df <- make_data(
