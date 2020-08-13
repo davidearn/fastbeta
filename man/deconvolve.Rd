@@ -135,7 +135,7 @@ appropriately.
 }
 
 \examples{
-x <- 420 - (-20:20)^2
+x <- 400 * exp(-seq(-2, 2, by = 0.1)^2)
 delay_dist <- rep(1 / 11, 11)
 p <- 0.5
 it_max <- 20

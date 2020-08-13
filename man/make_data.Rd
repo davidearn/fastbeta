@@ -221,7 +221,7 @@ head(df)
 # Stochastic simulation
 par_list <- make_par_list(
   dt_weeks = 1,
-  epsilon2 = 1, # environmental stochasticity
+  epsilon2 = 1, # environmental sxtochasticity
   prep = 0.5, # random under-reporting of infections
   trep = 2, # random reporting delays
   k = 4

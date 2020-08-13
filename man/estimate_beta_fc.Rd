@@ -149,10 +149,13 @@ head(df_fc)
 # because the FC method ignores susceptible mortality
 plot(S ~ I(t - t[1]), df, type = "l", ylim = c(43, 83) * 1e03)
 lines(S ~ I(t - t[1]), df_fc[!is.na(df_fc$S), ], col = "red")
+plot(I ~ I(t - t[1]), df, type = "l", ylim = c(0, 3) * 1e03)
+lines(I ~ I(t - t[1]), df_fc[!is.na(df_fc$I), ], col = "red")
 plot(beta ~ I(t - t[1]), df, type = "l", ylim = c(0.5, 1.2) * 1e-05)
 lines(beta ~ I(t - t[1]), df_fc[!is.na(df_fc$beta), ], col = "red")
 
 }
 \references{
+\insertRef{FineClar82}{fastbeta}
 \insertRef{deJo+20}{fastbeta}
 }
