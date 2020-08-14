@@ -31,7 +31,7 @@ fastbeta <- function(df       = data.frame(),
   # `?estimate_beta_si`.
   df[c("Z", "B", "mu")] <- mapply(impute_na,
     x = df[c("Z", "B", "mu")],
-    zeros_as_na = c(TRUE, FALSE, FALSE)
+    zero_as_na = c(TRUE, FALSE, FALSE)
   )
   out <- estimate_beta_si(df, par_list)
 
