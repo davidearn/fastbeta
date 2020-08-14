@@ -12,8 +12,7 @@ compute_rrmse(x, xhat, na_rm = FALSE)
 \item{xhat}{Numeric vector with length equal to \code{length(x)}.
 An estimate of \code{x}.}
 
-\item{na_rm}{Logical. If \code{TRUE}, then missing and infinite values
-are ignored.}
+\item{na_rm}{Logical. If \code{TRUE}, then missing values are ignored.}
 }
 \value{
 A numeric scalar indicating the RRMSE in \code{xhat}, with exceptions

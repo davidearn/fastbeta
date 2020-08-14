@@ -2,13 +2,16 @@
 
 ### Code
 
-* `estimate_beta()` wrapper
-* smoothing wrapper
-* print, plot, summary methods
+* useful `fastbeta()` output other than data frame?
+* loess wrapper
+* print, plot, summary methods for class "fastbeta"
 
 ### Debug
 
+* no obvious bugs at the moment
+
 ### Documentation
 
-* `impute()` functions
+* `fastbeta()`
+* `deconvolve()` algorithm with mathjaxr
 * vignette

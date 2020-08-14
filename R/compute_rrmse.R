@@ -7,8 +7,7 @@
 #' @param x Numeric vector.
 #' @param xhat Numeric vector with length equal to `length(x)`.
 #'   An estimate of `x`.
-#' @param na_rm Logical. If `TRUE`, then missing and infinite values
-#'   are ignored.
+#' @param na_rm Logical. If `TRUE`, then missing values are ignored.
 #'
 #' @return
 #' A numeric scalar indicating the RRMSE in `xhat`, with exceptions
@@ -36,6 +35,5 @@ compute_rrmse <- function(x, xhat, na_rm = FALSE) {
     return(NA)
   }
   mse <- sum((xhat[cc] - x[cc])^2) / sum(cc)
-  rrmse <- sqrt(mse) / mean(x[cc])
-  rrmse
+  sqrt(mse) / mean(x[cc])
 }

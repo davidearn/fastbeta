@@ -163,7 +163,5 @@ estimate_beta_s <- function(df       = data.frame(),
     }
   )
 
-  attr(df, "call") <- match.call()
-  attr(df, "arg_list") <- arg_list
-  df
+  structure(df, call = match.call(), arg_list = arg_list)
 }

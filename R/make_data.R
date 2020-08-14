@@ -430,9 +430,7 @@ make_data <- function(par_list       = make_par_list(),
     
   df <- df[, c("t", "t_years", "beta", "beta_phi",
                "N", "S", "I", "Z", "Zrep", "C", "B", "mu")]
-  attr(df, "call") <- match.call()
-  attr(df, "arg_list") <- arg_list
-  df
+  structure(df, call = match.call(), arg_list = arg_list)
 }
 
 # For `R CMD check`

@@ -243,7 +243,5 @@ deconvolve <- function(x,
     x_pad   = c(rep(NA, b), x[b+1:N]),
     it_chi2_lt1 = if (any(chi2 < 1)) min(which(chi2 < 1)) - 1 else NA
   )
-  attr(out, "call") <- match.call()
-  attr(out, "arg_list") <- arg_list
-  out
+  structure(out, call = match.call(), arg_list = arg_list)
 }
