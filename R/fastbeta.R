@@ -1,3 +1,15 @@
+#' Estimate time-varying transmission rates
+#'
+#' @description
+#' Generates a fastbeta object.
+#'
+#' @param df A data frame with time series data.
+#' @param par_list A list of parameter values.
+#'
+#' @return
+#' A fastbeta object.
+#'
+#' @export
 fastbeta <- function(df       = data.frame(),
                      par_list = list()) {
   if (!is.data.frame(df)) {

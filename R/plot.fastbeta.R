@@ -1,4 +1,16 @@
-plot.fastbeta <- function(x) {
+#' Plot a fastbeta object
+#'
+#' @description
+#' Plots a fastbeta object.
+#'
+#' @param x A fastbeta object.
+#' @param ... Unused optional arguments.
+#'
+#' @return
+#' `NULL` is returned invisibly.
+#'
+#' @export
+plot.fastbeta <- function(x, ...) {
   if (!inherits(x, "fastbeta")) {
     stop("`x` must be a fastbeta object.")
   }

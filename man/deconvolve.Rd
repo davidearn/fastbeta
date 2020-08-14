@@ -2,8 +2,7 @@
 % Please edit documentation in R/deconvolve.R
 \name{deconvolve}
 \alias{deconvolve}
-\title{\loadmathjax
-Deconvolve a time series of reported incidence}
+\title{Deconvolve a time series of reported incidence}
 \usage{
 deconvolve(x, delay_dist = c(1), p = 1, it_max = 20L)
 }

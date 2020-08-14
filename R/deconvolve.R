@@ -1,4 +1,3 @@
-#' \loadmathjax
 #' Deconvolve a time series of reported incidence
 #'
 #' @description
