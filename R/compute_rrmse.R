@@ -1,4 +1,4 @@
-#' Compute RRMSE in a vector
+#' @title Compute RRMSE in a vector
 #'
 #' @description
 #' `compute_rrmse()` computes the relative root mean square error

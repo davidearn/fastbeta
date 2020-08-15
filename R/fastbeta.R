@@ -3,6 +3,9 @@
 #' @description
 #' Generates a fastbeta object.
 #'
+#' @details
+#' Details to come.
+#'
 #' @param df A data frame with time series data.
 #' @param par_list A list of parameter values.
 #'
@@ -10,8 +13,7 @@
 #' A fastbeta object.
 #'
 #' @export
-fastbeta <- function(df       = data.frame(),
-                     par_list = list()) {
+fastbeta <- function(df, par_list) {
   if (!is.data.frame(df)) {
     stop("`df` must be a data frame.")  
   } else if (!all(c("t", "Z", "B", "mu") %in% names(df))) {

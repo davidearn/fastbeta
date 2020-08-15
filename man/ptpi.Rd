@@ -188,5 +188,5 @@ ptpi_out$S0
 
 }
 \references{
-\insertRef{deJo+20}{fastbeta}
+\insertRef{Jaga+20}{fastbeta}
 }

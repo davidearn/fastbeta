@@ -170,7 +170,7 @@
 #' (ptpi_out$S0_final - df$S[1]) / df$S[1]
 #' 
 #' @references
-#' \insertRef{deJo+20}{fastbeta}
+#' \insertRef{Jaga+20}{fastbeta}
 #'
 #' @export
 ptpi <- function(df = data.frame(), par_list = list(),

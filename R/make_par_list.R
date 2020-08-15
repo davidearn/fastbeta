@@ -5,6 +5,54 @@
 #' `make_par_list()` creates a list of parameter values to be passed as
 #' an argument of [make_data()].
 #'
+#' @details
+#' # Details
+#'
+#' ## 1. Concordance of \mjseqn{\mathcal{R}_0} and \mjseqn{\langle\beta\rangle}
+#' 
+#' `make_par_list()` enforces the identity
+#'
+#' \mjsdeqn{\mathcal{R}_0 = \frac{\nu \widehat{N}_0}{\mu} \cdot \frac{\langle\beta\rangle}{\gamma + \mu}\,,}
+#'
+#' where \mjseqn{\gamma = 1 / t_\text{gen}}. This means that
+#' it calculates \mjseqn{\langle\beta\rangle} (`beta_mean`)
+#' as a function of \mjseqn{\mathcal{R}_0} (`Rnaught`) unless
+#' `Rnaught` is `NULL` in the function call, in which case it
+#' calculates \mjseqn{\mathcal{R}_0} as a function of
+#' \mjseqn{\langle\beta\rangle}. Hence argument `beta_mean`
+#' is optional if `Rnaught` is specified (non-`NULL`), but
+#' mandatory otherwise.
+#' 
+#' ## 2. Missing \mjseqn{N_0}, \mjseqn{S_0}, or \mjseqn{I_0}
+#'
+#' If \mjseqn{N_0}, \mjseqn{S_0}, or \mjseqn{I_0} (`N0`, `S0`, or `I0`)
+#' is `NULL` in the function call, then `make_par_list()` uses
+#' [deSolve::ode()] to numerically integrate the system of SIR equations
+#'
+#' \mjsdeqn{\begin{align} \frac{\text{d}S}{\text{d}t} &= \nu \widehat{N}_0 - \beta(t) S I - \mu S \cr \frac{\text{d}I}{\text{d}t} &= \beta(t) S I - \gamma I - \mu I \cr \frac{\text{d}R}{\text{d}t} &= \gamma I - \mu R \end{align}}
+#' 
+#' with \mjseqn{\gamma = 1 / t_\text{gen}} and
+#' 
+#' \mjsdeqn{\beta(t) = \langle\beta\rangle \left\lbrack 1 + \alpha \cos\left(\frac{2 \pi t}{\text{1 year}}\right) \right\rbrack}
+#' 
+#' between times \mjseqn{t = 0} years and \mjseqn{t = t_0}, taking
+#'
+#' \mjsdeqn{\begin{bmatrix} S(0) \cr I(0) \cr R(0) \end{bmatrix} = \widehat{N}_0 \begin{bmatrix} \frac{1}{\mathcal{R}_0} \cr \big(1 - \frac{1}{\mathcal{R}_0}\big) \frac{\mu}{\gamma + \mu} \cr \big(1 - \frac{1}{\mathcal{R}_0}\big) \frac{\gamma}{\gamma + \mu} \end{bmatrix}}
+#'
+#' for the initial state. This is the endemic equilibrium of the above system
+#' with constant transmission rate \mjseqn{\beta(t) \equiv \langle\beta\rangle},
+#' scaled by \mjseqn{\mu/\nu} to enforce
+#' \mjseqn{S(0) + I(0) + R(0) = \widehat{N}_0}
+#' as the initial population size. Then `make_par_list()` assigns
+#' `N0`, `S0`, and `I0` (only those `NULL` in the function call)
+#' the values
+#'
+#' \describe{
+#'   \item{`N0`}{\mjseqn{S(t_0) + I(t_0) + R(t_0)}}
+#'   \item{`S0`}{\mjseqn{S(t_0)}}
+#'   \item{`I0`}{\mjseqn{I(t_0)}}
+#' }
+#'
 #' @param dt_weeks \mjseqn{\lbrace\,\Delta t\,\rbrace}
 #'   Numeric scalar. Observation interval in weeks.
 #' @param t0 \mjseqn{\lbrace\,t_0/\Delta t\,\rbrace}
@@ -63,54 +111,6 @@
 #' A list of the arguments of `make_par_list()` with values for `Rnaught`,
 #' `beta_mean`, `N0`, `S0`, and `I0` if not supplied in the function call
 #' (see Details 1 and 2).
-#'
-#' @details
-#' # Details
-#'
-#' ## 1. Concordance of \mjseqn{\mathcal{R}_0} and \mjseqn{\langle\beta\rangle}
-#' 
-#' `make_par_list()` enforces the identity
-#'
-#' \mjsdeqn{\mathcal{R}_0 = \frac{\nu \widehat{N}_0}{\mu} \cdot \frac{\langle\beta\rangle}{\gamma + \mu}\,,}
-#'
-#' where \mjseqn{\gamma = 1 / t_\text{gen}}. This means that
-#' it calculates \mjseqn{\langle\beta\rangle} (`beta_mean`)
-#' as a function of \mjseqn{\mathcal{R}_0} (`Rnaught`) unless
-#' `Rnaught` is `NULL` in the function call, in which case it
-#' calculates \mjseqn{\mathcal{R}_0} as a function of
-#' \mjseqn{\langle\beta\rangle}. Hence argument `beta_mean`
-#' is optional if `Rnaught` is specified (non-`NULL`), but
-#' mandatory otherwise.
-#' 
-#' ## 2. Missing \mjseqn{N_0}, \mjseqn{S_0}, or \mjseqn{I_0}
-#'
-#' If \mjseqn{N_0}, \mjseqn{S_0}, or \mjseqn{I_0} (`N0`, `S0`, or `I0`)
-#' is `NULL` in the function call, then `make_par_list()` uses
-#' [deSolve::ode()] to numerically integrate the system of SIR equations
-#'
-#' \mjsdeqn{\begin{align} \frac{\text{d}S}{\text{d}t} &= \nu \widehat{N}_0 - \beta(t) S I - \mu S \cr \frac{\text{d}I}{\text{d}t} &= \beta(t) S I - \gamma I - \mu I \cr \frac{\text{d}R}{\text{d}t} &= \gamma I - \mu R \end{align}}
-#' 
-#' with \mjseqn{\gamma = 1 / t_\text{gen}} and
-#' 
-#' \mjsdeqn{\beta(t) = \langle\beta\rangle \left\lbrack 1 + \alpha \cos\left(\frac{2 \pi t}{\text{1 year}}\right) \right\rbrack}
-#' 
-#' between times \mjseqn{t = 0} years and \mjseqn{t = t_0}, taking
-#'
-#' \mjsdeqn{\begin{bmatrix} S(0) \cr I(0) \cr R(0) \end{bmatrix} = \widehat{N}_0 \begin{bmatrix} \frac{1}{\mathcal{R}_0} \cr \big(1 - \frac{1}{\mathcal{R}_0}\big) \frac{\mu}{\gamma + \mu} \cr \big(1 - \frac{1}{\mathcal{R}_0}\big) \frac{\gamma}{\gamma + \mu} \end{bmatrix}}
-#'
-#' for the initial state. This is the endemic equilibrium of the above system
-#' with constant transmission rate \mjseqn{\beta(t) \equiv \langle\beta\rangle},
-#' scaled by \mjseqn{\mu/\nu} to enforce
-#' \mjseqn{S(0) + I(0) + R(0) = \widehat{N}_0}
-#' as the initial population size. Then `make_par_list()` assigns
-#' `N0`, `S0`, and `I0` (only those `NULL` in the function call)
-#' the values
-#'
-#' \describe{
-#'   \item{`N0`}{\mjseqn{S(t_0) + I(t_0) + R(t_0)}}
-#'   \item{`S0`}{\mjseqn{S(t_0)}}
-#'   \item{`I0`}{\mjseqn{I(t_0)}}
-#' }
 #' 
 #' @examples
 #' # Creates a reasonable list without user input

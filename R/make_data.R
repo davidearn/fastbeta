@@ -13,6 +13,74 @@
 #'   delay that either (i) is fixed or (ii) follows a
 #'   negative binomial distribution.
 #'
+#' @details
+#' # Details
+#' 
+#' ## Simulation model
+#' 
+#' `make_data()` simulates epidemic time series data using the system of
+#' SIR equations below, which includes a fourth equation for cumulative
+#' births and a fifth equation for cumulative incidence:
+#'
+#' \mjseqn{\out{\begin{align} \frac{\text{d}S}{\text{d}t} &= \nu \widehat{N}_0 - \beta_\phi(t) S I - \mu S\,, \cr \frac{\text{d}I}{\text{d}t} &= \beta_\phi(t) S I - \gamma I - \mu I\,, \cr \frac{\text{d}R}{\text{d}t} &= \gamma I - \mu R\,, \cr \frac{\text{d}B_\text{cum}}{\text{d}t} &= \nu \widehat{N}_0\,, \cr \frac{\text{d}Z_\text{cum}}{\text{d}t} &= \beta_\phi(t) S I\,. \end{align}}}
+#' 
+#' Here, \mjseqn{\gamma = 1 / t_\text{gen}},
+#' 
+#' \mjsdeqn{\beta_\phi(t) = \langle\beta\rangle \left\lbrack 1 + \alpha \cos\left(\frac{2 \pi t}{\text{1 year}} + \phi(t;\epsilon)\right) \right\rbrack\,,}
+#' 
+#' and \mjseqn{\phi(t;\epsilon^2)} is the linear interpolant of noise
+#' \mjseqn{\lbrace(t_k;\Phi_k)\rbrace_{k=0}^n} with
+#' 
+#' \mjsdeqn{\Phi_k \sim \mathrm{Normal}(0,\epsilon^2)\,,}
+#'
+#' modeling **environmental stochasticity**.
+#'
+#' `make_data()` generates observations of the above system at equally spaced
+#' times \mjseqn{t_i = t_0 + i \Delta t} (for \mjseqn{i = 0, \ldots, n}) by
+#' either
+#' (i) numerically integrating the ODE using [deSolve::ode()]
+#' (`with_dem_stoch = FALSE`), or
+#' (ii) realizing a corresponding continuous-time stochastic process using
+#' [adaptivetau::ssa.adaptivetau()] (`with_dem_stoch = TRUE`).
+#' Both methods use initial state
+#'
+#' \mjsdeqn{\begin{bmatrix} S(t_0) \cr I(t_0) \cr R(t_0) \cr B_\text{cum}(t_0) \cr Z_\text{cum}(t_0) \end{bmatrix} = \begin{bmatrix} S_0 \cr I_0 \cr N_0 - S_0 - I_0 \cr 0 \cr 0 \end{bmatrix}\,.}
+#' 
+#' The latter method defines event probabilities as proportional to
+#' terms in the ODE and models **demographic stochasticity**. Disease
+#' fadeout in simulations with demographic stochasticity is prevented
+#' by setting the probability of infected decrease to zero whenever
+#' the number of infecteds is one.
+#'
+#' `make_data()` calculates births \mjseqn{B} and incidence \mjseqn{Z}
+#' from cumulative births \mjseqn{B_\text{cum}} and cumulative incidence
+#' \mjseqn{Z_\text{cum}} via first differences:
+#'
+#' \mjsdeqn{\begin{align} B(t_i) &= B_\text{cum}(t_i) - B_\text{cum}(t_{i-1}), \cr Z(t_i) &= Z_\text{cum}(t_i) - Z_\text{cum}(t_{i-1}). \end{align}}
+#'
+#' It then does binomial sampling to generate, for each observation
+#' of \mjseqn{Z}, a number of infections that is eventually reported:
+#'
+#' \mjsdeqn{Z_\text{rep}(t_i) \sim \mathrm{Binomial}\big(Z(t_i),p_\text{rep}\big)\,.}
+#' 
+#' Finally, it generates reported incidence \mjseqn{C} by sampling
+#' from a reporting delay distribution and binning infections counted
+#' by \mjseqn{Z_\text{rep}} forward in time. Compared to \mjseqn{Z},
+#' \mjseqn{C} models **observation error**, i.e., under-reporting of
+#' cases with a delay between infection and reporting. If `par_list$k`
+#' is non-`NULL`, then the reporting delay in units \mjseqn{\Delta t}
+#' is modeled as
+#'
+#' \mjsdeqn{D \sim \mathrm{NegativeBinomial}\left(k,\frac{k}{m+k}\right)\,,}
+#'
+#' where \mjseqn{k} is a dispersion parameter and
+#' \mjseqn{m = t_\text{rep}/\Delta t} is the mean reporting delay.
+#' In this case, infections counted in \mjseqn{Z_\text{rep}(t_i)}
+#' are reported in \mjseqn{C(t_{i+D})}. On the other hand, if
+#' `par_list$k` is `NULL`, then the reporting delay is fixed equal
+#' to \mjseqn{d = \mathrm{nint}(t_\text{rep}/\Delta t)}, and so
+#' \mjseqn{C(t_{i+d}) = Z_\text{rep}(t_i)\,.}
+#'
 #' @param par_list A list of parameter values with elements:
 #'   \describe{
 #'     \item{`dt_weeks`}{\mjseqn{\lbrace\,\Delta t\,\rbrace}
@@ -129,74 +197,6 @@
 #' reproducible with `eval(call)` or `do.call(make_data, arg_list)`,
 #' preceded by a call to `set.seed()`.
 #'
-#' @details
-#' # Details
-#' 
-#' ## Simulation model
-#' 
-#' `make_data()` simulates epidemic time series data using the system of
-#' SIR equations below, which includes a fourth equation for cumulative
-#' births and a fifth equation for cumulative incidence:
-#'
-#' \mjseqn{\out{\begin{align} \frac{\text{d}S}{\text{d}t} &= \nu \widehat{N}_0 - \beta_\phi(t) S I - \mu S\,, \cr \frac{\text{d}I}{\text{d}t} &= \beta_\phi(t) S I - \gamma I - \mu I\,, \cr \frac{\text{d}R}{\text{d}t} &= \gamma I - \mu R\,, \cr \frac{\text{d}B_\text{cum}}{\text{d}t} &= \nu \widehat{N}_0\,, \cr \frac{\text{d}Z_\text{cum}}{\text{d}t} &= \beta_\phi(t) S I\,. \end{align}}}
-#' 
-#' Here, \mjseqn{\gamma = 1 / t_\text{gen}},
-#' 
-#' \mjsdeqn{\beta_\phi(t) = \langle\beta\rangle \left\lbrack 1 + \alpha \cos\left(\frac{2 \pi t}{\text{1 year}} + \phi(t;\epsilon)\right) \right\rbrack\,,}
-#' 
-#' and \mjseqn{\phi(t;\epsilon^2)} is the linear interpolant of noise
-#' \mjseqn{\lbrace(t_k;\Phi_k)\rbrace_{k=0}^n} with
-#' 
-#' \mjsdeqn{\Phi_k \sim \mathrm{Normal}(0,\epsilon^2)\,,}
-#'
-#' modeling **environmental stochasticity**.
-#'
-#' `make_data()` generates observations of the above system at equally spaced
-#' times \mjseqn{t_i = t_0 + i \Delta t} (for \mjseqn{i = 0, \ldots, n}) by
-#' either
-#' (i) numerically integrating the ODE using [deSolve::ode()]
-#' (`with_dem_stoch = FALSE`), or
-#' (ii) realizing a corresponding continuous-time stochastic process using
-#' [adaptivetau::ssa.adaptivetau()] (`with_dem_stoch = TRUE`).
-#' Both methods use initial state
-#'
-#' \mjsdeqn{\begin{bmatrix} S(t_0) \cr I(t_0) \cr R(t_0) \cr B_\text{cum}(t_0) \cr Z_\text{cum}(t_0) \end{bmatrix} = \begin{bmatrix} S_0 \cr I_0 \cr N_0 - S_0 - I_0 \cr 0 \cr 0 \end{bmatrix}\,.}
-#' 
-#' The latter method defines event probabilities as proportional to
-#' terms in the ODE and models **demographic stochasticity**. Disease
-#' fadeout in simulations with demographic stochasticity is prevented
-#' by setting the probability of infected decrease to zero whenever
-#' the number of infecteds is one.
-#'
-#' `make_data()` calculates births \mjseqn{B} and incidence \mjseqn{Z}
-#' from cumulative births \mjseqn{B_\text{cum}} and cumulative incidence
-#' \mjseqn{Z_\text{cum}} via first differences:
-#'
-#' \mjsdeqn{\begin{align} B(t_i) &= B_\text{cum}(t_i) - B_\text{cum}(t_{i-1}), \cr Z(t_i) &= Z_\text{cum}(t_i) - Z_\text{cum}(t_{i-1}). \end{align}}
-#'
-#' It then does binomial sampling to generate, for each observation
-#' of \mjseqn{Z}, a number of infections that is eventually reported:
-#'
-#' \mjsdeqn{Z_\text{rep}(t_i) \sim \mathrm{Binomial}\big(Z(t_i),p_\text{rep}\big)\,.}
-#' 
-#' Finally, it generates reported incidence \mjseqn{C} by sampling
-#' from a reporting delay distribution and binning infections counted
-#' by \mjseqn{Z_\text{rep}} forward in time. Compared to \mjseqn{Z},
-#' \mjseqn{C} models **observation error**, i.e., under-reporting of
-#' cases with a delay between infection and reporting. If `par_list$k`
-#' is non-`NULL`, then the reporting delay in units \mjseqn{\Delta t}
-#' is modeled as
-#'
-#' \mjsdeqn{D \sim \mathrm{NegativeBinomial}\left(k,\frac{k}{m+k}\right)\,,}
-#'
-#' where \mjseqn{k} is a dispersion parameter and
-#' \mjseqn{m = t_\text{rep}/\Delta t} is the mean reporting delay.
-#' In this case, infections counted in \mjseqn{Z_\text{rep}(t_i)}
-#' are reported in \mjseqn{C(t_{i+D})}. On the other hand, if
-#' `par_list$k` is `NULL`, then the reporting delay is fixed equal
-#' to \mjseqn{d = \mathrm{nint}(t_\text{rep}/\Delta t)}, and so
-#' \mjseqn{C(t_{i+d}) = Z_\text{rep}(t_i)\,.}
-#'
 #' @examples
 #' # Deterministic simulation
 #' par_list <- make_par_list(dt_weeks = 1)
@@ -223,6 +223,7 @@
 #' )
 #' head(df)
 #'
+#' @importFrom stats rnorm rbinom rnbinom approxfun
 #' @export
 make_data <- function(par_list       = make_par_list(),
                       n              = 20 * 365 / 7,

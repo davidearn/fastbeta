@@ -86,7 +86,7 @@
 #' abline(v = df$t_years[peaks$all], lty = 2, col = "red")
 #'
 #' @references
-#' \insertRef{deJo+20}{fastbeta}
+#' \insertRef{Jaga+20}{fastbeta}
 #' 
 #' @export
 get_peak_times <- function(x, period, bw_mavg, bw_peakid) {

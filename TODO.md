@@ -8,7 +8,7 @@
 
 ### Debug
 
-* no obvious bugs at the moment
+* `?fastbeta` gives package help instead of function help
 
 ### Documentation
 

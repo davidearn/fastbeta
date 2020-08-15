@@ -1,4 +1,4 @@
-#' Deconvolve a time series of reported incidence
+#' @title Deconvolve a time series of reported incidence
 #'
 #' @description
 #' Deconvolves a reported incidence time series using a Richardson-Lucy
@@ -242,5 +242,9 @@ deconvolve <- function(x,
     x_pad   = c(rep(NA, b), x[b+1:N]),
     it_chi2_lt1 = if (any(chi2 < 1)) min(which(chi2 < 1)) - 1 else NA
   )
-  structure(out, call = match.call(), arg_list = arg_list)
+  structure(out,
+    class    = c("deconvolve", "list"),
+    call     = match.call(),
+    arg_list = arg_list
+  )
 }

@@ -1,7 +1,5 @@
+#' @details
 #' \loadmathjax
-#' The \pkg{fastbeta} package
-#'
-#' @description
 #' \pkg{fastbeta} implements the FC, S, and SI methods for estimating
 #' time-varying infectious disease transmission rates \mjseqn{\beta(t)}
 #' from disease incidence and mortality data:
@@ -39,10 +37,11 @@
 #' See References for details.
 #'
 #' @references
-#' \insertRef{deJo+20}{fastbeta}
+#' \insertRef{Jaga+20}{fastbeta}
 #'
 #' @docType package
-#' @name fastbeta
+#' @keywords internal
+#' @aliases fastbeta-package
 #' @importFrom Rdpack reprompt
 #' @importFrom mathjaxr preview_rd
-NULL
+"_PACKAGE"

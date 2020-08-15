@@ -1,4 +1,4 @@
-#' Impute missing values in a numeric vector
+#' @title Impute missing values in a numeric vector
 #'
 #' @description
 #' Imputes missing values in a numeric vector
@@ -30,6 +30,8 @@
 #' impute_na(x)
 #' impute_na(x, zero_as_na = TRUE)
 #'
+#' @keywords internal
+#' @importFrom stats approx
 #' @export
 impute_na <- function(x, zero_as_na = FALSE) {
   # Do nothing if there is nothing to do
@@ -56,7 +58,7 @@ impute_na <- function(x, zero_as_na = FALSE) {
     y[y == 0] <- NA
     y[c(1, length(y))] <- y_end
   }
-  approx_out <- stats::approx(
+  approx_out <- approx(
     x      = which(!is.na(y)),
     y      = y[!is.na(y)],
     xout   = seq_along(y),
