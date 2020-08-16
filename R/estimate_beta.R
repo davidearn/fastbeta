@@ -2,14 +2,15 @@
 #' Estimate time-varying transmission rates
 #'
 #' @description
-#' These functions implement the FC, S, and SI methods (see Algorithm)
+#' Functions implementing the FC, S, and SI methods (see Algorithm)
 #' for estimating time-varying transmission rates \mjseqn{\beta(t)}
-#' from time series of incidence, births, and natural mortality observed
-#' at equally spaced time points \mjseqn{t_k = t_0 + k \Delta t}.
-#' The FC and S methods are deprecated and outperformed by the more
-#' robust SI method. `estimate_beta_si()` need not be called directly:
-#' it is wrapped inside the more useful constructor function [fastbeta()],
-#' which does checks on the input and output and has associated methods.
+#' from time series of incidence, births, and natural mortality
+#' observed at equally spaced time points \mjseqn{t_k = t_0 + k \Delta t}.
+#' The FC and S methods are deprecated and outperformed by the
+#' more robust SI method. `estimate_beta_si()` need not be called
+#' directly: it is wrapped in the more useful constructor function
+#' [fastbeta()], which does checks on input and output and returns
+#' a fastbeta object with associated methods.
 #' 
 #' @details
 #' # Details

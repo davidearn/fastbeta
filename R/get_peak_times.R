@@ -1,17 +1,23 @@
-#' Find times of peaks in periodic time series
+#' \loadmathjax
+#' Locate peaks in periodic time series
 #'
-#' `get_peak_times()` locates peaks in periodic, equally spaced time
-#' series with known period. It applies a central moving average to the
-#' raw time series, identifies when peaks occur in the resulting smooth
-#' time series, and subsets those peaks in phase with the first peak.
+#' @description
+#' Locates peaks in roughly periodic, equally spaced time series.
+#' 
+#' @details
+#' # Details
 #'
-#' @section Bandwidth tuning:
+#' ## 1. Algorithm
+#' A central moving average is applied to the supplied time series
+#' \mjseqn{\lbrace (t_k, x_k) \rbrace_{k=0}^n}.
+#' 
+#' ## 2. Bandwidth tuning
 #' The bandwidths `bw_mavg` and `bw_peakid` must be iteratively tuned
 #' so as to disqualify peaks caused by noise in `x` (choose `bw_mavg`
 #' large enough) without disqualifying true peaks (choose `bw_peakid`
 #' not too large). Tuning is not done internally.
 #'
-#' @section Missed peaks:
+#' ## 3. Missed peaks
 #' `get_peak_times()` will not detect peaks at the edges of `x`.
 #' Specifically, it will not detect a peak at index `i` if:
 #'
@@ -30,12 +36,10 @@
 #'   observation interval.
 #' @param bw_mavg Numeric scalar. Bandwidth for the central moving
 #'   average applied to `x`. `x_mavg[i]` will be the mean of the set
-#'   of observations `x[j]` with
-#'   \ifelse{latex}{\out{$|i - j| \leq bandwidth$}}{\ifelse{html}{\out{&vert;<i>i</i> &minus; <i>j</i>&vert; &le; bandwidth}}{|i - j| <= bandwidth}}.
+#'   of observations `x[j]` with \mjseqn{|i - j| \leq \text{bandwidth}}.
 #' @param bw_peakid Numeric scalar. Bandwidth for peak identification.
 #'   `i` will be a peak time if and only if `x_mavg[i] > x_mavg[j]`
-#'   for all `j` with
-#'   \ifelse{latex}{\out{$0 < |i - j| \leq bandwidth$}}{\ifelse{html}{\out{0 &lt; &vert;<i>i</i> &minus; <i>j</i>&vert; &le; bandwidth}}{0 < |i - j| <= bandwidth}}.
+#'   for all `j` with \mjseqn{0 < |i - j| \leq \text{bandwidth}}.
 #'
 #' @return
 #' A list containing:

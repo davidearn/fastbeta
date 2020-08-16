@@ -2,10 +2,10 @@
 #' Simulate epidemic time series data
 #'
 #' @description
-#' `make_data()` simulates epidemic time series data using a system of
-#' SIR equations and a supplied list of parameter values. Observations
-#' are recorded at equally spaced time points \mjseqn{t_i = t_0 + i \Delta t}
-#' (for \mjseqn{i = 0, \ldots, n}). Among other things, the simulation model
+#' Simulates epidemic time series data using a system of SIR equations
+#' and a supplied list of parameter values. Observations are recorded
+#' at equally spaced time points \mjseqn{t_i = t_0 + i \Delta t} (for
+#' \mjseqn{i = 0, \ldots, n}). Among other things, the simulation model
 #' assumes:
 #' * A seasonally forced transmission rate.
 #' * Constant birth and per capita natural mortality rates.

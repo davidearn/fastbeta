@@ -2,8 +2,8 @@
 #' Create a list of parameter values for simulations
 #'
 #' @description
-#' `make_par_list()` creates a list of parameter values to be passed as
-#' an argument of [make_data()].
+#' Creates a list of parameter values to be passed as an argument
+#' of [make_data()] for simulating epidemic time series data.
 #'
 #' @details
 #' # Details

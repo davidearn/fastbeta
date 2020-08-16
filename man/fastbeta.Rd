@@ -2,14 +2,24 @@
 % Please edit documentation in R/fastbeta.R
 \name{fastbeta}
 \alias{fastbeta}
+\alias{plot.fastbeta}
+\alias{print.fastbeta}
 \title{Estimate time-varying transmission rates}
 \usage{
 fastbeta(df, par_list)
+
+\method{plot}{fastbeta}(x, ...)
+
+\method{print}{fastbeta}(x, ...)
 }
 \arguments{
 \item{df}{A data frame with time series data.}
 
 \item{par_list}{A list of parameter values.}
+
+\item{x}{An object of class \code{"fastbeta"}.}
+
+\item{...}{Unused optional arguments.}
 }
 \value{
 A fastbeta object.
@@ -20,3 +30,10 @@ Generates a fastbeta object.
 \details{
 Details to come.
 }
+\section{Methods (by generic)}{
+\itemize{
+\item \code{plot}: Plot a fastbeta object.
+
+\item \code{print}: Print a fastbeta object.
+}}
+

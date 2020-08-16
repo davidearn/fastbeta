@@ -1,8 +1,7 @@
 #' @title Compute RRMSE in a vector
 #'
 #' @description
-#' `compute_rrmse()` computes the relative root mean square error
-#' (RRMSE) in a vector.
+#' Computes the relative root mean square error (RRMSE) in a vector.
 #' 
 #' @param x Numeric vector.
 #' @param xhat Numeric vector with length equal to `length(x)`.
