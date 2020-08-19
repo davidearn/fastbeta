@@ -4,8 +4,9 @@
 #' @description
 #' Functions implementing the FC, S, and SI methods (see Algorithm)
 #' for estimating time-varying transmission rates \mjseqn{\beta(t)}
-#' from time series of incidence, births, and natural mortality
-#' observed at equally spaced time points \mjseqn{t_k = t_0 + k \Delta t}.
+#' from time series of incidence, births, and natural mortality with
+#' observations at equally spaced time points
+#' \mjseqn{t_i = t_0 + i \Delta t}.
 #' The FC and S methods are deprecated and outperformed by the
 #' more robust SI method. `estimate_beta_si()` need not be called
 #' directly: it is wrapped in the more useful constructor function
@@ -18,30 +19,30 @@
 #' ## 1. Algorithm
 #'
 #' ### FC method
-#' The supplied incidence time series \mjseqn{Z_k} (`df$Z`) is aggregated
+#' The supplied incidence time series \mjseqn{Z_i} (`df$Z`) is aggregated
 #' over generation intervals:
 #'
-#' \mjsdeqn{Z_k^\text{agg} = \sum_{i=k-g+1}^k Z_i\,,\quad k=jg\,,\quad j = 1,2,\ldots\,,}
+#' \mjsdeqn{Z_i^\text{agg} = \sum_{k=i-g+1}^k Z_k\,,\quad i=jg\,,\quad j = 1,2,\ldots\,,}
 #'
 #' where \mjseqn{g = \mathrm{nint}(t_\text{gen} / \Delta t)} is the mean
 #' generation interval \mjseqn{t_\text{gen}} in units of the observation
 #' interval \mjseqn{\Delta t} (`par_list$tgen`), rounded to the nearest
-#' integer. The supplied births time series \mjseqn{B_k} (`df$B`)
+#' integer. The supplied births time series \mjseqn{B_i} (`df$B`)
 #' is aggregated similarly. The susceptible population size is estimated
 #' recursively starting from the supplied initial value \mjseqn{S_0}
 #' (`par_list$S0`):
 #'
-#' \mjsdeqn{S_{k+g} = S_k + B_{k+g}^\text{agg} - Z_{k+g}^\text{agg}\,,\quad k=jg\,,\quad j = 0,1,\ldots\,,}
+#' \mjsdeqn{S_{i+g} = S_i + B_{i+g}^\text{agg} - Z_{i+g}^\text{agg}\,,\quad i=jg\,,\quad j = 0,1,\ldots\,,}
 #'
 #' where natural mortality of susceptibles is assumed to be negligible.
 #' The infected population size is approximated by aggregated incidence:
 #'
-#' \mjsdeqn{I_k = Z_k^\text{agg}\,,\quad k=jg\,,\quad j = 1,2,\ldots\,,}
+#' \mjsdeqn{I_i = Z_i^\text{agg}\,,\quad i=jg\,,\quad j = 1,2,\ldots\,,}
 #' 
 #' where natural mortality of infecteds is assumed to be negligible.
 #' The transmission rate is then estimated as
 #'
-#' \mjsdeqn{\beta_k = \frac{Z_{k+g}}{S_k I_k g \Delta t}\,,\quad k=jg\,,\quad j = 1,2,\ldots\,.}
+#' \mjsdeqn{\beta_i = \frac{Z_{i+g}}{S_i I_i g \Delta t}\,,\quad i=jg\,,\quad j = 1,2,\ldots\,.}
 #'
 #' Note that this algorithm was first published by
 #' \insertCite{FineClar82;textual}{fastbeta}.
@@ -50,35 +51,35 @@
 #' The susceptible population size is estimated recursively starting from
 #' the supplied initial value \mjseqn{S_0} (`par_list$S0`):
 #'
-#' \mjsdeqn{S_{k+1} = S_k + B_{k+1} - Z_{k+1} - \mu_k S_k \Delta t\,.}
+#' \mjsdeqn{S_{i+1} = S_i + B_{i+1} - Z_{i+1} - \mu_i S_i \Delta t\,.}
 #'
 #' The infected population size is approximated by a scaling of incidence:
 #' 
-#' \mjsdeqn{I_k = \frac{Z_{k-g+1}}{(\gamma + \mu_k) \Delta t}\,,\quad \gamma = 1 / t_\text{gen}\,,}
+#' \mjsdeqn{I_i = \frac{Z_{i-g+1}}{(\gamma + \mu_i) \Delta t}\,,\quad \gamma = 1 / t_\text{gen}\,,}
 #' 
 #' where \mjseqn{g = \mathrm{nint}(t_\text{gen} / \Delta t)} is the mean
 #' generation interval \mjseqn{t_\text{gen}} in units of the observation
 #' interval \mjseqn{\Delta t} (`par_list$tgen`), rounded to the nearest
 #' integer. The transmission rate is then estimated as
 #'
-#' \mjsdeqn{\beta_k = \frac{Z_{k+1}}{S_k I_k \Delta t}\,.}
+#' \mjsdeqn{\beta_i = \frac{Z_{i+1}}{S_i I_i \Delta t}\,.}
 #'
 #' ### SI method
 #' The susceptible and infected population sizes are estimated recursively
 #' starting from the supplied initial values \mjseqn{S_0} (`par_list$S0`)
 #' and \mjseqn{I_0} (`par_list$I0`):
 #'
-#' \mjsdeqn{\begin{align*} S_{k+1} &= \frac{\big\lbrack 1 - \frac{1}{2} \mu_k \Delta t \big\rbrack S_k + B_{k+1} - Z_{k+1}}{1 + \frac{1}{2} \mu_{k+1} \Delta t}\,, \cr I_{k+1} &= \frac{\big\lbrack 1 - \frac{1}{2} (\gamma + \mu_k) \Delta t \big\rbrack I_k + Z_{k+1}}{1 + \frac{1}{2} (\gamma + \mu_{k+1}) \Delta t}\,,\quad \gamma = 1 / t_\text{gen}\,. \end{align*}}
+#' \mjsdeqn{\begin{align*} S_{i+1} &= \frac{\big\lbrack 1 - \frac{1}{2} \mu_i \Delta t \big\rbrack S_i + B_{i+1} - Z_{i+1}}{1 + \frac{1}{2} \mu_{i+1} \Delta t}\,, \cr I_{i+1} &= \frac{\big\lbrack 1 - \frac{1}{2} (\gamma + \mu_i) \Delta t \big\rbrack I_i + Z_{i+1}}{1 + \frac{1}{2} (\gamma + \mu_{i+1}) \Delta t}\,,\quad \gamma = 1 / t_\text{gen}\,. \end{align*}}
 #'
 #' The transmission rate is then estimated as
 #'
-#' \mjsdeqn{\beta_k = \frac{Z_k + Z_{k+1}}{2 S_k I_k \Delta t}\,.}
+#' \mjsdeqn{\beta_i = \frac{Z_i + Z_{i+1}}{2 S_i I_i \Delta t}\,.}
 #' 
 #' ## 2. Missing data
 #' 
-#' Missing values in `df$Z` and `df$B` are not tolerated and must be
-#' imputed. Columns `S` and `beta` in the output will be filled with
-#' `NA` after the index of the first missing value.
+#' Missing values in `df$Z` are not tolerated and must be imputed.
+#' Columns `S` and `beta` in the output will be filled with `NA`
+#' after the index of the first missing value.
 #'
 #' In the FC and S methods, zeros in `df$Z` can cause divide-by-zero
 #' errors. In this case, column `beta` in the output may contain `NaN`
@@ -174,11 +175,7 @@
 #' # Simulate time series data using an SIR model
 #' # with seasonally forced transmission rate
 #' par_list <- make_par_list(dt_weeks = 1)
-#' df <- make_data(
-#'   par_list = par_list,
-#'   n = 20 * 365 / 7, # 20 years in units dt
-#'   with_dem_stoch = FALSE
-#' )
+#' df <- make_data(par_list = par_list, with_ds = FALSE)
 #' head(df)
 #'
 #' # Estimate susceptibles, infecteds, and
@@ -215,16 +212,17 @@
 #' plot(beta ~ I(t - t[1]), df, type = "l", ylim = c(0.95, 1.25) * 1e-05)
 #' lines(beta ~ I(t - t[1]), df_si, col = "blue")
 #'
-#' # However, restarting with `with_dem_stoch = TRUE`
-#' # reveals that the S method is vulnerable to
-#' # propagation of noise from the data to the
-#' # transmission rate estimate. Hence the SI method
-#' # should be preferred in practice.
+#' # However, restarting with `with_ds = TRUE`
+#' # reveals that the S method is vulnerable
+#' # to propagation of noise from the data to
+#' # the transmission rate estimate. Hence the
+#' # SI method should be preferred in practice.
 #'
 #' @references
 #' \insertRef{Jaga+20}{fastbeta}
 #' \insertRef{FineClar82}{fastbeta}
 #'
+#' @seealso [fastbeta()]
 #' @name estimate_beta
 NULL
 

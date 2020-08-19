@@ -5,10 +5,11 @@
 \title{\loadmathjax
 Simulate epidemic time series data}
 \usage{
-make_data(par_list = make_par_list(), n = 20 * 365/7, with_dem_stoch = TRUE)
+make_data(par_list = make_par_list(), with_ds = TRUE, n = 1000)
 }
 \arguments{
 \item{par_list}{A list of parameter values with elements:
+
 \describe{
 \item{\code{dt_weeks}}{\mjseqn{\lbrace\,\Delta t\,\rbrace}
 Numeric scalar. Observation interval in weeks.
@@ -71,26 +72,30 @@ Numeric scalar. Variance of the normally distributed
 phase shift introduced to the seasonally forced
 transmission rate \mjseqn{\beta(t)}.
 }
-}}
+}
 
-\item{n}{Integer scalar. Time between the first and last observations
-in units \mjseqn{\Delta t}, so that simulated time series have \code{n + 1}
-observations. (If numeric but not integer, then \code{n} is replaced by
-\code{floor(n)}.)}
+Such a list can be constructed with the help of \code{\link[=make_par_list]{make_par_list()}}.}
 
-\item{with_dem_stoch}{Logical scalar. If \code{TRUE}, then the simulation
-is generated using \code{\link[adaptivetau:ssa.adaptivetau]{adaptivetau::ssa.adaptivetau()}}. Otherwise, it
-is generated using \code{\link[deSolve:ode]{deSolve::ode()}} (see Details).}
+\item{with_ds}{Logical scalar. Should the simulation include demographic
+stochasticity? If \code{TRUE}, then the simulation is generated using
+\code{\link[adaptivetau:ssa.adaptivetau]{adaptivetau::ssa.adaptivetau()}}. Otherwise, it is generated using
+\code{\link[deSolve:ode]{deSolve::ode()}} (see Details).}
+
+\item{n}{Integer scalar. The number of observations in the simulated
+time series. If numeric but not integer, then \code{n} is replaced by
+\code{floor(n)}.}
 }
 \value{
-A data frame with \code{n + 1} rows corresponding to equally spaced time
-points \mjseqn{t_i = t_0 + i \Delta t} (for \mjseqn{i = 0, \ldots, n}),
+A data frame with \code{n} rows corresponding to equally spaced time points
+\mjseqn{t_i = t_0 + i \Delta t} (for \mjseqn{i = 0, \ldots, n-1}),
 and numeric columns:
 
 \describe{
-\item{\code{t}}{Time in units \mjseqn{\Delta t}. Equal to \code{par_list$t0 + 0:n}.}
-\item{\code{t_years}}{Time in years. Equal to
-\code{(par_list$t0 + 0:n) * par_list$dt_weeks * (7 / 365)}.
+\item{\code{t}}{Time in units \mjseqn{\Delta t}.
+Equal to \code{par_list$t0 + 0:(n-1)}.
+}
+\item{\code{t_years}}{Time in years.
+Equal to \code{(par_list$t0 + 0:(n-1)) * par_list$dt_weeks * (7 / 365)}.
 }
 \item{\code{beta}}{Seasonally forced transmission rate expressed
 per unit \mjseqn{\Delta t} per susceptible per infected,
@@ -114,11 +119,11 @@ that are eventually reported.
 reported between times \code{t[i-1]} and \code{t[i]}.
 }
 \item{\code{B}}{Births. \code{B[i]} is the number of births between times
-\code{t[i-1]} and \code{t[i]}. Equal to \code{with(par_list, rep(nu * hatN0, n + 1))}
-if \code{with_dem_stoch = FALSE}.
+\code{t[i-1]} and \code{t[i]}. Equal to \code{with(par_list, rep(nu * hatN0, n))}
+if \code{with_ds = FALSE}.
 }
 \item{\code{mu}}{Per capita natural mortality rate. \code{mu[i]} is rate
-at time \code{t[i]}. Equal to \code{with(par_list, rep(mu, n + 1))}.
+at time \code{t[i]}. Equal to \code{with(par_list, rep(mu, n))}.
 }
 }
 
@@ -127,11 +132,10 @@ reproducible with \code{eval(call)} or \code{do.call(make_data, arg_list)},
 preceded by a call to \code{set.seed()}.
 }
 \description{
-\code{make_data()} simulates epidemic time series data using a system of
-SIR equations and a supplied list of parameter values. Observations
-are recorded at equally spaced time points \mjseqn{t_i = t_0 + i \Delta t}
-(for \mjseqn{i = 0, \ldots, n}). Among other things, the simulation model
-assumes:
+Simulates epidemic time series data using a system of SIR equations
+and a supplied list of parameter values. Observations are recorded
+at equally spaced time points \mjseqn{t_i = t_0 + i \Delta t}.
+Among other things, the simulation model assumes:
 \itemize{
 \item A seasonally forced transmission rate.
 \item Constant birth and per capita natural mortality rates.
@@ -154,19 +158,19 @@ Here, \mjseqn{\gamma = 1 / t_\text{gen}},
 \mjsdeqn{\beta_\phi(t) = \langle\beta\rangle \left\lbrack 1 + \alpha \cos\left(\frac{2 \pi t}{\text{1 year}} + \phi(t;\epsilon)\right) \right\rbrack\,,}
 
 and \mjseqn{\phi(t;\epsilon^2)} is the linear interpolant of noise
-\mjseqn{\lbrace(t_k;\Phi_k)\rbrace_{k=0}^n} with
+\mjseqn{\lbrace(t_i;\Phi_i)\rbrace_{i=0}^{n-1}} with
 
-\mjsdeqn{\Phi_k \sim \mathrm{Normal}(0,\epsilon^2)\,,}
+\mjsdeqn{\Phi_i \sim \mathrm{Normal}(0,\epsilon^2)\,,}
 
 modeling \strong{environmental stochasticity}.
 
 \code{make_data()} generates observations of the above system at equally spaced
-times \mjseqn{t_i = t_0 + i \Delta t} (for \mjseqn{i = 0, \ldots, n}) by
+times \mjseqn{t_i = t_0 + i \Delta t} (for \mjseqn{i = 0, \ldots, n-1}) by
 either
 (i) numerically integrating the ODE using \code{\link[deSolve:ode]{deSolve::ode()}}
-(\code{with_dem_stoch = FALSE}), or
+(\code{with_ds = FALSE}), or
 (ii) realizing a corresponding continuous-time stochastic process using
-\code{\link[adaptivetau:ssa.adaptivetau]{adaptivetau::ssa.adaptivetau()}} (\code{with_dem_stoch = TRUE}).
+\code{\link[adaptivetau:ssa.adaptivetau]{adaptivetau::ssa.adaptivetau()}} (\code{with_ds = TRUE}).
 Both methods use initial state
 
 \mjsdeqn{\begin{bmatrix} S(t_0) \cr I(t_0) \cr R(t_0) \cr B_\text{cum}(t_0) \cr Z_\text{cum}(t_0) \end{bmatrix} = \begin{bmatrix} S_0 \cr I_0 \cr N_0 - S_0 - I_0 \cr 0 \cr 0 \end{bmatrix}\,.}
@@ -211,17 +215,13 @@ to \mjseqn{d = \mathrm{nint}(t_\text{rep}/\Delta t)}, and so
 \examples{
 # Deterministic simulation
 par_list <- make_par_list(dt_weeks = 1)
-df <- make_data(
-  par_list = par_list,
-  n = 20 * 365 / 7, # number of weeks in 20 years
-  with_dem_stoch = FALSE
-)
+df <- make_data(par_list = par_list, with_ds = FALSE)
 head(df)
 
 # Stochastic simulation
 par_list <- make_par_list(
   dt_weeks = 1,
-  epsilon2 = 1, # environmental sxtochasticity
+  epsilon2 = 1, # environmental stochasticity
   prep = 0.5, # random under-reporting of infections
   trep = 2, # random reporting delays
   k = 4
@@ -229,9 +229,11 @@ par_list <- make_par_list(
 set.seed(2146)
 df <- make_data(
   par_list = par_list,
-  n = 20 * 365 / 7,
-  with_dem_stoch = TRUE # demographic stochasticity
+  with_ds = TRUE # demographic stochasticity
 )
 head(df)
 
+}
+\seealso{
+\code{\link[=make_par_list]{make_par_list()}}
 }

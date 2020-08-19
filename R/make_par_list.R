@@ -128,8 +128,10 @@
 #'   tgen     = tgen_days * (1 / 7) / dt_weeks
 #' )
 #' unlist(par_list)
-#' 
+#'
+#' @seealso [make_data()]
 #' @export
+#' @importFrom deSolve ode
 make_par_list <- function(dt_weeks  = 1,
                           t0        = 1000 * (365 / 7) / dt_weeks,
                           prep      = 1,
@@ -185,7 +187,7 @@ make_par_list <- function(dt_weeks  = 1,
 
     # Numerically integrate the system of SIR equations
     df <- as.data.frame(
-      deSolve::ode(
+      ode(
         y     = x_init,
         times = t_out,
         func  = compute_sir_rates,

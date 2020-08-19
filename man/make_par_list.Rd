@@ -100,8 +100,8 @@ A list of the arguments of \code{make_par_list()} with values for \code{Rnaught}
 (see Details 1 and 2).
 }
 \description{
-\code{make_par_list()} creates a list of parameter values to be passed as
-an argument of \code{\link[=make_data]{make_data()}}.
+Creates a list of parameter values to be passed as an argument
+of \code{\link[=make_data]{make_data()}} for simulating epidemic time series data.
 }
 \section{Details}{
 \subsection{1. Concordance of \mjseqn{\mathcal{R}_0} and \mjseqn{\langle\beta\rangle}}{
@@ -169,4 +169,7 @@ par_list <- make_par_list(
 )
 unlist(par_list)
 
+}
+\seealso{
+\code{\link[=make_data]{make_data()}}
 }

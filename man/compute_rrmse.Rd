@@ -19,8 +19,7 @@ A numeric scalar indicating the RRMSE in \code{xhat}, with exceptions
 (see Details).
 }
 \description{
-\code{compute_rrmse()} computes the relative root mean square error
-(RRMSE) in a vector.
+Computes the relative root mean square error (RRMSE) in a vector.
 }
 \details{
 Let \code{cc = is.finite(x) & is.finite(xhat)} ("complete cases"). \code{cc} is the

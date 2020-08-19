@@ -2,135 +2,120 @@
 % Please edit documentation in R/ptpi.R
 \name{ptpi}
 \alias{ptpi}
-\title{Estimate
-\ifelse{latex}{\out{$S_0 = S(t_0)$}}{\ifelse{html}{\out{<i>S</i><sub>0</sub> = <i>S</i>(<i>t</i><sub>0</sub>)}}{S_0 = S(t_0)}}
-using PTPI}
+\title{\loadmathjax
+Estimate \mjseqn{S_0} using PTPI}
 \usage{
-ptpi(df = data.frame(), par_list = list(), a, b, initial_S0_est, iter = 0L)
+ptpi(df, S0_init, peak1 = 1L, peak2 = nrow(df), it = 10L)
 }
 \arguments{
 \item{df}{A data frame with numeric columns:
 
 \describe{
 \item{\code{Z}}{Incidence. \code{Z[i]} is the number of infections between
-time
-\ifelse{latex}{\out{$t = t_{i-2}$}}{\ifelse{html}{\out{<i>t</i> = <i>t</i><sub><i>i</i>&minus;2</sub>}}{t = t_i-2}}
-and time
-\ifelse{latex}{\out{$t = t_{i-1}$}}{\ifelse{html}{\out{<i>t</i> = <i>t</i><sub><i>i</i>&minus;1</sub>}}{t = t_i-1}}.
-\code{Z} must be roughly periodic.
+times \code{t[i-1]} and \code{t[i]}. Must be roughly periodic.
 }
-\item{\code{B}}{Births. \code{B[i]} is the number of births between time
-\ifelse{latex}{\out{$t = t_{i-2}$}}{\ifelse{html}{\out{<i>t</i> = <i>t</i><sub><i>i</i>&minus;2</sub>}}{t = t_i-2}}
-and time
-\ifelse{latex}{\out{$t = t_{i-1}$}}{\ifelse{html}{\out{<i>t</i> = <i>t</i><sub><i>i</i>&minus;1</sub>}}{t = t_i-1}}.
+\item{\code{B}}{Births. \code{B[i]} is the number of births between times
+\code{t[i-1]} and \code{t[i]}.
 }
 \item{\code{mu}}{Natural mortality rate. \code{mu[i]} is the rate at time
-\ifelse{latex}{\out{$t = t_{i-1}$}}{\ifelse{html}{\out{<i>t</i> = <i>t</i><sub><i>i</i>&minus;1</sub>}}{t = t_i-1}}
-expressed per unit
-\ifelse{latex}{\out{$\Delta t$}}{\ifelse{html}{\out{<i>&Delta;t</i>}}{Dt}}
-and per capita.
+\code{t[i]} expressed per unit \mjseqn{\Delta t} and per capita.
 }
 }
 
-\code{B} is optional if \code{hatN0} and \code{nu} are defined in \code{par_list}, and
-\code{mu} is optional if \code{mu} is defined in \code{par_list} (see Details).}
+Missing values in \code{df} are not tolerated and must be imputed
+separately.}
 
-\item{par_list}{A list containing:
+\item{S0_init}{Numeric scalar. An initial estimate of \mjseqn{S_0}.}
 
-\describe{
-\item{\code{hatN0}}{[ \ifelse{latex}{\out{$\widehat{N}_0$}}{\ifelse{html}{\out{<i>&Ntilde;</i><sub>0</sub>}}{hatN_0}} ]
-Population size at time
-\ifelse{latex}{\out{$t = 0$}}{\ifelse{html}{\out{<i>t</i> = 0}}{t = 0}}
-years.
-}
-\item{\code{nu}}{[ \ifelse{latex}{\out{$\nu_\text{c}$}}{\ifelse{html}{\out{<i>&nu;<sub>c</sub></i>}}{nu_c}} ]
-Birth rate expressed per unit
-\ifelse{latex}{\out{$\Delta t$}}{\ifelse{html}{\out{<i>&Delta;t</i>}}{Dt}}
-and relative to
-\ifelse{latex}{\out{$\hat{N}_0$}}{\ifelse{html}{\out{<i>&Ntilde;</i><sub>0</sub>}}{hatN_0}}
-(if modeled as constant).
-}
-\item{\code{mu}}{[ \ifelse{latex}{\out{$\mu_\text{c}$}}{\ifelse{html}{\out{<i>&mu;</i><sub>c</sub>}}{mu_c}} ]
-Natural mortality rate expressed per unit
-\ifelse{latex}{\out{$\Delta t$}}{\ifelse{html}{\out{<i>&Delta;t</i>}}{Dt}}
-and per capita (if modeled as constant).
-}
-}
+\item{peak1}{Integer scalar. Index of the first peak in \code{df$Z}.
+A reasonable value can be obtained using \code{\link[=peaks]{peaks()}} (see Examples).}
 
-\code{hatN0} and \code{nu} are optional if \code{B} is defined in \code{df}, and
-\code{mu} is optional if \code{mu} is defined in \code{df} (see Details).}
+\item{peak2}{Integer scalar. Index of the last peak in \code{df$Z} in phase
+with the first peak.
+A reasonable value can be obtained using \code{\link[=peaks]{peaks()}} (see Examples).}
 
-\item{a}{Integer scalar. Index of first peak in \code{df$Z}, possibly
-obtained via \code{get_peak_times()}.}
-
-\item{b}{Integer scalar. Index of last peak in \code{df$Z} in phase
-with first peak, possibly obtained via \code{get_peak_times()}.}
-
-\item{initial_S0_est}{Numeric scalar. An initial estimate of
-\ifelse{latex}{\out{$S_0 = S(t_0)$}}{\ifelse{html}{\out{<i>S</i><sub>0</sub> = <i>S</i>(<i>t</i><sub>0</sub>)}}{S_0 = S(t_0)}}.}
-
-\item{iter}{Integer scalar. The number of estimates of
-\ifelse{latex}{\out{$S_0 = S(t_0)$}}{\ifelse{html}{\out{<i>S</i><sub>0</sub> = <i>S</i>(<i>t</i><sub>0</sub>)}}{S_0 = S(t_0)}}
-to generate before stopping.}
+\item{it}{Integer scalar. The number of iterations to perform before
+stopping.}
 }
 \value{
-A list containing:
+A ptpi object. A list with elements:
 
 \describe{
-\item{\code{S_mat}}{A numeric matrix with dimensions
-\code{c(nrow(df), iter+1)} containing the susceptible time series
-generated in each iteration.
+\item{\code{mat}}{A numeric matrix with \code{nrow(df)} rows and \code{1 + it} columns
+containing the susceptible time series generated in each iteration.
+\code{mat[i,j]} gives the value of \mjseqn{S_{i-1}^{(j-1)}} as defined in
+Algorithm.
 }
-\item{\code{S0}}{A numeric vector listing in order all \code{1+iter}
-estimates of
-\ifelse{latex}{\out{$S_0 = S(t_0)$}}{\ifelse{html}{\out{<i>S</i><sub>0</sub> = <i>S</i>(<i>t</i><sub>0</sub>)}}{S_0 = S(t_0)}}.
-Equal to \code{S_mat[1, ]}.
+\item{\code{S0}}{A numeric vector listing in order all \code{1 + it} estimates of
+\mjseqn{S_0 = S(t_0)}. Equivalent to \code{mat[1, ]}.
 }
-\item{\code{S0_final}}{The final estimate of
-\ifelse{latex}{\out{$S_0 = S(t_0)$}}{\ifelse{html}{\out{<i>S</i><sub>0</sub> = <i>S</i>(<i>t</i><sub>0</sub>)}}{S_0 = S(t_0)}}.
-Equal to \code{S0[length(S0)]}.
-}
-\item{\code{SA}}{A numeric vector listing in order all \code{1+iter}
-estimates of
-\ifelse{latex}{\out{$S_\text{a} = S(t_\text{a})$}}{\ifelse{html}{\out{<i>S</i><sub>a</sub> = <i>S</i>(<i>t</i><sub>a</sub>)}}{S_a = S(t_a)}},
-where
-\ifelse{latex}{\out{$t_\text{a}$}}{\ifelse{html}{\out{<i>t</i><sub>a</sub>}}{t_a}}
-is the time point corresponding to row \code{a} in \code{df}.
-Equal to \code{S_mat[a, ]}.
-}
-\item{\code{SA_final}}{The final estimate of
-\ifelse{latex}{\out{$S_\text{a} = S(t_\text{a})$}}{\ifelse{html}{\out{<i>S</i><sub>a</sub> = <i>S</i>(<i>t</i><sub>a</sub>)}}{S_a = S(t_a)}}.
-Equal to \code{SA[length(SA)]}.
+\item{\code{S0_final}}{The final estimate of \mjseqn{S_0}.
+Equivalent to \code{mat[1, ncol(mat)]}.
 }
 }
 
-A list of the arguments of \code{ptpi()} is included as an attribute.
+The object has attributes \code{call} and \code{arg_list}, making it
+reproducible with \code{eval(call)} or \code{do.call(ptpi, arg_list)}.
 }
 \description{
-Using the method of peak-to-peak iteration (PTPI, see References),
-\code{ptpi()} estimates the initial number of susceptibles
-\ifelse{latex}{\out{$S_0 = S(t_0)$}}{\ifelse{html}{\out{<i>S</i><sub>0</sub> = <i>S</i>(<i>t</i><sub>0</sub>)}}{S_0 = S(t_0)}}
-from time series of incidence (\emph{must be roughly periodic}), births,
-and natural mortality, observed at equally spaced time points
-\ifelse{latex}{\out{$t_k = t_0 + k \Delta t$}}{\ifelse{html}{\out{<i>t<sub>k</sub></i> = <i>t</i><sub>0</sub>+<i>k&Delta;t</i>}}{t_k = t_0 + k*Dt}}
-(for \ifelse{latex}{\out{$k = 0,\ldots,n$}}{\ifelse{html}{\out{<i>k</i> = 0,...,<i>n</i>}}{k = 0,...,n}}),
-where
-\ifelse{latex}{\out{$\Delta t$}}{\ifelse{html}{\out{<i>&Delta;t</i>}}{Dt}}
-denotes the observation interval.
+Using peak-to-peak iteration (PTPI, see Algorithm), estimates the
+initial number of susceptible individuals \mjseqn{S_0 = S(t_0)}
+from time series of incidence, births, and natural mortality with
+observations at equally spaced time points \mjseqn{t_i = t_0 + i \Delta t}.
+The incidence time series must be roughly periodic.
 }
-\section{Mock vital data}{
+\section{Details}{
+\subsection{1. Algorithm}{
 
-If \code{df$B} is undefined in the function call, then \code{df$B[i]} gets the
-value \code{with(par_list, nu * hatN0 * 1)} for all \code{i}. If \code{df$mu} is
-undefined in the function call, then \code{df$mu[i]} gets the value
-\code{with(par_list, mu)} for all \code{i}.
+Supplied in the data frame \code{df} are time series
+\mjseqn{\lbrace (t_i,Z_i) \rbrace_{i=0}^{n-1}},
+\mjseqn{\lbrace (t_i,B_i) \rbrace_{i=0}^{n-1}}, and
+\mjseqn{\lbrace (t_i,\mu_i) \rbrace_{i=0}^{n-1}}
+of incidence, births, and natural mortality with observations
+at equally spaced time points \mjseqn{t_i = t_0 + i \Delta t}.
+The first peak in incidence and the last peak in phase with
+the first peak occur at times \mjseqn{t_a} and \mjseqn{t_b},
+respectively, where \mjseqn{a} is \code{peak1 - 1} and \mjseqn{b}
+is \code{peak2 - 1}.
+
+Let \mjseqn{S_i^{(j)}} denote the estimate of \mjseqn{S(t_i)}
+obtained after \mjseqn{j} iterations. Assign both \mjseqn{S_0^{(0)}}
+and \mjseqn{S_a^{(0)}} the value of \code{S0_init}, then proceed with
+the following iteration.
+
+Given \mjseqn{S_a^{(j)}} for some \mjseqn{j}, define \mjseqn{S_i^{(j)}}
+for all \mjseqn{i \in \lbrace a+1,\ldots,n-1 \rbrace} with the recursion
+
+\mjsdeqn{S_{i+1}^{(j)} = \frac{\big\lbrack 1 - \frac{1}{2} \mu_i \Delta t \big\rbrack S_i^{(j)} + B_{i+1} - Z_{i+1}}{1 + \frac{1}{2} \mu_{i+1} \Delta t}\,.}
+
+Then set \mjseqn{S_a^{(j+1)} = S_b^{(j)}} and define \mjseqn{S_i^{(j+1)}}
+for all \mjseqn{i \in \lbrace 0,\ldots,a-1 \rbrace} with the recursion
+
+\mjsdeqn{S_{i-1}^{(j+1)} = \frac{\big\lbrack 1 + \frac{1}{2} \mu_i \Delta t \big\rbrack S_i^{(j+1)} - B_i + Z_i}{1 + \frac{1}{2} \mu_{i-1} \Delta t}\,.}
+
+Note that this second recursion is carried out backwards in time.
 }
 
-\section{Missing data}{
+\subsection{2. Convergence}{
 
-Missing values in \code{df[, c("Z", "B", "mu")]} are mostly not tolerated.
-At the moment, \code{ptpi()} makes no effort to impute them, so imputation
-must be done beforehand.
+Suppose incidence is \mjseqn{(p \Delta t)}-periodic, where \mjseqn{p}
+is a nonzero integer, and consider the special case in which the birth
+and per capita death rates are constant. Then \mjseqn{Z_i = Z_{i+kp}},
+\mjseqn{B_i = B}, and \mjseqn{\mu_i = \mu}, for all integers \mjseqn{i}
+and \mjseqn{k}. In this case, one can show that the sequence
+\mjseqn{(S_0^{(j)})} converges to a limit \mjseqn{S_0^*} given by
+
+\mjsdeqn{S_0^* = \left( \frac{1 + \frac{1}{2} \mu \Delta t}{1 - \frac{1}{2} \mu \Delta t} \right)^a S_a^* + \frac{1}{1 - \frac{1}{2} \mu \Delta t} \sum_{i=1}^a (Z_i - B_i) \left( \frac{1 + \frac{1}{2} \mu \Delta t}{1 - \frac{1}{2} \mu \Delta t} \right)^{i-1}\,,}
+
+where \mjseqn{S_a^*} is the limit of the sequence \mjseqn{(S_a^{(j)})},
+given by
+
+\mjsdeqn{S_a^* = \frac{B}{\mu \Delta t} - \frac{1}{1 + \frac{1}{2} \mu \Delta t} \left\lbrack \frac{\left( \frac{1 - \frac{1}{2} \mu \Delta t}{1 + \frac{1}{2} \mu \Delta t} \right)^p}{1 - \left( \frac{1 - \frac{1}{2} \mu \Delta t}{1 + \frac{1}{2} \mu \Delta t} \right)^p} \right\rbrack \sum_{i=1}^p Z_{a+i} \left( \frac{1 + \frac{1}{2} \mu \Delta t}{1 - \frac{1}{2} \mu \Delta t} \right)^i\,.}
+
+One can further show that the convergence is linear and follows
+
+\mjsdeqn{S_0^{(j)} - S_0^* = (S_0^{(0)} - S_a^*) \left( \frac{1 - \frac{1}{2} \mu \Delta t}{1 + \frac{1}{2} \mu \Delta t} \right)^{jp-a}\,.}
+}
 }
 
 \examples{
@@ -139,8 +124,8 @@ must be done beforehand.
 par_list <- make_par_list(dt_weeks = 1)
 df <- make_data(
   par_list = par_list,
-  n = 20 * 365 / 7, # 20 years is ~1042 weeks
-  with_dem_stoch = TRUE
+  with_ds = TRUE,
+  n = 20 * 365 / 7 # number of weeks in 20 years
 )
 
 # Plot incidence time series, and note the
@@ -152,32 +137,25 @@ plot(Z ~ t_years, df,
 )
 
 # Find peaks in incidence time series
-peaks <- get_peak_times(
+peaks_out <- peaks(
   x = df$Z,
-  period = 365 / 7, # 1 year is ~52 weeks
-  bw_mavg = 6,
-  bw_peakid = 8
+  bw1 = 6,
+  bw2 = 8,
+  period = 365 / 7 # number of weeks in 1 year
 )
 
 # Verify that peaks were identified correctly
-abline(v = df$t_years[peaks$all], lty = 2, col = "red")
+abline(v = df$t_years[peaks_out$all], lty = 2, col = "red")
 
-# Index of first peak
-a <- with(peaks, phase[1])
-
-# Index of last peak in phase with first
-b <- with(peaks, phase[length(phase)])
-
-# Estimate `S0` from incidence via PTPI,
-# starting from an erroneous initial guess
-# (mock vital data generated internally)
+# Estimate `S0` from incidence, births, and
+# natural mortality using PTPI, starting from
+# an erroneous initial guess
 ptpi_out <- ptpi(
-  df = df["Z"],
-  par_list = par_list,
-  a = a,
-  b = b,
-  initial_S0_est <- df$S[1] * 4,
-  iter = 25
+  df = df,
+  S0_init = df$S[1] * 4,
+  peak1 = with(peaks_out, phase[1]),
+  peak2 = with(peaks_out, phase[length(phase)]),
+  it = 25
 )
 
 # Sequence of estimates
@@ -189,4 +167,7 @@ ptpi_out$S0
 }
 \references{
 \insertRef{Jaga+20}{fastbeta}
+}
+\seealso{
+\code{\link[=peaks]{peaks()}}
 }

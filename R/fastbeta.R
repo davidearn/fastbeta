@@ -12,22 +12,26 @@
 #' @return
 #' A fastbeta object.
 #'
+#' @references
+#' \insertRef{Jaga+20}{fastbeta}
+#' 
+#' @seealso [estimate_beta_si()], [deconvolve()], [plot.fastbeta()] 
 #' @export
 fastbeta <- function(df, par_list) {
   if (!is.data.frame(df)) {
-    stop("`df` must be a data frame.")  
+    stop("`df` must be a data frame.")
   } else if (!all(c("t", "Z", "B", "mu") %in% names(df))) {
     stop("`df` is missing necessary columns.")
-  } 
+  }
   if (!is.list(par_list)) {
     stop("`par_list` must be a list.")
   } else if (!all(c("S0", "I0", "tgen") %in% names(par_list))) {
     stop("`par_list` is missing necessary elements.")
   }
-  
+
   # Save arguments in a list
   arg_list <- as.list(environment())
-    
+
   # Missing values are not tolerated. Zeros in incidence
   # *are* tolerated but can have undesired effects. See
   # `?estimate_beta_si`.
@@ -54,10 +58,19 @@ fastbeta <- function(df, par_list) {
   )
 }
 
-#' @describeIn fastbeta Plot a fastbeta object.
+#' Methods for class fastbeta
+#'
+#' Methods for printing and plotting fastbeta objects
+#' returned by [fastbeta()].
+#' 
 #' @param x A fastbeta object.
 #' @param ... Unused optional arguments.
 #'
+#' @name fastbeta-methods
+NULL
+
+#' @rdname fastbeta-methods
+#' @export
 #' @importFrom graphics layout par plot title mtext
 plot.fastbeta <- function(x, ...) {
   if (!inherits(x, "fastbeta")) {
@@ -70,7 +83,7 @@ plot.fastbeta <- function(x, ...) {
   op <- par(mar=c(3, 6, 1, 1), oma=c(3, 0, 0, 0))
   on.exit(par(op))
   for (i in 1:3) {
-    plot(0:(nrow(x)-1), x[, ynames[i]],
+    plot(seq_len(nrow(x))-1, x[, ynames[i]],
          type="l", lty=1, lwd=2, col=cols[i],
          xaxs="i", las=1, xlab="", ylab="")
     title(ylab=ylabs[i], line=4.5, cex.lab=1.3)
@@ -79,16 +92,17 @@ plot.fastbeta <- function(x, ...) {
   invisible(NULL)
 }
 
-#' @describeIn fastbeta Print a fastbeta object.
+#' @rdname fastbeta-methods
+#' @export
 print.fastbeta <- function(x, ...) {
   if (!inherits(x, "fastbeta")) {
     stop("`x` must be a fastbeta object.")
   }
-  print.data.frame(head(x, 16))
-  m <- nrow(x)
-  if (m > 16) {
-    s <- if (m == 17) "" else "s"
-    cat(paste0("\n... and ", m - 16, " more row", s, ".\n"))
+  n <- nrow(x)
+  print.data.frame(x[seq_len(min(n, 16)), ])
+  if (n > 16) {
+    s <- if (n == 17) "" else "s"
+    cat("\n... and ", n - 16, " more row", s, ".\n", sep = "")
   }
   invisible(x)
 }

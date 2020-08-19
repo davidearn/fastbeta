@@ -16,7 +16,7 @@
 #' \mjseqn{S_0} from time series data:
 #'
 #' * [ptpi()]
-#' * [get_peak_times()]
+#' * [peaks()]
 #'
 #' PTPI can be used in conjunction with the SI method, which requires
 #' users to specify an estimate of \mjseqn{S_0}.

@@ -4,9 +4,8 @@
 #' @description
 #' Simulates epidemic time series data using a system of SIR equations
 #' and a supplied list of parameter values. Observations are recorded
-#' at equally spaced time points \mjseqn{t_i = t_0 + i \Delta t} (for
-#' \mjseqn{i = 0, \ldots, n}). Among other things, the simulation model
-#' assumes:
+#' at equally spaced time points \mjseqn{t_i = t_0 + i \Delta t}.
+#' Among other things, the simulation model assumes:
 #' * A seasonally forced transmission rate.
 #' * Constant birth and per capita natural mortality rates.
 #' * Infections reported with a fixed probability after a
@@ -29,19 +28,19 @@
 #' \mjsdeqn{\beta_\phi(t) = \langle\beta\rangle \left\lbrack 1 + \alpha \cos\left(\frac{2 \pi t}{\text{1 year}} + \phi(t;\epsilon)\right) \right\rbrack\,,}
 #' 
 #' and \mjseqn{\phi(t;\epsilon^2)} is the linear interpolant of noise
-#' \mjseqn{\lbrace(t_k;\Phi_k)\rbrace_{k=0}^n} with
+#' \mjseqn{\lbrace(t_i;\Phi_i)\rbrace_{i=0}^{n-1}} with
 #' 
-#' \mjsdeqn{\Phi_k \sim \mathrm{Normal}(0,\epsilon^2)\,,}
+#' \mjsdeqn{\Phi_i \sim \mathrm{Normal}(0,\epsilon^2)\,,}
 #'
 #' modeling **environmental stochasticity**.
 #'
 #' `make_data()` generates observations of the above system at equally spaced
-#' times \mjseqn{t_i = t_0 + i \Delta t} (for \mjseqn{i = 0, \ldots, n}) by
+#' times \mjseqn{t_i = t_0 + i \Delta t} (for \mjseqn{i = 0, \ldots, n-1}) by
 #' either
 #' (i) numerically integrating the ODE using [deSolve::ode()]
-#' (`with_dem_stoch = FALSE`), or
+#' (`with_ds = FALSE`), or
 #' (ii) realizing a corresponding continuous-time stochastic process using
-#' [adaptivetau::ssa.adaptivetau()] (`with_dem_stoch = TRUE`).
+#' [adaptivetau::ssa.adaptivetau()] (`with_ds = TRUE`).
 #' Both methods use initial state
 #'
 #' \mjsdeqn{\begin{bmatrix} S(t_0) \cr I(t_0) \cr R(t_0) \cr B_\text{cum}(t_0) \cr Z_\text{cum}(t_0) \end{bmatrix} = \begin{bmatrix} S_0 \cr I_0 \cr N_0 - S_0 - I_0 \cr 0 \cr 0 \end{bmatrix}\,.}
@@ -82,6 +81,7 @@
 #' \mjseqn{C(t_{i+d}) = Z_\text{rep}(t_i)\,.}
 #'
 #' @param par_list A list of parameter values with elements:
+#'
 #'   \describe{
 #'     \item{`dt_weeks`}{\mjseqn{\lbrace\,\Delta t\,\rbrace}
 #'       Numeric scalar. Observation interval in weeks.
@@ -145,23 +145,27 @@
 #'       transmission rate \mjseqn{\beta(t)}.
 #'     }
 #'   }
-#' @param n Integer scalar. Time between the first and last observations
-#'   in units \mjseqn{\Delta t}, so that simulated time series have `n + 1`
-#'   observations. (If numeric but not integer, then `n` is replaced by
-#'   `floor(n)`.)
-#' @param with_dem_stoch Logical scalar. If `TRUE`, then the simulation
-#'   is generated using [adaptivetau::ssa.adaptivetau()]. Otherwise, it
-#'   is generated using [deSolve::ode()] (see Details).
 #'
+#'   Such a list can be constructed with the help of [make_par_list()].
+#' @param with_ds Logical scalar. Should the simulation include demographic
+#'   stochasticity? If `TRUE`, then the simulation is generated using
+#'   [adaptivetau::ssa.adaptivetau()]. Otherwise, it is generated using
+#'   [deSolve::ode()] (see Details).
+#' @param n Integer scalar. The number of observations in the simulated
+#'   time series. If numeric but not integer, then `n` is replaced by
+#'   `floor(n)`.
+#' 
 #' @return
-#' A data frame with `n + 1` rows corresponding to equally spaced time
-#' points \mjseqn{t_i = t_0 + i \Delta t} (for \mjseqn{i = 0, \ldots, n}),
+#' A data frame with `n` rows corresponding to equally spaced time points
+#' \mjseqn{t_i = t_0 + i \Delta t} (for \mjseqn{i = 0, \ldots, n-1}),
 #' and numeric columns:
 #'
 #' \describe{
-#'   \item{`t`}{Time in units \mjseqn{\Delta t}. Equal to `par_list$t0 + 0:n`.}
-#'   \item{`t_years`}{Time in years. Equal to
-#'     `(par_list$t0 + 0:n) * par_list$dt_weeks * (7 / 365)`.
+#'   \item{`t`}{Time in units \mjseqn{\Delta t}.
+#'     Equal to `par_list$t0 + 0:(n-1)`.
+#'   }
+#'   \item{`t_years`}{Time in years.
+#'     Equal to `(par_list$t0 + 0:(n-1)) * par_list$dt_weeks * (7 / 365)`.
 #'   }
 #'   \item{`beta`}{Seasonally forced transmission rate expressed
 #'     per unit \mjseqn{\Delta t} per susceptible per infected,
@@ -185,11 +189,11 @@
 #'     reported between times `t[i-1]` and `t[i]`.
 #'   }
 #'   \item{`B`}{Births. `B[i]` is the number of births between times
-#'     `t[i-1]` and `t[i]`. Equal to `with(par_list, rep(nu * hatN0, n + 1))`
-#'     if `with_dem_stoch = FALSE`.
+#'     `t[i-1]` and `t[i]`. Equal to `with(par_list, rep(nu * hatN0, n))`
+#'     if `with_ds = FALSE`.
 #'   }
 #'   \item{`mu`}{Per capita natural mortality rate. `mu[i]` is rate
-#'     at time `t[i]`. Equal to `with(par_list, rep(mu, n + 1))`.
+#'     at time `t[i]`. Equal to `with(par_list, rep(mu, n))`.
 #'   }
 #' }
 #'
@@ -200,17 +204,13 @@
 #' @examples
 #' # Deterministic simulation
 #' par_list <- make_par_list(dt_weeks = 1)
-#' df <- make_data(
-#'   par_list = par_list,
-#'   n = 20 * 365 / 7, # number of weeks in 20 years
-#'   with_dem_stoch = FALSE
-#' )
+#' df <- make_data(par_list = par_list, with_ds = FALSE)
 #' head(df)
 #' 
 #' # Stochastic simulation
 #' par_list <- make_par_list(
 #'   dt_weeks = 1,
-#'   epsilon2 = 1, # environmental sxtochasticity
+#'   epsilon2 = 1, # environmental stochasticity
 #'   prep = 0.5, # random under-reporting of infections
 #'   trep = 2, # random reporting delays
 #'   k = 4
@@ -218,16 +218,16 @@
 #' set.seed(2146)
 #' df <- make_data(
 #'   par_list = par_list,
-#'   n = 20 * 365 / 7,
-#'   with_dem_stoch = TRUE # demographic stochasticity
+#'   with_ds = TRUE # demographic stochasticity
 #' )
 #' head(df)
 #'
-#' @importFrom stats rnorm rbinom rnbinom approxfun
+#' @seealso [make_par_list()]
 #' @export
-make_data <- function(par_list       = make_par_list(),
-                      n              = 20 * 365 / 7,
-                      with_dem_stoch = TRUE) {
+#' @importFrom stats rnorm rbinom rnbinom approxfun
+make_data <- function(par_list = make_par_list(),
+                      with_ds  = TRUE,
+                      n        = 1e03) {
   ## 1. Set-up -----------------------------------------------------------
 
   # Save arguments in a list
@@ -247,7 +247,7 @@ make_data <- function(par_list       = make_par_list(),
 
   # Time points
   n <- floor(n)
-  t_out <- t0 + 0:n
+  t_out <- t0 + 0:(n-1)
 
   # Environmental noise
   phi <- stats::rnorm(
@@ -279,7 +279,7 @@ make_data <- function(par_list       = make_par_list(),
   ## 2.(a) Simulate SIR equations ... ------------------------------------
   ##       if with demographic stochasticity
 
-  if (with_dem_stoch) {
+  if (with_ds) {
 
     ## NOTE: The adaptivetau package insists that simulations start at
     ##       time 0. To get simulations from time `t0`, we must take care

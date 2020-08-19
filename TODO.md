@@ -3,12 +3,12 @@
 ### Code
 
 * useful `fastbeta()` output other than data frame?
+* plot, print methods for class ptpi
 * loess wrapper
-* print, plot, summary methods for class "fastbeta"
 
 ### Debug
 
-* `?fastbeta` gives package help instead of function help
+* `plot.peaks()` not found when checking `peaks()` examples
 
 ### Documentation
 

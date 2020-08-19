@@ -28,7 +28,7 @@ and should be preferred in practice.
 \mjseqn{S_0} from time series data:
 \itemize{
 \item \code{\link[=ptpi]{ptpi()}}
-\item \code{\link[=get_peak_times]{get_peak_times()}}
+\item \code{\link[=peaks]{peaks()}}
 }
 
 PTPI can be used in conjunction with the SI method, which requires
