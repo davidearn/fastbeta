@@ -116,7 +116,10 @@
 #'
 #' # Plot incidence time series, and note the
 #' # apparent 1-year period
-#' plot(Z ~ t_years, df, type = "l", xlab = "Time (years)", ylab = "Incidence")
+#' plot(Z ~ I(t_years - t_years[1]), df, type = "l",
+#'   xlab = "Time (years)",
+#'   ylab = "Incidence"
+#' )
 #'
 #' # Locate peaks in incidence time series
 #' peaks_out <- peaks(
@@ -141,6 +144,7 @@
 #'   peak2 = with(peaks_out, phase[length(phase)]),
 #'   it = 25
 #' )
+#' plot(ptpi_out)
 #'
 #' # Sequence of estimates
 #' ptpi_out$S0
