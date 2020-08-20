@@ -12,10 +12,21 @@
 #' @return
 #' A fastbeta object.
 #'
+#' @examples
+#' # Simulate time series data using an SIR model
+#' # with seasonally forced transmission rate
+#' par_list <- make_par_list(dt_weeks = 1)
+#' df <- make_data(par_list = par_list, with_ds = TRUE)
+#'
+#' # Estimate susceptibles, infecteds, and
+#' # the seasonally forced transmission rate
+#' fastbeta_out <- fastbeta(df, par_list)
+#' plot(fastbeta_out)
+#'
 #' @references
 #' \insertRef{Jaga+20}{fastbeta}
-#' 
-#' @seealso [estimate_beta_si()], [deconvolve()], [plot.fastbeta()] 
+#'
+#' @seealso [estimate_beta_si()], [deconvolve()], [plot.fastbeta()]
 #' @export
 fastbeta <- function(df, par_list) {
   if (!is.data.frame(df)) {
@@ -62,7 +73,7 @@ fastbeta <- function(df, par_list) {
 #'
 #' Methods for printing and plotting fastbeta objects
 #' returned by [fastbeta()].
-#' 
+#'
 #' @param x A fastbeta object.
 #' @param ... Unused optional arguments.
 #'
@@ -80,14 +91,14 @@ plot.fastbeta <- function(x, ...) {
   ynames <- c("S", "I", "beta")
   ylabs <- c("Susceptibles", "Infecteds", "Transmission rate")
   cols <- c("seagreen", "mediumvioletred", "slateblue")
-  op <- par(mar=c(3, 6, 1, 1), oma=c(3, 0, 0, 0))
+  op <- par(mar=c(3,5.6,0.2,0.2), oma=c(2.4,0,0,0)+1)
   on.exit(par(op))
   for (i in 1:3) {
     plot(seq_len(nrow(x))-1, x[, ynames[i]],
          type="l", lty=1, lwd=2, col=cols[i],
          xaxs="i", las=1, xlab="", ylab="")
-    title(ylab=ylabs[i], line=4.5, cex.lab=1.3)
-    mtext("Time (units dt)", side=1, line=1.5, adj=0.565, outer=TRUE, cex=1.3)
+    title(ylab=ylabs[i], line=4.5, cex.lab=1.2)
+    mtext("Time (units dt)", side=1, line=1, adj=0.565, outer=TRUE, cex=1.2)
   }
   invisible(NULL)
 }

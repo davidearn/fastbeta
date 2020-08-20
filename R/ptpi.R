@@ -21,7 +21,7 @@
 #' The first peak in incidence and the last peak in phase with
 #' the first peak occur at times \mjseqn{t_a} and \mjseqn{t_b},
 #' respectively, where \mjseqn{a} is `peak1 - 1` and \mjseqn{b}
-#' is `peak2 - 1`. 
+#' is `peak2 - 1`.
 #'
 #' Let \mjseqn{S_i^{(j)}} denote the estimate of \mjseqn{S(t_i)}
 #' obtained after \mjseqn{j} iterations. Assign both \mjseqn{S_0^{(0)}}
@@ -49,16 +49,16 @@
 #' \mjseqn{(S_0^{(j)})} converges to a limit \mjseqn{S_0^*} given by
 #'
 #' \mjsdeqn{S_0^* = \left( \frac{1 + \frac{1}{2} \mu \Delta t}{1 - \frac{1}{2} \mu \Delta t} \right)^a S_a^* + \frac{1}{1 - \frac{1}{2} \mu \Delta t} \sum_{i=1}^a (Z_i - B_i) \left( \frac{1 + \frac{1}{2} \mu \Delta t}{1 - \frac{1}{2} \mu \Delta t} \right)^{i-1}\,,}
-#' 
+#'
 #' where \mjseqn{S_a^*} is the limit of the sequence \mjseqn{(S_a^{(j)})},
 #' given by
-#' 
+#'
 #' \mjsdeqn{S_a^* = \frac{B}{\mu \Delta t} - \frac{1}{1 + \frac{1}{2} \mu \Delta t} \left\lbrack \frac{\left( \frac{1 - \frac{1}{2} \mu \Delta t}{1 + \frac{1}{2} \mu \Delta t} \right)^p}{1 - \left( \frac{1 - \frac{1}{2} \mu \Delta t}{1 + \frac{1}{2} \mu \Delta t} \right)^p} \right\rbrack \sum_{i=1}^p Z_{a+i} \left( \frac{1 + \frac{1}{2} \mu \Delta t}{1 - \frac{1}{2} \mu \Delta t} \right)^i\,.}
 #'
 #' One can further show that the convergence is linear and follows
 #'
 #' \mjsdeqn{S_0^{(j)} - S_0^* = (S_0^{(0)} - S_a^*) \left( \frac{1 - \frac{1}{2} \mu \Delta t}{1 + \frac{1}{2} \mu \Delta t} \right)^{jp-a}\,.}
-#' 
+#'
 #' @param df A data frame with numeric columns:
 #'
 #'   \describe{
@@ -116,13 +116,9 @@
 #'
 #' # Plot incidence time series, and note the
 #' # apparent 1-year period
-#' plot(Z ~ t_years, df,
-#'   type = "l",
-#'   xlab = "Time (years)",
-#'   ylab = "Incidence"
-#' )
-#' 
-#' # Find peaks in incidence time series
+#' plot(Z ~ t_years, df, type = "l", xlab = "Time (years)", ylab = "Incidence")
+#'
+#' # Locate peaks in incidence time series
 #' peaks_out <- peaks(
 #'   x = df$Z,
 #'   bw1 = 6,
@@ -130,8 +126,10 @@
 #'   period = 365 / 7 # number of weeks in 1 year
 #' )
 #'
-#' # Verify that peaks were identified correctly
-#' abline(v = df$t_years[peaks_out$all], lty = 2, col = "red")
+#' # Verify that peaks were identified correctly:
+#' # * Blue lines are peaks.
+#' # * Pink circles are peaks in phase with first peak.
+#' plot(peaks_out)
 #'
 #' # Estimate `S0` from incidence, births, and
 #' # natural mortality using PTPI, starting from
@@ -153,12 +151,12 @@
 #' @references
 #' \insertRef{Jaga+20}{fastbeta}
 #'
-#' @seealso [peaks()]
+#' @seealso [peaks()], [plot.ptpi()]
 #' @export
 ptpi <- function(df, S0_init, peak1 = 1L, peak2 = nrow(df), it = 10L) {
   # Save arguments in a list
   arg_list <- as.list(environment())
-  
+
   # Preallocate memory for all susceptible time series,
   # and initialize the first
   mat <- matrix(NA, nrow = nrow(df), ncol = 1 + it)
@@ -198,7 +196,6 @@ ptpi <- function(df, S0_init, peak1 = 1L, peak2 = nrow(df), it = 10L) {
 
   }
 
-
   out <- list(
     mat      = mat,
     S0       = mat[1, ],
@@ -209,4 +206,61 @@ ptpi <- function(df, S0_init, peak1 = 1L, peak2 = nrow(df), it = 10L) {
     call     = match.call(),
     arg_list = arg_list
   )
+}
+
+#' Methods for class ptpi
+#'
+#' Methods for plotting and printing ptpi objects
+#' returned by [ptpi()].
+#'
+#' @param x A ptpi object.
+#' @param ... Unused optional arguments.
+#'
+#' @name ptpi-methods
+NULL
+
+#' @rdname ptpi-methods
+#' @export
+#' @importFrom graphics plot lines points mtext
+plot.ptpi <- function(x, ...) {
+  if (!inherits(x, "ptpi")) {
+    stop("`x` must be a ptpi object.")
+  }
+  m <- nrow(x$mat)
+  n <- ncol(x$mat)
+  if (m < 2 || n < 1) {
+    stop("`x$mat` must have at least 2 rows and at least 1 column.")
+  }
+  op <- par(mar=c(4,5.4,1.2,0.2)+1)
+  on.exit(op)
+  plot(0, 0, type="n",
+       xlim=c(0,m-1), ylim=range(x$mat, na.rm=TRUE),
+       xaxs="i", las=1,
+       xlab="Time (units dt)", ylab="")
+  mtext("Susceptibles", side=2, line=4.5)
+  for (j in seq_len(n-1)) {
+    lines(0:(m-1), x$mat[, j], lwd=2, col="grey80")
+  }
+  lines(0:(m-1), x$mat[, n], lwd=2)
+  points(rep(0, length(x$S0)), x$S0, pch=18, col="seagreen", xpd=NA)
+  mtext(paste("S0 =", sprintf("%.4f", x$S0_final), "after", n-1, "iterations"),
+        side=3, line=0.2, adj=0, padj=0)
+  invisible(NULL)
+}
+
+#' @rdname ptpi-methods
+#' @export
+print.ptpi <- function(x, ...) {
+  if (!inherits(x, "ptpi")) {
+    stop("`x` must be a ptpi object.")
+  }
+  n <- length(x$S0)
+  if (n == 1) {
+    cat("`ptpi()` returned this 1 estimate of S0:\n")
+  } else {
+    cat("`ptpi()` returned these", length(x$S0), "estimates of S0:\n")
+  }
+  fmt <- paste0("%", nchar(max(floor(x$S0))) + 4 + 5, ".4f")
+  cat(paste0(sprintf(fmt, x$S0), "\n"), sep = "")
+  invisible(x$S0)
 }

@@ -153,7 +153,7 @@ lines(xbar, lwd = 2)
 # tends to yield reasonable results
 bw2 <- 0.4 * 200 / 2
 
-# Get peaks in time series
+# Locate peaks in time series
 peaks_out <- peaks(
   x = x,
   bw1 = bw1,
@@ -164,7 +164,7 @@ peaks_out <- peaks(
 # Verify that peaks were identified correctly:
 # * Blue lines are peaks.
 # * Pink circles are peaks in phase with first peak.
-plot.peaks(peaks_out)
+plot(peaks_out)
 
 }
 \references{

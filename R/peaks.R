@@ -136,7 +136,7 @@
 #' # tends to yield reasonable results
 #' bw2 <- 0.4 * 200 / 2
 #'
-#' # Get peaks in time series
+#' # Locate peaks in time series
 #' peaks_out <- peaks(
 #'   x = x,
 #'   bw1 = bw1,
@@ -147,7 +147,7 @@
 #' # Verify that peaks were identified correctly:
 #' # * Blue lines are peaks.
 #' # * Pink circles are peaks in phase with first peak.
-#' plot.peaks(peaks_out)
+#' plot(peaks_out)
 #'
 #' @references
 #' \insertRef{Jaga+20}{fastbeta}
@@ -234,7 +234,6 @@ peaks <- function(x, bw1, bw2, period = NULL) {
     )
   }
 
-
   out <- list(
     x     = x,
     xbar  = xbar,
@@ -252,7 +251,7 @@ peaks <- function(x, bw1, bw2, period = NULL) {
 #'
 #' Methods for plotting and printing peaks objects
 #' returned by [peaks()].
-#' 
+#'
 #' @param x A peaks object.
 #' @param ... Unused optional arguments.
 #'
@@ -261,16 +260,18 @@ NULL
 
 #' @rdname peaks-methods
 #' @export
-#' @importFrom graphics plot mtext lines abline axis
+#' @importFrom graphics par plot mtext lines abline axis
 plot.peaks <- function(x, ...) {
   if (!inherits(x, "peaks")) {
     stop("`x` must be a peaks object.")
   }
+  op <- par(mar=c(4,4.4,0.8,0.2)+1)
+  on.exit(par(op))
   plot(seq_along(x$x)-1, x$x, type="l",
        lwd=2, col="grey80",
        xaxs="i", las=1,
        xlab="Time (units dt)", ylab="")
-  mtext("x", side=2, line=3, las=1)
+  mtext("x", side=2, line=4, las=1)
   lines(seq_along(x$x)-1, x$xbar, lwd=2)
   abline(v=x$all-1, col="blue")
   if (!is.null(x$phase)) {
@@ -287,6 +288,13 @@ print.peaks <- function(x, ...) {
   if (!inherits(x, "peaks")) {
     stop("`x` must be a peaks object.")
   }
-  cat("`peaks()` found", length(x$all), "peaks in `x`, indexed by:\n", x$all)
+  n <- length(x$all)
+  if (n == 0) {
+    cat("`peaks()` found no peaks.\n")
+  } else {
+    fmt <- paste0("%", nchar(max(x$all)) + 4, "d")
+    cat("`peaks()` found", n, "peaks in `x`, indexed by:\n")
+    cat(paste0(sprintf(fmt, x$all), "\n"), sep = "")
+  }
   invisible(x$all)
 }

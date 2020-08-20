@@ -20,6 +20,18 @@ Generates a fastbeta object.
 \details{
 Details to come.
 }
+\examples{
+# Simulate time series data using an SIR model
+# with seasonally forced transmission rate
+par_list <- make_par_list(dt_weeks = 1)
+df <- make_data(par_list = par_list, with_ds = TRUE)
+
+# Estimate susceptibles, infecteds, and
+# the seasonally forced transmission rate
+fastbeta_out <- fastbeta(df, par_list)
+plot(fastbeta_out)
+
+}
 \references{
 \insertRef{Jaga+20}{fastbeta}
 }

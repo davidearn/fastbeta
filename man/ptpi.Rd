@@ -130,13 +130,9 @@ df <- make_data(
 
 # Plot incidence time series, and note the
 # apparent 1-year period
-plot(Z ~ t_years, df,
-  type = "l",
-  xlab = "Time (years)",
-  ylab = "Incidence"
-)
+plot(Z ~ t_years, df, type = "l", xlab = "Time (years)", ylab = "Incidence")
 
-# Find peaks in incidence time series
+# Locate peaks in incidence time series
 peaks_out <- peaks(
   x = df$Z,
   bw1 = 6,
@@ -144,8 +140,10 @@ peaks_out <- peaks(
   period = 365 / 7 # number of weeks in 1 year
 )
 
-# Verify that peaks were identified correctly
-abline(v = df$t_years[peaks_out$all], lty = 2, col = "red")
+# Verify that peaks were identified correctly:
+# * Blue lines are peaks.
+# * Pink circles are peaks in phase with first peak.
+plot(peaks_out)
 
 # Estimate `S0` from incidence, births, and
 # natural mortality using PTPI, starting from
@@ -169,5 +167,5 @@ ptpi_out$S0
 \insertRef{Jaga+20}{fastbeta}
 }
 \seealso{
-\code{\link[=peaks]{peaks()}}
+\code{\link[=peaks]{peaks()}}, \code{\link[=plot.ptpi]{plot.ptpi()}}
 }
