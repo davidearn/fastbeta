@@ -4,7 +4,7 @@
 \alias{ptpi-methods}
 \alias{plot.ptpi}
 \alias{print.ptpi}
-\title{Methods for class ptpi}
+\title{Methods for class "ptpi"}
 \usage{
 \method{plot}{ptpi}(x, ...)
 

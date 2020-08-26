@@ -45,3 +45,10 @@
 #' @importFrom Rdpack reprompt
 #' @importFrom mathjaxr preview_rd
 "_PACKAGE"
+
+# For `R CMD check`
+if (getRversion() >= "2.15.1") {
+  utils::globalVariables(c("tgen", "tlat", "tinf",
+                           "S", "E", "logE", "logI", "R",
+                           "Zcum", "Bcum"))
+}

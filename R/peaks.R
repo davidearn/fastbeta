@@ -79,19 +79,19 @@
 #' A good value for `bw1` can be found by experimenting with [stats::filter()]
 #' (see Examples).
 #'
-#' @param x Numeric vector. An equally spaced time series.
+#' @param x A numeric vector. An equally spaced time series.
 #'   Defines \mjseqn{\lbrace x_i \rbrace_{i=0}^{n-1}} in Algorithm.
 #'   (Without loss of generality, the indices `seq_along(x)` are
 #'   used as time points, so that \mjseqn{t_i = i+1} for all \mjseqn{i}.)
-#' @param bw1 Integer scalar. Bandwidth for the central moving average
+#' @param bw1 An integer scalar. Bandwidth for the central moving average
 #'   applied to `x`, so that `xbar[i] = mean(x[(i-bw1):(i+bw1)])` for
 #'   all `i`. Defines \mjseqn{\ell_1} in Algorithm.
-#' @param bw2 Integer scalar. Bandwidth for peak definition, so that a
+#' @param bw2 An integer scalar. Bandwidth for peak definition, so that a
 #'   peak occurs at index `i` if and only if
 #'   `all(xbar[i] > xbar[(i-bw2):(i-1)])` and
 #'   `all(xbar[i] > xbar[(i+1):(i+bw2)])`.
 #'   Defines \mjseqn{\ell_2} in Algorithm.
-#' @param period Numeric scalar. Period of `x` if `x` is roughly periodic.
+#' @param period A numeric scalar. Period of `x` if `x` is roughly periodic.
 #'   Defines \mjseqn{T} in Algorithm. This argument is optional and should
 #'   retain the default value `NULL` if `x` is not roughly periodic.
 #'
@@ -99,13 +99,13 @@
 #' A peaks object. A list with elements:
 #'
 #' \describe{
-#'   \item{`xbar`}{Numeric vector. The result of applying
+#'   \item{`xbar`}{A numeric vector. The result of applying
 #'     a `(2 * bw1 + 1)`-point central moving average to `x`.
 #'   }
-#'   \item{`all`}{Numeric vector. A subset of `seq_along(x)`
+#'   \item{`all`}{An integer vector. A subset of `seq_along(x)`
 #'     listing the index of each peak in `x`.
 #'   }
-#'   \item{`phase`}{Numeric vector. A subset of `all` listing
+#'   \item{`phase`}{An integer vector. A subset of `all` listing
 #'     the index of each peak in phase with the first peak.
 #'     `NULL` if `period` is `NULL` in the function call.
 #'   }
@@ -152,7 +152,7 @@
 #' @references
 #' \insertRef{Jaga+20}{fastbeta}
 #'
-#' @seealso [ptpi()], [plot.peaks()]
+#' @seealso [methods for class "peaks"][peaks-methods], [ptpi()]
 #' @export
 #' @importFrom stats filter embed
 peaks <- function(x, bw1, bw2, period = NULL) {
@@ -247,7 +247,7 @@ peaks <- function(x, bw1, bw2, period = NULL) {
   )
 }
 
-#' Methods for class peaks
+#' Methods for class "peaks"
 #'
 #' Methods for plotting and printing peaks objects
 #' returned by [peaks()].

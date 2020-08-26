@@ -4,6 +4,7 @@
 
 * useful `fastbeta()` output other than data frame?
 * loess wrapper
+* bootstrap CIs on beta(t) estimates
 
 ### Debug
 

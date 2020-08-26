@@ -2,17 +2,18 @@
 #' Estimate time-varying transmission rates
 #'
 #' @description
-#' Functions implementing the FC, S, and SI methods (see Algorithm)
-#' for estimating time-varying transmission rates \mjseqn{\beta(t)}
-#' from time series of incidence, births, and natural mortality with
-#' observations at equally spaced time points
-#' \mjseqn{t_i = t_0 + i \Delta t}.
-#' The FC and S methods are deprecated and outperformed by the
-#' more robust SI method. `estimate_beta_si()` need not be called
-#' directly: it is wrapped in the more useful constructor function
-#' [fastbeta()], which does checks on input and output and returns
-#' a fastbeta object with associated methods.
-#' 
+#' Functions implementing the FC, S, SI, and SEI methods (see Algorithm)
+#' for estimating time-varying transmission rates \mjseqn{\beta(t)} from
+#' time series of incidence, births, and natural mortality with observations
+#' at equally spaced time points \mjseqn{t_i = t_0 + i \Delta t}. The FC
+#' and S methods are deprecated and outperformed by the more robust SI
+#' and SEI methods. The SEI method accounts for a latent period and so
+#' should be preferred over the SI method in practice. These 4 functions
+#' should not be called directly, as they are all accessible through the
+#' `method` argument of the more useful constructor function [fastbeta()],
+#' which does checks on input and output and returns a fastbeta object
+#' with associated methods.
+#'
 #' @details
 #' # Details
 #'
@@ -38,7 +39,7 @@
 #' The infected population size is approximated by aggregated incidence:
 #'
 #' \mjsdeqn{I_i = Z_i^\text{agg}\,,\quad i=jg\,,\quad j = 1,2,\ldots\,,}
-#' 
+#'
 #' where natural mortality of infecteds is assumed to be negligible.
 #' The transmission rate is then estimated as
 #'
@@ -54,9 +55,9 @@
 #' \mjsdeqn{S_{i+1} = S_i + B_{i+1} - Z_{i+1} - \mu_i S_i \Delta t\,.}
 #'
 #' The infected population size is approximated by a scaling of incidence:
-#' 
+#'
 #' \mjsdeqn{I_i = \frac{Z_{i-g+1}}{(\gamma + \mu_i) \Delta t}\,,\quad \gamma = 1 / t_\text{gen}\,,}
-#' 
+#'
 #' where \mjseqn{g = \mathrm{nint}(t_\text{gen} / \Delta t)} is the mean
 #' generation interval \mjseqn{t_\text{gen}} in units of the observation
 #' interval \mjseqn{\Delta t} (`par_list$tgen`), rounded to the nearest
@@ -74,9 +75,21 @@
 #' The transmission rate is then estimated as
 #'
 #' \mjsdeqn{\beta_i = \frac{Z_i + Z_{i+1}}{2 S_i I_i \Delta t}\,.}
-#' 
+#'
+#' ### SEI method
+#' The susceptible, exposed, and infectious population sizes are estimated
+#' recursively starting from the supplied initial values \mjseqn{S_0}
+#' (`par_list$S0`), \mjseqn{E_0} (`par_list$E0`), and \mjseqn{I_0}
+#' (`par_list$I0`):
+#'
+#' \mjsdeqn{\begin{align*} S_{i+1} &= \frac{\big\lbrack 1 - \frac{1}{2} \mu_i \Delta t \big\rbrack S_i + B_{i+1} - Z_{i+1}}{1 + \frac{1}{2} \mu_{i+1} \Delta t}\,, \cr E_{i+1} &= \frac{\big\lbrack 1 - \frac{1}{2} (\sigma + \mu_i) \Delta t \big\rbrack E_i + Z_i}{1 + \frac{1}{2} (\sigma + \mu_{i+1}) \Delta t}\,,\quad \sigma = 1 / t_\text{lat}\,, \cr I_{i+1} &= \frac{\big\lbrack 1 - \frac{1}{2} (\gamma + \mu_i) \Delta t \big\rbrack I_i + \frac{1}{2} \sigma (E_i + E_{i+1}) \Delta t}{1 + \frac{1}{2} (\gamma + \mu_{i+1}) \Delta t}\,,\quad \sigma = 1 / t_\text{lat}\,,\quad \gamma = 1 / t_\text{inf}\,. \end{align*}}
+#'
+#' The transmission rate is then estimated as
+#'
+#' \mjsdeqn{\beta_i = \frac{Z_i + Z_{i+1}}{2 S_i I_i \Delta t}\,.}
+#'
 #' ## 2. Missing data
-#' 
+#'
 #' Missing values in `df$Z` are not tolerated and must be imputed.
 #' Columns `S` and `beta` in the output will be filled with `NA`
 #' after the index of the first missing value.
@@ -84,17 +97,16 @@
 #' In the FC and S methods, zeros in `df$Z` can cause divide-by-zero
 #' errors. In this case, column `beta` in the output may contain `NaN`
 #' and `Inf` where an estimate would otherwise be expected. In the SI
-#' method, strings of zeros in `df$Z` can lead to spurious zeros and
-#' large numeric elements in column `beta` of the output. Zeros in `df$Z`
-#' can be "imputed" (replaced with positive values in a sensible way)
-#' to avoid this issue.
+#' and SEI methods, strings of zeros in `df$Z` can lead to spurious
+#' zeros and large numeric elements in column `beta` of the output.
+#' Zeros in `df$Z` can be "imputed" (replaced with positive values
+#' in a sensible way) to avoid these issues.
 #'
 #' Imputation is not carried out by `estimate_beta_fc()` and friends,
-#' but *is* carried out by the more useful constructor function
-#' [fastbeta()], a wrapper for `estimate_beta_si()`.
+#' but *is* carried out by [fastbeta()].
 #'
 #' ## 3. Effective observation interval (FC method only)
-#' 
+#'
 #' In the absence of errors, every `round(par_list$tgen)`th row in
 #' the FC method output will be complete. The remaining rows will
 #' contain `NA` in columns `S`, `I`, `beta`, `Z_agg`, and `B_agg`.
@@ -105,34 +117,52 @@
 #' @param df A data frame with numeric columns:
 #'
 #'   \describe{
-#'     \item{`t`}{Time. `t[i]` is equal to
-#'       \mjseqn{t_{i-1} = t_0 + (i-1) \Delta t} in any convenient units,
-#'       where \mjseqn{t_0} is the initial observation time
-#'       and \mjseqn{\Delta t} is the observation interval.
+#'     \item{`t`}{\mjseqn{\lbrace\,t_i\,\rbrace}
+#'       Time. Lists the observation times \mjseqn{t_i = t_0 + i \Delta t}
+#'       (for \mjseqn{i = 0, \ldots, n-1}) in any convenient units. Here,
+#'       \mjseqn{t_0} is the initial observation time and \mjseqn{\Delta t}
+#'       is the observation interval.
 #'     }
-#'     \item{`Z`}{Incidence. `Z[i]` is the number of infections between
-#'       times `t[i-1]` and `t[i]`.
+#'     \item{`Z`}{\mjseqn{\lbrace\,Z_i\,\rbrace}
+#'       Incidence. `Z[i]` is the number of infections
+#'       between times `t[i-1]` and `t[i]`.
 #'     }
-#'     \item{`B`}{Births. `B[i]` is the number of births between times
-#'       `t[i-1]` and `t[i]`.
+#'     \item{`B`}{\mjseqn{\lbrace\,B_i\,\rbrace}
+#'       Births. `B[i]` is the number of births
+#'       between times `t[i-1]` and `t[i]`.
 #'     }
-#'     \item{`mu`}{Natural mortality rate. `mu[i]` is the rate at time
-#'       `t[i]` expressed per unit \mjseqn{\Delta t} and per capita.
-#'       S and SI methods only.
+#'     \item{`mu_i`}{\mjseqn{\lbrace\,\mu_i\,\rbrace}
+#'       Per capita natural mortality rate. `mu[i]` is the rate
+#'       at time `t[i]` expressed per unit \mjseqn{\Delta t}.
+#'       S, SI, and SEI methods only.
 #'     }
 #'   }
-#' 
-#' @param par_list A list with elements:
+#'
+#' @param par_list A list with numeric scalar elements:
 #'
 #'   \describe{
-#'     \item{`tgen`}{Mean generation interval of the disease of interest
-#'       in units of the observation interval \mjseqn{\Delta t}.
+#'     \item{`tgen`}{\mjseqn{\lbrace\,t_\text{gen} / \Delta t\,\rbrace}
+#'       Mean generation interval of the disease of interest
+#'       in units \mjseqn{\Delta t}. FC, S, and SI methods only.
 #'     }
-#'     \item{`S0`}{Number of susceptibles at the initial observation time
-#'       \mjseqn{t_0}.
+#'     \item{`tlat`}{\mjseqn{\lbrace\,t_\text{lat} / \Delta t\,\rbrace}
+#'       Mean latent period of the disease of interest
+#'       in units \mjseqn{\Delta t}. SEI method only.
 #'     }
-#'     \item{`I0`}{Number of infecteds at the initial observation time
-#'       \mjseqn{t_0}. SI method only.
+#'     \item{`tinf`}{\mjseqn{\lbrace\,t_\text{inf} / \Delta t\,\rbrace}
+#'       Mean infectious period of the disease of interest
+#'       in units \mjseqn{\Delta t}. SEI method only.
+#'     }
+#'     \item{`S0`}{\mjseqn{\lbrace\,S_0\,\rbrace}
+#'       Number of susceptible individuals at time \mjseqn{t = t_0}.
+#'     }
+#'     \item{`E0`}{\mjseqn{\lbrace\,E_0\,\rbrace}
+#'       Number of exposed individuals at time \mjseqn{t = t_0}.
+#'       SEI method only.
+#'     }
+#'     \item{`I0`}{\mjseqn{\lbrace\,I_0\,\rbrace}
+#'       Number of infected (SI) or infectious (SEI) individuals
+#'       at time \mjseqn{t = t_0}. SI and SEI methods only.
 #'     }
 #'   }
 #'
@@ -140,96 +170,154 @@
 #' A data frame with numeric columns:
 #'
 #' \describe{
-#'   \item{`t`}{Time. Identical to `df$t`.}
-#'   \item{`Z`}{Incidence. Identical to `df$Z`.}
-#'   \item{`Z_agg`}{Aggregated incidence. `Z_agg[i]` is the number
-#'     of infections between times `t[i-round(tgen)+1]` and `t[i]`,
-#'     for `i` in `seq(1 + round(tgen), nrow(df), by = round(tgen))`.
-#'     `Z_agg[i]` is `NA` otherwise. FC method only.
+#'   \item{`t`}{\mjseqn{\lbrace\,t_i\,\rbrace} Time. Identical to `df$t`.}
+#'   \item{`Z`}{\mjseqn{\lbrace\,Z_i\,\rbrace} Incidence. Identical to `df$Z`.}
+#'   \item{`Z_agg`}{\mjseqn{\lbrace\,Z_i^\text{agg}\,\rbrace}
+#'     Aggregated incidence. `Z_agg[i]` is the number of infections
+#'     between times `t[i-round(tgen)+1]` and `t[i]`, for `i` in
+#'     `seq(1 + round(tgen), nrow(df), by = round(tgen))`. `Z_agg[i]`
+#'     is `NA` for all other `i`. FC method only.
 #'   }
-#'   \item{`B`}{Births. Identical to `df$B`.}
-#'   \item{`B_agg`}{Aggregated births. `B_agg[i]` is the number
-#'     of births between times `t[i-round(tgen)+1]` and `t[i]`,
-#'     for `i` in `seq(1 + round(tgen), nrow(df), by = round(tgen))`.
-#'     `B_agg[i]` is `NA` otherwise. FC method only.
+#'   \item{`B`}{\mjseqn{\lbrace\,B_i\,\rbrace} Births. Identical to `df$B`.}
+#'   \item{`B_agg`}{\mjseqn{\lbrace\,B_i^\text{agg}\,\rbrace}
+#'     Aggregated births. `B_agg[i]` is the number of births
+#'     between times `t[i-round(tgen)+1]` and `t[i]`, for `i` in
+#'     `seq(1 + round(tgen), nrow(df), by = round(tgen))`. `B_agg[i]`
+#'     is `NA` for all other `i`. FC method only.
 #'   }
-#'   \item{`mu`}{Natural mortality rate. Identical to `df$mu`.
-#'     S and SI methods only.
+#'   \item{`mu`}{\mjseqn{\lbrace\,\mu_i\,\rbrace}
+#'     Per capita natural mortality rate. Identical to `df$mu`.
+#'     S, SI, and SEI methods only.
 #'   }
-#'   \item{`S`}{Number of susceptibles. `S[i]` is the estimated
-#'     number of susceptibles at time `t[i]`.
+#'   \item{`S`}{\mjseqn{\lbrace\,S_i\,\rbrace}
+#'     Estimated number of susceptible individuals.
 #'   }
-#'   \item{`I`}{Number of infecteds. `I[i]` is the estimated
-#'     number of infecteds at time `t[i]`.
+#'   \item{`E`}{\mjseqn{\lbrace\,E_i\,\rbrace}
+#'     Estimated number of exposed individuals. SEI method only.
 #'   }
-#'   \item{`beta`}{Transmission rate. `beta[i]` is the estimated
-#'     transmission rate at time `t[i]`, expressed per unit \mjseqn{\Delta t}
-#'     per susceptible per infected.
+#'   \item{`I`}{\mjseqn{\lbrace\,I_i\,\rbrace}
+#'     Estimated number of infected (FC, S, SI) or infectious (SEI)
+#'     individuals.
+#'   }
+#'   \item{`beta`}{\mjseqn{\lbrace\,\beta_i\,\rbrace}
+#'     Estimated transmission rate, expressed per unit \mjseqn{\Delta t}
+#'     per susceptible individual per infected (FC, S, SI)
+#'     or infectious (SEI) individual.
 #'   }
 #' }
 #'
 #' The data frame has attributes `call` and `arg_list`, making it
 #' reproducible with `eval(call)` or `do.call(estimate_beta_x, arg_list)`.
-#' 
+#'
 #' @examples
 #' # Simulate time series data using an SIR model
-#' # with seasonally forced transmission rate
-#' par_list <- make_par_list(dt_weeks = 1)
-#' df <- make_data(par_list = par_list, with_ds = FALSE)
-#' head(df)
+#' # to test the FC, S, and SI methods
+#' par_list_sir <- make_par_list(model = "sir")
+#' df_sir <- make_data(par_list_sir, with_ds = TRUE, model = "sir")
+#' head(df_sir)
 #'
-#' # Estimate susceptibles, infecteds, and
-#' # the seasonally forced transmission rate
-#' df_fc <- estimate_beta_fc(df, par_list)
-#' head(df_fc)
-#' df_s <- estimate_beta_s(df, par_list)
-#' head(df_s)
-#' df_si <- estimate_beta_si(df, par_list)
-#' head(df_si)
+#' # Simulate time series data using an SEIR model
+#' # to test the SEI method
+#' par_list_seir <- make_par_list(model = "seir")
+#' df_seir <- make_data(par_list_seir, with_ds = TRUE, model = "seir")
+#' head(df_seir)
 #'
-#' # FC method fails rapidly as a result
-#' # of ignoring susceptible mortality
-#' plot(S ~ I(t - t[1]), df, type = "l", ylim = c(43, 83) * 1e03)
-#' lines(S ~ I(t - t[1]), df_fc[!is.na(df_fc$S), ], col = "blue")
-#' plot(I ~ I(t - t[1]), df, type = "l", ylim = c(0, 3) * 1e03)
-#' lines(I ~ I(t - t[1]), df_fc[!is.na(df_fc$I), ], col = "blue")
-#' plot(beta ~ I(t - t[1]), df, type = "l", ylim = c(0.5, 1.2) * 1e-05)
-#' lines(beta ~ I(t - t[1]), df_fc[!is.na(df_fc$beta), ], col = "blue")
+#' # Estimate the seasonally forced transmission rate
+#' # underlying each simulation
+#' f_list <- list(
+#'   fc  = estimate_beta_fc,
+#'   s   = estimate_beta_s,
+#'   si  = estimate_beta_si,
+#'   sei = estimate_beta_sei
+#' )
+#' eb_out <- mapply(
+#'   function(f, df, par_list) f(df, par_list),
+#'   f = f_list,
+#'   df = list(df_sir, df_sir, df_sir, df_seir),
+#'   par_list = list(
+#'     within(par_list_sir, tgen <- tlat + tinf), #' fc
+#'     within(par_list_sir, tgen <- tlat + tinf), #' s
+#'     within(par_list_sir, tgen <- tlat + tinf), #' si
+#'     par_list_seir                              #' sei
+#'   ),
+#'   SIMPLIFY = FALSE
+#' )
+#' lapply(eb_out, head)
 #'
-#' # S method does well
-#' plot(S ~ I(t - t[1]), df, type = "l", ylim = c(43, 58) * 1e03)
-#' lines(S ~ I(t - t[1]), df_s, col = "blue")
-#' plot(I ~ I(t - t[1]), df, type = "l", ylim = c(0, 3) * 1e03)
-#' lines(I ~ I(t - t[1]), df_s, col = "red")
-#' plot(beta ~ I(t - t[1]), df, type = "l", ylim = c(0.95, 1.25) * 1e-05)
-#' lines(beta ~ I(t - t[1]), df_s, col = "blue")
+#' op <- par(mfrow = c(3, 1), mar = c(2, 5, 1, 1), oma = c(3, 0, 2, 0))
+#'
+#' # FC method fails rapidly as a result of ignoring
+#' # susceptible mortality
+#' plot(S ~ t, df_sir, type = "l", lwd = 4, ylim = c(43, 83) * 1e03,
+#'      xlab = "", ylab = "Susceptible")
+#' lines(S ~ t, na.omit(eb_out$fc), lwd = 2, col = "seagreen")
+#' title(main = "FC method", line = 1, xpd = NA)
+#' plot(I ~ t, df_sir, type = "l", lwd = 4, ylim = c(0, 3.5) * 1e03,
+#'      xlab = "", ylab = "Infected")
+#' lines(I ~ t, na.omit(eb_out$fc), lwd = 2, col = "mediumvioletred")
+#' plot(beta ~ t, df_sir, type = "l", lwd = 4, ylim = c(0.5, 1.3) * 1e-05,
+#'      xlab = "", ylab = "Transmission rate")
+#' lines(beta ~ t, na.omit(eb_out$fc), lwd = 2, col = "slateblue")
+#' title(xlab = "Time (units dt)", line = 3, xpd = NA)
+#'
+#' # S method is visibly biased
+#' plot(S ~ t, df_sir, type = "l", lwd = 4, ylim = c(43, 58) * 1e03,
+#'      xlab = "", ylab = "Susceptible")
+#' lines(S ~ t, eb_out$s, lwd = 2, col = "seagreen")
+#' title(main = "S method", line = 1, xpd = NA)
+#' plot(I ~ t, df_sir, type = "l", lwd = 4, ylim = c(0, 3.5) * 1e03,
+#'      xlab = "", ylab = "Infected")
+#' lines(I ~ t, eb_out$s, lwd = 2, col = "mediumvioletred")
+#' plot(beta ~ t, df_sir, type = "l", lwd = 4, ylim = c(1.0, 1.4) * 1e-05,
+#'      xlab = "", ylab = "Transmission rate")
+#' lines(beta ~ t, eb_out$s, lwd = 2, col = "slateblue")
+#' title(xlab = "Time (units dt)", line = 3, xpd = NA)
 #'
 #' # SI method does well
-#' plot(S ~ I(t - t[1]), df, type = "l", ylim = c(43, 58) * 1e03)
-#' lines(S ~ I(t - t[1]), df_si, col = "blue")
-#' plot(I ~ I(t - t[1]), df, type = "l", ylim = c(3, 3) * 1e03)
-#' lines(I ~ I(t - t[1]), df_si, col = "blue")
-#' plot(beta ~ I(t - t[1]), df, type = "l", ylim = c(0.95, 1.25) * 1e-05)
-#' lines(beta ~ I(t - t[1]), df_si, col = "blue")
+#' plot(S ~ t, df_sir, type = "l", lwd = 4, ylim = c(43, 58) * 1e03,
+#'      xlab = "", ylab = "Susceptible")
+#' lines(S ~ t, eb_out$si, lwd = 2, col = "seagreen")
+#' title(main = "SI method", line = 1, xpd = NA)
+#' plot(I ~ t, df_sir, type = "l", lwd = 4, ylim = c(0, 3.5) * 1e03,
+#'      xlab = "", ylab = "Infected")
+#' lines(I ~ t, eb_out$si, lwd = 2, col = "mediumvioletred")
+#' plot(beta ~ t, df_sir, type = "l", lwd = 4, ylim = c(1.0, 1.4) * 1e-05,
+#'      xlab = "", ylab = "Transmission rate")
+#' lines(beta ~ t, eb_out$si, lwd = 2, col = "slateblue")
+#' title(xlab = "Time (units dt)", line = 3, xpd = NA)
 #'
-#' # However, restarting with `with_ds = TRUE`
-#' # reveals that the S method is vulnerable
-#' # to propagation of noise from the data to
-#' # the transmission rate estimate. Hence the
-#' # SI method should be preferred in practice.
+#' # SEI method does well, but see note below
+#' plot(S ~ t, df_seir, type = "l", lwd = 4, ylim = c(43, 58) * 1e03,
+#'      xlab = "", ylab = "Susceptible")
+#' lines(S ~ t, eb_out$sei, lwd = 2, col = "seagreen")
+#' title(main = "SEI method", line = 1, xpd = NA)
+#' plot(I ~ t, df_seir, type = "l", lwd = 4, ylim = c(0, 2) * 1e03,
+#'      xlab = "", ylab = "Infectious")
+#' lines(I ~ t, eb_out$sei, lwd = 2, col = "mediumvioletred")
+#' plot(beta ~ t, df_seir, type = "l", lwd = 4, ylim = c(1.7, 2.3) * 1e-05,
+#'      xlab = "", ylab = "Transmission rate")
+#' lines(beta ~ t, eb_out$sei, lwd = 2, col = "slateblue")
+#' title(xlab = "Time (units dt)", line = 3, xpd = NA)
+#'
+#' par(op)
+#'
+#' # NOTE: Restarting with `with_ds = TRUE` passed to
+#' # `make_data()` suggests that the SI method is the
+#' # most robust to demographic stochasticity and more
+#' # generally to noise in the data-generating process.
 #'
 #' @references
 #' \insertRef{Jaga+20}{fastbeta}
 #' \insertRef{FineClar82}{fastbeta}
 #'
 #' @seealso [fastbeta()]
-#' @name estimate_beta
+#' @name estimate-beta
 NULL
 
-#' @rdname estimate_beta
+#' @rdname estimate-beta
 #' @export
 estimate_beta_fc <- function(df, par_list) {
-  ## 1. Set-up -----------------------------------------------------------
+  ## Set-up --------------------------------------------------------------
 
   # Save arguments in a list
   arg_list <- as.list(environment())
@@ -250,7 +338,7 @@ estimate_beta_fc <- function(df, par_list) {
   )
 
 
-  ## 2. Aggregate incidence, births --------------------------------------
+  ## Aggregate incidence, births -----------------------------------------
 
   # Aggregates are recorded after each generation interval,
   # starting at the first time point
@@ -266,7 +354,7 @@ estimate_beta_fc <- function(df, par_list) {
   }
 
 
-  ## 3. Estimate susceptibles, infecteds, transmission rate --------------
+  ## Estimate susceptibles, infecteds, transmission rate -----------------
 
   df[c("S", "I", "beta")] <- with(df,
     {
@@ -284,10 +372,10 @@ estimate_beta_fc <- function(df, par_list) {
   structure(df, call = match.call(), arg_list = arg_list)
 }
 
-#' @rdname estimate_beta
+#' @rdname estimate-beta
 #' @export
 estimate_beta_s <- function(df, par_list) {
-  ## 1. Set-up -----------------------------------------------------------
+  ## Set-up --------------------------------------------------------------
 
   # Save arguments in a list
   arg_list <- as.list(environment())
@@ -300,7 +388,7 @@ estimate_beta_s <- function(df, par_list) {
   df[c("S", "I", "beta")] <- NA
 
 
-  ## 2. Estimate susceptibles, infecteds, transmission rate --------------
+  ## Estimate susceptibles, infecteds, transmission rate -----------------
 
   tgenr <- round(tgen)
   gamma <- 1 / tgen
@@ -328,10 +416,10 @@ estimate_beta_s <- function(df, par_list) {
   structure(df, call = match.call(), arg_list = arg_list)
 }
 
-#' @rdname estimate_beta
+#' @rdname estimate-beta
 #' @export
 estimate_beta_si <- function(df, par_list) {
-  ## 1. Set-up -----------------------------------------------------------
+  ## Set-up --------------------------------------------------------------
 
   # Save arguments in a list
   arg_list <- as.list(environment())
@@ -344,7 +432,7 @@ estimate_beta_si <- function(df, par_list) {
   df[c("S", "I", "beta")] <- NA
 
 
-  ## 2. Estimate susceptibles, infecteds, transmission rate --------------
+  ## Estimate susceptibles, infecteds, transmission rate -----------------
 
   gamma <- 1 / tgen
 
@@ -360,6 +448,49 @@ estimate_beta_si <- function(df, par_list) {
       }
       beta <- (Z + c(Z[-1], NA)) / (2 * S * I * 1)
       list(S, I, beta)
+    }
+  )
+
+  structure(df, call = match.call(), arg_list = arg_list)
+}
+
+#' @rdname estimate-beta
+#' @export
+estimate_beta_sei <- function(df, par_list) {
+  ## Set-up --------------------------------------------------------------
+
+  # Save arguments in a list
+  arg_list <- as.list(environment())
+
+  # Load necessary elements of `par_list` into the execution environment
+  list2env(par_list[c("S0", "E0", "I0", "tlat", "tinf")], envir = environment())
+
+  # Preallocate memory for output
+  df <- df[c("t", "Z", "B", "mu")]
+  df[c("S", "E", "I", "beta")] <- NA
+
+
+  ## Estimate susceptible, exposed, infectious population sizes ... ------
+  ## and transmission rate
+
+  sigma <- 1 / tlat
+  gamma <- 1 / tinf
+
+  df[c("S", "E", "I", "beta")] <- with(df,
+    {
+      S[1] <- S0
+      E[1] <- E0
+      I[1] <- I0
+      for (i in 2:nrow(df)) {
+        S[i] <- ((1-0.5*mu[i-1]*1)*S[i-1]+B[i]-Z[i]) /
+          (1+0.5*mu[i]*1)
+        E[i] <- ((1-0.5*(sigma+mu[i-1])*1)*E[i-1]+Z[i]) /
+          (1+0.5*(sigma+mu[i])*1)
+        I[i] <- ((1-0.5*(gamma+mu[i-1])*1)*I[i-1]+0.5*sigma*(E[i-1]+E[i])*1) /
+          (1+0.5*(gamma+mu[i])*1)
+      }
+      beta <- (Z+c(Z[-1], NA)) / (2*S*I*1)
+      list(S, E, I, beta)
     }
   )
 

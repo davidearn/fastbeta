@@ -11,31 +11,32 @@ ptpi(df, S0_init, peak1 = 1L, peak2 = nrow(df), it = 10L)
 \item{df}{A data frame with numeric columns:
 
 \describe{
-\item{\code{Z}}{Incidence. \code{Z[i]} is the number of infections between
-times \code{t[i-1]} and \code{t[i]}. Must be roughly periodic.
+\item{\code{Z}}{Incidence. \code{Z[i]} is the number of infections
+between times \mjseqn{t_{i-1}} and \mjseqn{t_i}.
+Must be roughly periodic.
 }
-\item{\code{B}}{Births. \code{B[i]} is the number of births between times
-\code{t[i-1]} and \code{t[i]}.
+\item{\code{B}}{Births. \code{B[i]} is the number of births
+between times \mjseqn{t_{i-1}} and \mjseqn{t_i}.
 }
-\item{\code{mu}}{Natural mortality rate. \code{mu[i]} is the rate at time
-\code{t[i]} expressed per unit \mjseqn{\Delta t} and per capita.
+\item{\code{mu}}{Per capita natural mortality rate. \code{mu[i]} is the
+rate at time \mjseqn{t_i} expressed per unit \mjseqn{\Delta t}.
 }
 }
 
 Missing values in \code{df} are not tolerated and must be imputed
 separately.}
 
-\item{S0_init}{Numeric scalar. An initial estimate of \mjseqn{S_0}.}
+\item{S0_init}{A numeric scalar. An initial estimate of \mjseqn{S_0}.}
 
-\item{peak1}{Integer scalar. Index of the first peak in \code{df$Z}.
+\item{peak1}{An integer scalar. Index of the first peak in \code{df$Z}.
 A reasonable value can be obtained using \code{\link[=peaks]{peaks()}} (see Examples).}
 
-\item{peak2}{Integer scalar. Index of the last peak in \code{df$Z} in phase
-with the first peak.
+\item{peak2}{An integer scalar. Index of the last peak in \code{df$Z}
+in phase with the first peak.
 A reasonable value can be obtained using \code{\link[=peaks]{peaks()}} (see Examples).}
 
-\item{it}{Integer scalar. The number of iterations to perform before
-stopping.}
+\item{it}{An integer scalar. The number of iterations to perform
+before stopping.}
 }
 \value{
 A ptpi object. A list with elements:
@@ -49,8 +50,8 @@ Algorithm.
 \item{\code{S0}}{A numeric vector listing in order all \code{1 + it} estimates of
 \mjseqn{S_0 = S(t_0)}. Equivalent to \code{mat[1, ]}.
 }
-\item{\code{S0_final}}{The final estimate of \mjseqn{S_0}.
-Equivalent to \code{mat[1, ncol(mat)]}.
+\item{\code{S0_final}}{A numeric scalar giving the final estimate
+of \mjseqn{S_0}. Equivalent to \code{mat[1, ncol(mat)]}.
 }
 }
 
@@ -105,7 +106,7 @@ and per capita death rates are constant. Then \mjseqn{Z_i = Z_{i+kp}},
 and \mjseqn{k}. In this case, one can show that the sequence
 \mjseqn{(S_0^{(j)})} converges to a limit \mjseqn{S_0^*} given by
 
-\mjsdeqn{S_0^* = \left( \frac{1 + \frac{1}{2} \mu \Delta t}{1 - \frac{1}{2} \mu \Delta t} \right)^a S_a^* + \frac{1}{1 - \frac{1}{2} \mu \Delta t} \sum_{i=1}^a (Z_i - B_i) \left( \frac{1 + \frac{1}{2} \mu \Delta t}{1 - \frac{1}{2} \mu \Delta t} \right)^{i-1}\,,}
+\mjsdeqn{S_0^* = \left( \frac{1 + \frac{1}{2} \mu \Delta t}{1 - \frac{1}{2} \mu \Delta t} \right)^a S_a^* + \frac{1}{1 - \frac{1}{2} \mu \Delta t} \sum_{i=1}^a (Z_i - B) \left( \frac{1 + \frac{1}{2} \mu \Delta t}{1 - \frac{1}{2} \mu \Delta t} \right)^{i-1}\,,}
 
 where \mjseqn{S_a^*} is the limit of the sequence \mjseqn{(S_a^{(j)})},
 given by
@@ -121,16 +122,17 @@ One can further show that the convergence is linear and follows
 \examples{
 # Simulate 20 years of disease incidence,
 # observed weekly
-par_list <- make_par_list(dt_weeks = 1)
+par_list <- make_par_list(dt_days = 7)
 df <- make_data(
   par_list = par_list,
+  n = 20 * 365 / 7, # number of weeks in 20 years
   with_ds = TRUE,
-  n = 20 * 365 / 7 # number of weeks in 20 years
+  model = "sir"
 )
 
 # Plot incidence time series, and note the
 # apparent 1-year period
-plot(Z ~ I(t_years - t_years[1]), df, type = "l",
+plot(Z ~ t_years, df, type = "l",
   xlab = "Time (years)",
   ylab = "Incidence"
 )
@@ -171,5 +173,5 @@ ptpi_out$S0
 \insertRef{Jaga+20}{fastbeta}
 }
 \seealso{
-\code{\link[=peaks]{peaks()}}, \code{\link[=plot.ptpi]{plot.ptpi()}}
+\link[=ptpi-methods]{methods for call "ptpi"}, \code{\link[=peaks]{peaks()}}
 }

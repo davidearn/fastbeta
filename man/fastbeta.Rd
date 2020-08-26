@@ -4,12 +4,18 @@
 \alias{fastbeta}
 \title{Estimate time-varying transmission rates}
 \usage{
-fastbeta(df, par_list)
+fastbeta(df, par_list, method)
 }
 \arguments{
 \item{df}{A data frame with time series data.}
 
 \item{par_list}{A list of parameter values.}
+
+\item{method}{A character scalar, one of \code{"fc"}, \code{"s"}, \code{"si"},
+and \code{"sei"}, indicating a transmission rate estimation method.
+The FC and S methods are deprecated and outperformed by the
+more robust SI and SEI methods. For the details of each algorithm,
+see the respective sections of \link[=estimate-beta]{this help page}.}
 }
 \value{
 A fastbeta object.
@@ -23,12 +29,23 @@ Details to come.
 \examples{
 # Simulate time series data using an SIR model
 # with seasonally forced transmission rate
-par_list <- make_par_list(dt_weeks = 1)
-df <- make_data(par_list = par_list, with_ds = TRUE)
+par_list <- make_par_list(model = "sir")
+df <- make_data(par_list = par_list, with_ds = TRUE, model = "sir")
 
-# Estimate susceptibles, infecteds, and
-# the seasonally forced transmission rate
-fastbeta_out <- fastbeta(df, par_list)
+# Estimate the seasonally forced transmission rate
+# using the SI method
+par_list <- within(par_list, tgen <- tlat + tinf)
+fastbeta_out <- fastbeta(df, par_list, method = "si")
+plot(fastbeta_out)
+
+# Simulate time series data using an SEIR model
+# with seasonally forced transmission rate
+par_list <- make_par_list(model = "seir")
+df <- make_data(par_list = par_list, with_ds = TRUE, model = "seir")
+
+# Estimate the seasonally forced transmission rate
+# using the SEI method
+fastbeta_out <- fastbeta(df, par_list, method = "sei")
 plot(fastbeta_out)
 
 }
@@ -36,5 +53,6 @@ plot(fastbeta_out)
 \insertRef{Jaga+20}{fastbeta}
 }
 \seealso{
-\code{\link[=estimate_beta_si]{estimate_beta_si()}}, \code{\link[=deconvolve]{deconvolve()}}, \code{\link[=plot.fastbeta]{plot.fastbeta()}}
+\link[=fastbeta-methods]{methods for class "fastbeta"},
+\link[=estimate-beta]{algorithms used under the hood}
 }

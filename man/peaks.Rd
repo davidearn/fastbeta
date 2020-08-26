@@ -8,22 +8,22 @@ Locate peaks in time series}
 peaks(x, bw1, bw2, period = NULL)
 }
 \arguments{
-\item{x}{Numeric vector. An equally spaced time series.
+\item{x}{A numeric vector. An equally spaced time series.
 Defines \mjseqn{\lbrace x_i \rbrace_{i=0}^{n-1}} in Algorithm.
 (Without loss of generality, the indices \code{seq_along(x)} are
 used as time points, so that \mjseqn{t_i = i+1} for all \mjseqn{i}.)}
 
-\item{bw1}{Integer scalar. Bandwidth for the central moving average
+\item{bw1}{An integer scalar. Bandwidth for the central moving average
 applied to \code{x}, so that \code{xbar[i] = mean(x[(i-bw1):(i+bw1)])} for
 all \code{i}. Defines \mjseqn{\ell_1} in Algorithm.}
 
-\item{bw2}{Integer scalar. Bandwidth for peak definition, so that a
+\item{bw2}{An integer scalar. Bandwidth for peak definition, so that a
 peak occurs at index \code{i} if and only if
 \code{all(xbar[i] > xbar[(i-bw2):(i-1)])} and
 \code{all(xbar[i] > xbar[(i+1):(i+bw2)])}.
 Defines \mjseqn{\ell_2} in Algorithm.}
 
-\item{period}{Numeric scalar. Period of \code{x} if \code{x} is roughly periodic.
+\item{period}{A numeric scalar. Period of \code{x} if \code{x} is roughly periodic.
 Defines \mjseqn{T} in Algorithm. This argument is optional and should
 retain the default value \code{NULL} if \code{x} is not roughly periodic.}
 }
@@ -31,13 +31,13 @@ retain the default value \code{NULL} if \code{x} is not roughly periodic.}
 A peaks object. A list with elements:
 
 \describe{
-\item{\code{xbar}}{Numeric vector. The result of applying
+\item{\code{xbar}}{A numeric vector. The result of applying
 a \code{(2 * bw1 + 1)}-point central moving average to \code{x}.
 }
-\item{\code{all}}{Numeric vector. A subset of \code{seq_along(x)}
+\item{\code{all}}{An integer vector. A subset of \code{seq_along(x)}
 listing the index of each peak in \code{x}.
 }
-\item{\code{phase}}{Numeric vector. A subset of \code{all} listing
+\item{\code{phase}}{An integer vector. A subset of \code{all} listing
 the index of each peak in phase with the first peak.
 \code{NULL} if \code{period} is \code{NULL} in the function call.
 }
@@ -171,5 +171,5 @@ plot(peaks_out)
 \insertRef{Jaga+20}{fastbeta}
 }
 \seealso{
-\code{\link[=ptpi]{ptpi()}}, \code{\link[=plot.peaks]{plot.peaks()}}
+\link[=peaks-methods]{methods for class "peaks"}, \code{\link[=ptpi]{ptpi()}}
 }

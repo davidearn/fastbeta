@@ -3,10 +3,11 @@
 #' @description
 #' Computes the relative root mean square error (RRMSE) in a vector.
 #' 
-#' @param x Numeric vector.
-#' @param xhat Numeric vector with length equal to `length(x)`.
+#' @param x A numeric vector.
+#' @param xhat A numeric vector of the same length as `x`.
 #'   An estimate of `x`.
-#' @param na_rm Logical. If `TRUE`, then missing values are ignored.
+#' @param na_rm A logical scalar. If `TRUE`, then missing values
+#'   are ignored.
 #'
 #' @return
 #' A numeric scalar indicating the RRMSE in `xhat`, with exceptions

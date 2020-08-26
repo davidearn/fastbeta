@@ -4,7 +4,7 @@
 \alias{fastbeta-methods}
 \alias{plot.fastbeta}
 \alias{print.fastbeta}
-\title{Methods for class fastbeta}
+\title{Methods for class "fastbeta"}
 \usage{
 \method{plot}{fastbeta}(x, ...)
 

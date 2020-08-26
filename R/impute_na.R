@@ -1,14 +1,13 @@
-#' @title Impute missing values in a numeric vector
+#' Impute missing values in a numeric vector
 #'
 #' @description
-#' Imputes missing values in a numeric vector
-#' by linear interpolation of observed values,
-#' assuming equal spacing (e.g., that the
-#' elements of the vector are observations
+#' Imputes missing values in a numeric vector by linear
+#' interpolation of observed values, assuming equal spacing
+#' (e.g., that the elements of the vector are observations
 #' of a quantity at equally spaced times).
 #'
-#' @param x Numeric vector.
-#' @param zero_as_na Logical scalar. If `TRUE`,
+#' @param x A numeric vector.
+#' @param zero_as_na A logical scalar. If `TRUE`,
 #'   then zeros in `x` are treated like missing values.
 #'
 #' @return
@@ -30,9 +29,9 @@
 #' impute_na(x)
 #' impute_na(x, zero_as_na = TRUE)
 #'
-#' @keywords internal
-#' @importFrom stats approx
+#' @seealso [fastbeta()]
 #' @export
+#' @importFrom stats approx
 impute_na <- function(x, zero_as_na = FALSE) {
   # Do nothing if there is nothing to do
   if (!is.numeric(x)) {

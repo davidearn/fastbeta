@@ -7,19 +7,18 @@
 impute_na(x, zero_as_na = FALSE)
 }
 \arguments{
-\item{x}{Numeric vector.}
+\item{x}{A numeric vector.}
 
-\item{zero_as_na}{Logical scalar. If \code{TRUE},
+\item{zero_as_na}{A logical scalar. If \code{TRUE},
 then zeros in \code{x} are treated like missing values.}
 }
 \value{
 \code{x} with missing values replaced where possible.
 }
 \description{
-Imputes missing values in a numeric vector
-by linear interpolation of observed values,
-assuming equal spacing (e.g., that the
-elements of the vector are observations
+Imputes missing values in a numeric vector by linear
+interpolation of observed values, assuming equal spacing
+(e.g., that the elements of the vector are observations
 of a quantity at equally spaced times).
 }
 \details{
@@ -39,4 +38,6 @@ impute_na(x)
 impute_na(x, zero_as_na = TRUE)
 
 }
-\keyword{internal}
+\seealso{
+\code{\link[=fastbeta]{fastbeta()}}
+}

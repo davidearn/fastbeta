@@ -4,7 +4,7 @@
 \alias{peaks-methods}
 \alias{plot.peaks}
 \alias{print.peaks}
-\title{Methods for class peaks}
+\title{Methods for class "peaks"}
 \usage{
 \method{plot}{peaks}(x, ...)
 
