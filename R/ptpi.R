@@ -12,7 +12,7 @@
 #' # Details
 #'
 #' ## 1. Algorithm
-#' Supplied in the data frame `df` are time series
+#' Supplied in the data frame `data` are time series
 #' \mjseqn{\lbrace (t_i,Z_i) \rbrace_{i=0}^{n-1}},
 #' \mjseqn{\lbrace (t_i,B_i) \rbrace_{i=0}^{n-1}}, and
 #' \mjseqn{\lbrace (t_i,\mu_i) \rbrace_{i=0}^{n-1}}
@@ -20,8 +20,8 @@
 #' at equally spaced time points \mjseqn{t_i = t_0 + i \Delta t}.
 #' The first peak in incidence and the last peak in phase with
 #' the first peak occur at times \mjseqn{t_a} and \mjseqn{t_b},
-#' respectively, where \mjseqn{a} is `peak1 - 1` and \mjseqn{b}
-#' is `peak2 - 1`.
+#' respectively, where \mjseqn{a} is `peak1-1` and \mjseqn{b}
+#' is `peak2-1`.
 #'
 #' Let \mjseqn{S_i^{(j)}} denote the estimate of \mjseqn{S(t_i)}
 #' obtained after \mjseqn{j} iterations. Assign both \mjseqn{S_0^{(0)}}
@@ -41,12 +41,16 @@
 #' Note that this second recursion is carried out backwards in time.
 #'
 #' ## 2. Convergence
-#' Suppose incidence is \mjseqn{(p \Delta t)}-periodic, where \mjseqn{p}
-#' is a nonzero integer, and consider the special case in which the birth
-#' and per capita death rates are constant. Then \mjseqn{Z_i = Z_{i+kp}},
-#' \mjseqn{B_i = B}, and \mjseqn{\mu_i = \mu}, for all integers \mjseqn{i}
-#' and \mjseqn{k}. In this case, one can show that the sequence
-#' \mjseqn{(S_0^{(j)})} converges to a limit \mjseqn{S_0^*} given by
+#' Suppose that incidence is \mjseqn{(p \Delta t)}-periodic and
+#' (without loss of generality) that \mjseqn{b - a = m p}, where
+#' \mjseqn{p} and \mjseqn{m} are positive integers. Then
+#' \mjseqn{Z_i = Z_{i+kp}} for all integers \mjseqn{i} and \mjseqn{k},
+#' and there are \mjseqn{m} periods between times \mjseqn{t_a} and
+#' \mjseqn{t_b}. Now consider the special case in which the birth
+#' and per capita death rates are constant, so that \mjseqn{B_i = B}
+#' and \mjseqn{\mu_i = \mu} for all integers \mjseqn{i}.
+#' In this case, one can show that the sequence \mjseqn{(S_0^{(j)})}
+#' converges to a limit \mjseqn{S_0^*} given by
 #'
 #' \mjsdeqn{S_0^* = \left( \frac{1 + \frac{1}{2} \mu \Delta t}{1 - \frac{1}{2} \mu \Delta t} \right)^a S_a^* + \frac{1}{1 - \frac{1}{2} \mu \Delta t} \sum_{i=1}^a (Z_i - B) \left( \frac{1 + \frac{1}{2} \mu \Delta t}{1 - \frac{1}{2} \mu \Delta t} \right)^{i-1}\,,}
 #'
@@ -59,26 +63,41 @@
 #'
 #' \mjsdeqn{S_0^{(j)} - S_0^* = (S_0^{(0)} - S_a^*) \left( \frac{1 - \frac{1}{2} \mu \Delta t}{1 + \frac{1}{2} \mu \Delta t} \right)^{jp-a}\,.}
 #'
-#' @param df A data frame with numeric columns:
+#' A corollary is that convergence of \mjseqn{(S_0^{(j)})} is guaranteed
+#' even if incidence is not truly periodic, because, within the iteration,
+#' incidence is always *effectively* \mjseqn{((b - a) \Delta t)}-periodic.
+#' This can be seen by noting that \mjseqn{S_a^{(j)}} is updated recursively,
+#' with each update using the same \mjseqn{b - a} observations of incidence:
+#' \mjseqn{Z_{a+1}, \ldots, Z_b}. Hence the limits above will be correct for
+#' aperiodic (or just roughly periodic) incidence provided that \mjseqn{p}
+#' is replaced with \mjseqn{b - a}.
+#'
+#' @param data A data frame with numeric columns:
 #'
 #'   \describe{
-#'     \item{`Z`}{Incidence. `Z[i]` is the number of infections
-#'       between times \mjseqn{t_{i-1}} and \mjseqn{t_i}.
-#'       Must be roughly periodic.
+#'     \item{`t`}{\mjseqn{\lbrace\,t_i\,\rbrace}
+#'       Time. Lists the observation times \mjseqn{t_i = t_0 + i \Delta t}
+#'       (for \mjseqn{i = 0, \ldots, n-1}) in any convenient units. Here,
+#'       \mjseqn{t_0} is the initial observation time and \mjseqn{\Delta t}
+#'       is the observation interval.
 #'     }
-#'     \item{`B`}{Births. `B[i]` is the number of births
-#'       between times \mjseqn{t_{i-1}} and \mjseqn{t_i}.
+#'     \item{`Z`}{\mjseqn{\lbrace\,Z_i\,\rbrace}
+#'       Incidence. `Z[i]` is the number of infections
+#'       between times `t[i-1]` and `t[i]`. Must be roughly periodic.
 #'     }
-#'     \item{`mu`}{Per capita natural mortality rate. `mu[i]` is the
-#'       rate at time \mjseqn{t_i} expressed per unit \mjseqn{\Delta t}.
+#'     \item{`B`}{\mjseqn{\lbrace\,B_i\,\rbrace}
+#'       Births. `B[i]` is the number of births
+#'       between times `t[i-1]` and `t[i]`.
+#'     }
+#'     \item{`mu`}{\mjseqn{\lbrace\,\mu_i \Delta t\,\rbrace}
+#'       Per capita natural mortality rate. `mu[i]` is the rate
+#'       at time `t[i]` expressed per unit \mjseqn{\Delta t}.
 #'     }
 #'   }
 #'
-#'   Missing values in `df` are not tolerated and must be imputed
-#'   separately.
-#' @param peak1 An integer scalar. Index of the first peak in `df$Z`.
+#' @param peak1 An integer scalar. Index of the first peak in `data$Z`.
 #'   A reasonable value can be obtained using [peaks()] (see Examples).
-#' @param peak2 An integer scalar. Index of the last peak in `df$Z`
+#' @param peak2 An integer scalar. Index of the last peak in `data$Z`
 #'   in phase with the first peak.
 #'   A reasonable value can be obtained using [peaks()] (see Examples).
 #' @param S0_init A numeric scalar. An initial estimate of \mjseqn{S_0}.
@@ -89,10 +108,13 @@
 #' A ptpi object. A list with elements:
 #'
 #' \describe{
-#'   \item{`mat`}{A numeric matrix with `nrow(df)` rows and `1 + it` columns
-#'     containing the susceptible time series generated in each iteration.
-#'     `mat[i,j]` gives the value of \mjseqn{S_{i-1}^{(j-1)}} as defined in
-#'     Algorithm.
+#'   \item{`times`}{A numeric vector. The rows of `mat` correspond
+#'     to these time points. Identical to `data$t`.
+#'   }
+#'   \item{`mat`}{A numeric matrix with `length(times)` rows and `1 + it`
+#'     columns containing the susceptible time series generated in each
+#'     iteration. `mat[i,j]` gives the value of \mjseqn{S_{i-1}^{(j-1)}}
+#'     as defined in Algorithm.
 #'   }
 #'   \item{`S0`}{A numeric vector listing in order all `1 + it` estimates of
 #'     \mjseqn{S_0 = S(t_0)}. Equivalent to `mat[1, ]`.
@@ -100,17 +122,19 @@
 #'   \item{`S0_final`}{A numeric scalar giving the final estimate
 #'     of \mjseqn{S_0}. Equivalent to `mat[1, ncol(mat)]`.
 #'   }
+#'   \item{`call`}{The function call. The ptpi object is reproducible
+#'     with `eval(call)`.
+#'   }
+#'   \item{`arg_list`}{A list of the arguments in the function call.
+#'     The ptpi object is reproducible with `do.call(ptpi, arg_list)`.
+#'   }
 #' }
-#'
-#' The object has attributes `call` and `arg_list`, making it
-#' reproducible with `eval(call)` or `do.call(ptpi, arg_list)`.
 #'
 #' @examples
 #' # Simulate 20 years of disease incidence,
 #' # observed weekly
-#' par_list <- make_par_list(dt_days = 7)
-#' df <- make_data(
-#'   par_list = par_list,
+#' pl <- make_par_list(model = "sir")
+#' df <- make_data(pl,
 #'   n = 20 * 365 / 7, # number of weeks in 20 years
 #'   with_ds = TRUE,
 #'   model = "sir"
@@ -140,7 +164,7 @@
 #' # natural mortality using PTPI, starting from
 #' # an erroneous initial guess
 #' ptpi_out <- ptpi(
-#'   df = df,
+#'   data = df,
 #'   S0_init = df$S[1] * 4,
 #'   peak1 = with(peaks_out, phase[1]),
 #'   peak2 = with(peaks_out, phase[length(phase)]),
@@ -157,15 +181,44 @@
 #' @references
 #' \insertRef{Jaga+20}{fastbeta}
 #'
-#' @seealso [methods for call "ptpi"][ptpi-methods], [peaks()]
+#' @seealso [methods for class "ptpi"][ptpi-methods], [peaks()]
 #' @export
-ptpi <- function(df, S0_init, peak1 = 1L, peak2 = nrow(df), it = 10L) {
+ptpi <- function(data, S0_init, peak1 = 1L, peak2 = nrow(data), it = 10L) {
+  if (missing(data)) {
+    stop("Missing argument `data`.")
+  } else if (!is.data.frame(data)) {
+    stop("`data` must be a data frame.")
+  } else if (!all(c("t", "Z", "B", "mu") %in% names(data))) {
+    stop("`data` is missing necessary columns.")
+  }
+  if (missing(S0_init)) {
+    stop("Missing argument `S0_init`.")
+  } else if (!is.numeric(S0_init) || length(S0_init) != 1 || !isTRUE(S0_init >= 0)) {
+    stop("`S0_init` must be a non-negative numeric scalar.")
+  }
+  if (missing(peak1)) {
+    stop("Missing argument `peak1`.")
+  } else if (missing(peak2)) {
+    stop("Missing argument `peak2`.")
+  } else if (!is.numeric(peak1) || length(peak1) != 1 || !peak1 %in% seq_len(nrow(data)) ||
+               !is.numeric(peak2) || length(peak2) != 1 || !peak2 %in% seq_len(nrow(data))) {
+    stop("`peak1` and `peak2` must be integer scalars in `seq_len(nrow(data))`.")
+  } else if (peak2 < peak1) {
+    stop("`peak2` must be greater than `peak1`.")
+  }
+  if (missing(it)) {
+    stop("Missing argument `it`.")
+  } else if (!is.numeric(it) || length(it) != 1 || !isTRUE(it >= 0)) {
+    stop("`it` must be a non-negative integer scalar.")
+  }
+
   # Save arguments in a list
   arg_list <- as.list(environment())
 
   # Preallocate memory for all susceptible time series,
   # and initialize the first
-  mat <- matrix(NA, nrow = nrow(df), ncol = 1 + it)
+  it <- floor(it)
+  mat <- matrix(NA, nrow = nrow(data), ncol = 1 + it)
   mat[1, 1] <- S0_init
   mat[peak1, 1] <- S0_init
 
@@ -176,7 +229,7 @@ ptpi <- function(df, S0_init, peak1 = 1L, peak2 = nrow(df), it = 10L) {
     # with estimate at index `peak2` after reconstructing
     # from index `peak1` to end
     for (i in (peak1+1):nrow(mat)) {
-      mat[i, j] <- with(df[c("Z", "B", "mu")],
+      mat[i, j] <- with(data[c("Z", "B", "mu")],
         {
           ((1 - 0.5 * mu[i-1] * 1) * mat[i-1,j] + B[i] - Z[i]) /
             (1 + 0.5 * mu[i] * 1)
@@ -192,7 +245,7 @@ ptpi <- function(df, S0_init, peak1 = 1L, peak2 = nrow(df), it = 10L) {
     # by reconstructing from index `peak1` to start
     # (backwards in time)
     for (i in (peak1-1):1) {
-      mat[i, j+1] <- with(df[c("Z", "B", "mu")],
+      mat[i, j+1] <- with(data[c("Z", "B", "mu")],
         {
           ((1 + 0.5 * mu[i+1] * 1) * mat[i+1, j+1] - B[i+1] + Z[i+1]) /
             (1 - 0.5 * mu[i] * 1)
@@ -203,70 +256,12 @@ ptpi <- function(df, S0_init, peak1 = 1L, peak2 = nrow(df), it = 10L) {
   }
 
   out <- list(
+    times    = data$t,
     mat      = mat,
     S0       = mat[1, ],
-    S0_final = mat[1, ncol(mat)]
-  )
-  structure(out,
-    class    = c("ptpi", "list"),
+    S0_final = mat[1, ncol(mat)],
     call     = match.call(),
     arg_list = arg_list
   )
-}
-
-#' Methods for class "ptpi"
-#'
-#' Methods for plotting and printing ptpi objects
-#' returned by [ptpi()].
-#'
-#' @param x A ptpi object.
-#' @param ... Unused optional arguments.
-#'
-#' @name ptpi-methods
-NULL
-
-#' @rdname ptpi-methods
-#' @export
-#' @importFrom graphics plot lines points mtext
-plot.ptpi <- function(x, ...) {
-  if (!inherits(x, "ptpi")) {
-    stop("`x` must be a ptpi object.")
-  }
-  m <- nrow(x$mat)
-  n <- ncol(x$mat)
-  if (m < 2 || n < 1) {
-    stop("`x$mat` must have at least 2 rows and at least 1 column.")
-  }
-  op <- par(mar=c(4,5.4,1.2,0.2)+1)
-  on.exit(op)
-  plot(0, 0, type="n",
-       xlim=c(0,m-1), ylim=range(x$mat, na.rm=TRUE),
-       xaxs="i", las=1,
-       xlab="Time (units dt)", ylab="")
-  mtext("Susceptibles", side=2, line=4.5)
-  for (j in seq_len(n-1)) {
-    lines(0:(m-1), x$mat[, j], lwd=2, col="grey80")
-  }
-  lines(0:(m-1), x$mat[, n], lwd=2)
-  points(rep(0, length(x$S0)), x$S0, pch=18, col="seagreen", xpd=NA)
-  mtext(paste("S0 =", sprintf("%.4f", x$S0_final), "after", n-1, "iterations"),
-        side=3, line=0.2, adj=0, padj=0)
-  invisible(NULL)
-}
-
-#' @rdname ptpi-methods
-#' @export
-print.ptpi <- function(x, ...) {
-  if (!inherits(x, "ptpi")) {
-    stop("`x` must be a ptpi object.")
-  }
-  n <- length(x$S0)
-  if (n == 1) {
-    cat("`ptpi()` returned this 1 estimate of S0:\n")
-  } else {
-    cat("`ptpi()` returned these", length(x$S0), "estimates of S0:\n")
-  }
-  fmt <- paste0("%", nchar(max(floor(x$S0))) + 4 + 5, ".4f")
-  cat(paste0(sprintf(fmt, x$S0), "\n"), sep = "")
-  invisible(x$S0)
+  structure(out, class = c("ptpi", "list"))
 }

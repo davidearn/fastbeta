@@ -38,6 +38,3 @@ impute_na(x)
 impute_na(x, zero_as_na = TRUE)
 
 }
-\seealso{
-\code{\link[=fastbeta]{fastbeta()}}
-}

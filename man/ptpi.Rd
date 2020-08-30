@@ -5,33 +5,38 @@
 \title{\loadmathjax
 Estimate \mjseqn{S_0} using PTPI}
 \usage{
-ptpi(df, S0_init, peak1 = 1L, peak2 = nrow(df), it = 10L)
+ptpi(data, S0_init, peak1 = 1L, peak2 = nrow(data), it = 10L)
 }
 \arguments{
-\item{df}{A data frame with numeric columns:
+\item{data}{A data frame with numeric columns:
 
 \describe{
-\item{\code{Z}}{Incidence. \code{Z[i]} is the number of infections
-between times \mjseqn{t_{i-1}} and \mjseqn{t_i}.
-Must be roughly periodic.
+\item{\code{t}}{\mjseqn{\lbrace\,t_i\,\rbrace}
+Time. Lists the observation times \mjseqn{t_i = t_0 + i \Delta t}
+(for \mjseqn{i = 0, \ldots, n-1}) in any convenient units. Here,
+\mjseqn{t_0} is the initial observation time and \mjseqn{\Delta t}
+is the observation interval.
 }
-\item{\code{B}}{Births. \code{B[i]} is the number of births
-between times \mjseqn{t_{i-1}} and \mjseqn{t_i}.
+\item{\code{Z}}{\mjseqn{\lbrace\,Z_i\,\rbrace}
+Incidence. \code{Z[i]} is the number of infections
+between times \code{t[i-1]} and \code{t[i]}. Must be roughly periodic.
 }
-\item{\code{mu}}{Per capita natural mortality rate. \code{mu[i]} is the
-rate at time \mjseqn{t_i} expressed per unit \mjseqn{\Delta t}.
+\item{\code{B}}{\mjseqn{\lbrace\,B_i\,\rbrace}
+Births. \code{B[i]} is the number of births
+between times \code{t[i-1]} and \code{t[i]}.
 }
+\item{\code{mu}}{\mjseqn{\lbrace\,\mu_i \Delta t\,\rbrace}
+Per capita natural mortality rate. \code{mu[i]} is the rate
+at time \code{t[i]} expressed per unit \mjseqn{\Delta t}.
 }
-
-Missing values in \code{df} are not tolerated and must be imputed
-separately.}
+}}
 
 \item{S0_init}{A numeric scalar. An initial estimate of \mjseqn{S_0}.}
 
-\item{peak1}{An integer scalar. Index of the first peak in \code{df$Z}.
+\item{peak1}{An integer scalar. Index of the first peak in \code{data$Z}.
 A reasonable value can be obtained using \code{\link[=peaks]{peaks()}} (see Examples).}
 
-\item{peak2}{An integer scalar. Index of the last peak in \code{df$Z}
+\item{peak2}{An integer scalar. Index of the last peak in \code{data$Z}
 in phase with the first peak.
 A reasonable value can be obtained using \code{\link[=peaks]{peaks()}} (see Examples).}
 
@@ -42,10 +47,13 @@ before stopping.}
 A ptpi object. A list with elements:
 
 \describe{
-\item{\code{mat}}{A numeric matrix with \code{nrow(df)} rows and \code{1 + it} columns
-containing the susceptible time series generated in each iteration.
-\code{mat[i,j]} gives the value of \mjseqn{S_{i-1}^{(j-1)}} as defined in
-Algorithm.
+\item{\code{times}}{A numeric vector. The rows of \code{mat} correspond
+to these time points. Identical to \code{data$t}.
+}
+\item{\code{mat}}{A numeric matrix with \code{length(times)} rows and \code{1 + it}
+columns containing the susceptible time series generated in each
+iteration. \code{mat[i,j]} gives the value of \mjseqn{S_{i-1}^{(j-1)}}
+as defined in Algorithm.
 }
 \item{\code{S0}}{A numeric vector listing in order all \code{1 + it} estimates of
 \mjseqn{S_0 = S(t_0)}. Equivalent to \code{mat[1, ]}.
@@ -53,10 +61,13 @@ Algorithm.
 \item{\code{S0_final}}{A numeric scalar giving the final estimate
 of \mjseqn{S_0}. Equivalent to \code{mat[1, ncol(mat)]}.
 }
+\item{\code{call}}{The function call. The ptpi object is reproducible
+with \code{eval(call)}.
 }
-
-The object has attributes \code{call} and \code{arg_list}, making it
-reproducible with \code{eval(call)} or \code{do.call(ptpi, arg_list)}.
+\item{\code{arg_list}}{A list of the arguments in the function call.
+The ptpi object is reproducible with \code{do.call(ptpi, arg_list)}.
+}
+}
 }
 \description{
 Using peak-to-peak iteration (PTPI, see Algorithm), estimates the
@@ -68,7 +79,7 @@ The incidence time series must be roughly periodic.
 \section{Details}{
 \subsection{1. Algorithm}{
 
-Supplied in the data frame \code{df} are time series
+Supplied in the data frame \code{data} are time series
 \mjseqn{\lbrace (t_i,Z_i) \rbrace_{i=0}^{n-1}},
 \mjseqn{\lbrace (t_i,B_i) \rbrace_{i=0}^{n-1}}, and
 \mjseqn{\lbrace (t_i,\mu_i) \rbrace_{i=0}^{n-1}}
@@ -76,8 +87,8 @@ of incidence, births, and natural mortality with observations
 at equally spaced time points \mjseqn{t_i = t_0 + i \Delta t}.
 The first peak in incidence and the last peak in phase with
 the first peak occur at times \mjseqn{t_a} and \mjseqn{t_b},
-respectively, where \mjseqn{a} is \code{peak1 - 1} and \mjseqn{b}
-is \code{peak2 - 1}.
+respectively, where \mjseqn{a} is \code{peak1-1} and \mjseqn{b}
+is \code{peak2-1}.
 
 Let \mjseqn{S_i^{(j)}} denote the estimate of \mjseqn{S(t_i)}
 obtained after \mjseqn{j} iterations. Assign both \mjseqn{S_0^{(0)}}
@@ -99,12 +110,16 @@ Note that this second recursion is carried out backwards in time.
 
 \subsection{2. Convergence}{
 
-Suppose incidence is \mjseqn{(p \Delta t)}-periodic, where \mjseqn{p}
-is a nonzero integer, and consider the special case in which the birth
-and per capita death rates are constant. Then \mjseqn{Z_i = Z_{i+kp}},
-\mjseqn{B_i = B}, and \mjseqn{\mu_i = \mu}, for all integers \mjseqn{i}
-and \mjseqn{k}. In this case, one can show that the sequence
-\mjseqn{(S_0^{(j)})} converges to a limit \mjseqn{S_0^*} given by
+Suppose that incidence is \mjseqn{(p \Delta t)}-periodic and
+(without loss of generality) that \mjseqn{b - a = m p}, where
+\mjseqn{p} and \mjseqn{m} are positive integers. Then
+\mjseqn{Z_i = Z_{i+kp}} for all integers \mjseqn{i} and \mjseqn{k},
+and there are \mjseqn{m} periods between times \mjseqn{t_a} and
+\mjseqn{t_b}. Now consider the special case in which the birth
+and per capita death rates are constant, so that \mjseqn{B_i = B}
+and \mjseqn{\mu_i = \mu} for all integers \mjseqn{i}.
+In this case, one can show that the sequence \mjseqn{(S_0^{(j)})}
+converges to a limit \mjseqn{S_0^*} given by
 
 \mjsdeqn{S_0^* = \left( \frac{1 + \frac{1}{2} \mu \Delta t}{1 - \frac{1}{2} \mu \Delta t} \right)^a S_a^* + \frac{1}{1 - \frac{1}{2} \mu \Delta t} \sum_{i=1}^a (Z_i - B) \left( \frac{1 + \frac{1}{2} \mu \Delta t}{1 - \frac{1}{2} \mu \Delta t} \right)^{i-1}\,,}
 
@@ -116,15 +131,23 @@ given by
 One can further show that the convergence is linear and follows
 
 \mjsdeqn{S_0^{(j)} - S_0^* = (S_0^{(0)} - S_a^*) \left( \frac{1 - \frac{1}{2} \mu \Delta t}{1 + \frac{1}{2} \mu \Delta t} \right)^{jp-a}\,.}
+
+A corollary is that convergence of \mjseqn{(S_0^{(j)})} is guaranteed
+even if incidence is not truly periodic, because, within the iteration,
+incidence is always \emph{effectively} \mjseqn{((b - a) \Delta t)}-periodic.
+This can be seen by noting that \mjseqn{S_a^{(j)}} is updated recursively,
+with each update using the same \mjseqn{b - a} observations of incidence:
+\mjseqn{Z_{a+1}, \ldots, Z_b}. Hence the limits above will be correct for
+aperiodic (or just roughly periodic) incidence provided that \mjseqn{p}
+is replaced with \mjseqn{b - a}.
 }
 }
 
 \examples{
 # Simulate 20 years of disease incidence,
 # observed weekly
-par_list <- make_par_list(dt_days = 7)
-df <- make_data(
-  par_list = par_list,
+pl <- make_par_list(model = "sir")
+df <- make_data(pl,
   n = 20 * 365 / 7, # number of weeks in 20 years
   with_ds = TRUE,
   model = "sir"
@@ -154,7 +177,7 @@ plot(peaks_out)
 # natural mortality using PTPI, starting from
 # an erroneous initial guess
 ptpi_out <- ptpi(
-  df = df,
+  data = df,
   S0_init = df$S[1] * 4,
   peak1 = with(peaks_out, phase[1]),
   peak2 = with(peaks_out, phase[length(phase)]),
@@ -173,5 +196,5 @@ ptpi_out$S0
 \insertRef{Jaga+20}{fastbeta}
 }
 \seealso{
-\link[=ptpi-methods]{methods for call "ptpi"}, \code{\link[=peaks]{peaks()}}
+\link[=ptpi-methods]{methods for class "ptpi"}, \code{\link[=peaks]{peaks()}}
 }

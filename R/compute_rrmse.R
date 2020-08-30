@@ -1,17 +1,7 @@
-#' @title Compute RRMSE in a vector
+#' Compute RRMSE
 #'
 #' @description
 #' Computes the relative root mean square error (RRMSE) in a vector.
-#' 
-#' @param x A numeric vector.
-#' @param xhat A numeric vector of the same length as `x`.
-#'   An estimate of `x`.
-#' @param na_rm A logical scalar. If `TRUE`, then missing values
-#'   are ignored.
-#'
-#' @return
-#' A numeric scalar indicating the RRMSE in `xhat`, with exceptions
-#' (see Details).
 #'
 #' @details
 #' Let `cc = is.finite(x) & is.finite(xhat)` ("complete cases"). `cc` is the
@@ -23,11 +13,21 @@
 #' RRMSE is not defined and the expression is evaluated accordingly as `Inf`
 #' or `NaN`.
 #'
+#' @param x A numeric vector.
+#' @param xhat A numeric vector of the same length as `x`.
+#'   An estimate of `x`.
+#' @param na_rm A logical scalar. If `TRUE`, then missing values
+#'   are ignored.
+#'
+#' @return
+#' A numeric scalar indicating the RRMSE in `xhat`, with exceptions
+#' (see Details).
+#'
 #' @examples
 #' x <- rep(10, 100)
 #' xhat <- x + rnorm(x, 0, 1)
 #' compute_rrmse(x, xhat) # RRMSE in `xhat`
-#' 
+#'
 #' @export
 compute_rrmse <- function(x, xhat, na_rm = FALSE) {
   cc <- is.finite(x) & is.finite(xhat)

@@ -58,7 +58,7 @@
 #' instead of a single highest point).
 #'
 #' ## 3. Bandwidth tuning
-#' The bandwidths `bw1` and `bw1`(denoted by \mjseqn{\ell_1} and
+#' The bandwidths `bw1` and `bw1` (denoted by \mjseqn{\ell_1} and
 #' \mjseqn{\ell_2} in Algorithm) must be tuned in order to disqualify
 #' spurious peaks in \mjseqn{\lbrace (t_i,x_i) \rbrace_{i=0}^{n-1}}
 #' caused by noise, without disqualifying true peaks. Disqualifying
@@ -68,37 +68,37 @@
 #' maxima from other points (choosing `bw2` large enough). Not
 #' disqualifying true peaks is a matter of not including more than
 #' one peak in those temporal neighbourhoods (choosing `bw2` less
-#' than `0.5 * num_obs_in_period / num_peaks_in_period`).
+#' than `0.5 * num_dt_in_period / num_peaks_in_period` if peaks are
+#' evenly spaced within a period).
 #'
 #' Reasonable results are typically obtained by:
 #' * Choosing the smallest `bw1` such that
 #'   \mjseqn{\out{\lbrace (t_k,\bar{x}_k) \rbrace_{k=\ell_1}^{n-1-\ell_1}}}
-#'   is smooth around the peaks.
+#'   is smooth around the peaks, which can be found by experimenting with
+#'   [stats::filter()] (see Examples).
 #' * Choosing `bw2` around
-#'   `0.4 * num_obs_in_period / num_peaks_in_period`.
-#' A good value for `bw1` can be found by experimenting with [stats::filter()]
-#' (see Examples).
+#'   `0.4 * num_dt_in_period / num_peaks_in_period`.
 #'
-#' @param x A numeric vector. An equally spaced time series.
-#'   Defines \mjseqn{\lbrace x_i \rbrace_{i=0}^{n-1}} in Algorithm.
-#'   (Without loss of generality, the indices `seq_along(x)` are
-#'   used as time points, so that \mjseqn{t_i = i+1} for all \mjseqn{i}.)
-#' @param bw1 An integer scalar. Bandwidth for the central moving average
-#'   applied to `x`, so that `xbar[i] = mean(x[(i-bw1):(i+bw1)])` for
-#'   all `i`. Defines \mjseqn{\ell_1} in Algorithm.
-#' @param bw2 An integer scalar. Bandwidth for peak definition, so that a
-#'   peak occurs at index `i` if and only if
-#'   `all(xbar[i] > xbar[(i-bw2):(i-1)])` and
-#'   `all(xbar[i] > xbar[(i+1):(i+bw2)])`.
-#'   Defines \mjseqn{\ell_2} in Algorithm.
-#' @param period A numeric scalar. Period of `x` if `x` is roughly periodic.
-#'   Defines \mjseqn{T} in Algorithm. This argument is optional and should
-#'   retain the default value `NULL` if `x` is not roughly periodic.
+#' @param x \mjseqn{\lbrace\,x_i\,\rbrace}
+#'   A numeric vector defining an equally spaced time series.
+#' @param bw1 \mjseqn{\lbrace\,\ell_1\,\rbrace}
+#'   An integer scalar. Bandwidth for the central moving average
+#'   applied to `x`, so that `xbar[i] = mean(x[(i-bw1):(i+bw1)])`
+#'   for all `i`.
+#' @param bw2 \mjseqn{\lbrace\,\ell_2\,\rbrace}
+#'   An integer scalar. Bandwidth for peak definition, so that
+#'   a peak occurs at index `i` if and only if
+#'   `all(xbar[i] > xbar[c((i-bw2):(i-1), (i+1):(i+bw2))])`.
+#' @param period \mjseqn{\lbrace\,T / \Delta t\,\rbrace}
+#'   A numeric scalar. Period of `x` in units \mjseqn{\Delta t}.
+#'   Necessary only if `x` is roughly periodic and peaks in phase
+#'   with the first peak are desired.
 #'
 #' @return
 #' A peaks object. A list with elements:
 #'
 #' \describe{
+#'   \item{`x`}{A numeric vector. The value of `x` in the function call.}
 #'   \item{`xbar`}{A numeric vector. The result of applying
 #'     a `(2 * bw1 + 1)`-point central moving average to `x`.
 #'   }
@@ -109,13 +109,16 @@
 #'     the index of each peak in phase with the first peak.
 #'     `NULL` if `period` is `NULL` in the function call.
 #'   }
+#'   \item{`call`}{The function call. The peaks object is reproducible
+#'     with `eval(call)`.
+#'   }
+#'   \item{`arg_list`}{A list of the arguments in the function call.
+#'     The peaks object is reproducible with `do.call(peaks, arg_list)`
+#'   }
 #' }
 #'
-#' The list has attributes `call` and `arg_list`, making it
-#' reproducible with `eval(call)` or `do.call(peaks, arg_list)`.
-#'
 #' @examples
-#' # Create a noisy periodic time series
+#' # Create a noisy 2-periodic time series with 2 peaks per period
 #' times <- seq(0, 20, by = 0.01)
 #' x <- sin(2 * pi * times) + sin(pi * times) + rnorm(times, 0, 0.5)
 #' plot(x, type = "l", lwd = 2, col = "grey80", las = 1)
@@ -132,7 +135,7 @@
 #' )
 #' lines(xbar, lwd = 2)
 #'
-#' # Setting `bw2 = 0.4 * num_obs_in_period / num_peaks_in_period`
+#' # Setting `bw2 = 0.4 * num_dt_in_period / num_peaks_in_period`
 #' # tends to yield reasonable results
 #' bw2 <- 0.4 * 200 / 2
 #'
@@ -141,7 +144,7 @@
 #'   x = x,
 #'   bw1 = bw1,
 #'   bw2 = bw2,
-#'   period = 200 # number of observations in a period (2 units of time)
+#'   period = 200 # period is 200 observation intervals
 #' )
 #'
 #' # Verify that peaks were identified correctly:
@@ -156,7 +159,24 @@
 #' @export
 #' @importFrom stats filter embed
 peaks <- function(x, bw1, bw2, period = NULL) {
-  ## 1. Setup ------------------------------------------------------------
+  if (missing(x)) {
+    stop("Missing argument `x`.")
+  } else if (!is.numeric(x)) {
+    stop("`x` must be a numeric vector.")
+  }
+  if (missing(bw1)) {
+    stop("Missing argument `bw1`.")
+  } else if (missing(bw2)) {
+    stop("Missing argument `bw2`.")
+  } else if (!is.numeric(bw1) || length(bw1) != 1 || !isTRUE(bw1 >= 0) ||
+               !is.numeric(bw2) || length(bw2) != 1 || !isTRUE(bw2 >= 0)) {
+    stop("`bw1` and `bw2` must be non-negative numeric scalars.")
+  }
+  if (!is.null(period) && (!is.numeric(period) || !isTRUE(period > 0))) {
+    stop("`period` must be `NULL` or a positive numeric scalar.")
+  }
+
+  ## Setup ---------------------------------------------------------------
 
   # Save arguments in a list
   arg_list <- as.list(environment())
@@ -167,7 +187,7 @@ peaks <- function(x, bw1, bw2, period = NULL) {
   bw2 <- floor(bw2)
 
 
-  ## 2. Apply moving average ---------------------------------------------
+  ## Apply moving average ------------------------------------------------
 
   # Number of observations in moving average band
   m <- 2 * bw1 + 1
@@ -184,7 +204,7 @@ peaks <- function(x, bw1, bw2, period = NULL) {
   )
 
 
-  ## 3. Locate all peaks -------------------------------------------------
+  ## Locate all peaks ----------------------------------------------------
 
   # Number of observations in peak definition band
   m <- 2 * bw2 + 1
@@ -211,7 +231,7 @@ peaks <- function(x, bw1, bw2, period = NULL) {
   peaks_all <- which(bands_mid > bands_sides_max)
 
 
-  ## 4. Subset peaks in phase with first peak ----------------------------
+  ## Subset peaks in phase with first peak ------------------------------
 
   if (!is.null(period)) {
     # First peak time
@@ -232,69 +252,16 @@ peaks <- function(x, bw1, bw2, period = NULL) {
     peaks_phase <- sapply(peaks_phase,
       function(x) peaks_all[which.min(abs(peaks_all - x))]
     )
+    peaks_phase <- peaks_phase[!duplicated(peaks_phase)]
   }
 
   out <- list(
-    x     = x,
-    xbar  = xbar,
-    all   = peaks_all,
-    phase = if (is.null(period)) NULL else peaks_phase
-  )
-  structure(out,
-    class    = c("peaks", "list"),
+    x        = x,
+    xbar     = xbar,
+    all      = peaks_all,
+    phase    = if (is.null(period)) NULL else peaks_phase,
     call     = match.call(),
     arg_list = arg_list
   )
-}
-
-#' Methods for class "peaks"
-#'
-#' Methods for plotting and printing peaks objects
-#' returned by [peaks()].
-#'
-#' @param x A peaks object.
-#' @param ... Unused optional arguments.
-#'
-#' @name peaks-methods
-NULL
-
-#' @rdname peaks-methods
-#' @export
-#' @importFrom graphics par plot mtext lines abline axis
-plot.peaks <- function(x, ...) {
-  if (!inherits(x, "peaks")) {
-    stop("`x` must be a peaks object.")
-  }
-  op <- par(mar=c(4,4.4,0.8,0.2)+1)
-  on.exit(par(op))
-  plot(seq_along(x$x)-1, x$x, type="l",
-       lwd=2, col="grey80",
-       xaxs="i", las=1,
-       xlab="Time (units dt)", ylab="")
-  mtext("x", side=2, line=4, las=1)
-  lines(seq_along(x$x)-1, x$xbar, lwd=2)
-  abline(v=x$all-1, col="blue")
-  if (!is.null(x$phase)) {
-    axis(side=3, at=x$phase-1,
-         labels=rep("o", length(x$phase)),
-         tick=FALSE, mgp=c(3,0.1,0), col.axis="hotpink")
-  }
-  invisible(NULL)
-}
-
-#' @rdname peaks-methods
-#' @export
-print.peaks <- function(x, ...) {
-  if (!inherits(x, "peaks")) {
-    stop("`x` must be a peaks object.")
-  }
-  n <- length(x$all)
-  if (n == 0) {
-    cat("`peaks()` found no peaks.\n")
-  } else {
-    fmt <- paste0("%", nchar(max(x$all)) + 4, "d")
-    cat("`peaks()` found", n, "peaks in `x`, indexed by:\n")
-    cat(paste0(sprintf(fmt, x$all), "\n"), sep = "")
-  }
-  invisible(x$all)
+  structure(out, class = c("peaks", "list"))
 }

@@ -8,29 +8,29 @@ Locate peaks in time series}
 peaks(x, bw1, bw2, period = NULL)
 }
 \arguments{
-\item{x}{A numeric vector. An equally spaced time series.
-Defines \mjseqn{\lbrace x_i \rbrace_{i=0}^{n-1}} in Algorithm.
-(Without loss of generality, the indices \code{seq_along(x)} are
-used as time points, so that \mjseqn{t_i = i+1} for all \mjseqn{i}.)}
+\item{x}{\mjseqn{\lbrace\,x_i\,\rbrace}
+A numeric vector defining an equally spaced time series.}
 
-\item{bw1}{An integer scalar. Bandwidth for the central moving average
-applied to \code{x}, so that \code{xbar[i] = mean(x[(i-bw1):(i+bw1)])} for
-all \code{i}. Defines \mjseqn{\ell_1} in Algorithm.}
+\item{bw1}{\mjseqn{\lbrace\,\ell_1\,\rbrace}
+An integer scalar. Bandwidth for the central moving average
+applied to \code{x}, so that \code{xbar[i] = mean(x[(i-bw1):(i+bw1)])}
+for all \code{i}.}
 
-\item{bw2}{An integer scalar. Bandwidth for peak definition, so that a
-peak occurs at index \code{i} if and only if
-\code{all(xbar[i] > xbar[(i-bw2):(i-1)])} and
-\code{all(xbar[i] > xbar[(i+1):(i+bw2)])}.
-Defines \mjseqn{\ell_2} in Algorithm.}
+\item{bw2}{\mjseqn{\lbrace\,\ell_2\,\rbrace}
+An integer scalar. Bandwidth for peak definition, so that
+a peak occurs at index \code{i} if and only if
+\code{all(xbar[i] > xbar[c((i-bw2):(i-1), (i+1):(i+bw2))])}.}
 
-\item{period}{A numeric scalar. Period of \code{x} if \code{x} is roughly periodic.
-Defines \mjseqn{T} in Algorithm. This argument is optional and should
-retain the default value \code{NULL} if \code{x} is not roughly periodic.}
+\item{period}{\mjseqn{\lbrace\,T / \Delta t\,\rbrace}
+A numeric scalar. Period of \code{x} in units \mjseqn{\Delta t}.
+Necessary only if \code{x} is roughly periodic and peaks in phase
+with the first peak are desired.}
 }
 \value{
 A peaks object. A list with elements:
 
 \describe{
+\item{\code{x}}{A numeric vector. The value of \code{x} in the function call.}
 \item{\code{xbar}}{A numeric vector. The result of applying
 a \code{(2 * bw1 + 1)}-point central moving average to \code{x}.
 }
@@ -41,10 +41,13 @@ listing the index of each peak in \code{x}.
 the index of each peak in phase with the first peak.
 \code{NULL} if \code{period} is \code{NULL} in the function call.
 }
+\item{\code{call}}{The function call. The peaks object is reproducible
+with \code{eval(call)}.
 }
-
-The list has attributes \code{call} and \code{arg_list}, making it
-reproducible with \code{eval(call)} or \code{do.call(peaks, arg_list)}.
+\item{\code{arg_list}}{A list of the arguments in the function call.
+The peaks object is reproducible with \code{do.call(peaks, arg_list)}
+}
+}
 }
 \description{
 Locates peaks in time series with observations at equally spaced
@@ -106,7 +109,7 @@ instead of a single highest point).
 
 \subsection{3. Bandwidth tuning}{
 
-The bandwidths \code{bw1} and \code{bw1}(denoted by \mjseqn{\ell_1} and
+The bandwidths \code{bw1} and \code{bw1} (denoted by \mjseqn{\ell_1} and
 \mjseqn{\ell_2} in Algorithm) must be tuned in order to disqualify
 spurious peaks in \mjseqn{\lbrace (t_i,x_i) \rbrace_{i=0}^{n-1}}
 caused by noise, without disqualifying true peaks. Disqualifying
@@ -116,23 +119,23 @@ of points in the temporal neighbourhoods that distinguish local
 maxima from other points (choosing \code{bw2} large enough). Not
 disqualifying true peaks is a matter of not including more than
 one peak in those temporal neighbourhoods (choosing \code{bw2} less
-than \code{0.5 * num_obs_in_period / num_peaks_in_period}).
+than \code{0.5 * num_dt_in_period / num_peaks_in_period} if peaks are
+evenly spaced within a period).
 
 Reasonable results are typically obtained by:
 \itemize{
 \item Choosing the smallest \code{bw1} such that
 \mjseqn{\out{\lbrace (t_k,\bar{x}_k) \rbrace_{k=\ell_1}^{n-1-\ell_1}}}
-is smooth around the peaks.
+is smooth around the peaks, which can be found by experimenting with
+\code{\link[stats:filter]{stats::filter()}} (see Examples).
 \item Choosing \code{bw2} around
-\code{0.4 * num_obs_in_period / num_peaks_in_period}.
-A good value for \code{bw1} can be found by experimenting with \code{\link[stats:filter]{stats::filter()}}
-(see Examples).
+\code{0.4 * num_dt_in_period / num_peaks_in_period}.
 }
 }
 }
 
 \examples{
-# Create a noisy periodic time series
+# Create a noisy 2-periodic time series with 2 peaks per period
 times <- seq(0, 20, by = 0.01)
 x <- sin(2 * pi * times) + sin(pi * times) + rnorm(times, 0, 0.5)
 plot(x, type = "l", lwd = 2, col = "grey80", las = 1)
@@ -149,7 +152,7 @@ xbar <- as.vector(
 )
 lines(xbar, lwd = 2)
 
-# Setting `bw2 = 0.4 * num_obs_in_period / num_peaks_in_period`
+# Setting `bw2 = 0.4 * num_dt_in_period / num_peaks_in_period`
 # tends to yield reasonable results
 bw2 <- 0.4 * 200 / 2
 
@@ -158,7 +161,7 @@ peaks_out <- peaks(
   x = x,
   bw1 = bw1,
   bw2 = bw2,
-  period = 200 # number of observations in a period (2 units of time)
+  period = 200 # period is 200 observation intervals
 )
 
 # Verify that peaks were identified correctly:

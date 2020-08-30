@@ -4,48 +4,156 @@
 \alias{fastbeta}
 \title{Estimate time-varying transmission rates}
 \usage{
-fastbeta(df, par_list, method)
+fastbeta(data, par_list, method)
 }
 \arguments{
-\item{df}{A data frame with time series data.}
+\item{data}{A data frame with numeric columns:
 
-\item{par_list}{A list of parameter values.}
+\describe{
+\item{\code{t}}{\mjseqn{\lbrace\,t_i\,\rbrace}
+Time. Lists the observation times \mjseqn{t_i = t_0 + i \Delta t}
+(for \mjseqn{i = 0, \ldots, n-1}) in any convenient units. Here,
+\mjseqn{t_0} is the initial observation time and \mjseqn{\Delta t}
+is the observation interval.
+}
+\item{\code{Z}}{\mjseqn{\lbrace\,Z_i\,\rbrace}
+Incidence. \code{Z[i]} is the number of infections
+between times \code{t[i-1]} and \code{t[i]}.
+}
+\item{\code{B}}{\mjseqn{\lbrace\,B_i\,\rbrace}
+Births. \code{B[i]} is the number of births
+between times \code{t[i-1]} and \code{t[i]}.
+}
+\item{\code{mu}}{\mjseqn{\lbrace\,\mu_i \Delta t\,\rbrace}
+Per capita natural mortality rate. \code{mu[i]} is the rate
+at time \code{t[i]} expressed per unit \mjseqn{\Delta t}.
+S, SI, and SEI methods only.
+}
+}}
 
-\item{method}{A character scalar, one of \code{"fc"}, \code{"s"}, \code{"si"},
-and \code{"sei"}, indicating a transmission rate estimation method.
-The FC and S methods are deprecated and outperformed by the
-more robust SI and SEI methods. For the details of each algorithm,
-see the respective sections of \link[=estimate-beta]{this help page}.}
+\item{par_list}{A list with numeric scalar elements:
+
+\describe{
+\item{\code{tgen}}{\mjseqn{\lbrace\,t_\text{gen} / \Delta t\,\rbrace}
+Mean generation interval of the disease of interest
+in units \mjseqn{\Delta t}. FC, S, and SI methods only.
+}
+\item{\code{tlat}}{\mjseqn{\lbrace\,t_\text{lat} / \Delta t\,\rbrace}
+Mean latent period of the disease of interest
+in units \mjseqn{\Delta t}. SEI method only.
+}
+\item{\code{tinf}}{\mjseqn{\lbrace\,t_\text{inf} / \Delta t\,\rbrace}
+Mean infectious period of the disease of interest
+in units \mjseqn{\Delta t}. SEI method only.
+}
+\item{\code{S0}}{\mjseqn{\lbrace\,S_0\,\rbrace}
+Number of susceptible individuals at time \mjseqn{t = t_0}.
+}
+\item{\code{E0}}{\mjseqn{\lbrace\,E_0\,\rbrace}
+Number of exposed (infected but not infectious) individuals
+at time \mjseqn{t = t_0}. SEI method only.
+}
+\item{\code{I0}}{\mjseqn{\lbrace\,I_0\,\rbrace}
+Number of infectious individuals at time \mjseqn{t = t_0}.
+SI and SEI methods only.
+}
+}}
+
+\item{method}{A character scalar, one of \code{"fc"}, \code{"s"}, \code{"si"}, and \code{"sei"},
+indicating an estimation algorithm, one of \code{\link[=estimate_beta_fc]{estimate_beta_fc()}},
+\code{\link[=estimate_beta_s]{estimate_beta_s()}}, \code{\link[=estimate_beta_si]{estimate_beta_si()}}, and \code{\link[=estimate_beta_sei]{estimate_beta_sei()}}.}
 }
 \value{
-A fastbeta object.
+A fastbeta object. A list with elements:
+
+\describe{
+\item{\code{out}}{A data frame containing the estimation output.
+The result of applying \code{\link[=estimate-beta]{estimate_beta_method()}}
+to \code{data} and \code{par_list} \emph{after} replacing missing values in
+\code{data[c("Z", "B", "mu")]} and zeros in \code{data$Z} with \code{\link[=impute_na]{impute_na()}}
+(see Details).
+}
+\item{\code{method}}{A character scalar. The value of \code{method}
+in the function call.
+}
+\item{\code{warn}}{A logical scalar indicating whether a warning
+was issued about negative elements in \code{out$S} (see Details).
+Equal to \code{any(out$S < 0, na.rm = TRUE)}.
+}
+\item{\code{call}}{The function call. The fastbeta object is reproducible
+with \code{eval(call)}.
+}
+\item{\code{arg_list}}{A list of the arguments in the function call.
+The fastbeta object is reproducible with \code{do.call(fastbeta, arg_list)}.
+}
+}
 }
 \description{
-Generates a fastbeta object.
+A wrapper for the \code{\link[=estimate-beta]{estimate_beta_method()}} functions,
+which implement the FC, S, SI, and SEI methods for estimating time-varying
+transmission rates \mjseqn{\beta(t)} from equally spaced time series of
+incidence, births, and natural mortality.
 }
 \details{
-Details to come.
+The help page for \code{\link[=estimate-beta]{estimate_beta_method()}}
+documents the four estimation algorithms, their output,
+various issues, and possible fixes. To summarize the main
+issues, the algorithms struggle with:
+\enumerate{
+\item Missing data and zeros in incidence.
+\item Systematic overestimation of incidence by \code{data$Z}
+and systematic underestimation of births by \code{data$B},
+causing the estimated susceptible population size
+to become negative.
+\item Process and observation error in the data-generating
+process, causing spurious noise in the estimated
+transmission rate.
+}
+
+\code{fastbeta()} handles these issues as follows:
+\enumerate{
+\item Prior to calling \code{\link[=estimate-beta]{estimate_beta_method()}},
+\code{fastbeta()} uses \code{\link[=impute_na]{impute_na()}} to replace missing values in
+\code{data[c("Z", "B", "mu")]} and zeros in \code{data$Z} with positive
+values. \code{\link[=impute_na]{impute_na()}}, which performs linear interpolation,
+fails in certain cases that are documented in its help page.
+If a more sophisticated technique is desired, then it must be
+applied prior to the call to \code{fastbeta()}.
+\item \code{fastbeta()} warns if the estimated susceptible population size
+is at any time negative and suggests restarting with scaled down
+\code{data$Z} and/or scaled up \code{data$B}. (Less crude approaches to
+correcting incidence certainly exist. For an approach based on
+deconvolution, see \code{\link[=deconvol]{deconvol()}}.) A rule-of-thumb is to iterate
+until the start of the susceptible time series no longer displays
+pronounced transient dynamics, while still considering whether
+the correction applied is reasonable.
+\item \code{fastbeta()} \emph{does not} prevent or smooth out noise in the estimated
+transmission rate. Determining what constitutes a "good" degree of
+smoothing is not a trivial task and typically involves a graphical
+inspection of results for different values of smoothing parameters.
+\code{\link[=try_loess]{try_loess()}} attempts to facilitate this process for users fitting
+smooth loess curves to noisy time series.
+}
 }
 \examples{
 # Simulate time series data using an SIR model
 # with seasonally forced transmission rate
-par_list <- make_par_list(model = "sir")
-df <- make_data(par_list = par_list, with_ds = TRUE, model = "sir")
+pl <- make_par_list(model = "sir")
+df <- make_data(pl, with_ds = TRUE, model = "sir")
 
 # Estimate the seasonally forced transmission rate
 # using the SI method
-par_list <- within(par_list, tgen <- tlat + tinf)
-fastbeta_out <- fastbeta(df, par_list, method = "si")
+fastbeta_out <- fastbeta(df, pl, method = "si")
 plot(fastbeta_out)
 
 # Simulate time series data using an SEIR model
 # with seasonally forced transmission rate
-par_list <- make_par_list(model = "seir")
-df <- make_data(par_list = par_list, with_ds = TRUE, model = "seir")
+pl <- make_par_list(model = "seir")
+df <- make_data(pl, with_ds = TRUE, model = "seir")
 
 # Estimate the seasonally forced transmission rate
 # using the SEI method
-fastbeta_out <- fastbeta(df, par_list, method = "sei")
+fastbeta_out <- fastbeta(df, pl, method = "sei")
 plot(fastbeta_out)
 
 }

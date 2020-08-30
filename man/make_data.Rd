@@ -6,7 +6,7 @@
 Simulate epidemic time series data}
 \usage{
 make_data(
-  par_list = make_par_list(),
+  par_list = make_par_list(model = "sir"),
   n = 1000,
   with_ds = FALSE,
   model = "sir",
@@ -30,20 +30,23 @@ Population size at time \mjseqn{t = 0} years.
 Number of susceptible individuals at time \mjseqn{t = 0} years.
 }
 \item{\code{E0}}{\mjseqn{\lbrace\,E_0\,\rbrace}
-Number of exposed individuals at time \mjseqn{t = 0} years.
-Necessary only if \code{model = "seir"}.
+Number of exposed (infected but not infectious) individuals
+at time \mjseqn{t = 0} years. Necessary only if \code{model = "seir"}.
 }
 \item{\code{I0}}{\mjseqn{\lbrace\,I_0\,\rbrace}
-Number of infected (\code{model = "sir"}) or infectious (\code{model = "seir"})
-individuals at time \mjseqn{t = 0} years.
+Number of infectious individuals at time \mjseqn{t = 0} years.
 }
 \item{\code{tlat}}{\mjseqn{\lbrace\,t_\text{lat}/\Delta t\,\rbrace}
 Mean latent period of the disease of interest
-in units \mjseqn{\Delta t}.
+in units \mjseqn{\Delta t}. If \code{model = "sir"},
+then the removal rate \mjseqn{\gamma} is set equal to
+\mjseqn{1 / (t_\text{lat} + t_\text{inf})} (see Details 1).
 }
 \item{\code{tinf}}{\mjseqn{\lbrace\,t_\text{inf}/\Delta t\,\rbrace}
 Mean infectious period of the disease of interest
-in units \mjseqn{\Delta t}.
+in units \mjseqn{\Delta t}. If \code{model = "sir"},
+then the removal rate \mjseqn{\gamma} is set equal to
+\mjseqn{1 / (t_\text{lat} + t_\text{inf})} (see Details 1).
 }
 \item{\code{prep}}{\mjseqn{\lbrace\,p_\text{rep}\,\rbrace}
 Probability that an infection is reported.
@@ -90,12 +93,15 @@ of the same length as \code{s} containing the value of
 The function must define \mjseqn{f(s)} for all
 \mjseqn{s \in \lbrack 0,n-1 \rbrack}. Here, \mjseqn{\beta(t) \Delta t}
 is the transmission rate at time \mjseqn{t}
-expressed per unit \mjseqn{\Delta t}.}
+expressed per unit \mjseqn{\Delta t} per susceptible individual
+per infectious individual.}
 
-\item{delay_dist}{A numeric vector. The distribution of the
-number of observations intervals between infection and reporting.
+\item{delay_dist}{A numeric vector. The distribution of the integer
+number of observation intervals between infection and reporting.
 \code{delay_dist[i]} is the probability that an infection that is
-eventually reported is reported after \code{i - 1} observation intervals.}
+eventually reported is reported after \code{i - 1} observation intervals.
+\code{delay_dist} is replaced with \code{delay_dist / sum(delay_dist)} in the
+event that \code{sum(delay_dist) != 1}.}
 }
 \value{
 A data frame with \code{n} rows corresponding to equally spaced time points
@@ -129,11 +135,11 @@ Population size.
 Number of susceptible individuals.
 }
 \item{\code{E}}{\mjseqn{\lbrace\,E(t_i)\,\rbrace}
-Number of exposed individuals. Included only if \code{model = "seir"}.
+Number of exposed (infected but not infectious) individuals.
+Included only if \code{model = "seir"}.
 }
 \item{\code{I}}{\mjseqn{\lbrace\,I(t_i)\,\rbrace}
-Number of infected (\code{model = "sir"}) or infectious (\code{model = "seir"})
-individuals.
+Number of infectious individuals.
 }
 \item{\code{Z}}{\mjseqn{\lbrace\,Z(t_i)\,\rbrace}
 Incidence. \code{Z[i]} is the number of infections
@@ -156,15 +162,15 @@ between times \code{t[i-1]} and \code{t[i]}.
 
 The data frame has attributes \code{call} and \code{arg_list}, making it
 reproducible with \code{eval(call)} or \code{do.call(make_data, arg_list)},
-preceded by a call to \code{set.seed()}.
+possibly preceded by a call to \code{\link[base:set.seed]{base::set.seed()}}.
 }
 \description{
 Simulates epidemic time series data using a system of S(E)IR equations
-and a supplied parametrization (see Details 1). Observations are recorded
-at equally spaced time points \mjseqn{t_i = t_0 + i \Delta t}. Users can
-specify any time-varying birth, death, and transmission rates and any
-discrete distribution of the time from infection to reporting. By default,
-the vital rates are constant and the transmission rate is seasonally forced.
+(see Details 1). Observations are recorded at equally spaced time points
+\mjseqn{t_i = t_0 + i \Delta t}. Users can specify any time-varying birth,
+death, and transmission rates and any discrete distribution of the time
+from infection to reporting. By default, the vital rates are constant and
+the transmission rate is seasonally forced (see Details 2).
 }
 \section{Details}{
 \subsection{1. Simulation model}{
@@ -182,7 +188,11 @@ If \code{model = "seir"}, then the system is
 \mjsdeqn{\begin{align*} \frac{\text{d}S}{\text{d}t} &= \nu(t) N_0 - \beta(t) S I - \mu(t) S\,, \cr \frac{\text{d}E}{\text{d}t} &= \beta(t) S I - \sigma E - \mu(t) E\,, \cr \frac{\text{d}I}{\text{d}t} &= \sigma E - \gamma I - \mu(t) I\,, \cr \frac{\text{d}R}{\text{d}t} &= \gamma I - \mu(t) R\,, \cr \frac{\text{d}B_\text{cum}}{\text{d}t} &= \nu(t) N_0\,, \cr \frac{\text{d}Z_\text{cum}}{\text{d}t} &= \beta(t) S I\,, \end{align*}}
 
 where \mjseqn{\sigma = 1 / t_\text{lat}} and
-\mjseqn{\gamma = 1 / t_\text{inf}}.
+\mjseqn{\gamma = 1 / t_\text{inf}}. Note that setting
+\mjseqn{\gamma = 1 / (t_\text{lat} + t_\text{inf})}
+in the SIR model guarantees that the implied mean
+generation interval matches that of the corresponding
+SEIR model.
 
 \code{make_data()} generates observations of the system at equally spaced
 times \mjseqn{t_i = i \Delta t} (for \mjseqn{i = 0, \ldots, n-1}) by
@@ -275,7 +285,7 @@ a list conforming to these default requirements.
 }
 
 \examples{
-# Stochastic simulation of SIR model
+# Stochastic simulation of SEIR model
 par_list <- make_par_list(
   epsilon = pi / 4, # environmental stochasticity
   prep = 0.5, # random under-reporting of infections
@@ -284,21 +294,20 @@ par_list <- make_par_list(
 set.seed(1422)
 df <- make_data(par_list,
   with_ds = TRUE, # demographic stochasticity
-  model = "sir",
-  delay_dist = dnbinom(0:10, mu = 2, size = 4) /
-    pnbinom(10, mu = 2, size = 4) # random delays in reporting
+  model = "seir",
+  delay_dist = dnbinom(0:10, mu = 2, size = 4) # random delays in reporting
 )
 head(df)
 
-# Deterministic simulation of SEIR model
+# Deterministic simulation of SIR model
 par_list <- make_par_list(
   epsilon = 0,
   prep = 1,
-  model = "seir"
+  model = "sir"
 )
 df <- make_data(par_list,
   with_ds = FALSE,
-  model = "seir",
+  model = "sir",
   delay_dist = c(1)
 )
 head(df)

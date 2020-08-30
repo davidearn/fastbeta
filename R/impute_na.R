@@ -29,7 +29,6 @@
 #' impute_na(x)
 #' impute_na(x, zero_as_na = TRUE)
 #'
-#' @seealso [fastbeta()]
 #' @export
 #' @importFrom stats approx
 impute_na <- function(x, zero_as_na = FALSE) {

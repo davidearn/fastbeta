@@ -2,7 +2,7 @@
 % Please edit documentation in R/compute_rrmse.R
 \name{compute_rrmse}
 \alias{compute_rrmse}
-\title{Compute RRMSE in a vector}
+\title{Compute RRMSE}
 \usage{
 compute_rrmse(x, xhat, na_rm = FALSE)
 }
