@@ -2,7 +2,6 @@
 
 ### Code
 
-* loess wrapper
 * bootstrap CIs on beta(t) estimates
 
 ### Debug

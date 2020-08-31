@@ -1,5 +1,0 @@
-library(fastbeta)
-par_list <- make_par_list(epsilon2 = 1, prep = 0.5, trep = 2, k = 4)
-df <- make_data(par_list, n = 1000, with_dem_stoch = TRUE)
-fb <- fastbeta(df, par_list)
-plot(fb)

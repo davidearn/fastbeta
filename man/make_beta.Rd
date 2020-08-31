@@ -54,9 +54,9 @@ its own and instead uses the definition of the interpolant
 \mjseqn{a(s)} that it finds in its enclosing environment.
 
 The upshot is that the output of \code{make_beta()} (i.e., the function
-\code{f()}) is randomly generated and reproducible with \code{\link[base:set.seed]{base::set.seed()}},
+\code{f()}) is randomly generated and reproducible with \code{\link[base:Random]{base::set.seed()}},
 while the output of \code{f()} is determined and reproducible without
-\code{\link[base:set.seed]{base::set.seed()}}).
+\code{\link[base:Random]{base::set.seed()}}).
 }
 \examples{
 epsilon <- pi / 4

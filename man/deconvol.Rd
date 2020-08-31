@@ -148,8 +148,8 @@ x <- 400 * exp(-seq(-2, 2, by = 0.1)^2)
 delay_dist <- rep(1 / 11, 11)
 p <- 0.5
 it_max <- 25
-dcv_out <- deconvol(x, delay_dist, p, it_max)
-plot(dcv_out) # creates 3 plots
+deconvol_out <- deconvol(x, delay_dist, p, it_max)
+plot(deconvol_out) # creates 3 plots
 
 }
 \references{

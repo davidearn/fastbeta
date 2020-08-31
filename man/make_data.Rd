@@ -162,7 +162,7 @@ between times \code{t[i-1]} and \code{t[i]}.
 
 The data frame has attributes \code{call} and \code{arg_list}, making it
 reproducible with \code{eval(call)} or \code{do.call(make_data, arg_list)},
-possibly preceded by a call to \code{\link[base:set.seed]{base::set.seed()}}.
+possibly preceded by a call to \code{\link[base:Random]{base::set.seed()}}.
 }
 \description{
 Simulates epidemic time series data using a system of S(E)IR equations
