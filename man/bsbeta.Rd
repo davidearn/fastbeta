@@ -36,7 +36,7 @@ A bsbeta object. A list with elements:
 
 \describe{
 \item{\code{times}}{A numeric vector listing time points for the
-bootstrap estimates of \mjseqn{\beta(t)}}. Equal to \code{x$out$t}.
+bootstrap estimates of \mjseqn{\beta(t)}. Equal to \code{x$out$t}.
 \item{\code{beta}}{A numeric vector. If \code{y = NULL}, the \code{\link[=fastbeta]{fastbeta()}}
 estimate of \mjseqn{\beta(t)}, equal to \code{x$out$beta}. Otherwise,
 the loess fit evaluated at \code{times}, equal to \code{predict(y, times)}.
@@ -56,7 +56,7 @@ Equal to \code{rowMeans(mat)}.
 the bootstrap estimates. Equal to \code{apply(mat, 1, sd)}.
 }
 \item{\code{n}}{An integer scalar. The number of bootstrap estimates.
-Equal to \code{n} in the function call and also \code{ncol(mat)}.
+Equal to \code{ncol(mat)}.
 }
 \item{\code{call}}{The function call. The bsbeta object is reproducible
 with \code{eval(call)}.

@@ -51,7 +51,7 @@
 #'
 #' \describe{
 #'   \item{`times`}{A numeric vector listing time points for the
-#'     bootstrap estimates of \mjseqn{\beta(t)}}. Equal to `x$out$t`.
+#'     bootstrap estimates of \mjseqn{\beta(t)}. Equal to `x$out$t`.
 #'   \item{`beta`}{A numeric vector. If `y = NULL`, the [fastbeta()]
 #'     estimate of \mjseqn{\beta(t)}, equal to `x$out$beta`. Otherwise,
 #'     the loess fit evaluated at `times`, equal to `predict(y, times)`.
@@ -71,7 +71,7 @@
 #'     the bootstrap estimates. Equal to `apply(mat, 1, sd)`.
 #'   }
 #'   \item{`n`}{An integer scalar. The number of bootstrap estimates.
-#'     Equal to `n` in the function call and also `ncol(mat)`.
+#'     Equal to `ncol(mat)`.
 #'   }
 #'   \item{`call`}{The function call. The bsbeta object is reproducible
 #'     with `eval(call)`.

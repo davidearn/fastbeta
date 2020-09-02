@@ -22,7 +22,7 @@ plot.ptpi <- function(x, ...) {
     stop("`x$mat` must have at least 2 rows and at least 1 column.")
   }
   op <- par(mar=c(4,5.4,1.2,0.2)+1)
-  on.exit(op)
+  on.exit(par(op))
   plot(0, 0, type="n",
        xlim=c(0,m-1), ylim=range(x$mat, na.rm=TRUE),
        xaxs="i", las=1, mgp=c(3,0.7,0),
