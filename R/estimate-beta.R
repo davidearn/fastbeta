@@ -140,8 +140,9 @@
 #' A data frame with numeric columns:
 #'
 #' \describe{
-#'   \item{`t`}{\mjseqn{\lbrace\,t_i\,\rbrace}
-#'     Time. Identical to `data$t`.
+#'   \item{`t`}{\mjseqn{\lbrace\,(t_i-t_0)/\Delta t\,\rbrace}
+#'     Time since the initial time in units \mjseqn{\Delta t}.
+#'     Equal to `0:(nrow(data)-1)`.
 #'   }
 #'   \item{`Z`}{\mjseqn{\lbrace\,Z_i\,\rbrace}
 #'     Incidence. Identical to `data$Z`.
@@ -293,7 +294,7 @@ estimate_beta_fc <- function(data, par_list) {
 
   # Preallocate memory for output
   data <- data.frame(
-    t     = data$t,
+    t     = seq_along(data$t) - 1,
     Z     = data$Z,
     Z_agg = NA,
     B     = data$B,
@@ -352,6 +353,7 @@ estimate_beta_s <- function(data, par_list) {
 
   # Preallocate memory for output
   data <- data[c("t", "Z", "B", "mu")]
+  data$t <- seq_along(data$t) - 1
   data[c("S", "I", "beta")] <- NA
 
 
@@ -397,6 +399,7 @@ estimate_beta_si <- function(data, par_list) {
 
   # Preallocate memory for output
   data <- data[c("t", "Z", "B", "mu")]
+  data$t <- seq_along(data$t) - 1
   data[c("S", "I", "beta")] <- NA
 
 
@@ -436,6 +439,7 @@ estimate_beta_sei <- function(data, par_list) {
 
   # Preallocate memory for output
   data <- data[c("t", "Z", "B", "mu")]
+  data$t <- seq_along(data$t) - 1
   data[c("S", "E", "I", "beta")] <- NA
 
 

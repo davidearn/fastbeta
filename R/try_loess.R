@@ -49,7 +49,10 @@
 #' df <- data.frame(t = times, x)
 #' q <- c(6, 20, 100, 400)
 #' control <- loess.control(surface = "direct")
-#' loess_out <- try_loess(x ~ t, df, q, control = control, plot = TRUE)
+#' try_loess_out <- try_loess(x ~ t, df, q, control = control, plot = TRUE)
+#'
+#' # Fit with `q = 100` looks okay
+#' my_loess <- try_loess_out[["q100"]]
 #'
 #' @references
 #' \insertRef{ClevGros+91}{fastbeta}

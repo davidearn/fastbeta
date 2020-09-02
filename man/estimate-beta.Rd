@@ -74,8 +74,9 @@ SI and SEI methods only.
 A data frame with numeric columns:
 
 \describe{
-\item{\code{t}}{\mjseqn{\lbrace\,t_i\,\rbrace}
-Time. Identical to \code{data$t}.
+\item{\code{t}}{\mjseqn{\lbrace\,(t_i-t_0)/\Delta t\,\rbrace}
+Time since the initial time in units \mjseqn{\Delta t}.
+Equal to \code{0:(nrow(data)-1)}.
 }
 \item{\code{Z}}{\mjseqn{\lbrace\,Z_i\,\rbrace}
 Incidence. Identical to \code{data$Z}.

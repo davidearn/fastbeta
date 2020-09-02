@@ -14,7 +14,7 @@ make_par_list(
   Rnaught = 20,
   alpha = 0.08,
   epsilon = 0,
-  prep = 1,
+  pconst = 1,
   model = "sir",
   n = 1000 * 365/dt_days
 )
@@ -35,9 +35,8 @@ A numeric scalar. Mean infectious period
 of the disease of interest in units \mjseqn{\Delta t}.}
 
 \item{muconst}{\mjseqn{\lbrace\,\mu_\text{c} \Delta t\,\rbrace}
-A numeric scalar. Birth rate (relative to \mjseqn{N_0})
-expressed per unit \mjseqn{\Delta t} \emph{and} per capita
-natural mortality rate expressed per unit \mjseqn{\Delta t}.}
+A numeric scalar. Per capita natural mortality rate expressed
+per unit \mjseqn{\Delta t}.}
 
 \item{Rnaught}{\mjseqn{\lbrace\,\mathcal{R}_0\,\rbrace}
 A numeric scalar. Basic reproduction number
@@ -52,8 +51,8 @@ A numeric scalar. Standard deviation of the standard
 normally distributed phase shift in the seasonally forced
 transmission rate.}
 
-\item{prep}{\mjseqn{\lbrace\,p_\text{rep}\,\rbrace}
-A numeric scalar. Probability that an infection is reported.}
+\item{pconst}{\mjseqn{\lbrace\,p_\text{c}\,\rbrace}
+A numeric scalar. Probability that an infection is eventually reported.}
 
 \item{model}{A character scalar, either \code{"sir"} or \code{"seir"},
 indicating a system of equations to be numerically integrated
@@ -94,14 +93,15 @@ Number of infectious individuals at time \mjseqn{t = 0} years.
 }
 
 This list can be assigned to the argument \code{par_list} of \verb{[make_data()]}
-if defaults are accepted for its arguments \code{mu}, \code{nu}, and \code{beta}.
+if defaults are accepted for its arguments \code{mu}, \code{nu}, \code{beta}, and \code{p}.
 In this case, care must be taken to ensure that the argument \code{model}
 of \code{\link[=make_data]{make_data()}} matches that of \code{make_par_list()}.
 }
 \description{
 Creates a list of parameter values that can be assigned
 to the argument \code{par_list} of \code{\link[=make_data]{make_data()}} if defaults
-are accepted for its arguments \code{mu}, \code{nu}, and \code{beta}.
+are accepted for its arguments \code{mu}, \code{nu}, \code{beta}, and
+\code{p}.
 }
 \section{Details}{
 \subsection{1. Defining \mjseqn{\langle\beta\rangle}}{

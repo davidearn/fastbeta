@@ -68,11 +68,7 @@
 #' @importFrom stats approxfun rnorm
 make_beta <- function(epsilon, n) {
   n <- floor(n)
-  a <- approxfun(
-    x      = 0:(n - 1),
-    y      = rnorm(n, mean = 0, sd = epsilon),
-    method = "linear"
-  )
+  a <- approxfun(x = 0:(n - 1), y = rnorm(n, mean = 0, sd = epsilon))
   function(s, par_list) {
     a_val <- ifelse(s < 0 | s > n - 1, 0, a(s))
     one_year <- 365 / par_list$dt_days

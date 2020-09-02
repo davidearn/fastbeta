@@ -4,7 +4,8 @@
 #' @description
 #' Creates a list of parameter values that can be assigned
 #' to the argument `par_list` of [make_data()] if defaults
-#' are accepted for its arguments `mu`, `nu`, and `beta`.
+#' are accepted for its arguments `mu`, `nu`, `beta`, and
+#' `p`.
 #'
 #' @details
 #' # Details
@@ -88,9 +89,8 @@
 #'   A numeric scalar. Mean infectious period
 #'   of the disease of interest in units \mjseqn{\Delta t}.
 #' @param muconst \mjseqn{\lbrace\,\mu_\text{c} \Delta t\,\rbrace}
-#'   A numeric scalar. Birth rate (relative to \mjseqn{N_0})
-#'   expressed per unit \mjseqn{\Delta t} *and* per capita
-#'   natural mortality rate expressed per unit \mjseqn{\Delta t}.
+#'   A numeric scalar. Per capita natural mortality rate expressed
+#'   per unit \mjseqn{\Delta t}.
 #' @param Rnaught \mjseqn{\lbrace\,\mathcal{R}_0\,\rbrace}
 #'   A numeric scalar. Basic reproduction number
 #'   of the disease of interest.
@@ -101,8 +101,8 @@
 #'   A numeric scalar. Standard deviation of the standard
 #'   normally distributed phase shift in the seasonally forced
 #'   transmission rate.
-#' @param prep \mjseqn{\lbrace\,p_\text{rep}\,\rbrace}
-#'   A numeric scalar. Probability that an infection is reported.
+#' @param pconst \mjseqn{\lbrace\,p_\text{c}\,\rbrace}
+#'   A numeric scalar. Probability that an infection is eventually reported.
 #' @param model A character scalar, either `"sir"` or `"seir"`,
 #'   indicating a system of equations to be numerically integrated
 #'   (see Details 2).
@@ -141,7 +141,7 @@
 #' }
 #'
 #' This list can be assigned to the argument `par_list` of `[make_data()]`
-#' if defaults are accepted for its arguments `mu`, `nu`, and `beta`.
+#' if defaults are accepted for its arguments `mu`, `nu`, `beta`, and `p`.
 #' In this case, care must be taken to ensure that the argument `model`
 #' of [make_data()] matches that of `make_par_list()`.
 #'
@@ -175,7 +175,7 @@ make_par_list <- function(dt_days  = 7,
                           Rnaught  = 20,
                           alpha    = 0.08,
                           epsilon  = 0,
-                          prep     = 1,
+                          pconst   = 1,
                           model    = "sir",
                           n        = 1000 * 365 / dt_days) {
   # Some derived quantities
@@ -241,7 +241,7 @@ make_par_list <- function(dt_days  = 7,
       y     = x_init,
       times = times,
       func  = compute_ode_rates,
-      parms = NULL, # found in enclosing environment of `compute_seir_rates()`
+      parms = NULL, # found in enclosing environment of `compute_ode_rates()`
       hmax  = 1 # avoids error when `length(times) = 1`
     )
   )
@@ -256,10 +256,10 @@ make_par_list <- function(dt_days  = 7,
   if (model == "sir") {
     as.list(environment())[c("dt_days", "N0", "S0", "I0",
                              "tlat", "tinf", "tgen", "muconst", "Rnaught",
-                             "beta_mean", "alpha", "epsilon", "prep")]
+                             "beta_mean", "alpha", "epsilon", "pconst")]
   } else if (model == "seir") {
     as.list(environment())[c("dt_days", "N0", "S0", "E0", "I0",
                              "tlat", "tinf", "tgen", "muconst", "Rnaught",
-                             "beta_mean", "alpha", "epsilon", "prep")]
+                             "beta_mean", "alpha", "epsilon", "pconst")]
   }
 }

@@ -4,10 +4,12 @@
 #' @description
 #' Simulates epidemic time series data using a system of S(E)IR equations
 #' (see Details 1). Observations are recorded at equally spaced time points
-#' \mjseqn{t_i = t_0 + i \Delta t}. Users can specify any time-varying birth,
-#' death, and transmission rates and any discrete distribution of the time
-#' from infection to reporting. By default, the vital rates are constant and
-#' the transmission rate is seasonally forced (see Details 2).
+#' \mjseqn{t_i = t_0 + i \Delta t}. Users can specify any time-varying rates
+#' of birth, death, and transmission, any time-varying probability that an
+#' infection is reported, and any discrete distribution of the time from
+#' infection to reporting. By default, the vital rates are constant, the
+#' transmission rate is seasonally forced, and all infections are reported
+#' with no delay.
 #'
 #' @details
 #' # Details
@@ -19,19 +21,15 @@
 #' cumulative births and cumulative incidence. If `model = "sir"`,
 #' then the system is
 #'
-#' \mjsdeqn{\begin{align*} \frac{\text{d}S}{\text{d}t} &= \nu(t) N_0 - \beta(t) S I - \mu(t) S\,, \cr \frac{\text{d}I}{\text{d}t} &= \beta(t) S I - \gamma I - \mu(t) I\,, \cr \frac{\text{d}R}{\text{d}t} &= \gamma I - \mu(t) R\,, \cr \frac{\text{d}B_\text{cum}}{\text{d}t} &= \nu(t) N_0\,, \cr \frac{\text{d}Z_\text{cum}}{\text{d}t} &= \beta(t) S I\,, \end{align*}}
+#' \mjsdeqn{\begin{align*} \frac{\text{d}S}{\text{d}t} &= \nu(t) - \beta(t) S I - \mu(t) S\,, \cr \frac{\text{d}I}{\text{d}t} &= \beta(t) S I - \gamma I - \mu(t) I\,, \cr \frac{\text{d}R}{\text{d}t} &= \gamma I - \mu(t) R\,, \cr \frac{\text{d}B_\text{cum}}{\text{d}t} &= \nu(t)\,, \cr \frac{\text{d}Z_\text{cum}}{\text{d}t} &= \beta(t) S I\,, \end{align*}}
 #'
-#' where \mjseqn{\gamma = 1 / (t_\text{lat} + t_\text{inf})}.
+#' where \mjseqn{\gamma = 1 / t_\text{gen}}.
 #' If `model = "seir"`, then the system is
 #'
-#' \mjsdeqn{\begin{align*} \frac{\text{d}S}{\text{d}t} &= \nu(t) N_0 - \beta(t) S I - \mu(t) S\,, \cr \frac{\text{d}E}{\text{d}t} &= \beta(t) S I - \sigma E - \mu(t) E\,, \cr \frac{\text{d}I}{\text{d}t} &= \sigma E - \gamma I - \mu(t) I\,, \cr \frac{\text{d}R}{\text{d}t} &= \gamma I - \mu(t) R\,, \cr \frac{\text{d}B_\text{cum}}{\text{d}t} &= \nu(t) N_0\,, \cr \frac{\text{d}Z_\text{cum}}{\text{d}t} &= \beta(t) S I\,, \end{align*}}
+#' \mjsdeqn{\begin{align*} \frac{\text{d}S}{\text{d}t} &= \nu(t) - \beta(t) S I - \mu(t) S\,, \cr \frac{\text{d}E}{\text{d}t} &= \beta(t) S I - \sigma E - \mu(t) E\,, \cr \frac{\text{d}I}{\text{d}t} &= \sigma E - \gamma I - \mu(t) I\,, \cr \frac{\text{d}R}{\text{d}t} &= \gamma I - \mu(t) R\,, \cr \frac{\text{d}B_\text{cum}}{\text{d}t} &= \nu(t)\,, \cr \frac{\text{d}Z_\text{cum}}{\text{d}t} &= \beta(t) S I\,, \end{align*}}
 #'
 #' where \mjseqn{\sigma = 1 / t_\text{lat}} and
-#' \mjseqn{\gamma = 1 / t_\text{inf}}. Note that setting
-#' \mjseqn{\gamma = 1 / (t_\text{lat} + t_\text{inf})}
-#' in the SIR model guarantees that the implied mean
-#' generation interval matches that of the corresponding
-#' SEIR model.
+#' \mjseqn{\gamma = 1 / t_\text{inf}}.
 #'
 #' `make_data()` generates observations of the system at equally spaced
 #' times \mjseqn{t_i = i \Delta t} (for \mjseqn{i = 0, \ldots, n-1}) by
@@ -66,21 +64,24 @@
 #' It then does binomial sampling to generate, for each observation
 #' of \mjseqn{Z}, a number of infections that is eventually reported:
 #'
-#' \mjsdeqn{Z_\text{rep}(t_i) \sim \mathrm{Binomial}\big(Z(t_i),p_\text{rep}\big)\,.}
+#' \mjsdeqn{Z_\text{rep}(t_i) \sim \mathrm{Binomial}\big(Z(t_i),p(t_i)\big)\,.}
 #'
-#' Finally, it generates reported incidence \mjseqn{C} by sampling from
-#' a supplied reporting delay distribution and binning infections counted
-#' by \mjseqn{Z_\text{rep}} forward in time. Compared to \mjseqn{Z},
-#' \mjseqn{C} models **observation error**, i.e., under-reporting of
-#' cases with a delay between infection and reporting.
+#' Here, \mjseqn{p_\text{rep}(t_i)} is the probability that an infection
+#' between times \mjseqn{t_{i-1}} and \mjseqn{t_i} (counted by \mjseqn{Z(t_i)})
+#' is eventually reported. Finally, it generates reported incidence \mjseqn{C}
+#' by sampling from a supplied reporting delay distribution and binning
+#' infections counted by \mjseqn{Z_\text{rep}} forward in time. Compared to
+#' \mjseqn{Z}, \mjseqn{C} models **observation error**, i.e., under-reporting
+#' of infections with a delay between infection and reporting.
 #'
 #' ## 2. Default parametrization
 #'
-#' By default, \mjseqn{\mu} and and \mjseqn{\nu} are modeled as constant,
-#' while \mjseqn{\beta} is modeled by a seasonal forcing function with
-#' environmental noise. Specifically,
+#' By default, \mjseqn{\mu} and \mjseqn{\nu} are modeled as constant
+#' and equal to \mjseqn{\mu_\text{c}} and \mjseqn{\mu_\text{c} N_0},
+#' respectively, while \mjseqn{\beta} is modeled by a seasonal forcing
+#' function with environmental noise. Specifically,
 #'
-#' \mjsdeqn{\begin{align*} \mu(t) &= \mu_\text{c}\,, \cr \nu(t) &= \mu_\text{c}\,, \cr \beta(t) &= \langle\beta\rangle \left\lbrack 1 + \alpha \cos\left(\frac{2 \pi t}{\text{365 days}} + \phi(t;\epsilon^2)\right) \right\rbrack\,, \end{align*}}
+#' \mjsdeqn{\beta(t) = \langle\beta\rangle \left\lbrack 1 + \alpha \cos\left(\frac{2 \pi t}{\text{365 days}} + \phi(t;\epsilon^2)\right) \right\rbrack\,,}
 #'
 #' where \mjseqn{\phi(t;\epsilon^2)} is the linear interpolant of noise
 #' \mjseqn{\lbrace(t_i;\Phi_i)\rbrace_{i=0}^{n-1}} with
@@ -93,13 +94,17 @@
 #' non-random output, which is helpful for reproducibility. For details,
 #' see [make_beta()].
 #'
-#' The default specification of `mu`, `nu`, and `beta` requires
+#' By default, the reporting probability \mjseqn{p} is constant and equal
+#' to \mjseqn{p_text{c}}, while the reporting delay is fixed equal to zero,
+#' so that all infections during a given observation interval are reported
+#' during the same observation interval, i.e., \mjseqn{C(t_i) = Z(t_i)}.
+#'
+#' The default specification of `mu`, `nu`, `beta`, and `p` requires
 #' that `par_list` contains these additional numeric scalar elements:
 #'
 #'   \describe{
 #'     \item{`muconst`}{\mjseqn{\lbrace\,\mu_\text{c} \Delta t\,\rbrace}
-#'       Birth rate (relative to \mjseqn{N_0}) expressed per unit
-#'       \mjseqn{\Delta t} *and* per capita natural mortality rate
+#'       Per capita natural mortality rate
 #'       expressed per unit \mjseqn{\Delta t}.
 #'     }
 #'     \item{`beta_mean`}{\mjseqn{\lbrace\,\langle\beta\rangle \Delta t\,\rbrace}
@@ -114,6 +119,9 @@
 #'     \item{`epsilon`}{\mjseqn{\lbrace\,\epsilon\,\rbrace}
 #'       Standard deviation of the standard normally distributed
 #'       phase shift in the seasonally forced transmission rate.
+#'     }
+#'     \item{`pconst`}{\mjseqn{\lbrace\,p_\text{c}\,\rbrace}
+#'       Probability that an infection is eventually reported.
 #'     }
 #'   }
 #'
@@ -139,25 +147,23 @@
 #'     \item{`I0`}{\mjseqn{\lbrace\,I_0\,\rbrace}
 #'       Number of infectious individuals at time \mjseqn{t = 0} years.
 #'     }
+#'     \item{`tgen`}{\mjseqn{\lbrace\,t_\text{gen}/\Delta t\,\rbrace}
+#'       Mean generation interval of the disease of interest
+#'       in units \mjseqn{\Delta t}. Necessary only if `model = "sir"`.
+#'     }
 #'     \item{`tlat`}{\mjseqn{\lbrace\,t_\text{lat}/\Delta t\,\rbrace}
 #'       Mean latent period of the disease of interest
-#'       in units \mjseqn{\Delta t}. If `model = "sir"`,
-#'       then the removal rate \mjseqn{\gamma} is set equal to
-#'       \mjseqn{1 / (t_\text{lat} + t_\text{inf})} (see Details 1).
+#'       in units \mjseqn{\Delta t}. Necessary only if `model = "seir"`.
 #'     }
 #'     \item{`tinf`}{\mjseqn{\lbrace\,t_\text{inf}/\Delta t\,\rbrace}
 #'       Mean infectious period of the disease of interest
-#'       in units \mjseqn{\Delta t}. If `model = "sir"`,
-#'       then the removal rate \mjseqn{\gamma} is set equal to
-#'       \mjseqn{1 / (t_\text{lat} + t_\text{inf})} (see Details 1).
-#'     }
-#'     \item{`prep`}{\mjseqn{\lbrace\,p_\text{rep}\,\rbrace}
-#'       Probability that an infection is reported.
+#'       in units \mjseqn{\Delta t}. Necessary only if `model = "seir"`.
 #'     }
 #'   }
 #'
-#'   Additional elements must be included as necessary to ensure that
-#'   the functions `nu`, `mu`, and `beta` (see below) can be evaluated.
+#'   Additional elements must be included as necessary to ensure
+#'   that the arguments `mu`, `nu`, `beta`, and `p` are well-defined
+#'   (see Details 2).
 #' @param n An integer scalar. The number of observations in the
 #'   simulated time series, which will have time points
 #'   \mjseqn{t_i = i \Delta t} (for \mjseqn{i = 0,\ldots,n-1}).
@@ -167,37 +173,42 @@
 #'   if `FALSE`.
 #' @param model A character scalar, either `"sir"` or `"seir"`,
 #'   indicating a system of equations to simulate (see Details 1).
-#' @param mu A function taking as input a numeric vector `s`
-#'   and a list `par_list` and returning as output a numeric vector
-#'   of the same length as `s` containing the value of
-#'   \mjseqn{f(s) = \mu(s \Delta t) \Delta t} at each element of `s`.
-#'   The function must define \mjseqn{f(s)} for all
+#' @param mu A function taking as input a numeric vector `s` and a list
+#'   `par_list` and returning as output a numeric vector of the same length
+#'   as `s` containing the value of \mjseqn{f(s) = \mu(s \Delta t) \Delta t}
+#'   at each element of `s`. The function must define \mjseqn{f(s)} for all
 #'   \mjseqn{s \in \lbrack 0,n-1 \rbrack}. Here, \mjseqn{\mu(t) \Delta t}
-#'   is the per capita natural mortality rate at time \mjseqn{t}
-#'   expressed per unit \mjseqn{\Delta t}.
-#' @param nu A function taking as input a numeric vector `s`
-#'   and a list `par_list` and returning as output a numeric vector
-#'   of the same length as `s` containing the value of
-#'   \mjseqn{f(s) = \nu(s \Delta t) \Delta t} at each element of `s`.
-#'   The function must define \mjseqn{f(s)} for all
+#'   is the per capita natural mortality rate at time \mjseqn{t} expressed
+#'   per unit \mjseqn{\Delta t}. Alternatively, a numeric scalar indicating
+#'   a constant rate \mjseqn{\mu_\text{c} \Delta t}.
+#' @param nu A function taking as input a numeric vector `s` and a list
+#'   `par_list` and returning as output a numeric vector of the same length
+#'   as `s` containing the value of \mjseqn{f(s) = \nu(s \Delta t) \Delta t}
+#'   at each element of `s`. The function must define \mjseqn{f(s)} for all
 #'   \mjseqn{s \in \lbrack 0,n-1 \rbrack}. Here, \mjseqn{\nu(t) \Delta t}
-#'   is the birth rate (relative to \mjseqn{N_0}) at time \mjseqn{t}
-#'   expressed per unit \mjseqn{\Delta t}.
-#' @param beta A function taking as input a numeric vector `s`
-#'   and a list `par_list` and returning as output a numeric vector
-#'   of the same length as `s` containing the value of
-#'   \mjseqn{f(s) = \beta(s \Delta t) \Delta t} at each element of `s`.
-#'   The function must define \mjseqn{f(s)} for all
+#'   is the birth rate at time \mjseqn{t} expressed per unit \mjseqn{\Delta t}.
+#'   Alternatively, a numeric scalar indicating a constant rate
+#'   \mjseqn{\nu_\text{c} \Delta t}.
+#' @param beta A function taking as input a numeric vector `s` and a list
+#'   `par_list` and returning as output a numeric vector of the same length
+#'   as `s` containing the value of \mjseqn{f(s) = \beta(s \Delta t) \Delta t}
+#'   at each element of `s`. The function must define \mjseqn{f(s)} for all
 #'   \mjseqn{s \in \lbrack 0,n-1 \rbrack}. Here, \mjseqn{\beta(t) \Delta t}
-#'   is the transmission rate at time \mjseqn{t}
-#'   expressed per unit \mjseqn{\Delta t} per susceptible individual
-#'   per infectious individual.
+#'   is the transmission rate at time \mjseqn{t} expressed per unit
+#'   \mjseqn{\Delta t} per susceptible individual per infectious individual.
+#'   Alternatively, a numeric scalar indicating a constant rate
+#'   \mjseqn{\beta_\text{c} \Delta t}.
+#' @param p A numeric vector of length `n-1` listing the probabilities
+#'   \mjseqn{p(t_i)} that an infection between times \mjseqn{t_{i-1}}
+#'   and \mjseqn{t_i} is eventually reported
+#'   (for \mjseqn{i = 1,\ldots,n-1}). Alternatively, a numeric scalar
+#'   indicating a constant probability \mjseqn{p_\text{c}}.
 #' @param delay_dist A numeric vector. The distribution of the integer
 #'   number of observation intervals between infection and reporting.
 #'   `delay_dist[i]` is the probability that an infection that is
-#'   eventually reported is reported after `i - 1` observation intervals.
-#'   `delay_dist` is replaced with `delay_dist / sum(delay_dist)` in the
-#'   event that `sum(delay_dist) != 1`.
+#'   eventually reported is reported after `i-1` observation intervals.
+#'   `delay_dist` is replaced with `delay_dist / sum(delay_dist)` in
+#'   the event that `sum(delay_dist) != 1`.
 #'
 #' @return
 #' A data frame with `n` rows corresponding to equally spaced time points
@@ -206,23 +217,27 @@
 #'
 #' \describe{
 #'   \item{`t`}{\mjseqn{\lbrace\,t_i / \Delta t\,\rbrace}
-#'     Time in units \mjseqn{\Delta t}. Equal to `0:(n - 1)`.
+#'     Time in units \mjseqn{\Delta t}. Equal to `0:(n-1)`.
 #'   }
 #'   \item{`t_years`}{\mjseqn{\lbrace\,t_i\,\rbrace}
-#'     Time in years. Equal to `(0:(n - 1)) * par_list$dt_days * / 365`.
-#'   }
-#'   \item{`mu`}{\mjseqn{\lbrace\,\mu(t_i) \Delta t\,\rbrace}
-#'     Per capita natural mortality rate expressed
-#'     per unit \mjseqn{\Delta t}. Equal to `mu(0:(n - 1))`.
-#'   }
-#'   \item{`nu`}{\mjseqn{\lbrace\,\nu(t_i) \Delta t\,\rbrace}
-#'     Birth rate (relative to \mjseqn{N_0}) expressed
-#'     per unit \mjseqn{\Delta t}. Equal to `nu(0:(n - 1))`.
+#'     Time in years. Equal to `(0:(n-1)) * par_list$dt_days * / 365`.
 #'   }
 #'   \item{`beta`}{\mjseqn{\lbrace\,\beta(t_i) \Delta t\,\rbrace}
 #'     Transmission rate expressed per unit \mjseqn{\Delta t}
 #'     per susceptible individual per infectious individual.
-#'     Equal to `beta(0:(n - 1))`.
+#'     Equal to `beta(0:(n-1))`.
+#'   }
+#'   \item{`mu`}{\mjseqn{\lbrace\,\mu(t_i) \Delta t\,\rbrace}
+#'     Per capita natural mortality rate expressed
+#'     per unit \mjseqn{\Delta t}. Equal to `mu(0:(n-1))`.
+#'   }
+#'   \item{`nu`}{\mjseqn{\lbrace\,\nu(t_i) \Delta t\,\rbrace}
+#'     Birth rate expressed per unit \mjseqn{\Delta t}.
+#'     Equal to `nu(0:(n-1))`.
+#'   }
+#'   \item{`B`}{\mjseqn{\lbrace\,B(t_i)\,\rbrace}
+#'     Births. `B[i]` is the number of births
+#'     between times `t[i-1]` and `t[i]`.
 #'   }
 #'   \item{`N`}{\mjseqn{\lbrace\,N(t_i)\,\rbrace}
 #'     Population size.
@@ -241,6 +256,12 @@
 #'     Incidence. `Z[i]` is the number of infections
 #'     between times `t[i-1]` and `t[i]`.
 #'   }
+#'   \item{`p`}{\mjseqn{\lbrace\,p(t_i)\,\rbrace}
+#'     Reporting probability. `p[i]` is the probability
+#'     that an infection between times `t[i-1]` and `t[i]`
+#'     is eventually reported. Equal to `p` in the function
+#'     call preceded by one `NA`, i.e., `c(NA, p)`.
+#'   }
 #'   \item{`Zrep`}{\mjseqn{\lbrace\,Z_\text{rep}(t_i)\,\rbrace}
 #'     Incidence conditional on reporting. `Zrep[i]` is the
 #'     number of infections between times `t[i-1]` and `t[i]`
@@ -248,10 +269,6 @@
 #'   }
 #'   \item{`C`}{\mjseqn{\lbrace\,C(t_i)\,\rbrace}
 #'     Reported incidence. `C[i]` is the number of infections reported
-#'     between times `t[i-1]` and `t[i]`.
-#'   }
-#'   \item{`B`}{\mjseqn{\lbrace\,B(t_i)\,\rbrace}
-#'     Births. `B[i]` is the number of births
 #'     between times `t[i-1]` and `t[i]`.
 #'   }
 #' }
@@ -264,7 +281,7 @@
 #' # Stochastic simulation of SEIR model
 #' par_list <- make_par_list(
 #'   epsilon = pi / 4, # environmental stochasticity
-#'   prep = 0.5, # random under-reporting of infections
+#'   pconst = 0.5, # random under-reporting of infections
 #'   model = "seir"
 #' )
 #' set.seed(1422)
@@ -278,7 +295,7 @@
 #' # Deterministic simulation of SIR model
 #' par_list <- make_par_list(
 #'   epsilon = 0,
-#'   prep = 1,
+#'   pconst = 1,
 #'   model = "sir"
 #' )
 #' df <- make_data(par_list,
@@ -293,13 +310,14 @@
 #' @importFrom stats rbinom
 #' @importFrom deSolve ode
 #' @importFrom adaptivetau ssa.adaptivetau
-make_data <- function(par_list = make_par_list(model = "sir"),
-                      n = 1e03,
-                      with_ds = FALSE,
-                      model = "sir",
-                      mu = function(s, par_list) rep(par_list$muconst, length(s)),
-                      nu = mu,
-                      beta = make_beta(par_list$epsilon, n),
+make_data <- function(par_list   = make_par_list(model = "sir"),
+                      n          = 1e03,
+                      with_ds    = FALSE,
+                      model      = "sir",
+                      mu         = par_list$muconst,
+                      nu         = par_list$muconst * par_list$N0,
+                      beta       = make_beta(par_list$epsilon, n),
+                      p          = par_list$pconst,
                       delay_dist = c(1)) {
   ## Setup ---------------------------------------------------------------
 
@@ -308,16 +326,35 @@ make_data <- function(par_list = make_par_list(model = "sir"),
 
   # Time points
   n <- floor(n)
-  times <- 0:(n - 1)
+  times <- 0:(n-1)
 
   # Some derived quantities
   if (model == "sir") {
-    gamma <- 1 / (par_list$tlat + par_list$tinf)
+    gamma <- 1 / (par_list$tgen)
   } else if (model == "seir") {
     sigma <- 1 / par_list$tlat
     gamma <- 1 / par_list$tinf
   } else {
     stop("`model` must be one of `\"sir\"` or `\"seir\"`.")
+  }
+
+  # Replace numeric scalar `mu`, `nu`, `beta`, `p`
+  # with desired equivalents
+  if (is.numeric(mu)) {
+    muconst <- mu[1]
+    mu <- function(s, par_list) rep(muconst, length(s))
+  }
+  if (is.numeric(nu)) {
+    nuconst <- nu[1]
+    nu <- function(s, par_list) rep(nuconst, length(s))
+  }
+  if (is.numeric(beta)) {
+    betaconst <- beta[1]
+    beta <- function(s, par_list) rep(betaconst, length(s))
+  }
+  if (length(p) != n - 1) {
+    pconst <- p[1]
+    p <- rep(pconst, n - 1)
   }
 
   # Normalize `delay_dist`
@@ -356,7 +393,7 @@ make_data <- function(par_list = make_par_list(model = "sir"),
       compute_event_rates <- function(x, params, t) {
         m <- mu(t, params)
         c(
-          nu(t, params) * params$N0,         # birth
+          nu(t, params),                     # birth
           beta(t, params) * x["S"] * x["I"], # infection
           gamma * x["I"] * (x["I"] > 1),     # removal
           m * x["S"],                        # natural mortality
@@ -395,7 +432,7 @@ make_data <- function(par_list = make_par_list(model = "sir"),
       compute_event_rates <- function(x, params, t) {
         m <- mu(t, params)
         c(
-          nu(t, params) * params$N0,              # birth
+          nu(t, params),                          # birth
           beta(t, params) * x["S"] * x["I"],      # infection
           sigma * x["E"],                         # onset of infectiousness
           gamma * x["I"] * (x["E"] + x["I"] > 1), # removal
@@ -462,7 +499,7 @@ make_data <- function(par_list = make_par_list(model = "sir"),
         m <- mu(t, parms)
         b <- beta(t, parms)
         y["I"] <- exp(y["logI"])
-        dBcum <- nu(t, parms) * parms$N0
+        dBcum <- nu(t, parms)
         dZcum <- b * y["S"] * y["I"]
         dS <- dBcum - dZcum - m * y["S"]
         dlogI <- b * y["S"] - gamma - m
@@ -490,7 +527,7 @@ make_data <- function(par_list = make_par_list(model = "sir"),
         b <- beta(t, parms)
         y["E"] <- exp(y["logE"])
         y["I"] <- exp(y["logI"])
-        dBcum <- nu(t, parms) * parms$N0
+        dBcum <- nu(t, parms)
         dZcum <- b * y["S"] * y["I"]
         dS <- dBcum - dZcum - m * y["S"]
         dlogE <- b * y["S"] * y["I"] / y["E"] - sigma - m
@@ -527,6 +564,7 @@ make_data <- function(par_list = make_par_list(model = "sir"),
     mu       = mu(t, par_list),
     nu       = nu(t, par_list),
     beta     = beta(t, par_list),
+    p        = c(NA, p),
     N        = S + (if (model == "seir") E else 0) + I + R,
     Z        = c(NA, diff(Zcum)), # `Z` from `Zcum` by first differences
     B        = c(NA, diff(Bcum))  # `B` from `Bcum` by first differences
@@ -537,10 +575,10 @@ make_data <- function(par_list = make_par_list(model = "sir"),
 
   # `Zrep` from `Z` by binomial sampling
   df$Zrep <- c(NA,
-    stats::rbinom(
+    rbinom(
       n    = nrow(df) - 1,    # number of experiments
       size = round(df$Z[-1]), # numbers of Bernoulli trials
-      p    = par_list$prep    # success probability
+      prob = df$p[-1]         # success probability
     )
   )
 
@@ -549,11 +587,11 @@ make_data <- function(par_list = make_par_list(model = "sir"),
   df$C <- c(NA, convol_out$simulation[1:(nrow(df)-1), 1])
 
   if (model == "sir") {
-    df <- df[, c("t", "t_years", "mu", "nu", "beta",
-                 "N", "S", "I", "Z", "Zrep", "C", "B")]
+    df <- df[, c("t", "t_years", "beta", "mu", "nu", "B",
+                 "N", "S", "I", "Z", "p", "Zrep", "C")]
   } else if (model == "seir") {
-    df <- df[, c("t", "t_years", "mu", "nu", "beta",
-                 "N", "S", "E", "I", "Z", "Zrep", "C", "B")]
+    df <- df[, c("t", "t_years", "beta", "mu", "nu", "B",
+                 "N", "S", "E", "I", "Z", "p", "Zrep", "C")]
   }
   structure(df, call = match.call(), arg_list = arg_list)
 }
