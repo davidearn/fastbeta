@@ -153,7 +153,9 @@
 #'
 #' @seealso [methods for class "fastbeta"][fastbeta-methods],
 #'   [algorithms used under the hood][estimate-beta],
-#'   [bsbeta()] for constructing bootstrap confidence intervals
+#'   [try_loess()] for smoothing noisy transmission rate estimates,
+#'   [bsbeta()] for constructing bootstrap confidence intervals on
+#'   transmission rate estimates
 #' @export
 fastbeta <- function(data, par_list, method) {
   if (missing(method)) {

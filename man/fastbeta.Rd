@@ -164,5 +164,7 @@ plot(fastbeta_out)
 \seealso{
 \link[=fastbeta-methods]{methods for class "fastbeta"},
 \link[=estimate-beta]{algorithms used under the hood},
-\code{\link[=bsbeta]{bsbeta()}} for constructing bootstrap confidence intervals
+\code{\link[=try_loess]{try_loess()}} for smoothing noisy transmission rate estimates,
+\code{\link[=bsbeta]{bsbeta()}} for constructing bootstrap confidence intervals on
+transmission rate estimates
 }

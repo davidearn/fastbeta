@@ -7,25 +7,36 @@
 #' on smooth loess fits to potentially noisy [fastbeta()] estimates).
 #'
 #' @details
-#' The [fastbeta()] estimate of \mjseqn{\beta(t)} (or a smooth loess fit
-#' to the estimate) is taken to be the true transmission rate for the
-#' purpose of simulating new time series data using [make_data()] and
-#' generating bootstrap estimates of \mjseqn{\beta(t)} from those data
-#' using [fastbeta()]. The bootstrap 95% CI is then defined as the
-#' 2.5-97.5th percentile interval of the (unsmoothed) bootstrap estimates.
+#' The raw [fastbeta()] estimate of \mjseqn{\beta(t)} (or a smooth loess
+#' fit to the raw estimate) is taken to be the true transmission rate for
+#' the purpose of simulating new time series data (using [make_data()])
+#' and generating bootstrap estimates of \mjseqn{\beta(t)} from those data.
+#' The bootstrap 95% CI is then defined as the 2.5-97.5th percentile interval
+#' of the bootstrap estimates.
 #'
-#' Arguments `p` and `delay_dist` can be used to define a model
-#' for observation error in the data-generating process. Their
-#' default values are such that all infections are reported with
-#' no delay between infection and reporting, i.e., such that
-#' there is no observation error. Deconvolution is employed to
-#' reconstruct incidence from simulated reported incidence,
-#' allowing for \mjseqn{\beta(t)} estimation using [fastbeta()].
-#' The iterative deconvolution algorithm is stopped when the
-#' chi-squared criterion is satisfied or when the prescribed
-#' maximum number of iterations (25) is reached (whichever occurs
-#' first). See Value of [deconvol()] with `simple = TRUE` for
-#' details.
+#' To be precise, if a loess object `y` is not specified in the function
+#' call, then the data-generating transmission rate is the linear interpolant
+#' of the raw [fastbeta()] estimate given in `x$out`, and the bootstrap
+#' estimates are the raw [fastbeta()] estimates obtained from the simulated
+#' data (one per simulation).
+#'
+#' On the other hand, if `y` *is* specified, the data-generating transmission
+#' rate is the loess fit to the to the raw [fastbeta()] estimate, and the
+#' bootstrap estimates are the loess fits to the raw [fastbeta()] estimates
+#' obtained from the simulated data, evaluated at the same time points.
+#' Values for all loess smoothing parameters are copied from `y`.
+#'
+#' Arguments `p` and `delay_dist` can be used to define a model for
+#' observation error in the data-generating process. Their default
+#' values are such that all infections are reported with no delay
+#' between infection and reporting, i.e., such that there is no
+#' observation error. In each simulation, deconvolution (see [deconvol()])
+#' is employed to reconstruct incidence from reported incidence,
+#' then the data-generating transmission rate is estimated from
+#' deconvolved incidence. The iterative deconvolution algorithm is
+#' stopped when the chi-squared criterion is satisfied or when the
+#' prescribed maximum number of iterations (25) is reached
+#' (whichever occurs first). For details, see Value of [deconvol()].
 #'
 #' @param x A fastbeta object defining a [fastbeta()] estimate
 #'   of \mjseqn{\beta(t)}. Must satisfy `x$method %in% c("si", "sei")`.
@@ -93,6 +104,17 @@
 #' fastbeta_out <- fastbeta(df, pl, method = "si")
 #' plot(fastbeta_out)
 #'
+#' # Construct bootstrap 95% confidence interval
+#' # on the raw `fastbeta()` estimate, conditional
+#' # on a given observation model
+#' bsbeta_raw_out <- bsbeta(fastbeta_out,
+#'   n = 100,
+#'   p = 1, # reporting probability: 50%
+#'   delay_dist = c(0, 0.5, 0.5) # reporting delay: 1 dt or 2 dt
+#'                               # with equal probability
+#' )
+#' plot(bsbeta_raw_out)
+#'
 #' # Fit a loess curve to the `fastbeta()` estimate.
 #' # Try different values for the smoothing parameter
 #' # and choose one that produces a reasonable fit.
@@ -104,16 +126,14 @@
 #' )
 #' my_loess <- try_loess_out[["q50"]] # `q = 50` seems reasonable
 #'
-#' # Construct bootstrap 95% confidence intervals
-#' # on the loess estimate, conditional on a given
-#' # observation model
-#' bsbeta_out <- bsbeta(fastbeta_out, my_loess,
+#' # Construct bootstrap 95% confidence interval
+#' # on the loess estimate
+#' bsbeta_loess_out <- bsbeta(fastbeta_out, my_loess,
 #'   n = 100,
-#'   p = 1, # reporting probability: 50%
-#'   delay_dist = c(0, 0.5, 0.5) # reporting delay: 1 dt or 2 dt
-#'                               # with equal probability
+#'   p = 1,
+#'   delay_dist = c(0, 0.5, 0.5)
 #' )
-#' plot(bsbeta_out)
+#' plot(bsbeta_loess_out)
 #'
 #' @seealso [methods for class "bsbeta"][bsbeta-methods],
 #'   [fastbeta()], [try_loess()], [make_data()]
@@ -179,14 +199,14 @@ bsbeta <- function(x, y = NULL, n = 100, p = 1, delay_dist = c(1)) {
 
   # Per capita natural mortality rate:
   # * Defined as the linear interpolant of the
-  #   PCNMR time series used by `fastbeta()`.
+  #   PCNMR time series in `x`.
   f <- approxfun(x = x$out$t, y = x$out$mu, rule = 2)
   mu <- function(s, par_list) f(s)
 
   # Birth rate:
   # * Defined as the linear interpolant of a 2-point
-  #   moving average applied the births time used by
-  #   `fastbeta()`.
+  #   moving average applied the births time series
+  #   in `x`.
   # * `B[i] + B[i+1]` is the number of births in the
   #   two observation intervals between times `t[i-1]`
   #   and `t[i+1]`, so `(B[i] + B[i+1]) / 2` gives a
@@ -197,14 +217,15 @@ bsbeta <- function(x, y = NULL, n = 100, p = 1, delay_dist = c(1)) {
   nu <- function(s, par_list) g(s)
 
   # Transmission rate:
-  # * Defined by the loess fit if supplied and otherwise
-  #   as the linear interpolant of the time series
-  #   returned by `fastbeta()`.
-  if (!is.null(y)) {
-    beta <- function(s, par_list) predict(y, s)
-  } else {
+  # * Defined as the linear interpolant of the
+  #   time series in `x` if `y` was not supplied.
+  # * Defined as the loess fit in `y` if `y` was
+  #   supplied.
+  if (is.null(y)) {
     h <- approxfun(x = x$out$t, y = x$out$beta, rule = 2)
     beta <- function(s, par_list) h(s)
+  } else {
+    beta <- function(s, par_list) predict(y, s)
   }
 
   # Reporting probability:
@@ -243,9 +264,21 @@ bsbeta <- function(x, y = NULL, n = 100, p = 1, delay_dist = c(1)) {
     data <- data[c("t", "B", "mu")]
     data$Z <- deconvol_out$inc[b+1:nrow(data)]
 
-    # Bootstrap estimate of the transmission rate
-    fastbeta(data, par_list, method = x$method)$out$beta
+    # fastbeta object containing raw transmission rate estimate
+    fastbeta_out <- fastbeta(data, par_list, method = x$method)
 
+    # Bootstrap estimate of the transmission rate
+    if (is.null(y)) {
+      fastbeta_out$out$beta
+    } else {
+      loess_out <- loess(beta ~ t,
+        data    = fastbeta_out$out,
+        span    = y$pars$span,
+        degree  = y$pars$degree,
+        control = loess.control(surface = "direct")
+      )
+      predict(loess_out, x$out$t)
+    }
   })
 
   out <- list(
