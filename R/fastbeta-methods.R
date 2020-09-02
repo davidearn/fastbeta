@@ -11,16 +11,15 @@ NULL
 
 #' @rdname fastbeta-methods
 #' @export
-#' @importFrom graphics layout par plot title mtext
+#' @importFrom graphics par plot title mtext
 plot.fastbeta <- function(x, ...) {
   if (!inherits(x, "fastbeta")) {
     stop("`x` must be a fastbeta object.")
   }
-  layout(matrix(1:3, ncol = 1))
   ynames <- c("S", "I", "beta")
   ylabs <- c("Susceptible", "Infectious", "Transmission rate")
   cols <- c("seagreen", "mediumvioletred", "slateblue")
-  op <- par(mar=c(3,5.6,0.2,0.2), oma=c(1.1,0,1.9,0)+1)
+  op <- par(mfrow=c(3,1), mar=c(3,5.6,0.2,0.2), oma=c(1.1,0,1.9,0)+1)
   on.exit(par(op))
   for (i in 1:3) {
     plot(seq_len(nrow(x$out))-1, x$out[, ynames[i]],
