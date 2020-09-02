@@ -1,4 +1,5 @@
 #' \loadmathjax
+#' fastbeta: Fast Estimation of Time-Varying Transmission Rates
 #'
 #' @details
 #' This package implements and extends the methods described in

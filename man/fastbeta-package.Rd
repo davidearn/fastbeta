@@ -4,7 +4,8 @@
 \name{fastbeta-package}
 \alias{fastbeta-package}
 \alias{_PACKAGE}
-\title{\loadmathjax}
+\title{\loadmathjax
+fastbeta: Fast Estimation of Time-Varying Transmission Rates}
 \description{
 Fast methods for estimating time-varying infectious disease
     transmission rates from incidence and mortality time series.
