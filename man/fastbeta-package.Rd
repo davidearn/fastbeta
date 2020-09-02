@@ -4,13 +4,12 @@
 \name{fastbeta-package}
 \alias{fastbeta-package}
 \alias{_PACKAGE}
-\title{fastbeta: Fast Estimation of Time-Varying Transmission Rates}
+\title{\loadmathjax}
 \description{
 Fast methods for estimating time-varying infectious disease
     transmission rates from incidence and mortality time series.
 }
 \details{
-\loadmathjax
 This package implements and extends the methods described in
 \insertCite{Jaga+20;textual}{fastbeta}. The package is modular,
 with the core machinery divided across different functions,
@@ -55,12 +54,12 @@ deconvolved incidence time series can then be passed to
 iteration} defined in \insertCite{Jaga+20;textual}{fastbeta}.
 If the initial number of susceptible individuals (a parameter
 to which \code{\link[=fastbeta]{fastbeta()}} is sensitive) is not known, and if
-incidence is roughly periodic, then \code{\link[=ptpi]{ptpi()}}, in conjunction
-with \code{\link[=peaks]{peaks()}}, can be used to produce a reasonable estimate
-starting from a poor initial guess.
+incidence is roughly periodic, then \code{\link[=peaks]{peaks()}} and \code{\link[=ptpi]{ptpi()}}
+can be used to produce a reasonable estimate starting from a
+poor initial guess.
 
-\code{\link[=make_data]{make_data()}} can be used to simulate epidemic time series
-data against which many of these functions can be tested.
+\code{\link[=make_data]{make_data()}} can be used to \strong{simulate epidemic time series
+data} against which many of these functions can be tested.
 See \code{\link[=fastbeta]{fastbeta()}}, \code{\link[=bsbeta]{bsbeta()}}, and \code{\link[=ptpi]{ptpi()}} for examples.
 }
 \references{

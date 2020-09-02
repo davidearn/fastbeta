@@ -1,5 +1,6 @@
-#' @details
 #' \loadmathjax
+#'
+#' @details
 #' This package implements and extends the methods described in
 #' \insertCite{Jaga+20;textual}{fastbeta}. The package is modular,
 #' with the core machinery divided across different functions,
@@ -44,12 +45,12 @@
 #' iteration** defined in \insertCite{Jaga+20;textual}{fastbeta}.
 #' If the initial number of susceptible individuals (a parameter
 #' to which [fastbeta()] is sensitive) is not known, and if
-#' incidence is roughly periodic, then [ptpi()], in conjunction
-#' with [peaks()], can be used to produce a reasonable estimate
-#' starting from a poor initial guess.
+#' incidence is roughly periodic, then [peaks()] and [ptpi()]
+#' can be used to produce a reasonable estimate starting from a
+#' poor initial guess.
 #'
-#' [make_data()] can be used to simulate epidemic time series
-#' data against which many of these functions can be tested.
+#' [make_data()] can be used to **simulate epidemic time series
+#' data** against which many of these functions can be tested.
 #' See [fastbeta()], [bsbeta()], and [ptpi()] for examples.
 #'
 #' @references

@@ -104,24 +104,13 @@
 #' my_loess <- try_loess_out[["q50"]] # `q = 50` seems reasonable
 #'
 #' # Construct bootstrap 95% confidence intervals
-#' # on the loess estimate, conditional on perfect
-#' # observation of incidence
+#' # on the loess estimate, conditional on a given
+#' # observation model
 #' bsbeta_out <- bsbeta(fastbeta_out, my_loess,
 #'   n = 100,
-#'   p = 1,
-#'   delay_dist = c(1)
-#' )
-#' plot(bsbeta_out)
-#'
-#' # Construct bootstrap 95% confidence intervals
-#' # on the loess estimate, conditional on an
-#' # infection reporting probability of 50% and a
-#' # reporting delay of 1 or 2 observation intervals
-#' # (each with equal probability)
-#' bsbeta_out <- bsbeta(fastbeta_out, my_loess,
-#'   n = 100,
-#'   p = 0.5,
-#'   delay_dist = c(0, 1, 1)
+#'   p = 1, # reporting probability: 50%
+#'   delay_dist = c(0, 0.5, 0.5) # reporting delay: 1 dt or 2 dt
+#'                               # with equal probability
 #' )
 #' plot(bsbeta_out)
 #'
