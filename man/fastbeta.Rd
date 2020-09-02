@@ -162,5 +162,6 @@ plot(fastbeta_out)
 }
 \seealso{
 \link[=fastbeta-methods]{methods for class "fastbeta"},
-\link[=estimate-beta]{algorithms used under the hood}
+\link[=estimate-beta]{algorithms used under the hood},
+\code{\link[=bsbeta]{bsbeta()}} for constructing bootstrap confidence intervals
 }

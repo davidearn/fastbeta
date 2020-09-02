@@ -1,43 +1,61 @@
 #' @details
 #' \loadmathjax
-#' \pkg{fastbeta} implements the FC, S, and SI methods for estimating
-#' time-varying infectious disease transmission rates \mjseqn{\beta(t)}
-#' from disease incidence and mortality data:
+#' This package implements and extends the methods described in
+#' \insertCite{Jaga+20;textual}{fastbeta}. The package is modular,
+#' with the core machinery divided across different functions,
+#' each with its own purpose and convenient plotting methods.
 #'
-#' * [estimate_beta_fc()]
-#' * [estimate_beta_s()]
-#' * [estimate_beta_si()]
+#' [fastbeta()] provides access to the **FC, S, SI, and SEI
+#' methods** of estimating time-varying transmission rates from
+#' incidence time series. The FC, S, and SI methods are derived
+#' from the SIR model
 #'
-#' The SI method is substantially more robust than the FC and S methods
-#' and should be preferred in practice.
+#' \mjsdeqn{\begin{align*} \frac{\text{d}S}{\text{d}t} &= \nu(t) - \beta(t) S I - \mu(t) S\,, \cr \frac{\text{d}I}{\text{d}t} &= \beta(t) S I - \gamma I - \mu(t) I\,, \cr \frac{\text{d}R}{\text{d}t} &= \gamma I - \mu(t) R\,,\end{align*}}
 #'
-#' \pkg{fastbeta} additionally implements peak-to-peak iteration
-#' (PTPI), a method for estimating the initial number of susceptibles
-#' \mjseqn{S_0} from time series data:
+#' while the SEI method
+#' (not discussed in \insertCite{Jaga+20;textual}{fastbeta})
+#' is a generalization of the SI method to the SEIR model
 #'
-#' * [ptpi()]
-#' * [peaks()]
+#' \mjsdeqn{\begin{align*} \frac{\text{d}S}{\text{d}t} &= \nu(t) - \beta(t) S I - \mu(t) S\,, \cr \frac{\text{d}E}{\text{d}t} &= \beta(t) S I - \sigma E - \mu(t) E\,, \cr \frac{\text{d}I}{\text{d}t} &= \sigma E - \gamma I - \mu(t) I\,, \cr \frac{\text{d}R}{\text{d}t} &= \gamma I - \mu(t) R\,.\end{align*}}
 #'
-#' PTPI can be used in conjunction with the SI method, which requires
-#' users to specify an estimate of \mjseqn{S_0}.
+#' The details of the individual algorithms are gathered
+#' [here][estimate-beta].
 #'
-#' \pkg{fastbeta} includes functions useful for simulating incidence
-#' time series with an underlying, seasonally forced transmission rate.
-#' These may be helpful in testing:
+#' As a result of process and observation error, [fastbeta()]
+#' can generate noisy transmission rate estimates from which
+#' it is difficult to discern temporal patterns of interest.
+#' [try_loess()] greatly facilitates the process of **fitting
+#' smooth loess curves** to noisy time series using different
+#' values for the smoothing parameter.
 #'
-#' * [make_par_list()]
-#' * [make_data()]
-#' * [compute_rrmse()]
+#' [bsbeta()] can be used to generate **bootstrap confidence
+#' intervals** on transmission rate estimates produced by
+#' [fastbeta()] (or loess fits to those estimates).
 #'
-#' All methods are based on the SIR model with time-varying rates of
-#' birth, death, and transmission:
+#' In the typical case where one knows reported incidence but not
+#' incidence, [fastbeta()] should not be used directly. Instead,
+#' [deconvol()], which implements the **deconvolution** algorithm
+#' of \insertCite{Gold+09;textual}{fastbeta}, can be used to
+#' reconstruct incidence from reported incidence. The resulting
+#' deconvolved incidence time series can then be passed to
+#' [fastbeta()]. [convol()] can be used for testing [deconvol()].
 #'
-#' \mjsdeqn{\begin{align} \frac{\text{d}S}{\text{d}t} &= \nu(t) \widehat{N}_0 - \beta(t) S I - \mu(t) S \cr \frac{\text{d}I}{\text{d}t} &= \beta(t) S I - \gamma I - \mu(t) I \cr \frac{\text{d}R}{\text{d}t} &= \gamma I - \mu(t) R \end{align}}
+#' [peaks()] and [ptpi()] together implement the **peak-to-peak
+#' iteration** defined in \insertCite{Jaga+20;textual}{fastbeta}.
+#' If the initial number of susceptible individuals (a parameter
+#' to which [fastbeta()] is sensitive) is not known, and if
+#' incidence is roughly periodic, then [ptpi()], in conjunction
+#' with [peaks()], can be used to produce a reasonable estimate
+#' starting from a poor initial guess.
 #'
-#' See References for details.
+#' [make_data()] can be used to simulate epidemic time series
+#' data against which many of these functions can be tested.
+#' See [fastbeta()], [bsbeta()], and [ptpi()] for examples.
 #'
 #' @references
 #' \insertRef{Jaga+20}{fastbeta}
+#'
+#' \insertRef{Gold+09}{fastbeta}
 #'
 #' @docType package
 #' @keywords internal

@@ -11,47 +11,62 @@ Fast methods for estimating time-varying infectious disease
 }
 \details{
 \loadmathjax
-\pkg{fastbeta} implements the FC, S, and SI methods for estimating
-time-varying infectious disease transmission rates \mjseqn{\beta(t)}
-from disease incidence and mortality data:
-\itemize{
-\item \code{\link[=estimate_beta_fc]{estimate_beta_fc()}}
-\item \code{\link[=estimate_beta_s]{estimate_beta_s()}}
-\item \code{\link[=estimate_beta_si]{estimate_beta_si()}}
-}
+This package implements and extends the methods described in
+\insertCite{Jaga+20;textual}{fastbeta}. The package is modular,
+with the core machinery divided across different functions,
+each with its own purpose and convenient plotting methods.
 
-The SI method is substantially more robust than the FC and S methods
-and should be preferred in practice.
+\code{\link[=fastbeta]{fastbeta()}} provides access to the \strong{FC, S, SI, and SEI
+methods} of estimating time-varying transmission rates from
+incidence time series. The FC, S, and SI methods are derived
+from the SIR model
 
-\pkg{fastbeta} additionally implements peak-to-peak iteration
-(PTPI), a method for estimating the initial number of susceptibles
-\mjseqn{S_0} from time series data:
-\itemize{
-\item \code{\link[=ptpi]{ptpi()}}
-\item \code{\link[=peaks]{peaks()}}
-}
+\mjsdeqn{\begin{align*} \frac{\text{d}S}{\text{d}t} &= \nu(t) - \beta(t) S I - \mu(t) S\,, \cr \frac{\text{d}I}{\text{d}t} &= \beta(t) S I - \gamma I - \mu(t) I\,, \cr \frac{\text{d}R}{\text{d}t} &= \gamma I - \mu(t) R\,,\end{align*}}
 
-PTPI can be used in conjunction with the SI method, which requires
-users to specify an estimate of \mjseqn{S_0}.
+while the SEI method
+(not discussed in \insertCite{Jaga+20;textual}{fastbeta})
+is a generalization of the SI method to the SEIR model
 
-\pkg{fastbeta} includes functions useful for simulating incidence
-time series with an underlying, seasonally forced transmission rate.
-These may be helpful in testing:
-\itemize{
-\item \code{\link[=make_par_list]{make_par_list()}}
-\item \code{\link[=make_data]{make_data()}}
-\item \code{\link[=compute_rrmse]{compute_rrmse()}}
-}
+\mjsdeqn{\begin{align*} \frac{\text{d}S}{\text{d}t} &= \nu(t) - \beta(t) S I - \mu(t) S\,, \cr \frac{\text{d}E}{\text{d}t} &= \beta(t) S I - \sigma E - \mu(t) E\,, \cr \frac{\text{d}I}{\text{d}t} &= \sigma E - \gamma I - \mu(t) I\,, \cr \frac{\text{d}R}{\text{d}t} &= \gamma I - \mu(t) R\,.\end{align*}}
 
-All methods are based on the SIR model with time-varying rates of
-birth, death, and transmission:
+The details of the individual algorithms are gathered
+\link[=estimate-beta]{here}.
 
-\mjsdeqn{\begin{align} \frac{\text{d}S}{\text{d}t} &= \nu(t) \widehat{N}_0 - \beta(t) S I - \mu(t) S \cr \frac{\text{d}I}{\text{d}t} &= \beta(t) S I - \gamma I - \mu(t) I \cr \frac{\text{d}R}{\text{d}t} &= \gamma I - \mu(t) R \end{align}}
+As a result of process and observation error, \code{\link[=fastbeta]{fastbeta()}}
+can generate noisy transmission rate estimates from which
+it is difficult to discern temporal patterns of interest.
+\code{\link[=try_loess]{try_loess()}} greatly facilitates the process of \strong{fitting
+smooth loess curves} to noisy time series using different
+values for the smoothing parameter.
 
-See References for details.
+\code{\link[=bsbeta]{bsbeta()}} can be used to generate \strong{bootstrap confidence
+intervals} on transmission rate estimates produced by
+\code{\link[=fastbeta]{fastbeta()}} (or loess fits to those estimates).
+
+In the typical case where one knows reported incidence but not
+incidence, \code{\link[=fastbeta]{fastbeta()}} should not be used directly. Instead,
+\code{\link[=deconvol]{deconvol()}}, which implements the \strong{deconvolution} algorithm
+of \insertCite{Gold+09;textual}{fastbeta}, can be used to
+reconstruct incidence from reported incidence. The resulting
+deconvolved incidence time series can then be passed to
+\code{\link[=fastbeta]{fastbeta()}}. \code{\link[=convol]{convol()}} can be used for testing \code{\link[=deconvol]{deconvol()}}.
+
+\code{\link[=peaks]{peaks()}} and \code{\link[=ptpi]{ptpi()}} together implement the \strong{peak-to-peak
+iteration} defined in \insertCite{Jaga+20;textual}{fastbeta}.
+If the initial number of susceptible individuals (a parameter
+to which \code{\link[=fastbeta]{fastbeta()}} is sensitive) is not known, and if
+incidence is roughly periodic, then \code{\link[=ptpi]{ptpi()}}, in conjunction
+with \code{\link[=peaks]{peaks()}}, can be used to produce a reasonable estimate
+starting from a poor initial guess.
+
+\code{\link[=make_data]{make_data()}} can be used to simulate epidemic time series
+data against which many of these functions can be tested.
+See \code{\link[=fastbeta]{fastbeta()}}, \code{\link[=bsbeta]{bsbeta()}}, and \code{\link[=ptpi]{ptpi()}} for examples.
 }
 \references{
 \insertRef{Jaga+20}{fastbeta}
+
+\insertRef{Gold+09}{fastbeta}
 }
 \seealso{
 Useful links:

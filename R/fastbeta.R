@@ -151,7 +151,8 @@
 #' \insertRef{Jaga+20}{fastbeta}
 #'
 #' @seealso [methods for class "fastbeta"][fastbeta-methods],
-#'   [algorithms used under the hood][estimate-beta]
+#'   [algorithms used under the hood][estimate-beta],
+#'   [bsbeta()] for constructing bootstrap confidence intervals
 #' @export
 fastbeta <- function(data, par_list, method) {
   if (missing(method)) {

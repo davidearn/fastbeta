@@ -125,6 +125,9 @@
 #' )
 #' plot(bsbeta_out)
 #'
+#' @seealso [methods for class "bsbeta"][bsbeta-methods],
+#'   [fastbeta()], [try_loess()], [make_data()]
+#'
 #' @export
 #' @importFrom stats approxfun quantile sd predict
 bsbeta <- function(x, y = NULL, n = 100, p = 1, delay_dist = c(1)) {

@@ -137,3 +137,7 @@ bsbeta_out <- bsbeta(fastbeta_out, my_loess,
 plot(bsbeta_out)
 
 }
+\seealso{
+\link[=bsbeta-methods]{methods for class "bsbeta"},
+\code{\link[=fastbeta]{fastbeta()}}, \code{\link[=try_loess]{try_loess()}}, \code{\link[=make_data]{make_data()}}
+}

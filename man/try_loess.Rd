@@ -4,7 +4,7 @@
 \alias{try_loess}
 \title{Explore loess fits to equally spaced time series}
 \usage{
-try_loess(formula, data, q = 6:9, ..., plot = FALSE)
+try_loess(formula, data, q = 6:9, ..., plot = TRUE)
 }
 \arguments{
 \item{formula}{A formula specifying a time series in \code{data}.
@@ -27,7 +27,7 @@ are assigned their default values in \code{\link[stats:loess]{stats::loess()}}.}
 are plotted (4 curves per plot).}
 }
 \value{
-A list of loess objects with names \code{paste0("q", q)}.
+Invisibly, a list of loess objects with names \code{paste0("q", q)}.
 }
 \description{
 A wrapper of \code{\link[stats:loess]{stats::loess()}} for equally spaced time series.

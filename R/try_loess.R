@@ -41,7 +41,7 @@
 #'   are plotted (4 curves per plot).
 #'
 #' @return
-#' A list of loess objects with names `paste0("q", q)`.
+#' Invisibly, a list of loess objects with names `paste0("q", q)`.
 #'
 #' @examples
 #' times <- seq(0, 4, by = 0.01)
@@ -60,7 +60,7 @@
 #' @export
 #' @importFrom stats loess
 #' @importFrom graphics par plot.new plot.window axis lines title box
-try_loess <- function(formula, data, q = 6:9, ..., plot = FALSE) {
+try_loess <- function(formula, data, q = 6:9, ..., plot = TRUE) {
   span <- q / nrow(data)
   out <- lapply(span, function(x) loess(formula, data, span = x, ...))
   names(out) <- paste0("q", q)
@@ -82,5 +82,5 @@ try_loess <- function(formula, data, q = 6:9, ..., plot = FALSE) {
       box()
     }
   }
-  out
+  invisible(out)
 }
