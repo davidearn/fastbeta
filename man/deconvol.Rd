@@ -4,7 +4,7 @@
 \alias{deconvol}
 \title{Deconvolve a reported incidence time series}
 \usage{
-deconvol(x, delay_dist = c(1), p = 1, it_max = 20L)
+deconvol(x, delay_dist = c(1), p = 1, it_max = 20L, simple = FALSE)
 }
 \arguments{
 \item{x}{A numeric vector defining an equally spaced reported incidence
@@ -18,18 +18,23 @@ infection that is eventually reported is reported after \code{i-1} days.
 event that \code{sum(delay_dist) != 1}.}
 
 \item{p}{Either
-(i) a numeric scalar giving a constant positive probability that an
-infection is reported, or
-(ii) a numeric vector giving a positive probability for each day
-from day \code{-b} to day \code{length(x)-1},
-where \code{b = max(which(delay_dist > 0)) - 1} is the maximum number of
-days from infection to reporting. In the latter case, \code{p[i]} is the
-probability that an infection on day \code{i-1-b} is reported.}
+(i) a numeric scalar giving a constant probability that an infection
+is reported, or
+(ii) a numeric vector giving a probability for each day from day \code{-b}
+to day \code{length(x)-1}, where \code{b = max(which(delay_dist > 0)) - 1} is
+the maximum number of days from infection to reporting. In the latter
+case, \code{p[i]} is the probability that an infection on day \code{i-1-b} is
+reported. \code{NA} are tolerated but cause \code{NA} to appear in the
+corresponding rows of \code{inc} (see \code{inc} in Value).}
 
 \item{it_max}{A non-negative integer. The desired number of iterations.}
+
+\item{simple}{A logical scalar. If \code{TRUE}, then a data frame with
+2 columns is returned instead of a deconvol object. See Value.}
 }
 \value{
-A deconvol object. A list with elements:
+If \code{simple = FALSE} (the default), a deconvol object.
+A list with elements:
 
 \describe{
 \item{\code{times}}{A numeric vector equal to \code{-b:(length(x)-1)},
@@ -43,8 +48,8 @@ time series with \code{lines(times, x_pad, ...)}.
 }
 \item{\code{poisson}}{A numeric matrix. \code{poisson[i, j]} is the estimate
 after \code{j-1} iterations of the expected number of infections on day
-\code{times[i]} that are eventually reported. See Details for the initial
-estimate.
+\code{times[i]} that are eventually reported. See Details 1 for the
+initial estimate.
 }
 \item{\code{inc}}{A numeric matrix. \code{inc[i, j]} is the expected number
 of infections on day \code{times[i]} conditional on \code{poisson[, j]}.
@@ -53,16 +58,13 @@ of infections on day \code{times[i]} conditional on \code{poisson[, j]}.
 \item{\code{inc_rep}}{A numeric matrix. \code{inc_rep[i, j]} is the expected
 number of cases reported on day \code{times[i]} conditional on \verb{poisson[, j].}
 }
-\item{\code{chi2}}{A numeric vector. \code{chi2[j]} is the normalized chi-squared
-statistic corresponding to \code{inc_rep[, j]}, computed as
+\item{\code{chi2}}{A numeric vector. \code{chi2[j]} is the normalized
+chi-squared statistic corresponding to \code{inc_rep[, j]},
+computed as
 \code{mean((x - y)^2 / y)}, where \code{y = inc_rep[b+1:length(x), j]}.
-}
-\item{\code{it_chi2_lt1}}{An integer scalar equal to \code{min(which(chi2 < 1)) - 1}
-if \code{any(chi2 < 1)} is \code{TRUE} and \code{NA} otherwise, giving the number
-of iterations performed before the chi-squared criterion suggested
-by \insertCite{Gold+09;textual}{fastbeta} (namely \code{chi2 < 1}) was
-satisfied. Note that the corresponding incidence time series is
-\code{inc[, 1+it_chi2_lt1]}.
+\insertCite{Gold+09;textual}{fastbeta} suggest taking column
+\code{j = min(which(chi2 < 1))} to estimate incidence instead of
+the last column (see Details 2).
 }
 \item{\code{call}}{The function call. The deconvol object is reproducible
 with \code{eval(call)}.
@@ -75,6 +77,10 @@ deconvol object is reproducible with \code{do.call(deconvol, arg_list)}.
 Note that \code{poisson}, \code{inc}, and \code{inc_rep} all have \code{b+length(x)} rows
 (corresponding to the elements of \code{times}) and \code{1+it_max} columns
 (one for each iteration, starting from an initial value).
+
+If \code{simple = TRUE}, then a data frame whose first column is \code{times}
+and whose second column is \code{inc[, min(which(chi2 < 1))]} or otherwise
+\code{inc[, ncol(inc)]}.
 }
 \description{
 Deconvolves an equally spaced reported incidence time series using a
@@ -110,15 +116,14 @@ from day \code{length(x)-s} to day \code{length(x)-1}.
 
 \insertCite{Gold+09;textual}{fastbeta} suggest to stop iterating
 once \code{chi2 < 1} and to keep the last generated incidence time series
-(see Value, under \code{chi2} and \code{it_chi2_lt1}). The reason for this
-criterion is that deconvolved incidence tends to acquire undesired
-noise after several iterations, and it is typically better to stop
-before this happens (see the supplement to
-\insertCite{Gold+09;textual}{fastbeta} for details). However, this
-criterion is not guaranteed to produce an optimal result, hence a
-decision about which incidence time series to keep should be based
-on a graphical exploration of the entire \code{deconvol()} output
-(see Examples).
+(see \code{chi2} in Value). The reason for this criterion is that
+deconvolved incidence tends to acquire undesired noise after several
+iterations, and it is typically better to stop before this happens
+(see the supplement to \insertCite{Gold+09;textual}{fastbeta} for
+details). However, this criterion is not guaranteed to produce an
+optimal result, hence a decision about which incidence time series
+to keep should be based on a graphical exploration of the entire
+\code{deconvol()} output (see Examples).
 }
 
 \subsection{3. Missing values in output}{

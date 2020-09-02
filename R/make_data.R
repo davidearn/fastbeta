@@ -61,8 +61,13 @@
 #'
 #' \mjsdeqn{\begin{align*} B(t_i) &= B_\text{cum}(t_i) - B_\text{cum}(t_{i-1}), \cr Z(t_i) &= Z_\text{cum}(t_i) - Z_\text{cum}(t_{i-1}). \end{align*}}
 #'
-#' It then does binomial sampling to generate, for each observation
-#' of \mjseqn{Z}, a number of infections that is eventually reported:
+#' This calculation leaves \mjseqn{B(t_0)} and \mjseqn{Z(t_0)} undefined.
+#' For simplicity, they are assigned the values of \mjseqn{B(t_1)} and
+#' \mjseqn{Z(t_1)}, respectively.
+#'
+#' `make_data()` then does binomial sampling to generate, for each
+#' observation of \mjseqn{Z}, a number of infections that is eventually
+#' reported:
 #'
 #' \mjsdeqn{Z_\text{rep}(t_i) \sim \mathrm{Binomial}\big(Z(t_i),p(t_i)\big)\,.}
 #'
@@ -70,9 +75,14 @@
 #' between times \mjseqn{t_{i-1}} and \mjseqn{t_i} (counted by \mjseqn{Z(t_i)})
 #' is eventually reported. Finally, it generates reported incidence \mjseqn{C}
 #' by sampling from a supplied reporting delay distribution and binning
-#' infections counted by \mjseqn{Z_\text{rep}} forward in time. Compared to
-#' \mjseqn{Z}, \mjseqn{C} models **observation error**, i.e., under-reporting
-#' of infections with a delay between infection and reporting.
+#' infections counted by \mjseqn{Z_\text{rep}} forward in time. If the maximum
+#' possible delay in units \mjseqn{\Delta t} is \mjseqn{b > 0}, then, for
+#' simplicity, \mjseqn{Z_\text{rep}(t_{-b}), \ldots, Z_\text{rep}(t_{-1})} are
+#' assigned the value \mjseqn{Z_\text{rep}(t_0)}, in order to ensure that
+#' \mjseqn{C(t_0), \ldots, C(t_{b-1})} are based on complete information about
+#' \mjseqn{Z_\text{rep}}. Compared to \mjseqn{Z}, \mjseqn{C} models
+#' **observation error**, i.e., under-reporting of infections with a
+#' delay between infection and reporting.
 #'
 #' ## 2. Default parametrization
 #'
@@ -198,10 +208,10 @@
 #'   \mjseqn{\Delta t} per susceptible individual per infectious individual.
 #'   Alternatively, a numeric scalar indicating a constant rate
 #'   \mjseqn{\beta_\text{c} \Delta t}.
-#' @param p A numeric vector of length `n-1` listing the probabilities
+#' @param p A numeric vector of length `n` listing the probabilities
 #'   \mjseqn{p(t_i)} that an infection between times \mjseqn{t_{i-1}}
 #'   and \mjseqn{t_i} is eventually reported
-#'   (for \mjseqn{i = 1,\ldots,n-1}). Alternatively, a numeric scalar
+#'   (for \mjseqn{i = 0,\ldots,n-1}). Alternatively, a numeric scalar
 #'   indicating a constant probability \mjseqn{p_\text{c}}.
 #' @param delay_dist A numeric vector. The distribution of the integer
 #'   number of observation intervals between infection and reporting.
@@ -352,9 +362,9 @@ make_data <- function(par_list   = make_par_list(model = "sir"),
     betaconst <- beta[1]
     beta <- function(s, par_list) rep(betaconst, length(s))
   }
-  if (length(p) != n - 1) {
+  if (length(p) != n) {
     pconst <- p[1]
-    p <- rep(pconst, n - 1)
+    p <- rep(pconst, n)
   }
 
   # Normalize `delay_dist`
@@ -561,30 +571,31 @@ make_data <- function(par_list   = make_par_list(model = "sir"),
 
   df <- transform(df,
     t_years  = t * par_list$dt_days / 365,
+    beta     = beta(t, par_list),
     mu       = mu(t, par_list),
     nu       = nu(t, par_list),
-    beta     = beta(t, par_list),
-    p        = c(NA, p),
+    p        = p,
     N        = S + (if (model == "seir") E else 0) + I + R,
-    Z        = c(NA, diff(Zcum)), # `Z` from `Zcum` by first differences
-    B        = c(NA, diff(Bcum))  # `B` from `Bcum` by first differences
+    B        = c(NA, diff(Bcum)), # `B` from `Bcum` by first differences
+    Z        = c(NA, diff(Zcum))  # `Z` from `Zcum` by first differences
   )
+  df$B[1] <- df$B[2]
+  df$Z[1] <- df$Z[2]
 
 
   ## Introduce observation error -----------------------------------------
 
   # `Zrep` from `Z` by binomial sampling
-  df$Zrep <- c(NA,
-    rbinom(
-      n    = nrow(df) - 1,    # number of experiments
-      size = round(df$Z[-1]), # numbers of Bernoulli trials
-      prob = df$p[-1]         # success probability
-    )
+  df$Zrep <- rbinom(
+    n    = nrow(df),    # number of experiments
+    size = round(df$Z), # numbers of Bernoulli trials
+    prob = df$p         # success probability
   )
 
   # `C` from `Zrep` by binning forward in time
-  convol_out <- convol(df$Zrep[-1], delay_dist, n = 1)
-  df$C <- c(NA, convol_out$simulation[1:(nrow(df)-1), 1])
+  b <- max(which(delay_dist > 0)) - 1
+  convol_out <- convol(c(rep(df$Zrep[1], b), df$Zrep), delay_dist, n = 1)
+  df$C <- convol_out$simulation[b+(1:n), 1]
 
   if (model == "sir") {
     df <- df[, c("t", "t_years", "beta", "mu", "nu", "B",

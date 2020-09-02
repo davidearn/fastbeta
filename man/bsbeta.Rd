@@ -9,19 +9,20 @@ bsbeta(x, y = NULL, n = 100, p = 1, delay_dist = c(1))
 }
 \arguments{
 \item{x}{A fastbeta object defining a \code{\link[=fastbeta]{fastbeta()}} estimate
-of \mjseqn{\beta(t)}.}
+of \mjseqn{\beta(t)}. Must satisfy \code{x$method \%in\% c("si", "sei")}.}
 
-\item{y}{An optional loess object defining a loess fit
-to the \code{\link[=fastbeta]{fastbeta()}} estimate (see Details). \code{\link[=try_loess]{try_loess()}}
-can help define a reasonable value for \code{y} (see Examples).}
+\item{y}{An optional loess object defining a loess fit to the
+\code{\link[=fastbeta]{fastbeta()}} estimate of \mjseqn{\beta(t)} (see Details).
+\code{\link[=try_loess]{try_loess()}} can help define a reasonable value for \code{y}
+(see Examples).}
 
 \item{n}{An integer scalar. The desired number of bootstrap
 estimates of \mjseqn{\beta(t)}.}
 
-\item{p}{A numeric vector of length \code{nrow(x$out)-1}. \code{p[i]} is the
-probability that an infection between times \code{x$out$t[i]} and
-\code{x$out$t[i+1]} is eventually reported. Alternatively, a numeric
-scalar indicating a constant probability.}
+\item{p}{A numeric vector of length \code{nrow(x$out)}. \code{p[i]} is the
+positive probability that an infection between times \code{x$out$t[i-1]}
+and \code{x$out$t[i]} is eventually reported. Alternatively, a numeric
+scalar indicating a constant positive probability.}
 
 \item{delay_dist}{A numeric vector. The distribution of the integer
 number of observation intervals between infection and reporting.
@@ -68,20 +69,28 @@ The bsbeta object is reproducible with \code{do.call(bsbeta, arg_list)}.
 \description{
 Constructs bootstrap 95\% confidence intervals on \code{\link[=fastbeta]{fastbeta()}} estimates
 of a time-varying transmission rate \mjseqn{\beta(t)} (or alternatively
-on loess fits to \code{\link[=fastbeta]{fastbeta()}} estimates).
+on smooth loess fits to potentially noisy \code{\link[=fastbeta]{fastbeta()}} estimates).
 }
 \details{
-The \code{\link[=fastbeta]{fastbeta()}} estimate of \mjseqn{\beta(t)} (or a loess fit to the
-estimate) is taken to be the true transmission rate for the purpose of
-simulating new time series data and generating bootstrap estimates of
-\mjseqn{\beta(t)} from those data. The bootstrap 95\% CI is then defined
-as the 2.5-97.5th percentile interval of the bootstrap estimates.
+The \code{\link[=fastbeta]{fastbeta()}} estimate of \mjseqn{\beta(t)} (or a smooth loess fit
+to the estimate) is taken to be the true transmission rate for the
+purpose of simulating new time series data using \code{\link[=make_data]{make_data()}} and
+generating bootstrap estimates of \mjseqn{\beta(t)} from those data
+using \code{\link[=fastbeta]{fastbeta()}}. The bootstrap 95\% CI is then defined as the
+2.5-97.5th percentile interval of the (unsmoothed) bootstrap estimates.
 
-Arguments \code{p} and \code{delay_dist} can be used to define a model for
-observation error in the data-generating process. Their default
-values are such that all infections are reported with no delay
-between infection and reporting, i.e., such that there is no
-observation error.
+Arguments \code{p} and \code{delay_dist} can be used to define a model
+for observation error in the data-generating process. Their
+default values are such that all infections are reported with
+no delay between infection and reporting, i.e., such that
+there is no observation error. Deconvolution is employed to
+reconstruct incidence from simulated reported incidence,
+allowing for \mjseqn{\beta(t)} estimation using \code{\link[=fastbeta]{fastbeta()}}.
+The iterative deconvolution algorithm is stopped when the
+chi-squared criterion is satisfied or when the prescribed
+maximum number of iterations (25) is reached (whichever occurs
+first). See Value of \code{\link[=deconvol]{deconvol()}} with \code{simple = TRUE} for
+details.
 }
 \examples{
 # Simulate time series data using an SIR model
@@ -106,8 +115,25 @@ try_loess_out <- try_loess(beta ~ t,
 my_loess <- try_loess_out[["q50"]] # `q = 50` seems reasonable
 
 # Construct bootstrap 95\% confidence intervals
-# on the loess estimate
-bsbeta_out <- bsbeta(fastbeta_out, my_loess, n = 100)
+# on the loess estimate, conditional on perfect
+# observation of incidence
+bsbeta_out <- bsbeta(fastbeta_out, my_loess,
+  n = 100,
+  p = 1,
+  delay_dist = c(1)
+)
+plot(bsbeta_out)
+
+# Construct bootstrap 95\% confidence intervals
+# on the loess estimate, conditional on an
+# infection reporting probability of 50\% and a
+# reporting delay of 1 or 2 observation intervals
+# (each with equal probability)
+bsbeta_out <- bsbeta(fastbeta_out, my_loess,
+  n = 100,
+  p = 0.5,
+  delay_dist = c(0, 1, 1)
+)
 plot(bsbeta_out)
 
 }

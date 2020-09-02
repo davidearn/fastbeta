@@ -196,19 +196,13 @@ ptpi <- function(data, S0_init, peak1 = 1L, peak2 = nrow(data), it = 10L) {
   } else if (!is.numeric(S0_init) || length(S0_init) != 1 || !isTRUE(S0_init >= 0)) {
     stop("`S0_init` must be a non-negative numeric scalar.")
   }
-  if (missing(peak1)) {
-    stop("Missing argument `peak1`.")
-  } else if (missing(peak2)) {
-    stop("Missing argument `peak2`.")
-  } else if (!is.numeric(peak1) || length(peak1) != 1 || !peak1 %in% seq_len(nrow(data)) ||
-               !is.numeric(peak2) || length(peak2) != 1 || !peak2 %in% seq_len(nrow(data))) {
+  if (!is.numeric(peak1) || length(peak1) != 1 || !peak1 %in% seq_len(nrow(data)) ||
+        !is.numeric(peak2) || length(peak2) != 1 || !peak2 %in% seq_len(nrow(data))) {
     stop("`peak1` and `peak2` must be integer scalars in `seq_len(nrow(data))`.")
   } else if (peak2 < peak1) {
     stop("`peak2` must be greater than `peak1`.")
   }
-  if (missing(it)) {
-    stop("Missing argument `it`.")
-  } else if (!is.numeric(it) || length(it) != 1 || !isTRUE(it >= 0)) {
+  if (!is.numeric(it) || length(it) != 1 || !isTRUE(it >= 0)) {
     stop("`it` must be a non-negative integer scalar.")
   }
 

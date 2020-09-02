@@ -31,15 +31,14 @@
 #' ## 2. Noise in deconvolved incidence and choosing when to stop
 #' \insertCite{Gold+09;textual}{fastbeta} suggest to stop iterating
 #' once `chi2 < 1` and to keep the last generated incidence time series
-#' (see Value, under `chi2` and `it_chi2_lt1`). The reason for this
-#' criterion is that deconvolved incidence tends to acquire undesired
-#' noise after several iterations, and it is typically better to stop
-#' before this happens (see the supplement to
-#' \insertCite{Gold+09;textual}{fastbeta} for details). However, this
-#' criterion is not guaranteed to produce an optimal result, hence a
-#' decision about which incidence time series to keep should be based
-#' on a graphical exploration of the entire `deconvol()` output
-#' (see Examples).
+#' (see `chi2` in Value). The reason for this criterion is that
+#' deconvolved incidence tends to acquire undesired noise after several
+#' iterations, and it is typically better to stop before this happens
+#' (see the supplement to \insertCite{Gold+09;textual}{fastbeta} for
+#' details). However, this criterion is not guaranteed to produce an
+#' optimal result, hence a decision about which incidence time series
+#' to keep should be based on a graphical exploration of the entire
+#' `deconvol()` output (see Examples).
 #'
 #' ## 3. Missing values in output
 #' The last `a` rows of `poisson` and `inc` are `NA`, where
@@ -67,17 +66,21 @@
 #'   `delay_dist` is replaced with `delay_dist / sum(delay_dist)` in the
 #'   event that `sum(delay_dist) != 1`.
 #' @param p Either
-#'   (i) a numeric scalar giving a constant positive probability that an
-#'   infection is reported, or
-#'   (ii) a numeric vector giving a positive probability for each day
-#'   from day `-b` to day `length(x)-1`,
-#'   where `b = max(which(delay_dist > 0)) - 1` is the maximum number of
-#'   days from infection to reporting. In the latter case, `p[i]` is the
-#'   probability that an infection on day `i-1-b` is reported.
+#'   (i) a numeric scalar giving a constant probability that an infection
+#'   is reported, or
+#'   (ii) a numeric vector giving a probability for each day from day `-b`
+#'   to day `length(x)-1`, where `b = max(which(delay_dist > 0)) - 1` is
+#'   the maximum number of days from infection to reporting. In the latter
+#'   case, `p[i]` is the probability that an infection on day `i-1-b` is
+#'   reported. `NA` are tolerated but cause `NA` to appear in the
+#'   corresponding rows of `inc` (see `inc` in Value).
 #' @param it_max A non-negative integer. The desired number of iterations.
+#' @param simple A logical scalar. If `TRUE`, then a data frame with
+#'   2 columns is returned instead of a deconvol object. See Value.
 #'
 #' @return
-#' A deconvol object. A list with elements:
+#' If `simple = FALSE` (the default), a deconvol object.
+#' A list with elements:
 #'
 #' \describe{
 #'   \item{`times`}{A numeric vector equal to `-b:(length(x)-1)`,
@@ -91,8 +94,8 @@
 #'   }
 #'   \item{`poisson`}{A numeric matrix. `poisson[i, j]` is the estimate
 #'     after `j-1` iterations of the expected number of infections on day
-#'     `times[i]` that are eventually reported. See Details for the initial
-#'     estimate.
+#'     `times[i]` that are eventually reported. See Details 1 for the
+#'     initial estimate.
 #'   }
 #'   \item{`inc`}{A numeric matrix. `inc[i, j]` is the expected number
 #'     of infections on day `times[i]` conditional on `poisson[, j]`.
@@ -101,16 +104,13 @@
 #'   \item{`inc_rep`}{A numeric matrix. `inc_rep[i, j]` is the expected
 #'     number of cases reported on day `times[i]` conditional on `poisson[, j].`
 #'   }
-#'   \item{`chi2`}{A numeric vector. `chi2[j]` is the normalized chi-squared
-#'     statistic corresponding to `inc_rep[, j]`, computed as
+#'   \item{`chi2`}{A numeric vector. `chi2[j]` is the normalized
+#'     chi-squared statistic corresponding to `inc_rep[, j]`,
+#'     computed as
 #'     `mean((x - y)^2 / y)`, where `y = inc_rep[b+1:length(x), j]`.
-#'   }
-#'   \item{`it_chi2_lt1`}{An integer scalar equal to `min(which(chi2 < 1)) - 1`
-#'     if `any(chi2 < 1)` is `TRUE` and `NA` otherwise, giving the number
-#'     of iterations performed before the chi-squared criterion suggested
-#'     by \insertCite{Gold+09;textual}{fastbeta} (namely `chi2 < 1`) was
-#'     satisfied. Note that the corresponding incidence time series is
-#'     `inc[, 1+it_chi2_lt1]`.
+#'     \insertCite{Gold+09;textual}{fastbeta} suggest taking column
+#'     `j = min(which(chi2 < 1))` to estimate incidence instead of
+#'     the last column (see Details 2).
 #'   }
 #'   \item{`call`}{The function call. The deconvol object is reproducible
 #'     with `eval(call)`.
@@ -123,6 +123,10 @@
 #' Note that `poisson`, `inc`, and `inc_rep` all have `b+length(x)` rows
 #' (corresponding to the elements of `times`) and `1+it_max` columns
 #' (one for each iteration, starting from an initial value).
+#'
+#' If `simple = TRUE`, then a data frame whose first column is `times`
+#' and whose second column is `inc[, min(which(chi2 < 1))]` or otherwise
+#' `inc[, ncol(inc)]`.
 #'
 #' @references
 #' \insertRef{Gold+09}{fastbeta}
@@ -140,7 +144,8 @@
 deconvol <- function(x,
                      delay_dist = c(1),
                      p = 1,
-                     it_max = 20L) {
+                     it_max = 20L,
+                     simple = FALSE) {
   # Save arguments in a list
   arg_list <- as.list(environment())
 
@@ -199,16 +204,21 @@ deconvol <- function(x,
   # Recover incidence from each Poisson parameter vector
   Z <- P / p
 
-  out <- list(
-    times    = -b:(N-1),
-    poisson  = P,
-    inc_rep  = E,
-    inc      = Z,
-    chi2     = chi2,
-    x_pad    = c(rep(NA, b), x[b+1:N]),
-    it_chi2_lt1 = if (any(chi2 < 1)) min(which(chi2 < 1)) - 1 else NA,
-    call     = match.call(),
-    arg_list = arg_list
-  )
-  structure(out, class = c("deconvol", "list"))
+  if (simple) {
+    index <- if (any(isTRUE(chi2 < 1))) min(which(chi2 < 1)) else ncol(Z)
+    out <- data.frame(times = -b:(N-1), inc = Z[, index])
+  } else {
+    out <- list(
+      times    = -b:(N-1),
+      poisson  = P,
+      inc_rep  = E,
+      inc      = Z,
+      chi2     = chi2,
+      x_pad    = c(rep(NA, b), x[b+1:N]),
+      call     = match.call(),
+      arg_list = arg_list
+    )
+    out <- structure(out, class = c("deconvol", "list"))
+  }
+  out
 }

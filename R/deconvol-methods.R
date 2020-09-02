@@ -30,7 +30,10 @@ plot.deconvol <- function(x, ...) {
       lines(times, inc[, j], lwd=2, col="grey80")
     }
     lines(times, inc[, n], lwd=2)
-    lines(times, inc[, 1+it_chi2_lt1], lwd=2, col="hotpink")
+    if (any(isTRUE(chi2 < 1))) {
+      index_chi2lt1 <- min(which(chi2 < 1))
+      lines(times, inc[, index_chi2lt1], lwd=2, col="hotpink")
+    }
     lines(times, x_pad, lwd=2, col = "blue")
   })
   box()
@@ -54,7 +57,9 @@ plot.deconvol <- function(x, ...) {
       lines(times, inc_rep[, j], lwd=2, col="grey80")
     }
     lines(times, inc_rep[, n], lwd=2)
-    lines(times, inc_rep[, 1+it_chi2_lt1], lwd=2, col="hotpink")
+    if (any(isTRUE(chi2 < 1))) {
+      lines(times, inc_rep[, index_chi2lt1], lwd=2, col="hotpink")
+    }
     lines(times, x_pad, lwd=2, col = "blue")
   })
   box()
