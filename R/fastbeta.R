@@ -1,3 +1,4 @@
+#' \loadmathjax
 #' Estimate time-varying transmission rates
 #'
 #' @description

@@ -2,7 +2,8 @@
 % Please edit documentation in R/fastbeta.R
 \name{fastbeta}
 \alias{fastbeta}
-\title{Estimate time-varying transmission rates}
+\title{\loadmathjax
+Estimate time-varying transmission rates}
 \usage{
 fastbeta(data, par_list, method)
 }
