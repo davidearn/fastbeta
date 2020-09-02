@@ -7,7 +7,7 @@ Authors@R:
 URL: https://github.com/davidearn/fastbeta
 Description: Fast methods for estimating time-varying infectious disease
     transmission rates from incidence and mortality time series.
-References: DeJonge MS, Jagan M, Krylova O, Earn DJD. Fast estimation of
+References: Jagan M, deJonge MS, Krylova O, Earn DJD. Fast estimation of
     time-varying infectious disease transmission rates. PLoS Comput Biol,
     in press.
 Imports:
