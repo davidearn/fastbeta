@@ -37,6 +37,7 @@ A bsbeta object. A list with elements:
 \describe{
 \item{\code{times}}{A numeric vector listing time points for the
 bootstrap estimates of \mjseqn{\beta(t)}. Equal to \code{x$out$t}.
+}
 \item{\code{beta}}{A numeric vector. If \code{y = NULL}, the \code{\link[=fastbeta]{fastbeta()}}
 estimate of \mjseqn{\beta(t)}, equal to \code{x$out$beta}. Otherwise,
 the loess fit evaluated at \code{times}, equal to \code{predict(y, times)}.

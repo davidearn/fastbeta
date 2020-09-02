@@ -52,6 +52,7 @@
 #' \describe{
 #'   \item{`times`}{A numeric vector listing time points for the
 #'     bootstrap estimates of \mjseqn{\beta(t)}. Equal to `x$out$t`.
+#'   }
 #'   \item{`beta`}{A numeric vector. If `y = NULL`, the [fastbeta()]
 #'     estimate of \mjseqn{\beta(t)}, equal to `x$out$beta`. Otherwise,
 #'     the loess fit evaluated at `times`, equal to `predict(y, times)`.
