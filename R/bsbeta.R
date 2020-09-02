@@ -104,18 +104,7 @@
 #' fastbeta_out <- fastbeta(df, pl, method = "si")
 #' plot(fastbeta_out)
 #'
-#' # Construct bootstrap 95% confidence interval
-#' # on the raw `fastbeta()` estimate, conditional
-#' # on a given observation model
-#' bsbeta_raw_out <- bsbeta(fastbeta_out,
-#'   n = 100,
-#'   p = 1, # reporting probability: 50%
-#'   delay_dist = c(0, 0.5, 0.5) # reporting delay: 1 dt or 2 dt
-#'                               # with equal probability
-#' )
-#' plot(bsbeta_raw_out)
-#'
-#' # Fit a loess curve to the `fastbeta()` estimate.
+# Fit a loess curve to the `fastbeta()` estimate.
 #' # Try different values for the smoothing parameter
 #' # and choose one that produces a reasonable fit.
 #' try_loess_out <- try_loess(beta ~ t,
@@ -126,14 +115,16 @@
 #' )
 #' my_loess <- try_loess_out[["q50"]] # `q = 50` seems reasonable
 #'
-#' # Construct bootstrap 95% confidence interval
-#' # on the loess estimate
-#' bsbeta_loess_out <- bsbeta(fastbeta_out, my_loess,
+#' # Construct a bootstrap 95% confidence interval
+#' # on the loess estimate, conditional on a given
+#' # observation model
+#' bsbeta_out <- bsbeta(fastbeta_out, my_loess,
 #'   n = 100,
-#'   p = 1,
-#'   delay_dist = c(0, 0.5, 0.5)
+#'   p = 0.5, # reporting probability: 50%
+#'   delay_dist = c(0, 0.5, 0.5) # reporting delay: 1 dt or 2 dt
+#'                               # with equal probability
 #' )
-#' plot(bsbeta_loess_out)
+#' plot(bsbeta_out)
 #'
 #' @seealso [methods for class "bsbeta"][bsbeta-methods],
 #'   [fastbeta()], [try_loess()], [make_data()]
