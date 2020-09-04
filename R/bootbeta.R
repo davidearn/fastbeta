@@ -280,8 +280,13 @@ bootbeta <- function(x, y = NULL, n = 100L, p = 1, delay_dist = c(1),
   line1 <- paste("Running", n_boot, "bootstrap simulations",
                  "on", num_cores, "cores.")
   line2 <- "This could take several minutes."
+  line3 <- "Each dot below is one complete simulation."
   border <- rep("=", nchar(line1))
-  message(border, "\n", line1, "\n", line2, "\n", border)
+  message(border, "\n",
+          line1, "\n",
+          line2, "\n",
+          line3, "\n",
+          border)
 
   ## Pass job to cluster
   mat <- parSapply(cl, seq_len(n_boot), function(i) {
@@ -321,6 +326,7 @@ bootbeta <- function(x, y = NULL, n = 100L, p = 1, delay_dist = c(1),
     out
 
   })
+  cat("\n")
 
   ## Terminate cluster
   stopCluster(cl)
