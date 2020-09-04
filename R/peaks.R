@@ -68,7 +68,7 @@
 #' maxima from other points (choosing `bw2` large enough). Not
 #' disqualifying true peaks is a matter of not including more than
 #' one peak in those temporal neighbourhoods (choosing `bw2` less
-#' than `0.5 * num_dt_in_period / num_peaks_in_period` if peaks are
+#' than `0.5 * num_dt_in_period / num_peaks_in_period`, if peaks are
 #' evenly spaced within a period).
 #'
 #' Reasonable results are typically obtained by:
@@ -100,7 +100,7 @@
 #' \describe{
 #'   \item{`x`}{A numeric vector. The value of `x` in the function call.}
 #'   \item{`xbar`}{A numeric vector. The result of applying
-#'     a `(2 * bw1 + 1)`-point central moving average to `x`.
+#'     a `(2*bw1+1)`-point central moving average to `x`.
 #'   }
 #'   \item{`all`}{An integer vector. A subset of `seq_along(x)`
 #'     listing the index of each peak in `x`.
@@ -118,16 +118,18 @@
 #' }
 #'
 #' @examples
-#' # Create a noisy 2-periodic time series with 2 peaks per period
+#' ## Create a noisy 2-periodic time series
+#' ## with 2 peaks per period
 #' times <- seq(0, 20, by = 0.01)
 #' x <- sin(2 * pi * times) + sin(pi * times) + rnorm(times, 0, 0.5)
 #' plot(x, type = "l", lwd = 2, col = "grey80", las = 1)
 #'
-#' # Smoothing with `bw1 = 20` removes noise around the peaks
+#' ## Smoothing with `bw1 = 20` removes noise
+#' ## around the peaks
 #' bw1 <- 20
 #' m <- 2 * bw1 + 1
 #' xbar <- as.vector(
-#'   filter(x,
+#'   stats::filter(x,
 #'     filter = rep(1 / m, m),
 #'     method = "convolution",
 #'     sides  = 2
@@ -135,11 +137,11 @@
 #' )
 #' lines(xbar, lwd = 2)
 #'
-#' # Setting `bw2 = 0.4 * num_dt_in_period / num_peaks_in_period`
-#' # tends to yield reasonable results
+#' ## Setting `bw2 = 0.4 * num_dt_in_period / num_peaks_in_period`
+#' ## tends to yield reasonable results
 #' bw2 <- 0.4 * 200 / 2
 #'
-#' # Locate peaks in time series
+#' ## Locate peaks in time series
 #' peaks_out <- peaks(
 #'   x = x,
 #'   bw1 = bw1,
@@ -147,9 +149,9 @@
 #'   period = 200 # period is 200 observation intervals
 #' )
 #'
-#' # Verify that peaks were identified correctly:
-#' # * Blue lines are peaks.
-#' # * Pink circles are peaks in phase with first peak.
+#' ## Verify that peaks were identified correctly:
+#' ## * Blue lines are peaks.
+#' ## * Pink circles are peaks in phase with first peak.
 #' plot(peaks_out)
 #'
 #' @references
@@ -176,25 +178,25 @@ peaks <- function(x, bw1, bw2, period = NULL) {
     stop("`period` must be `NULL` or a positive numeric scalar.")
   }
 
-  ## Setup ---------------------------------------------------------------
+  ### Setup ------------------------------------------------------------
 
-  # Save arguments in a list
+  ## Save arguments in a list
   arg_list <- as.list(environment())
 
-  # Fractional part of bandwidths can be discarded
-  # without affecting number of observations in band
+  ## Fractional part of bandwidths can be discarded
+  ## without affecting number of observations in band
   bw1 <- floor(bw1)
   bw2 <- floor(bw2)
 
 
-  ## Apply moving average ------------------------------------------------
+  ### Apply moving average ---------------------------------------------
 
-  # Number of observations in moving average band
+  ## Number of observations in moving average band
   m <- 2 * bw1 + 1
 
-  # `filter()` applies a moving average to `x`. It
-  # returns a vector of equal length containing the
-  # resulting smooth time series.
+  ## `filter()` applies a moving average to `x`. It
+  ## returns a vector of equal length containing the
+  ## resulting smooth time series.
   xbar <- as.vector(
     filter(x,
       filter = rep(1 / m, m),
@@ -204,51 +206,51 @@ peaks <- function(x, bw1, bw2, period = NULL) {
   )
 
 
-  ## Locate all peaks ----------------------------------------------------
+  ### Locate all peaks -------------------------------------------------
 
-  # Number of observations in peak definition band
+  ## Number of observations in peak definition band
   m <- 2 * bw2 + 1
 
-  # Pads ensure that `embed()` returns incomplete
-  # bands, e.g., the band centered at `xbar[1]`
+  ## Pads ensure that `embed()` returns incomplete
+  ## bands, e.g., the band centered at `xbar[1]`
   pad <- rep(NA, bw2)
   xbar_padded <- c(pad, xbar, pad)
 
-  # `embed()` applied to `xbar_padded` returns a
-  # matrix whose `i`th row is the band centered at
-  # `xbar[i]`
+  ## `embed()` applied to `xbar_padded` returns a
+  ## matrix whose `i`th row is the band centered at
+  ## `xbar[i]`
   bands <- embed(xbar_padded, m)
 
-  # Central element of each band
+  ## Central element of each band
   bands_mid <- bands[, bw2+1]
-  # Remaining elements
+  ## Remaining elements
   bands_sides <- bands[, -(bw2+1)]
-  # Maximum of remaining elements
+  ## Maximum of remaining elements
   bands_sides_max <- apply(bands_sides, 1, max)
 
-  # Indices of bands in which the central element exceeds the
-  # remaining elements. These can be considered peak "times".
+  ## Indices of bands in which the central element exceeds the
+  ## remaining elements. These can be considered peak "times".
   peaks_all <- which(bands_mid > bands_sides_max)
 
 
-  ## Subset peaks in phase with first peak ------------------------------
+  ### Subset peaks in phase with first peak ----------------------------
 
   if (!is.null(period)) {
-    # First peak time
+    ## First peak time
     ta <- peaks_all[1]
-    # Last observation time
+    ## Last observation time
     tf <- length(x) - bw1
     # Number of cycles in between
     num_cycles <- floor((tf - ta) / period)
 
-    # Peak times in phase with first peak time in the
-    # hypothetical case of exactly periodic dynamics
+    ## Peak times in phase with first peak time in the
+    ## hypothetical case of exactly periodic dynamics
     peaks_phase <- ta + (0:num_cycles) * period
 
-    # Dynamics in the time series `xbar` may not be
-    # exactly periodic. Replace each hypothetical time
-    # in `peaks_phase` with the nearest observed time
-    # in `peaks_all`.
+    ## Dynamics in the time series `xbar` may not be
+    ## exactly periodic. Replace each hypothetical time
+    ## in `peaks_phase` with the nearest observed time
+    ## in `peaks_all`.
     peaks_phase <- sapply(peaks_phase,
       function(x) peaks_all[which.min(abs(peaks_all - x))]
     )

@@ -11,7 +11,7 @@ NULL
 
 #' @rdname fastbeta-methods
 #' @export
-#' @importFrom graphics par plot title mtext
+#' @import graphics
 plot.fastbeta <- function(x, ...) {
   if (!inherits(x, "fastbeta")) {
     stop("`x` must be a fastbeta object.")

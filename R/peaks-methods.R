@@ -11,7 +11,7 @@ NULL
 
 #' @rdname peaks-methods
 #' @export
-#' @importFrom graphics par plot mtext lines abline axis
+#' @import graphics
 plot.peaks <- function(x, ...) {
   if (!inherits(x, "peaks")) {
     stop("`x` must be a peaks object.")

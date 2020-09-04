@@ -63,34 +63,34 @@
 #'
 #' @seealso [methods for class "convol"][convol-methods], [deconvol()]
 #' @export
-convol <- function(x, delay_dist = c(1), n = 0) {
-  # Save arguments in a list
+convol <- function(x, delay_dist = c(1), n = 0L) {
+  ## Save arguments in a list
   arg_list <- as.list(environment())
 
-  # Normalize `delay_dist`
+  ## Normalize `delay_dist`
   delay_dist <- delay_dist / sum(delay_dist)
 
-  # Infections occur at times `0:(N-1)`
+  ## Infections occur at times `0:(N-1)`
   N <- length(x)
 
-  # Time from infection to reporting is at most `b` days
+  ## Time from infection to reporting is at most `b` days
   b <- max(which(delay_dist > 0)) - 1
 
-  # Pad `x` and `delay_dist` with zeros to length `N + b`
-  # (convenient for matrix operations)
+  ## Pad `x` and `delay_dist` with zeros to length `N + b`
+  ## (convenient for matrix operations)
   x <- c(x, rep(0, b))
   delay_dist <- c(delay_dist[1:(b+1)], rep(0, N - 1))
 
-  # Create a lower triangular transition matrix satisfying
-  # `L[i,j] == delay_dist[i-j+1]`
+  ## Create a lower triangular transition matrix satisfying
+  ## `L[i,j] == delay_dist[i-j+1]`
   L <- array(rep(c(delay_dist, 0), N + b), dim = rep(N + b, 2))
   L[upper.tri(L, diag = FALSE)] <- 0
 
-  # Convolve `x` and `delay_dist`
+  ## Convolve `x` and `delay_dist`
   expected_rep_inc <- L %*% x
 
   if (n > 0) {
-    # Matrix with row `i` listing reporting delays for infection `i`
+    ## Matrix with row `i` listing reporting delays for infection `i`
     delays <- replicate(n,
       sample(
         x       = 0:b,
@@ -99,11 +99,11 @@ convol <- function(x, delay_dist = c(1), n = 0) {
         prob    = delay_dist[1:(b+1)]
       )
     )
-    # Matrix with row `i` listing reporting times for infection `i`
-    # as integers between 1 and `N + b`
+    ## Matrix with row `i` listing reporting times for infection `i`
+    ## as integers between 1 and `N + b`
     report_times <- rep(seq_along(x), times = x) + delays
 
-    # Matrix with row `i` listing counts of reports on day `i-1`
+    ## Matrix with row `i` listing counts of reports on day `i-1`
     simulated_rep_inc <- apply(report_times, 2,
       function(x) {
         y <- rep(0, N + b)

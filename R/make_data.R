@@ -4,12 +4,12 @@
 #' @description
 #' Simulates epidemic time series data using a system of S(E)IR equations
 #' (see Details 1). Observations are recorded at equally spaced time points
-#' \mjseqn{t_i = t_0 + i \Delta t}. Users can specify any time-varying rates
-#' of birth, death, and transmission, any time-varying probability that an
+#' \mjseqn{t_i = i \Delta t}. Users can specify any time-varying rates of
+#' birth, death, and transmission, any time-varying probability that an
 #' infection is reported, and any discrete distribution of the time from
 #' infection to reporting. By default, the vital rates are constant, the
-#' transmission rate is seasonally forced, and all infections are reported
-#' with no delay.
+#' transmission rate is seasonally forced, and infections are reported
+#' with a constant probability and zero delay.
 #'
 #' @details
 #' # Details
@@ -17,7 +17,7 @@
 #' ## 1. Simulation model
 #'
 #' `make_data()` simulates epidemic time series data using a system
-#' of SIR or SEIR equations, which includes additional equations for
+#' of SIR or SEIR equations that includes additional equations for
 #' cumulative births and cumulative incidence. If `model = "sir"`,
 #' then the system is
 #'
@@ -38,16 +38,15 @@
 #' (`with_ds = FALSE`), or
 #' (ii) realizing a corresponding continuous-time stochastic process
 #' using [adaptivetau::ssa.adaptivetau()] (`with_ds = TRUE`).
-#' Both methods (`with_ds = FALSE` and `with_ds = TRUE`) use
-#' the initial state
+#' Both methods use initial state
 #'
 #' \mjsdeqn{\begin{bmatrix} S(0) \cr I(0) \cr R(0) \cr B_\text{cum}(0) \cr Z_\text{cum}(0) \end{bmatrix} = \begin{bmatrix} S_0 \cr I_0 \cr N_0 - S_0 - I_0 \cr 0 \cr 0 \end{bmatrix}}
 #'
-#' if `model = "sir"` or
+#' for `model = "sir"` and
 #'
 #' \mjsdeqn{\begin{bmatrix} S(0) \cr E(0) \cr I(0) \cr R(0) \cr B_\text{cum}(0) \cr Z_\text{cum}(0) \end{bmatrix} = \begin{bmatrix} S_0 \cr E_0 \cr I_0 \cr N_0 - S_0 - E_0 - I_0 \cr 0 \cr 0 \end{bmatrix}}
 #'
-#' if `model = "seir"`.
+#' for `model = "seir"`.
 #'
 #' The latter method (`with_ds = TRUE`) defines event probabilities as
 #' proportional to terms in the ODE, modeling **demographic stochasticity**.
@@ -75,14 +74,15 @@
 #' between times \mjseqn{t_{i-1}} and \mjseqn{t_i} (counted by \mjseqn{Z(t_i)})
 #' is eventually reported. Finally, it generates reported incidence \mjseqn{C}
 #' by sampling from a supplied reporting delay distribution and binning
-#' infections counted by \mjseqn{Z_\text{rep}} forward in time. If the maximum
-#' possible delay in units \mjseqn{\Delta t} is \mjseqn{b > 0}, then, for
-#' simplicity, \mjseqn{Z_\text{rep}(t_{-b}), \ldots, Z_\text{rep}(t_{-1})} are
-#' assigned the value \mjseqn{Z_\text{rep}(t_0)}, in order to ensure that
-#' \mjseqn{C(t_0), \ldots, C(t_{b-1})} are based on complete information about
-#' \mjseqn{Z_\text{rep}}. Compared to \mjseqn{Z}, \mjseqn{C} models
-#' **observation error**, i.e., under-reporting of infections with a
-#' delay between infection and reporting.
+#' infections counted by \mjseqn{Z_\text{rep}} forward in time. If the
+#' maximum possible delay is \mjseqn{b \Delta t} and \mjseqn{b > 0}, then,
+#' for simplicity,
+#' \mjseqn{Z_\text{rep}(-b\Delta t),\ldots,Z_\text{rep}(t_{-\Delta t})}
+#' are assigned the value of \mjseqn{Z_\text{rep}(0)}, in order to ensure
+#' that \mjseqn{C(t_0),\ldots,C(t_{b-1})} are based on complete information
+#' about \mjseqn{Z_\text{rep}}. Compared to \mjseqn{Z}, \mjseqn{C} models
+#' **observation error**, i.e., under-reporting of infections with delay
+#' between infection and reporting.
 #'
 #' ## 2. Default parametrization
 #'
@@ -100,14 +100,15 @@
 #'
 #' Care is taken to ensure that random number generation occurs in the
 #' enclosing environment rather than the body of the function assigned
-#' by default to `beta`. This ensures that the function has noisy but
-#' non-random output, which is helpful for reproducibility. For details,
-#' see [make_beta()].
+#' by default to `make_data()` argument `beta`. This ensures that the
+#' function has noisy but non-random output, which is helpful for
+#' reproducibility. For details, see Usage and then see [make_beta()].
 #'
 #' By default, the reporting probability \mjseqn{p} is constant and equal
-#' to \mjseqn{p_text{c}}, while the reporting delay is fixed equal to zero,
-#' so that all infections during a given observation interval are reported
-#' during the same observation interval, i.e., \mjseqn{C(t_i) = Z(t_i)}.
+#' to \mjseqn{p_\text{c}}, while the reporting delay is fixed equal to zero,
+#' so that all infections during a given observation interval that are
+#' eventually reported, are reported during the same observation interval,
+#' i.e., \mjseqn{C(t_i) = Z_\text{rep}(t_i)} for all \mjseqn{i}.
 #'
 #' The default specification of `mu`, `nu`, `beta`, and `p` requires
 #' that `par_list` contains these additional numeric scalar elements:
@@ -247,7 +248,8 @@
 #'   }
 #'   \item{`B`}{\mjseqn{\lbrace\,B(t_i)\,\rbrace}
 #'     Births. `B[i]` is the number of births
-#'     between times `t[i-1]` and `t[i]`.
+#'     between times `t[i-1]` and `t[i]`. For
+#'     simplicity, `make_data()` assigns `B[1] <- B[2]`.
 #'   }
 #'   \item{`N`}{\mjseqn{\lbrace\,N(t_i)\,\rbrace}
 #'     Population size.
@@ -264,13 +266,14 @@
 #'   }
 #'   \item{`Z`}{\mjseqn{\lbrace\,Z(t_i)\,\rbrace}
 #'     Incidence. `Z[i]` is the number of infections
-#'     between times `t[i-1]` and `t[i]`.
+#'     between times `t[i-1]` and `t[i]`. For
+#'     simplicity, `make_data()` assigns `Z[1] <- Z[2]`.
 #'   }
 #'   \item{`p`}{\mjseqn{\lbrace\,p(t_i)\,\rbrace}
 #'     Reporting probability. `p[i]` is the probability
 #'     that an infection between times `t[i-1]` and `t[i]`
-#'     is eventually reported. Equal to `p` in the function
-#'     call preceded by one `NA`, i.e., `c(NA, p)`.
+#'     is eventually reported. Equal to the value of `p`
+#'     in the function call.
 #'   }
 #'   \item{`Zrep`}{\mjseqn{\lbrace\,Z_\text{rep}(t_i)\,\rbrace}
 #'     Incidence conditional on reporting. `Zrep[i]` is the
@@ -280,6 +283,9 @@
 #'   \item{`C`}{\mjseqn{\lbrace\,C(t_i)\,\rbrace}
 #'     Reported incidence. `C[i]` is the number of infections reported
 #'     between times `t[i-1]` and `t[i]`.
+#'     If `b = max(which(delay_dist > 0)) - 1` and `b > 0`, then `C[1:b]`
+#'     are generated based on assumptions about \mjseqn{Z_\text{rep}}
+#'     (see Details).
 #'   }
 #' }
 #'
@@ -288,27 +294,27 @@
 #' possibly preceded by a call to [base::set.seed()].
 #'
 #' @examples
-#' # Stochastic simulation of SEIR model
-#' par_list <- make_par_list(
+#' ## Stochastic simulation of SEIR model
+#' pl <- make_par_list(
 #'   epsilon = pi / 4, # environmental stochasticity
 #'   pconst = 0.5, # random under-reporting of infections
 #'   model = "seir"
 #' )
 #' set.seed(1422)
-#' df <- make_data(par_list,
+#' df <- make_data(pl,
 #'   with_ds = TRUE, # demographic stochasticity
 #'   model = "seir",
 #'   delay_dist = dnbinom(0:10, mu = 2, size = 4) # random delays in reporting
 #' )
 #' head(df)
 #'
-#' # Deterministic simulation of SIR model
-#' par_list <- make_par_list(
+#' ## Deterministic simulation of SIR model
+#' pl <- make_par_list(
 #'   epsilon = 0,
 #'   pconst = 1,
 #'   model = "sir"
 #' )
-#' df <- make_data(par_list,
+#' df <- make_data(pl,
 #'   with_ds = FALSE,
 #'   model = "sir",
 #'   delay_dist = c(1)
@@ -321,7 +327,7 @@
 #' @importFrom deSolve ode
 #' @importFrom adaptivetau ssa.adaptivetau
 make_data <- function(par_list   = make_par_list(model = "sir"),
-                      n          = 1e03,
+                      n          = 1000L,
                       with_ds    = FALSE,
                       model      = "sir",
                       mu         = par_list$muconst,
@@ -329,16 +335,16 @@ make_data <- function(par_list   = make_par_list(model = "sir"),
                       beta       = make_beta(par_list$epsilon, n),
                       p          = par_list$pconst,
                       delay_dist = c(1)) {
-  ## Setup ---------------------------------------------------------------
+  ### Setup ------------------------------------------------------------
 
-  # Save arguments in a list
+  ## Save arguments in a list
   arg_list <- as.list(environment())
 
-  # Time points
+  ## Time points
   n <- floor(n)
   times <- 0:(n-1)
 
-  # Some derived quantities
+  ## Some derived quantities
   if (model == "sir") {
     gamma <- 1 / (par_list$tgen)
   } else if (model == "seir") {
@@ -348,8 +354,7 @@ make_data <- function(par_list   = make_par_list(model = "sir"),
     stop("`model` must be one of `\"sir\"` or `\"seir\"`.")
   }
 
-  # Replace numeric scalar `mu`, `nu`, `beta`, `p`
-  # with desired equivalents
+  ## Map numeric `mu`, `nu`, and `beta` to constant functions
   if (is.numeric(mu)) {
     muconst <- mu[1]
     mu <- function(s, par_list) rep(muconst, length(s))
@@ -362,23 +367,26 @@ make_data <- function(par_list   = make_par_list(model = "sir"),
     betaconst <- beta[1]
     beta <- function(s, par_list) rep(betaconst, length(s))
   }
+
+  ## Map `p` with length not equal to `n`
+  ## to a constant vector of length `n`
   if (length(p) != n) {
     pconst <- p[1]
     p <- rep(pconst, n)
   }
 
-  # Normalize `delay_dist`
+  ## Normalize `delay_dist`
   delay_dist <- delay_dist / sum(delay_dist)
 
 
-  ## Simulate S(E)IR equations ... ---------------------------------------
-  ## if with demographic stochasticity
+  ### Simulate S(E)IR equations ... ------------------------------------
+  ### if with demographic stochasticity
 
   if (with_ds) {
 
     if (model == "sir") {
 
-      # Initial state
+      ## Initial state
       x_init <- with(par_list, {
         c(
           S = floor(S0),
@@ -389,7 +397,7 @@ make_data <- function(par_list   = make_par_list(model = "sir"),
         )
       })
 
-      # Transition events
+      ## Transition events
       event_list <- list(
         c(S = 1, Bcum = 1),         # birth
         c(S = -1, I = 1, Zcum = 1), # infection
@@ -399,7 +407,7 @@ make_data <- function(par_list   = make_par_list(model = "sir"),
         c(R = -1)
       )
 
-      # Transition event rates
+      ## Transition event rates
       compute_event_rates <- function(x, params, t) {
         m <- mu(t, params)
         c(
@@ -414,7 +422,7 @@ make_data <- function(par_list   = make_par_list(model = "sir"),
 
     } else if (model == "seir") {
 
-      # Initial state
+      ## Initial state
       x_init <- with(par_list, {
         c(
           S = floor(S0),
@@ -426,7 +434,7 @@ make_data <- function(par_list   = make_par_list(model = "sir"),
         )
       })
 
-      # Transition events
+      ## Transition events
       event_list <- list(
         c(S = 1, Bcum = 1),         # birth
         c(S = -1, E = 1, Zcum = 1), # infection
@@ -438,7 +446,7 @@ make_data <- function(par_list   = make_par_list(model = "sir"),
         c(R = -1)
       )
 
-      # Transition event rates
+      ## Transition event rates
       compute_event_rates <- function(x, params, t) {
         m <- mu(t, params)
         c(
@@ -455,7 +463,7 @@ make_data <- function(par_list   = make_par_list(model = "sir"),
 
     }
 
-    # Generate a realization of the stochastic process
+    ## Generate a realization of the stochastic process
     df <- as.data.frame(
       ssa.adaptivetau(
         init.values = x_init,
@@ -477,23 +485,23 @@ make_data <- function(par_list   = make_par_list(model = "sir"),
     ##       (time step varies between 0 and `maxtau`), but we desire
     ##       equal spacing (time step equal to 1 as in `times`)
 
-    # For each time in `times`, find the index of the last previous time
-    # in `df$t`
+    ## For each time in `times`, find the index of the
+    ## last previous time in `df$t`
     ind_state_out <- sapply(times, function(s) max(which(df$t <= s)))
 
-    # States at those times are states at times `times`
+    ## States at those times are states at times `times`
     df <- df[ind_state_out, ]
     df$t <- times
     rownames(df) <- NULL
 
 
-  ## Simulate S(E)IR equations ... ---------------------------------------
-  ## if without demographic stochasticity
+  ### Simulate S(E)IR equations ... ------------------------------------
+  ### if without demographic stochasticity
 
   } else {
     if (model == "sir") {
 
-      # Initial state
+      ## Initial state
       x_init <- with(par_list, {
         c(
           S    = S0,
@@ -504,7 +512,7 @@ make_data <- function(par_list   = make_par_list(model = "sir"),
         )
       })
 
-      # System of SIR equations
+      ## System of SIR equations
       compute_ode_rates <- function(t, y, parms) {
         m <- mu(t, parms)
         b <- beta(t, parms)
@@ -519,7 +527,7 @@ make_data <- function(par_list   = make_par_list(model = "sir"),
 
     } else if (model == "seir") {
 
-      # Initial state
+      ## Initial state
       x_init <- with(par_list, {
         c(
           S    = S0,
@@ -531,7 +539,7 @@ make_data <- function(par_list   = make_par_list(model = "sir"),
         )
       })
 
-      # System of SEIR equations
+      ## System of SEIR equations
       compute_ode_rates <- function(t, y, parms) {
         m <- mu(t, parms)
         b <- beta(t, parms)
@@ -548,7 +556,7 @@ make_data <- function(par_list   = make_par_list(model = "sir"),
 
     }
 
-    # Numerically integrate the system of S(E)IR equations
+    ## Numerically integrate the system of S(E)IR equations
     df <- as.data.frame(
       ode(
         y     = x_init,
@@ -567,7 +575,7 @@ make_data <- function(par_list   = make_par_list(model = "sir"),
   }
 
 
-  ## Append other desired variables --------------------------------------
+  ### Append other desired variables -----------------------------------
 
   df <- transform(df,
     t_years  = t * par_list$dt_days / 365,
@@ -583,16 +591,16 @@ make_data <- function(par_list   = make_par_list(model = "sir"),
   df$Z[1] <- df$Z[2]
 
 
-  ## Introduce observation error -----------------------------------------
+  ### Introduce observation error --------------------------------------
 
-  # `Zrep` from `Z` by binomial sampling
+  ## `Zrep` from `Z` by binomial sampling
   df$Zrep <- rbinom(
     n    = nrow(df),    # number of experiments
-    size = round(df$Z), # numbers of Bernoulli trials
-    prob = df$p         # success probability
+    size = round(df$Z), # numbers of Bernoulli trials in each experiment
+    prob = df$p         # success probability in each experiment
   )
 
-  # `C` from `Zrep` by binning forward in time
+  ## `C` from `Zrep` by binning forward in time
   b <- max(which(delay_dist > 0)) - 1
   convol_out <- convol(c(rep(df$Zrep[1], b), df$Zrep), delay_dist, n = 1)
   df$C <- convol_out$simulation[b+(1:n), 1]

@@ -40,7 +40,7 @@
 #' The upshot is that the output of `make_beta()` (i.e., the function
 #' `f()`) is randomly generated and reproducible with [base::set.seed()],
 #' while the output of `f()` is determined and reproducible without
-#' [base::set.seed()]).
+#' [base::set.seed()].
 #'
 #' @param epsilon A numeric scalar. The standard deviation of
 #'   the noise process (see Details).

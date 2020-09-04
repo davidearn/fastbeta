@@ -18,7 +18,7 @@
 #' \mjsdeqn{\mathcal{R}_0 = \frac{\langle\beta\rangle N_0}{\gamma + \mu}}
 #'
 #' if `model = "sir"`, where \mjseqn{\gamma = 1 / (t_\text{lat} + t_\text{inf})},
-#' or the identity
+#' and the identity
 #'
 #' \mjsdeqn{\mathcal{R}_0 = \frac{\langle\beta\rangle N_0}{\gamma + \mu} \frac{\sigma}{\sigma + \mu}}
 #'
@@ -73,10 +73,13 @@
 #'
 #' ## 3. Choosing \mjseqn{n}
 #'
-#' Choosing \mjseqn{n} such that \mjseqn{n \Delta t \sim 1000} years is
-#' typically enough to ensure that \mjseqn{\big(S(0),I(0),E(0)\big)} is
-#' near the attractor of the system, which can be desirable when simulating
-#' epidemic time series data (e.g., using [make_data()]).
+#' Choosing \mjseqn{n} such that \mjseqn{n \Delta t \sim 1000}
+#' years (the default) is typically enough to ensure that
+#' \mjseqn{\big(S(0),I(0)\big)} (`model = "sir"`) or
+#' \mjseqn{\big(S(0),I(0),E(0)\big)} (`model = "seir"`)
+#' are near the attractor of the system of S(E)IR equations,
+#' which can be desirable when using [make_data()] to simulate
+#' epidemic time series.
 #'
 #' @param dt_days \mjseqn{\lbrace\,\Delta t\,\rbrace}
 #'   A numeric scalar. Observation interval in days.
@@ -107,7 +110,7 @@
 #'   indicating a system of equations to be numerically integrated
 #'   (see Details 2).
 #' @param n \mjseqn{\lbrace\,n\,\rbrace}
-#'   An integer scalar (positive). A system of SIR (`model = "sir"`)
+#'   A positive integer scalar. A system of SIR (`model = "sir"`)
 #'   or SEIR (`model = "seir"`) equations will be numerically integrated
 #'   between times \mjseqn{t = -(n-1) \Delta t} and \mjseqn{t = 0} years
 #'   to obtain values for \mjseqn{S_0}, \mjseqn{E_0}, and \mjseqn{I_0}
@@ -121,7 +124,7 @@
 #' \describe{
 #'   \item{`tgen`}{\mjseqn{\lbrace\,t_\text{gen} / \Delta t\,\rbrace}
 #'     Mean generation interval of the disease of interest
-#'     in units \mjseqn{\Delta t}. Equal to \mjseqn{`tlat + tinf`}.
+#'     in units \mjseqn{\Delta t}. Equal to `tlat + tinf`.
 #'   }
 #'   \item{`beta_mean`}{\mjseqn{\lbrace\,\langle\beta\rangle \Delta t\,\rbrace}
 #'     Mean (long-term average) of the seasonally forced
@@ -146,23 +149,23 @@
 #' of [make_data()] matches that of `make_par_list()`.
 #'
 #' @examples
-#' # Creates a list for measles in England by default
-#' par_list <- make_par_list()
-#' unlist(par_list)
+#' ## Creates a plausible list for measles by default
+#' pl <- make_par_list()
+#' unlist(pl)
 #'
-#' # Time (rate) parameters should be specified
-#' # in units (per unit) of the observation interval
+#' ## Time (rate) parameters should be specified
+#' ## in units (per unit) of the observation interval
 #' dt_days <- 7
 #' tlat_days <- 5
 #' tinf_weeks <- 8 / 7
 #' muconst_peryear <- 0.04
-#' par_list <- make_par_list(
+#' pl <- make_par_list(
 #'   dt_days = dt_days,
 #'   tlat    = tlat_days / dt_days,
 #'   tinf    = tinf_weeks * 7 / dt_days,
 #'   muconst = muconst_peryear * dt_days / 365
 #' )
-#' unlist(par_list)
+#' unlist(pl)
 #'
 #' @seealso [make_data()]
 #' @export
@@ -178,7 +181,7 @@ make_par_list <- function(dt_days  = 7,
                           pconst   = 1,
                           model    = "sir",
                           n        = 1000 * 365 / dt_days) {
-  # Some derived quantities
+  ## Some derived quantities
   one_year <- 365 / dt_days
   tgen <- tlat + tinf
   if (model == "sir") {
@@ -192,19 +195,19 @@ make_par_list <- function(dt_days  = 7,
     stop("`model` must be one of `\"sir\"` or `\"seir\"`.")
   }
 
-  # Time points
+  ## Time points
   n <- floor(n)
   times <- -(n - 1):0
 
   if (model == "sir") {
 
-    # Initial state
+    ## Initial state
     x_init <- c(
       S    = N0 * (1 / Rnaught),
       logI = log(N0 * (1 - 1 / Rnaught) * (muconst / (gamma + muconst)))
     )
 
-    # System of SIR equations
+    ## System of SIR equations
     compute_ode_rates <- function(t, y, parms) {
       y["I"] <- exp(y["logI"])
       beta <- beta_mean * (1 + alpha * cos(2 * pi * t / one_year))
@@ -215,14 +218,14 @@ make_par_list <- function(dt_days  = 7,
 
   } else if (model == "seir") {
 
-    # Initial state
+    ## Initial state
     x_init <- c(
       S    = N0*(1/Rnaught),
       logE = log(N0*(1-1/Rnaught)*(muconst/(sigma+muconst))),
       logI = log(N0*(1-1/Rnaught)*(sigma/(sigma+muconst))*(muconst/(gamma+muconst)))
     )
 
-    # System of SEIR equations
+    ## System of SEIR equations
     compute_ode_rates <- function(t, y, parms) {
       y["E"] <- exp(y["logE"])
       y["I"] <- exp(y["logI"])
@@ -235,18 +238,18 @@ make_par_list <- function(dt_days  = 7,
 
   }
 
-  # Numerically integrate the system of S(E)IR equations
+  ## Numerically integrate the system of S(E)IR equations
   df <- as.data.frame(
     ode(
       y     = x_init,
       times = times,
       func  = compute_ode_rates,
       parms = NULL, # found in enclosing environment of `compute_ode_rates()`
-      hmax  = 1 # avoids error when `length(times) = 1`
+      hmax  = 1     # avoids error when `length(times) = 1`
     )
   )
 
-  # Assign final values of `S`, `E`, and `I`
+  ## Assign final values of `S`, `E`, and `I`
   S0 <- df[n, "S"]
   if (model == "seir") {
     E0 <- exp(df[n, "logE"])

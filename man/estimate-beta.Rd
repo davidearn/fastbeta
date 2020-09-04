@@ -79,7 +79,7 @@ Time since the initial time in units \mjseqn{\Delta t}.
 Equal to \code{0:(nrow(data)-1)}.
 }
 \item{\code{Z}}{\mjseqn{\lbrace\,Z_i\,\rbrace}
-Incidence. Identical to \code{data$Z}.
+Incidence. Equal to \code{data$Z}.
 }
 \item{\code{Z_agg}}{\mjseqn{\lbrace\,Z_i^\text{agg}\,\rbrace}
 Aggregated incidence. \code{Z_agg[i]} is the number of infections
@@ -88,7 +88,7 @@ between times \code{t[i-round(tgen)+1]} and \code{t[i]}, for \code{i} in
 \code{Z_agg[i]} is \code{NA} for all other \code{i}. FC method only.
 }
 \item{\code{B}}{\mjseqn{\lbrace\,B_i\,\rbrace}
-Births. Identical to \code{data$B}.
+Births. Equal to \code{data$B}.
 }
 \item{\code{B_agg}}{\mjseqn{\lbrace\,B_i^\text{agg}\,\rbrace}
 Aggregated births. \code{B_agg[i]} is the number of births
@@ -97,7 +97,7 @@ between times \code{t[i-round(tgen)+1]} and \code{t[i]}, for \code{i} in
 \code{B_agg[i]} is \code{NA} for all other \code{i}. FC method only.
 }
 \item{\code{mu}}{\mjseqn{\lbrace\,\mu_i \Delta t\,\rbrace}
-Per capita natural mortality rate. Identical to \code{data$mu}.
+Per capita natural mortality rate. Equal to \code{data$mu}.
 S, SI, and SEI methods only.
 }
 \item{\code{S}}{\mjseqn{\lbrace\,S_i\,\rbrace}
@@ -117,18 +117,29 @@ per susceptible individual per infectious individual.
 }
 }
 \description{
-Functions implementing the FC, S, SI, and SEI methods (see Algorithm)
+Functions implementing the FC, S, SI, and SEI methods (see Details)
 for estimating time-varying transmission rates \mjseqn{\beta(t)} from
 time series of incidence, births, and natural mortality with observations
 at equally spaced time points \mjseqn{t_i = t_0 + i \Delta t}. The FC
 and S methods are deprecated and outperformed by the more robust SI
 and SEI methods. These four functions should not be called directly,
 as they are all accessible through the \code{method} argument of the more
-useful constructor function \code{\link[=fastbeta]{fastbeta()}}, which does checks on input
-and output and returns a fastbeta object with associated methods.
+useful function \code{\link[=fastbeta]{fastbeta()}}, which does checks on input and output
+and returns a fastbeta object with associated methods.
 }
 \section{Details}{
-\subsection{1. Algorithm}{
+\subsection{1. Models}{
+
+The FC, S, and SI methods are derived from the SIR model
+
+\mjsdeqn{\begin{align*} \frac{\text{d}S}{\text{d}t} &= \nu(t) - \beta(t) S I - \mu(t) S\,, \cr \frac{\text{d}I}{\text{d}t} &= \beta(t) S I - \gamma I - \mu(t) I\,, \cr \frac{\text{d}R}{\text{d}t} &= \gamma I - \mu(t) R\,.\end{align*}}
+
+The SEI method is a generalization of the SI method to the SEIR model
+
+\mjsdeqn{\begin{align*} \frac{\text{d}S}{\text{d}t} &= \nu(t) - \beta(t) S I - \mu(t) S\,, \cr \frac{\text{d}E}{\text{d}t} &= \beta(t) S I - \sigma E - \mu(t) E\,, \cr \frac{\text{d}I}{\text{d}t} &= \sigma E - \gamma I - \mu(t) I\,, \cr \frac{\text{d}R}{\text{d}t} &= \gamma I - \mu(t) R\,.\end{align*}}
+}
+
+\subsection{2. Algorithms}{
 \subsection{FC method}{
 
 The supplied incidence time series \mjseqn{Z_i} (\code{data$Z}) is aggregated
@@ -211,71 +222,23 @@ per infectious individual is then estimated as
 }
 
 }
-
-\subsection{2. Missing data and zeros in incidence}{
-
-Missing values in \code{data$Z} are not tolerated and must be imputed.
-Columns \code{S} and \code{beta} in the output will be filled with \code{NA}
-after the index of the first missing value. In the FC and S methods,
-zeros in \code{data$Z} can cause divide-by-zero errors. In this case,
-column \code{beta} in the output may contain \code{NaN} and \code{Inf} where an
-estimate would otherwise be expected. In the SI and SEI methods,
-strings of zeros in \code{data$Z} can lead to spurious zeros and large
-numeric elements in column \code{beta} of the output. Zeros in \code{data$Z}
-can be "imputed" (replaced with positive values in a sensible way)
-to avoid these issues. \code{estimate_beta_method()} does not attempt
-imputation. However, see \code{\link[=fastbeta]{fastbeta()}}.
-}
-
-\subsection{3. Negative susceptibles}{
-
-If true incidence is systematically overestimated by \code{data$Z}
-or true births are systematically underestimated by \code{data$B},
-then the estimated susceptible population size can grossly
-underestimate the true number of susceptibles and can even
-become negative. In the latter case, column \code{S} in the output
-will contain negative elements. In both cases, more reasonable
-results are typically obtained by restarting with scaled up
-\code{data$Z} and/or scaled down \code{data$B}. \code{estimate_beta_method()}
-does not warn about negative susceptibles. However, see \code{\link[=fastbeta]{fastbeta()}}.
-}
-
-\subsection{4. Noise in the estimated transmission rate}{
-
-All four estimation methods propagate noise (due to process
-and observation error) from the data to transmission rate
-estimates. To distill temporal patterns of interest from the
-noise, the raw transmission rate estimates can be smoothed
-using, for example, \code{\link[stats:loess]{stats::loess()}}. \code{estimate_beta_method()}
-does not undertake smoothing.
-}
-
-\subsection{5. Effective observation interval (FC method only)}{
-
-In the absence of errors, every \code{round(par_list$tgen)}th row in
-the FC method output will be complete. The remaining rows will
-contain \code{NA} in columns \code{S}, \code{I}, \code{beta}, \code{Z_agg}, and \code{B_agg}.
-This is not a mistake: the rounded generation interval becomes
-the \emph{effective} observation interval when the incidence and births
-time series are aggregated (see Algorithm).
-}
 }
 
 \examples{
-# Simulate time series data using an SIR model
-# to test the FC, S, and SI methods
+## Simulate time series data using an SIR model
+## to test the FC, S, and SI methods
 pl_sir <- make_par_list(model = "sir")
 df_sir <- make_data(pl_sir, with_ds = FALSE, model = "sir")
 head(df_sir)
 
-# Simulate time series data using an SEIR model
-# to test the SEI method
+## Simulate time series data using an SEIR model
+## to test the SEI method
 pl_seir <- make_par_list(model = "seir")
 df_seir <- make_data(pl_seir, with_ds = FALSE, model = "seir")
 head(df_seir)
 
-# Estimate the seasonally forced transmission rate
-# underlying each simulation
+## Estimate the seasonally forced transmission rate
+## underlying each simulation
 f_list <- list(
   fc  = estimate_beta_fc,
   s   = estimate_beta_s,
@@ -292,8 +255,8 @@ lapply(eb_out, head)
 
 op <- par(mfrow = c(3, 1), mar = c(2, 6, 1, 1), oma = c(3, 0, 2, 0))
 
-# FC method fails rapidly as a result of ignoring
-# susceptible mortality
+## FC method fails rapidly as a result of ignoring
+## susceptible mortality
 plot(S ~ t, df_sir, type = "l", lwd = 4, ylim = c(43, 83) * 1e03,
      xlab = "", ylab = "Susceptible")
 lines(S ~ t, na.omit(eb_out$fc), lwd = 2, col = "seagreen")
@@ -306,7 +269,7 @@ plot(beta ~ t, df_sir, type = "l", lwd = 4, ylim = c(0.5, 1.3) * 1e-05,
 lines(beta ~ t, na.omit(eb_out$fc), lwd = 2, col = "slateblue")
 title(xlab = "Time (units dt)", line = 3, xpd = NA)
 
-# S method is visibly biased
+## S method is visibly biased
 plot(S ~ t, df_sir, type = "l", lwd = 4, ylim = c(43, 58) * 1e03,
      xlab = "", ylab = "Susceptible")
 lines(S ~ t, eb_out$s, lwd = 2, col = "seagreen")
@@ -319,7 +282,7 @@ plot(I(beta / pl_sir$beta_mean) ~ t, df_sir, type = "l", lwd = 4, ylim = c(0.7, 
 lines(I(beta / pl_sir$beta_mean) ~ t, eb_out$s, lwd = 2, col = "slateblue")
 title(xlab = "Time (units dt)", line = 3, xpd = NA)
 
-# SI method does well
+## SI method does well
 plot(S ~ t, df_sir, type = "l", lwd = 4, ylim = c(43, 58) * 1e03,
      xlab = "", ylab = "Susceptible")
 lines(S ~ t, eb_out$si, lwd = 2, col = "seagreen")
@@ -332,7 +295,7 @@ plot(I(beta / pl_sir$beta_mean) ~ t, df_sir, type = "l", lwd = 4, ylim = c(0.7, 
 lines(I(beta / pl_sir$beta_mean) ~ t, eb_out$si, lwd = 2, col = "slateblue")
 title(xlab = "Time (units dt)", line = 3, xpd = NA)
 
-# SEI method does well
+## SEI method does well
 plot(S ~ t, df_seir, type = "l", lwd = 4, ylim = c(43, 58) * 1e03,
      xlab = "", ylab = "Susceptible")
 lines(S ~ t, eb_out$sei, lwd = 2, col = "seagreen")
@@ -347,10 +310,10 @@ title(xlab = "Time (units dt)", line = 3, xpd = NA)
 
 par(op)
 
-# NOTE: Restarting with `with_ds = TRUE` passed to
-# `make_data()` suggests that the SI method is the
-# most robust to demographic stochasticity and more
-# generally to noise in the data-generating process.
+## NOTE: Restarting with `with_ds = TRUE` passed to `make_data()`
+##       suggests that the SI method is the most robust to
+##       demographic stochasticity and more generally to noise
+##       in the data-generating process.
 
 }
 \references{

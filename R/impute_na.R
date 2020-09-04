@@ -11,7 +11,8 @@
 #'   then zeros in `x` are treated like missing values.
 #'
 #' @return
-#' `x` with missing values replaced where possible.
+#' `x` with missing values replaced where possible
+#' (see Details).
 #'
 #' @details
 #' Missing values include `NA`, `NaN`, `Inf`, and `-Inf`.
@@ -32,7 +33,7 @@
 #' @export
 #' @importFrom stats approx
 impute_na <- function(x, zero_as_na = FALSE) {
-  # Do nothing if there is nothing to do
+  ## Do nothing if there is nothing to do
   if (!is.numeric(x)) {
     return(x)
   }
@@ -44,7 +45,7 @@ impute_na <- function(x, zero_as_na = FALSE) {
 
   x[is.nan(x) | is.infinite(x)] <- NA
 
-  # Do nothing else if nothing else can be done
+  ## Do nothing else if nothing else can be done
   r <- range(which(!is.na(x)))
   if (r[2] - r[1] < 2) {
     return(x)

@@ -2,7 +2,7 @@
 #'
 #' @description
 #' A wrapper of [stats::loess()] for equally spaced time series.
-#' Fits a loess curve to the specified time series using each
+#' Fits loess curves to the specified time series using each
 #' supplied value of the smoothing parameter and optionally plots
 #' the fitted curves.
 #'
@@ -13,8 +13,8 @@
 #' of `span` (those produced by non-integer `q`) are redundant.
 #' See \insertCite{ClevGros+91;textual}{fastbeta} for details.
 #'
-#' When fitting local quadratic polynomials (`degree = 2` by
-#' default), `q > 5` is required to ensure that the local
+#' When fitting local quadratic polynomials (`degree = 2`;
+#' the default), `q > 5` is required to ensure that the local
 #' smoothing kernel assigns at least 3 observations a positive
 #' weight. This will guarantee a unique least squares fit.
 #' When fitting local linear polynomials (`degree = 1`),
@@ -36,7 +36,7 @@
 #'   [stats::loess()] will be `q / nrow(data)` (see Details).
 #' @param ... Additional arguments of [stats::loess()], such as
 #'   `degree`, but not `subset` or `span`. Those not specified
-#'   are assigned their default values in [stats::loess()].
+#'   are assigned their default values (see [stats::loess()]).
 #' @param plot A logical scalar. If `TRUE`, then the fitted curves
 #'   are plotted (4 curves per plot).
 #'
@@ -51,7 +51,7 @@
 #' control <- loess.control(surface = "direct")
 #' try_loess_out <- try_loess(x ~ t, df, q, control = control, plot = TRUE)
 #'
-#' # Fit with `q = 100` looks okay
+#' ## Fit with `q = 100` looks okay
 #' my_loess <- try_loess_out[["q100"]]
 #'
 #' @references
@@ -59,7 +59,7 @@
 #'
 #' @export
 #' @importFrom stats loess
-#' @importFrom graphics par plot.new plot.window axis lines title box
+#' @import graphics
 try_loess <- function(formula, data, q = 6:9, ..., plot = TRUE) {
   span <- q / nrow(data)
   out <- lapply(span, function(x) loess(formula, data, span = x, ...))

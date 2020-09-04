@@ -2,13 +2,13 @@
 #'
 #' @description
 #' Deconvolves an equally spaced reported incidence time series using a
-#' Richardson-Lucy iteration, generating an estimate of the underlying
+#' Richardson-Lucy iteration, generating a reconstruction of the underlying
 #' incidence time series.
 #'
 #' @details
 #' # Details
 #'
-#' ## 1. Differences compared to \insertCite{Gold+09;textual}{fastbeta}
+#' ## 1. Departures from \insertCite{Gold+09;textual}{fastbeta}
 #' The algorithm follows \insertCite{Gold+09;textual}{fastbeta} with the
 #' following differences:
 #' * Reported incidence is observed from day 0 to day `length(x)-1`,
@@ -30,9 +30,9 @@
 #'
 #' ## 2. Noise in deconvolved incidence and choosing when to stop
 #' \insertCite{Gold+09;textual}{fastbeta} suggest to stop iterating
-#' once `chi2 < 1` and to keep the last generated incidence time series
-#' (see `chi2` in Value). The reason for this criterion is that
-#' deconvolved incidence tends to acquire undesired noise after several
+#' once `chi2 < 1` and to keep the last generated incidence time
+#' series (see `chi2` in Value). The reason for this criterion is that
+#' deconvolved incidence can acquire undesired noise after several
 #' iterations, and it is typically better to stop before this happens
 #' (see the supplement to \insertCite{Gold+09;textual}{fastbeta} for
 #' details). However, this criterion is not guaranteed to produce an
@@ -109,8 +109,8 @@
 #'     computed as
 #'     `mean((x - y)^2 / y)`, where `y = inc_rep[b+1:length(x), j]`.
 #'     \insertCite{Gold+09;textual}{fastbeta} suggest taking column
-#'     `j = min(which(chi2 < 1))` to estimate incidence instead of
-#'     the last column (see Details 2).
+#'     `j = min(which(chi2 < 1))` of `inc` to estimate incidence
+#'     instead of the last column (see Details 2).
 #'   }
 #'   \item{`call`}{The function call. The deconvol object is reproducible
 #'     with `eval(call)`.
@@ -120,13 +120,14 @@
 #'   }
 #' }
 #'
-#' Note that `poisson`, `inc`, and `inc_rep` all have `b+length(x)` rows
+#' `poisson`, `inc`, and `inc_rep` all have `b+length(x)` rows
 #' (corresponding to the elements of `times`) and `1+it_max` columns
 #' (one for each iteration, starting from an initial value).
 #'
 #' If `simple = TRUE`, then a data frame whose first column is `times`
-#' and whose second column is `inc[, min(which(chi2 < 1))]` or otherwise
-#' `inc[, ncol(inc)]`.
+#' and whose second column is `inc[, min(which(chi2 < 1))]` or
+#' otherwise `inc[, ncol(inc)]`, depending on whether the chi-squared
+#' criterion was reached.
 #'
 #' @references
 #' \insertRef{Gold+09}{fastbeta}
@@ -146,49 +147,49 @@ deconvol <- function(x,
                      p = 1,
                      it_max = 20L,
                      simple = FALSE) {
-  # Save arguments in a list
+  ## Save arguments in a list
   arg_list <- as.list(environment())
 
-  # Normalize `delay_dist`
+  ## Normalize `delay_dist`
   delay_dist <- delay_dist / sum(delay_dist)
 
-  # Cases are reported at times `0:(N-1)`
+  ## Cases are reported at times `0:(N-1)`
   N <- length(x)
 
-  # Time from infection to reporting is at most `b` days
+  ## Time from infection to reporting is at most `b` days
   b <- max(which(delay_dist > 0)) - 1
 
-  # Pad `x` and `delay_dist` with zeros to length `b + N`
-  # (convenient for matrix operations)
+  ## Pad `x` and `delay_dist` with zeros to length `b + N`
+  ## (convenient for matrix operations)
   x <- c(rep(0, b), x)
   delay_dist <- c(delay_dist[1:(b+1)], rep(0, N - 1))
 
-  # Create a lower triangular transition matrix satisfying
-  # `L[i,j] == delay_dist[i-j+1]`
+  ## Create a lower triangular transition matrix satisfying
+  ## `L[i,j] == delay_dist[i-j+1]`
   L <- array(rep(c(delay_dist, 0), b + N), dim = rep(b + N, 2))
   L[upper.tri(L, diag = FALSE)] <- 0
 
-  # Create an upper triangular transition matrix satisfying
-  # `U[i,j] == delay_dist[j-i+1]`
+  ## Create an upper triangular transition matrix satisfying
+  ## `U[i,j] == delay_dist[j-i+1]`
   U <- t(L)
 
-  # Compute the probability `q[i]` that an infection on day `i-b-1`
-  # is reported on day `j` for some `j` in `0:(N-1)`
+  ## Compute the probability `q[i]` that an infection on day `i-b-1`
+  ## is reported on day `j` for some `j` in `0:(N-1)`
   v <- c(rep(0, b), rep(1, N))
   q <- U %*% v
   qnz <- q > 0
 
-  # Preallocate space for all estimates of the Poisson parameter vector
-  # and the corresponding time series of (expected) reported incidence
+  ## Preallocate space for all estimates of the Poisson parameter vector
+  ## and the corresponding time series of (expected) reported incidence
   P <- matrix(NA, nrow = b + N, ncol = 1 + it_max)
   E <- P
 
-  # Initial estimate of the Poisson parameter vector is `x`
-  # binned backwards in time according to `delay_dist`
+  ## Initial estimate of the Poisson parameter vector is `x`
+  ## binned backwards in time according to `delay_dist`
   P[qnz, 1] <- U[qnz, ] %*% x
   E[, 1] <- L[, qnz] %*% P[qnz, 1]
 
-  # Carry out the Richardson-Lucy iteration
+  ## Carry out the Richardson-Lucy iteration
   for (j in 1:it_max) {
     enz <- E[, j] > 0
     P[qnz, j+1] <- (P[qnz, j] / q[qnz]) *
@@ -196,12 +197,12 @@ deconvol <- function(x,
     E[, j+1] <- L[, qnz] %*% P[qnz, j+1]
   }
 
-  # Compute the normalized chi-squared statistic associated with
-  # each time series of (expected) reported incidence
+  ## Compute the normalized chi-squared statistic associated with
+  ## each time series of (expected) reported incidence
   compute_chi2 <- function(y) mean(((x - y)^2 / y)[b+1:N])
   chi2 <- apply(E, 2, compute_chi2)
 
-  # Recover incidence from each Poisson parameter vector
+  ## Recover incidence from each Poisson parameter vector
   Z <- P / p
 
   if (simple) {

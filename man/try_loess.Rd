@@ -21,7 +21,7 @@ Must satisfy \code{all(all.vars(formula) \%in\% names(data))}
 
 \item{...}{Additional arguments of \code{\link[stats:loess]{stats::loess()}}, such as
 \code{degree}, but not \code{subset} or \code{span}. Those not specified
-are assigned their default values in \code{\link[stats:loess]{stats::loess()}}.}
+are assigned their default values (see \code{\link[stats:loess]{stats::loess()}}).}
 
 \item{plot}{A logical scalar. If \code{TRUE}, then the fitted curves
 are plotted (4 curves per plot).}
@@ -31,7 +31,7 @@ Invisibly, a list of loess objects with names \code{paste0("q", q)}.
 }
 \description{
 A wrapper of \code{\link[stats:loess]{stats::loess()}} for equally spaced time series.
-Fits a loess curve to the specified time series using each
+Fits loess curves to the specified time series using each
 supplied value of the smoothing parameter and optionally plots
 the fitted curves.
 }
@@ -42,8 +42,8 @@ time series, all possible smoothing kernels are captured by
 of \code{span} (those produced by non-integer \code{q}) are redundant.
 See \insertCite{ClevGros+91;textual}{fastbeta} for details.
 
-When fitting local quadratic polynomials (\code{degree = 2} by
-default), \code{q > 5} is required to ensure that the local
+When fitting local quadratic polynomials (\code{degree = 2};
+the default), \code{q > 5} is required to ensure that the local
 smoothing kernel assigns at least 3 observations a positive
 weight. This will guarantee a unique least squares fit.
 When fitting local linear polynomials (\code{degree = 1}),
@@ -62,7 +62,7 @@ q <- c(6, 20, 100, 400)
 control <- loess.control(surface = "direct")
 try_loess_out <- try_loess(x ~ t, df, q, control = control, plot = TRUE)
 
-# Fit with `q = 100` looks okay
+## Fit with `q = 100` looks okay
 my_loess <- try_loess_out[["q100"]]
 
 }

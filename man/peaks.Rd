@@ -32,7 +32,7 @@ A peaks object. A list with elements:
 \describe{
 \item{\code{x}}{A numeric vector. The value of \code{x} in the function call.}
 \item{\code{xbar}}{A numeric vector. The result of applying
-a \code{(2 * bw1 + 1)}-point central moving average to \code{x}.
+a \code{(2*bw1+1)}-point central moving average to \code{x}.
 }
 \item{\code{all}}{An integer vector. A subset of \code{seq_along(x)}
 listing the index of each peak in \code{x}.
@@ -119,7 +119,7 @@ of points in the temporal neighbourhoods that distinguish local
 maxima from other points (choosing \code{bw2} large enough). Not
 disqualifying true peaks is a matter of not including more than
 one peak in those temporal neighbourhoods (choosing \code{bw2} less
-than \code{0.5 * num_dt_in_period / num_peaks_in_period} if peaks are
+than \code{0.5 * num_dt_in_period / num_peaks_in_period}, if peaks are
 evenly spaced within a period).
 
 Reasonable results are typically obtained by:
@@ -135,16 +135,18 @@ is smooth around the peaks, which can be found by experimenting with
 }
 
 \examples{
-# Create a noisy 2-periodic time series with 2 peaks per period
+## Create a noisy 2-periodic time series
+## with 2 peaks per period
 times <- seq(0, 20, by = 0.01)
 x <- sin(2 * pi * times) + sin(pi * times) + rnorm(times, 0, 0.5)
 plot(x, type = "l", lwd = 2, col = "grey80", las = 1)
 
-# Smoothing with `bw1 = 20` removes noise around the peaks
+## Smoothing with `bw1 = 20` removes noise
+## around the peaks
 bw1 <- 20
 m <- 2 * bw1 + 1
 xbar <- as.vector(
-  filter(x,
+  stats::filter(x,
     filter = rep(1 / m, m),
     method = "convolution",
     sides  = 2
@@ -152,11 +154,11 @@ xbar <- as.vector(
 )
 lines(xbar, lwd = 2)
 
-# Setting `bw2 = 0.4 * num_dt_in_period / num_peaks_in_period`
-# tends to yield reasonable results
+## Setting `bw2 = 0.4 * num_dt_in_period / num_peaks_in_period`
+## tends to yield reasonable results
 bw2 <- 0.4 * 200 / 2
 
-# Locate peaks in time series
+## Locate peaks in time series
 peaks_out <- peaks(
   x = x,
   bw1 = bw1,
@@ -164,9 +166,9 @@ peaks_out <- peaks(
   period = 200 # period is 200 observation intervals
 )
 
-# Verify that peaks were identified correctly:
-# * Blue lines are peaks.
-# * Pink circles are peaks in phase with first peak.
+## Verify that peaks were identified correctly:
+## * Blue lines are peaks.
+## * Pink circles are peaks in phase with first peak.
 plot(peaks_out)
 
 }

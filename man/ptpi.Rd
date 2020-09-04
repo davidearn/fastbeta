@@ -47,16 +47,17 @@ before stopping.}
 A ptpi object. A list with elements:
 
 \describe{
-\item{\code{times}}{A numeric vector. The rows of \code{mat} correspond
-to these time points. Identical to \code{data$t}.
+\item{\code{times}}{A numeric vector listing times since the initial
+time in units of the observation interval. The rows of \code{mat}
+correspond to these time points. Equal to \code{0:(nrow(data)-1)}.
 }
-\item{\code{mat}}{A numeric matrix with \code{length(times)} rows and \code{1 + it}
+\item{\code{mat}}{A numeric matrix with \code{length(times)} rows and \code{1+it}
 columns containing the susceptible time series generated in each
 iteration. \code{mat[i,j]} gives the value of \mjseqn{S_{i-1}^{(j-1)}}
 as defined in Algorithm.
 }
-\item{\code{S0}}{A numeric vector listing in order all \code{1 + it} estimates of
-\mjseqn{S_0 = S(t_0)}. Equivalent to \code{mat[1, ]}.
+\item{\code{S0}}{A numeric vector listing in order all \code{1+it} estimates
+of \mjseqn{S_0 = S(t_0)}. Equivalent to \code{mat[1, ]}.
 }
 \item{\code{S0_final}}{A numeric scalar giving the final estimate
 of \mjseqn{S_0}. Equivalent to \code{mat[1, ncol(mat)]}.
@@ -137,15 +138,15 @@ even if incidence is not truly periodic, because, within the iteration,
 incidence is always \emph{effectively} \mjseqn{((b - a) \Delta t)}-periodic.
 This can be seen by noting that \mjseqn{S_a^{(j)}} is updated recursively,
 with each update using the same \mjseqn{b - a} observations of incidence:
-\mjseqn{Z_{a+1}, \ldots, Z_b}. Hence the limits above will be correct for
-aperiodic (or just roughly periodic) incidence provided that \mjseqn{p}
-is replaced with \mjseqn{b - a}.
+\mjseqn{Z_{a+1}, \ldots, Z_b}. Hence the limits above will be correct
+even for aperiodic (or just roughly periodic) incidence provided that
+\mjseqn{p} is replaced with \mjseqn{b - a}.
 }
 }
 
 \examples{
-# Simulate 20 years of disease incidence,
-# observed weekly
+## Simulate 20 years of disease incidence,
+## observed weekly
 pl <- make_par_list(model = "sir")
 df <- make_data(pl,
   n = 20 * 365 / 7, # number of weeks in 20 years
@@ -153,14 +154,14 @@ df <- make_data(pl,
   model = "sir"
 )
 
-# Plot incidence time series, and note the
-# apparent 1-year period
+## Plot incidence time series, and note the
+## apparent 1-year period
 plot(Z ~ t_years, df, type = "l",
   xlab = "Time (years)",
   ylab = "Incidence"
 )
 
-# Locate peaks in incidence time series
+## Locate peaks in incidence time series
 peaks_out <- peaks(
   x = df$Z,
   bw1 = 6,
@@ -168,14 +169,14 @@ peaks_out <- peaks(
   period = 365 / 7 # number of weeks in 1 year
 )
 
-# Verify that peaks were identified correctly:
-# * Blue lines are peaks.
-# * Pink circles are peaks in phase with first peak.
+## Verify that peaks were identified correctly:
+## * Blue lines are peaks.
+## * Pink circles are peaks in phase with first peak.
 plot(peaks_out)
 
-# Estimate `S0` from incidence, births, and
-# natural mortality using PTPI, starting from
-# an erroneous initial guess
+## Estimate `S0` from incidence, births, and
+## natural mortality using PTPI, starting from
+## an erroneous initial guess
 ptpi_out <- ptpi(
   data = df,
   S0_init = df$S[1] * 4,
@@ -185,10 +186,10 @@ ptpi_out <- ptpi(
 )
 plot(ptpi_out)
 
-# Sequence of estimates
+## Sequence of estimates
 ptpi_out$S0
 
-# Relative error in final estimate
+## Relative error in final estimate
 (ptpi_out$S0_final - df$S[1]) / df$S[1]
 
 }

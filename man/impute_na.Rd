@@ -13,7 +13,8 @@ impute_na(x, zero_as_na = FALSE)
 then zeros in \code{x} are treated like missing values.}
 }
 \value{
-\code{x} with missing values replaced where possible.
+\code{x} with missing values replaced where possible
+(see Details).
 }
 \description{
 Imputes missing values in a numeric vector by linear

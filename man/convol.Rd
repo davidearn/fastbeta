@@ -4,7 +4,7 @@
 \alias{convol}
 \title{Convolve an incidence time series with a delay distribution}
 \usage{
-convol(x, delay_dist = c(1), n = 0)
+convol(x, delay_dist = c(1), n = 0L)
 }
 \arguments{
 \item{x}{An integer vector defining an equally spaced incidence time series.

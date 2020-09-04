@@ -7,10 +7,10 @@
 #' with the core machinery divided across different functions,
 #' each with its own purpose and convenient plotting methods.
 #'
-#' [fastbeta()] provides access to the **FC, S, SI, and SEI
-#' methods** of estimating time-varying transmission rates from
-#' incidence time series. The FC, S, and SI methods are derived
-#' from the SIR model
+#' [fastbeta()] is a wrapper giving access to the **FC, S, SI, and
+#' SEI methods** of estimating time-varying transmission rates from
+#' incidence time series. The FC, S, and SI methods are derived from
+#' the SIR model
 #'
 #' \mjsdeqn{\begin{align*} \frac{\text{d}S}{\text{d}t} &= \nu(t) - \beta(t) S I - \mu(t) S\,, \cr \frac{\text{d}I}{\text{d}t} &= \beta(t) S I - \gamma I - \mu(t) I\,, \cr \frac{\text{d}R}{\text{d}t} &= \gamma I - \mu(t) R\,,\end{align*}}
 #'
@@ -20,7 +20,7 @@
 #'
 #' \mjsdeqn{\begin{align*} \frac{\text{d}S}{\text{d}t} &= \nu(t) - \beta(t) S I - \mu(t) S\,, \cr \frac{\text{d}E}{\text{d}t} &= \beta(t) S I - \sigma E - \mu(t) E\,, \cr \frac{\text{d}I}{\text{d}t} &= \sigma E - \gamma I - \mu(t) I\,, \cr \frac{\text{d}R}{\text{d}t} &= \gamma I - \mu(t) R\,.\end{align*}}
 #'
-#' The details of the individual algorithms are gathered
+#' Details of the individual algorithms are gathered
 #' [here][estimate-beta].
 #'
 #' As a result of process and observation error, [fastbeta()]
@@ -30,9 +30,9 @@
 #' smooth loess curves** to noisy time series using different
 #' values for the smoothing parameter.
 #'
-#' [bsbeta()] can be used to generate **bootstrap confidence
-#' intervals** on transmission rate estimates produced by
-#' [fastbeta()] (or loess fits to those estimates).
+#' [bootbeta()] can be used to generate **bootstrap confidence intervals**
+#' on transmission rate estimates produced by [fastbeta()] (or on loess fits
+#' to those estimates).
 #'
 #' In the typical case where one knows reported incidence but not
 #' incidence, [fastbeta()] should not be used directly. Instead,
@@ -50,12 +50,14 @@
 #' can be used to produce a reasonable estimate starting from a
 #' poor initial guess.
 #'
-#' [make_data()] can be used to **simulate epidemic time series
+#' [make_data()] can be used to simulate **epidemic time series
 #' data** against which many of these functions can be tested.
-#' See [fastbeta()], [bsbeta()], and [ptpi()] for examples.
+#' See [fastbeta()], [bootbeta()], and [ptpi()] for examples.
 #'
 #' @references
 #' \insertRef{Jaga+20}{fastbeta}
+#'
+#' \insertRef{FineClar82}{fastbeta}
 #'
 #' \insertRef{Gold+09}{fastbeta}
 #'
@@ -66,9 +68,10 @@
 #' @importFrom mathjaxr preview_rd
 "_PACKAGE"
 
-# For `R CMD check`
+## For `R CMD check`
 if (getRversion() >= "2.15.1") {
-  utils::globalVariables(c("tgen", "tlat", "tinf",
-                           "S", "E", "logE", "logI", "R",
-                           "Zcum", "Bcum"))
+  utils::globalVariables(
+    c("tgen", "tlat", "tinf",
+      "S", "E", "logE", "logI", "R", "Zcum", "Bcum")
+  )
 }

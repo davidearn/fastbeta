@@ -59,7 +59,7 @@ indicating a system of equations to be numerically integrated
 (see Details 2).}
 
 \item{n}{\mjseqn{\lbrace\,n\,\rbrace}
-An integer scalar (positive). A system of SIR (\code{model = "sir"})
+A positive integer scalar. A system of SIR (\code{model = "sir"})
 or SEIR (\code{model = "seir"}) equations will be numerically integrated
 between times \mjseqn{t = -(n-1) \Delta t} and \mjseqn{t = 0} years
 to obtain values for \mjseqn{S_0}, \mjseqn{E_0}, and \mjseqn{I_0}
@@ -73,7 +73,7 @@ these additional numeric scalar elements:
 \describe{
 \item{\code{tgen}}{\mjseqn{\lbrace\,t_\text{gen} / \Delta t\,\rbrace}
 Mean generation interval of the disease of interest
-in units \mjseqn{\Delta t}. Equal to \mjseqn{\code{tlat + tinf}}.
+in units \mjseqn{\Delta t}. Equal to \code{tlat + tinf}.
 }
 \item{\code{beta_mean}}{\mjseqn{\lbrace\,\langle\beta\rangle \Delta t\,\rbrace}
 Mean (long-term average) of the seasonally forced
@@ -112,7 +112,7 @@ of \mjseqn{\mathcal{R}_0} by enforcing the identity
 \mjsdeqn{\mathcal{R}_0 = \frac{\langle\beta\rangle N_0}{\gamma + \mu}}
 
 if \code{model = "sir"}, where \mjseqn{\gamma = 1 / (t_\text{lat} + t_\text{inf})},
-or the identity
+and the identity
 
 \mjsdeqn{\mathcal{R}_0 = \frac{\langle\beta\rangle N_0}{\gamma + \mu} \frac{\sigma}{\sigma + \mu}}
 
@@ -171,31 +171,34 @@ the value of \mjseqn{S(0)}, \mjseqn{E(0)}, and \mjseqn{I(0)}, respectively.
 
 \subsection{3. Choosing \mjseqn{n}}{
 
-Choosing \mjseqn{n} such that \mjseqn{n \Delta t \sim 1000} years is
-typically enough to ensure that \mjseqn{\big(S(0),I(0),E(0)\big)} is
-near the attractor of the system, which can be desirable when simulating
-epidemic time series data (e.g., using \code{\link[=make_data]{make_data()}}).
+Choosing \mjseqn{n} such that \mjseqn{n \Delta t \sim 1000}
+years (the default) is typically enough to ensure that
+\mjseqn{\big(S(0),I(0)\big)} (\code{model = "sir"}) or
+\mjseqn{\big(S(0),I(0),E(0)\big)} (\code{model = "seir"})
+are near the attractor of the system of S(E)IR equations,
+which can be desirable when using \code{\link[=make_data]{make_data()}} to simulate
+epidemic time series.
 }
 }
 
 \examples{
-# Creates a list for measles in England by default
-par_list <- make_par_list()
-unlist(par_list)
+## Creates a plausible list for measles by default
+pl <- make_par_list()
+unlist(pl)
 
-# Time (rate) parameters should be specified
-# in units (per unit) of the observation interval
+## Time (rate) parameters should be specified
+## in units (per unit) of the observation interval
 dt_days <- 7
 tlat_days <- 5
 tinf_weeks <- 8 / 7
 muconst_peryear <- 0.04
-par_list <- make_par_list(
+pl <- make_par_list(
   dt_days = dt_days,
   tlat    = tlat_days / dt_days,
   tinf    = tinf_weeks * 7 / dt_days,
   muconst = muconst_peryear * dt_days / 365
 )
-unlist(par_list)
+unlist(pl)
 
 }
 \seealso{

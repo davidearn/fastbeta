@@ -16,10 +16,10 @@ This package implements and extends the methods described in
 with the core machinery divided across different functions,
 each with its own purpose and convenient plotting methods.
 
-\code{\link[=fastbeta]{fastbeta()}} provides access to the \strong{FC, S, SI, and SEI
-methods} of estimating time-varying transmission rates from
-incidence time series. The FC, S, and SI methods are derived
-from the SIR model
+\code{\link[=fastbeta]{fastbeta()}} is a wrapper giving access to the \strong{FC, S, SI, and
+SEI methods} of estimating time-varying transmission rates from
+incidence time series. The FC, S, and SI methods are derived from
+the SIR model
 
 \mjsdeqn{\begin{align*} \frac{\text{d}S}{\text{d}t} &= \nu(t) - \beta(t) S I - \mu(t) S\,, \cr \frac{\text{d}I}{\text{d}t} &= \beta(t) S I - \gamma I - \mu(t) I\,, \cr \frac{\text{d}R}{\text{d}t} &= \gamma I - \mu(t) R\,,\end{align*}}
 
@@ -29,7 +29,7 @@ is a generalization of the SI method to the SEIR model
 
 \mjsdeqn{\begin{align*} \frac{\text{d}S}{\text{d}t} &= \nu(t) - \beta(t) S I - \mu(t) S\,, \cr \frac{\text{d}E}{\text{d}t} &= \beta(t) S I - \sigma E - \mu(t) E\,, \cr \frac{\text{d}I}{\text{d}t} &= \sigma E - \gamma I - \mu(t) I\,, \cr \frac{\text{d}R}{\text{d}t} &= \gamma I - \mu(t) R\,.\end{align*}}
 
-The details of the individual algorithms are gathered
+Details of the individual algorithms are gathered
 \link[=estimate-beta]{here}.
 
 As a result of process and observation error, \code{\link[=fastbeta]{fastbeta()}}
@@ -39,9 +39,9 @@ it is difficult to discern temporal patterns of interest.
 smooth loess curves} to noisy time series using different
 values for the smoothing parameter.
 
-\code{\link[=bsbeta]{bsbeta()}} can be used to generate \strong{bootstrap confidence
-intervals} on transmission rate estimates produced by
-\code{\link[=fastbeta]{fastbeta()}} (or loess fits to those estimates).
+\code{\link[=bootbeta]{bootbeta()}} can be used to generate \strong{bootstrap confidence intervals}
+on transmission rate estimates produced by \code{\link[=fastbeta]{fastbeta()}} (or on loess fits
+to those estimates).
 
 In the typical case where one knows reported incidence but not
 incidence, \code{\link[=fastbeta]{fastbeta()}} should not be used directly. Instead,
@@ -59,12 +59,14 @@ incidence is roughly periodic, then \code{\link[=peaks]{peaks()}} and \code{\lin
 can be used to produce a reasonable estimate starting from a
 poor initial guess.
 
-\code{\link[=make_data]{make_data()}} can be used to \strong{simulate epidemic time series
+\code{\link[=make_data]{make_data()}} can be used to simulate \strong{epidemic time series
 data} against which many of these functions can be tested.
-See \code{\link[=fastbeta]{fastbeta()}}, \code{\link[=bsbeta]{bsbeta()}}, and \code{\link[=ptpi]{ptpi()}} for examples.
+See \code{\link[=fastbeta]{fastbeta()}}, \code{\link[=bootbeta]{bootbeta()}}, and \code{\link[=ptpi]{ptpi()}} for examples.
 }
 \references{
 \insertRef{Jaga+20}{fastbeta}
+
+\insertRef{FineClar82}{fastbeta}
 
 \insertRef{Gold+09}{fastbeta}
 }

@@ -68,9 +68,9 @@
 #' incidence is always *effectively* \mjseqn{((b - a) \Delta t)}-periodic.
 #' This can be seen by noting that \mjseqn{S_a^{(j)}} is updated recursively,
 #' with each update using the same \mjseqn{b - a} observations of incidence:
-#' \mjseqn{Z_{a+1}, \ldots, Z_b}. Hence the limits above will be correct for
-#' aperiodic (or just roughly periodic) incidence provided that \mjseqn{p}
-#' is replaced with \mjseqn{b - a}.
+#' \mjseqn{Z_{a+1}, \ldots, Z_b}. Hence the limits above will be correct
+#' even for aperiodic (or just roughly periodic) incidence provided that
+#' \mjseqn{p} is replaced with \mjseqn{b - a}.
 #'
 #' @param data A data frame with numeric columns:
 #'
@@ -108,16 +108,17 @@
 #' A ptpi object. A list with elements:
 #'
 #' \describe{
-#'   \item{`times`}{A numeric vector. The rows of `mat` correspond
-#'     to these time points. Identical to `data$t`.
+#'   \item{`times`}{A numeric vector listing times since the initial
+#'     time in units of the observation interval. The rows of `mat`
+#'     correspond to these time points. Equal to `0:(nrow(data)-1)`.
 #'   }
-#'   \item{`mat`}{A numeric matrix with `length(times)` rows and `1 + it`
+#'   \item{`mat`}{A numeric matrix with `length(times)` rows and `1+it`
 #'     columns containing the susceptible time series generated in each
 #'     iteration. `mat[i,j]` gives the value of \mjseqn{S_{i-1}^{(j-1)}}
 #'     as defined in Algorithm.
 #'   }
-#'   \item{`S0`}{A numeric vector listing in order all `1 + it` estimates of
-#'     \mjseqn{S_0 = S(t_0)}. Equivalent to `mat[1, ]`.
+#'   \item{`S0`}{A numeric vector listing in order all `1+it` estimates
+#'     of \mjseqn{S_0 = S(t_0)}. Equivalent to `mat[1, ]`.
 #'   }
 #'   \item{`S0_final`}{A numeric scalar giving the final estimate
 #'     of \mjseqn{S_0}. Equivalent to `mat[1, ncol(mat)]`.
@@ -131,8 +132,8 @@
 #' }
 #'
 #' @examples
-#' # Simulate 20 years of disease incidence,
-#' # observed weekly
+#' ## Simulate 20 years of disease incidence,
+#' ## observed weekly
 #' pl <- make_par_list(model = "sir")
 #' df <- make_data(pl,
 #'   n = 20 * 365 / 7, # number of weeks in 20 years
@@ -140,14 +141,14 @@
 #'   model = "sir"
 #' )
 #'
-#' # Plot incidence time series, and note the
-#' # apparent 1-year period
+#' ## Plot incidence time series, and note the
+#' ## apparent 1-year period
 #' plot(Z ~ t_years, df, type = "l",
 #'   xlab = "Time (years)",
 #'   ylab = "Incidence"
 #' )
 #'
-#' # Locate peaks in incidence time series
+#' ## Locate peaks in incidence time series
 #' peaks_out <- peaks(
 #'   x = df$Z,
 #'   bw1 = 6,
@@ -155,14 +156,14 @@
 #'   period = 365 / 7 # number of weeks in 1 year
 #' )
 #'
-#' # Verify that peaks were identified correctly:
-#' # * Blue lines are peaks.
-#' # * Pink circles are peaks in phase with first peak.
+#' ## Verify that peaks were identified correctly:
+#' ## * Blue lines are peaks.
+#' ## * Pink circles are peaks in phase with first peak.
 #' plot(peaks_out)
 #'
-#' # Estimate `S0` from incidence, births, and
-#' # natural mortality using PTPI, starting from
-#' # an erroneous initial guess
+#' ## Estimate `S0` from incidence, births, and
+#' ## natural mortality using PTPI, starting from
+#' ## an erroneous initial guess
 #' ptpi_out <- ptpi(
 #'   data = df,
 #'   S0_init = df$S[1] * 4,
@@ -172,10 +173,10 @@
 #' )
 #' plot(ptpi_out)
 #'
-#' # Sequence of estimates
+#' ## Sequence of estimates
 #' ptpi_out$S0
 #'
-#' # Relative error in final estimate
+#' ## Relative error in final estimate
 #' (ptpi_out$S0_final - df$S[1]) / df$S[1]
 #'
 #' @references
@@ -206,22 +207,22 @@ ptpi <- function(data, S0_init, peak1 = 1L, peak2 = nrow(data), it = 10L) {
     stop("`it` must be a non-negative integer scalar.")
   }
 
-  # Save arguments in a list
+  ## Save arguments in a list
   arg_list <- as.list(environment())
 
-  # Preallocate memory for all susceptible time series,
-  # and initialize the first
+  ## Preallocate memory for all susceptible time series,
+  ## and initialize the first
   it <- floor(it)
   mat <- matrix(NA, nrow = nrow(data), ncol = 1 + it)
   mat[1, 1] <- S0_init
   mat[peak1, 1] <- S0_init
 
-  # Iterate
+  ## Iterate
   for (j in seq_len(1 + it)) {
 
-    # Update estimate of susceptibles at index `peak1`
-    # with estimate at index `peak2` after reconstructing
-    # from index `peak1` to end
+    ## Update estimate of susceptibles at index `peak1`
+    ## with estimate at index `peak2` after reconstructing
+    ## from index `peak1` to end
     for (i in (peak1+1):nrow(mat)) {
       mat[i, j] <- with(data[c("Z", "B", "mu")],
         {
@@ -235,9 +236,9 @@ ptpi <- function(data, S0_init, peak1 = 1L, peak2 = nrow(data), it = 10L) {
     }
     mat[peak1, j+1] <- mat[peak2, j]
 
-    # Update estimate of susceptibles at initial time
-    # by reconstructing from index `peak1` to start
-    # (backwards in time)
+    ## Update estimate of susceptibles at initial time
+    ## by reconstructing from index `peak1` to start
+    ## (backwards in time)
     for (i in (peak1-1):1) {
       mat[i, j+1] <- with(data[c("Z", "B", "mu")],
         {

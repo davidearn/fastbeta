@@ -11,7 +11,7 @@ NULL
 
 #' @rdname ptpi-methods
 #' @export
-#' @importFrom graphics plot lines points mtext
+#' @import graphics
 plot.ptpi <- function(x, ...) {
   if (!inherits(x, "ptpi")) {
     stop("`x` must be a ptpi object.")

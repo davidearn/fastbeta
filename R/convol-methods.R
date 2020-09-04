@@ -10,7 +10,7 @@ NULL
 
 #' @rdname convol-methods
 #' @export
-#' @importFrom graphics par plot.new plot.window lines axis title box legend
+#' @import graphics
 plot.convol <- function(x, ...) {
   if (!inherits(x, "convol")) {
     stop("`x` must be a convol object.")

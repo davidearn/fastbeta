@@ -90,70 +90,110 @@ The fastbeta object is reproducible with \code{do.call(fastbeta, arg_list)}.
 }
 }
 \description{
-A wrapper for the \code{\link[=estimate-beta]{estimate_beta_method()}} functions,
-which implement the FC, S, SI, and SEI methods for estimating time-varying
-transmission rates \mjseqn{\beta(t)} from equally spaced time series of
-incidence, births, and natural mortality.
+A wrapper for the \code{\link[=estimate-beta]{estimate_beta_method()}}
+functions. These implement the FC, S, SI, and SEI methods for
+estimating time-varying transmission rates \mjseqn{\beta(t)}
+from time series of incidence, births, and natural mortality
+observed at equally spaced time points \mjseqn{t_i = t_0 + i \Delta t}.
+Note that the algorithms require incidence, \emph{not} reported
+incidence. See \code{\link[=deconvol]{deconvol()}} for a method of reconstructing
+incidence from reported incidence.
 }
-\details{
-The help page for \code{\link[=estimate-beta]{estimate_beta_method()}}
-documents the four estimation algorithms, their output,
-various issues, and possible fixes. To summarize the main
-issues, the algorithms struggle with:
-\enumerate{
-\item Missing data and zeros in incidence.
-\item Systematic overestimation of incidence by \code{data$Z}
-and systematic underestimation of births by \code{data$B},
-causing the estimated susceptible population size
-to become negative.
-\item Process and observation error in the data-generating
-process, causing spurious noise in the estimated
-transmission rate.
+\section{Details}{
+\subsection{1. Models and algorithms}{
+
+See \link[=estimate-beta]{here}.
 }
 
-\code{fastbeta()} handles these issues as follows:
-\enumerate{
-\item Prior to calling \code{\link[=estimate-beta]{estimate_beta_method()}},
-\code{fastbeta()} uses \code{\link[=impute_na]{impute_na()}} to replace missing values in
-\code{data[c("Z", "B", "mu")]} and zeros in \code{data$Z} with positive
-values. \code{\link[=impute_na]{impute_na()}}, which performs linear interpolation,
-fails in certain cases that are documented in its help page.
-If a more sophisticated technique is desired, then it must be
-applied prior to the call to \code{fastbeta()}.
-\item \code{fastbeta()} warns if the estimated susceptible population size
+\subsection{2. Missing data and zeros in incidence}{
+
+Missing values in \code{data} are not tolerated by any of the estimation
+methods. Columns \code{S} and \code{beta} in the output will be filled with \code{NA}
+after the index of the first encountered missing value.
+
+In the FC and S methods, zeros in \code{data$Z} can cause divide-by-zero
+errors. In this case, column \code{beta} in the output may contain \code{NaN}
+and \code{Inf} where an estimate would otherwise be expected. In the SI
+and SEI methods, strings of zeros in \code{data$Z} can lead to spurious
+zeros and large numeric elements in column \code{beta} of the output.
+
+\code{fastbeta()} applies \code{\link[=impute_na]{impute_na()}} to the columns of \code{data} in an
+attempt to impute \code{NA} in \code{data} and replace zeros in \code{data$Z} with
+positive values. \code{\link[=impute_na]{impute_na()}} fails for missing values and zeros
+at the edges of a vector. If a different imputation scheme is
+desired (\code{\link[=impute_na]{impute_na()}} uses linear interpolation), then it must be
+applied prior to calling \code{fastbeta()}.
+}
+
+\subsection{3. Negative susceptibles}{
+
+If true incidence is systematically overestimated by \code{data$Z}
+or true births are systematically underestimated by \code{data$B},
+then the estimated susceptible population size can grossly
+underestimate the true number of susceptibles and can even
+become negative. In the latter case, column \code{S} in the output
+will have negative elements.
+
+\code{fastbeta()} warns if the estimated susceptible population size
 is at any time negative and suggests restarting with scaled down
-\code{data$Z} and/or scaled up \code{data$B}. (Less crude approaches to
-correcting incidence certainly exist. For an approach based on
-deconvolution, see \code{\link[=deconvol]{deconvol()}}.) A rule-of-thumb is to iterate
-until the start of the susceptible time series no longer displays
-pronounced transient dynamics, while still considering whether
-the correction applied is reasonable.
-\item \code{fastbeta()} \emph{does not} prevent or smooth out noise in the estimated
-transmission rate. Determining what constitutes a "good" degree of
-smoothing is not a trivial task and typically involves a graphical
-inspection of results for different values of smoothing parameters.
-\code{\link[=try_loess]{try_loess()}} attempts to facilitate this process for users fitting
-smooth loess curves to noisy time series.
+\code{data$Z} and/or scaled up \code{data$B}. A rule-of-thumb is to iterate
+with different scalings until the susceptible time series no
+longer displays pronounced transient dynamics, while considering
+whether the correction applied is reasonable.
+}
+
+\subsection{4. Noise in the estimated transmission rate}{
+
+All four estimation methods allow noise in the data (due to
+process and observation error) to be propagated to transmission
+rate estimates. To distill temporal  patterns of interest from
+the noise, the raw transmission rate estimates can be smoothed
+using, for example, \code{\link[stats:loess]{stats::loess()}}. \code{fastbeta()} does not
+undertake smoothing, because determining what constitutes a
+"good" degree of smoothing is not a trivial task and typically
+involves a graphical inspection of results for different values
+of a smoothing parameter. \code{\link[=try_loess]{try_loess()}} can be used to greatly
+facilitate the selection of loess fits to noisy transmission
+rate estimates.
+}
+
+\subsection{5. Confidence intervals on the estimated transmission rate}{
+
+\code{fastbeta()} does not construct confidence intervals on any
+of its estimates. The returned fastbeta object can be passed
+to \code{\link[=bootbeta]{bootbeta()}} to obtain bootstrap 95\% confidence intervals.
+}
+
+\subsection{6. Effective observation interval (FC method only)}{
+
+In the absence of errors, every \code{round(par_list$tgen)}th row in
+the FC method output will be complete. The remaining rows will
+contain \code{NA} in columns \code{S}, \code{I}, \code{beta}, \code{Z_agg}, and \code{B_agg}.
+This is not a mistake: the rounded generation interval becomes
+the \emph{effective} observation interval when incidence and births
+are aggregated over the rounded generation interval (see the
+FC method algorithm \link[=estimate-beta]{here}).
 }
 }
+
 \examples{
-# Simulate time series data using an SIR model
-# with seasonally forced transmission rate
+## Simulate time series data using an SIR model
+## with seasonally forced transmission rate
 pl <- make_par_list(model = "sir")
 df <- make_data(pl, with_ds = TRUE, model = "sir")
 
-# Estimate the seasonally forced transmission rate
-# using the SI method
+## Estimate the seasonally forced transmission rate
+## using the SI method
 fastbeta_out <- fastbeta(df, pl, method = "si")
 plot(fastbeta_out)
 
-# Simulate time series data using an SEIR model
-# with seasonally forced transmission rate
+## Simulate time series data using an SEIR model
+## with seasonally forced transmission rate
 pl <- make_par_list(model = "seir")
 df <- make_data(pl, with_ds = TRUE, model = "seir")
 
-# Estimate the seasonally forced transmission rate
-# using the SEI method
+## Estimate the seasonally forced transmission rate
+## using the SEI method
 fastbeta_out <- fastbeta(df, pl, method = "sei")
 plot(fastbeta_out)
 
@@ -163,8 +203,8 @@ plot(fastbeta_out)
 }
 \seealso{
 \link[=fastbeta-methods]{methods for class "fastbeta"},
-\link[=estimate-beta]{algorithms used under the hood},
+\link[=estimate-beta]{algorithms called under the hood},
 \code{\link[=try_loess]{try_loess()}} for smoothing noisy transmission rate estimates,
-\code{\link[=bsbeta]{bsbeta()}} for constructing bootstrap confidence intervals on
-transmission rate estimates
+\code{\link[=bootbeta]{bootbeta()}} for constructing bootstrap confidence intervals
+on transmission rate estimates
 }

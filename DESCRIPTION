@@ -13,6 +13,7 @@ References: Jagan M, deJonge MS, Krylova O, Earn DJD. Fast estimation of
 Imports:
     stats,
     graphics,
+    parallel,
     Rdpack (>= 0.7),
     mathjaxr (>= 1.0-1),
     adaptivetau (>= 2.2-3),

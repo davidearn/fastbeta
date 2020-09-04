@@ -10,7 +10,7 @@ NULL
 
 #' @rdname deconvol-methods
 #' @export
-#' @importFrom graphics par plot.new plot.window lines axis title box legend
+#' @import graphics
 plot.deconvol <- function(x, ...) {
   if (!inherits(x, "deconvol")) {
     stop("`x` must be a deconvol object.")

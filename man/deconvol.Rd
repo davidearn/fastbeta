@@ -63,8 +63,8 @@ chi-squared statistic corresponding to \code{inc_rep[, j]},
 computed as
 \code{mean((x - y)^2 / y)}, where \code{y = inc_rep[b+1:length(x), j]}.
 \insertCite{Gold+09;textual}{fastbeta} suggest taking column
-\code{j = min(which(chi2 < 1))} to estimate incidence instead of
-the last column (see Details 2).
+\code{j = min(which(chi2 < 1))} of \code{inc} to estimate incidence
+instead of the last column (see Details 2).
 }
 \item{\code{call}}{The function call. The deconvol object is reproducible
 with \code{eval(call)}.
@@ -74,21 +74,22 @@ deconvol object is reproducible with \code{do.call(deconvol, arg_list)}.
 }
 }
 
-Note that \code{poisson}, \code{inc}, and \code{inc_rep} all have \code{b+length(x)} rows
+\code{poisson}, \code{inc}, and \code{inc_rep} all have \code{b+length(x)} rows
 (corresponding to the elements of \code{times}) and \code{1+it_max} columns
 (one for each iteration, starting from an initial value).
 
 If \code{simple = TRUE}, then a data frame whose first column is \code{times}
-and whose second column is \code{inc[, min(which(chi2 < 1))]} or otherwise
-\code{inc[, ncol(inc)]}.
+and whose second column is \code{inc[, min(which(chi2 < 1))]} or
+otherwise \code{inc[, ncol(inc)]}, depending on whether the chi-squared
+criterion was reached.
 }
 \description{
 Deconvolves an equally spaced reported incidence time series using a
-Richardson-Lucy iteration, generating an estimate of the underlying
+Richardson-Lucy iteration, generating a reconstruction of the underlying
 incidence time series.
 }
 \section{Details}{
-\subsection{1. Differences compared to \insertCite{Gold+09;textual}{fastbeta}}{
+\subsection{1. Departures from \insertCite{Gold+09;textual}{fastbeta}}{
 
 The algorithm follows \insertCite{Gold+09;textual}{fastbeta} with the
 following differences:
@@ -115,9 +116,9 @@ from day \code{length(x)-s} to day \code{length(x)-1}.
 \subsection{2. Noise in deconvolved incidence and choosing when to stop}{
 
 \insertCite{Gold+09;textual}{fastbeta} suggest to stop iterating
-once \code{chi2 < 1} and to keep the last generated incidence time series
-(see \code{chi2} in Value). The reason for this criterion is that
-deconvolved incidence tends to acquire undesired noise after several
+once \code{chi2 < 1} and to keep the last generated incidence time
+series (see \code{chi2} in Value). The reason for this criterion is that
+deconvolved incidence can acquire undesired noise after several
 iterations, and it is typically better to stop before this happens
 (see the supplement to \insertCite{Gold+09;textual}{fastbeta} for
 details). However, this criterion is not guaranteed to produce an

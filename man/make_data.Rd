@@ -7,7 +7,7 @@ Simulate epidemic time series data}
 \usage{
 make_data(
   par_list = make_par_list(model = "sir"),
-  n = 1000,
+  n = 1000L,
   with_ds = FALSE,
   model = "sir",
   mu = par_list$muconst,
@@ -135,7 +135,8 @@ Equal to \code{nu(0:(n-1))}.
 }
 \item{\code{B}}{\mjseqn{\lbrace\,B(t_i)\,\rbrace}
 Births. \code{B[i]} is the number of births
-between times \code{t[i-1]} and \code{t[i]}.
+between times \code{t[i-1]} and \code{t[i]}. For
+simplicity, \code{make_data()} assigns \code{B[1] <- B[2]}.
 }
 \item{\code{N}}{\mjseqn{\lbrace\,N(t_i)\,\rbrace}
 Population size.
@@ -152,13 +153,14 @@ Number of infectious individuals.
 }
 \item{\code{Z}}{\mjseqn{\lbrace\,Z(t_i)\,\rbrace}
 Incidence. \code{Z[i]} is the number of infections
-between times \code{t[i-1]} and \code{t[i]}.
+between times \code{t[i-1]} and \code{t[i]}. For
+simplicity, \code{make_data()} assigns \code{Z[1] <- Z[2]}.
 }
 \item{\code{p}}{\mjseqn{\lbrace\,p(t_i)\,\rbrace}
 Reporting probability. \code{p[i]} is the probability
 that an infection between times \code{t[i-1]} and \code{t[i]}
-is eventually reported. Equal to \code{p} in the function
-call preceded by one \code{NA}, i.e., \code{c(NA, p)}.
+is eventually reported. Equal to the value of \code{p}
+in the function call.
 }
 \item{\code{Zrep}}{\mjseqn{\lbrace\,Z_\text{rep}(t_i)\,\rbrace}
 Incidence conditional on reporting. \code{Zrep[i]} is the
@@ -168,6 +170,9 @@ that are eventually reported.
 \item{\code{C}}{\mjseqn{\lbrace\,C(t_i)\,\rbrace}
 Reported incidence. \code{C[i]} is the number of infections reported
 between times \code{t[i-1]} and \code{t[i]}.
+If \code{b = max(which(delay_dist > 0)) - 1} and \code{b > 0}, then \code{C[1:b]}
+are generated based on assumptions about \mjseqn{Z_\text{rep}}
+(see Details).
 }
 }
 
@@ -178,18 +183,18 @@ possibly preceded by a call to \code{\link[base:Random]{base::set.seed()}}.
 \description{
 Simulates epidemic time series data using a system of S(E)IR equations
 (see Details 1). Observations are recorded at equally spaced time points
-\mjseqn{t_i = t_0 + i \Delta t}. Users can specify any time-varying rates
-of birth, death, and transmission, any time-varying probability that an
+\mjseqn{t_i = i \Delta t}. Users can specify any time-varying rates of
+birth, death, and transmission, any time-varying probability that an
 infection is reported, and any discrete distribution of the time from
 infection to reporting. By default, the vital rates are constant, the
-transmission rate is seasonally forced, and all infections are reported
-with no delay.
+transmission rate is seasonally forced, and infections are reported
+with a constant probability and zero delay.
 }
 \section{Details}{
 \subsection{1. Simulation model}{
 
 \code{make_data()} simulates epidemic time series data using a system
-of SIR or SEIR equations, which includes additional equations for
+of SIR or SEIR equations that includes additional equations for
 cumulative births and cumulative incidence. If \code{model = "sir"},
 then the system is
 
@@ -210,16 +215,15 @@ either
 (\code{with_ds = FALSE}), or
 (ii) realizing a corresponding continuous-time stochastic process
 using \code{\link[adaptivetau:ssa.adaptivetau]{adaptivetau::ssa.adaptivetau()}} (\code{with_ds = TRUE}).
-Both methods (\code{with_ds = FALSE} and \code{with_ds = TRUE}) use
-the initial state
+Both methods use initial state
 
 \mjsdeqn{\begin{bmatrix} S(0) \cr I(0) \cr R(0) \cr B_\text{cum}(0) \cr Z_\text{cum}(0) \end{bmatrix} = \begin{bmatrix} S_0 \cr I_0 \cr N_0 - S_0 - I_0 \cr 0 \cr 0 \end{bmatrix}}
 
-if \code{model = "sir"} or
+for \code{model = "sir"} and
 
 \mjsdeqn{\begin{bmatrix} S(0) \cr E(0) \cr I(0) \cr R(0) \cr B_\text{cum}(0) \cr Z_\text{cum}(0) \end{bmatrix} = \begin{bmatrix} S_0 \cr E_0 \cr I_0 \cr N_0 - S_0 - E_0 - I_0 \cr 0 \cr 0 \end{bmatrix}}
 
-if \code{model = "seir"}.
+for \code{model = "seir"}.
 
 The latter method (\code{with_ds = TRUE}) defines event probabilities as
 proportional to terms in the ODE, modeling \strong{demographic stochasticity}.
@@ -247,14 +251,15 @@ Here, \mjseqn{p_\text{rep}(t_i)} is the probability that an infection
 between times \mjseqn{t_{i-1}} and \mjseqn{t_i} (counted by \mjseqn{Z(t_i)})
 is eventually reported. Finally, it generates reported incidence \mjseqn{C}
 by sampling from a supplied reporting delay distribution and binning
-infections counted by \mjseqn{Z_\text{rep}} forward in time. If the maximum
-possible delay in units \mjseqn{\Delta t} is \mjseqn{b > 0}, then, for
-simplicity, \mjseqn{Z_\text{rep}(t_{-b}), \ldots, Z_\text{rep}(t_{-1})} are
-assigned the value \mjseqn{Z_\text{rep}(t_0)}, in order to ensure that
-\mjseqn{C(t_0), \ldots, C(t_{b-1})} are based on complete information about
-\mjseqn{Z_\text{rep}}. Compared to \mjseqn{Z}, \mjseqn{C} models
-\strong{observation error}, i.e., under-reporting of infections with a
-delay between infection and reporting.
+infections counted by \mjseqn{Z_\text{rep}} forward in time. If the
+maximum possible delay is \mjseqn{b \Delta t} and \mjseqn{b > 0}, then,
+for simplicity,
+\mjseqn{Z_\text{rep}(-b\Delta t),\ldots,Z_\text{rep}(t_{-\Delta t})}
+are assigned the value of \mjseqn{Z_\text{rep}(0)}, in order to ensure
+that \mjseqn{C(t_0),\ldots,C(t_{b-1})} are based on complete information
+about \mjseqn{Z_\text{rep}}. Compared to \mjseqn{Z}, \mjseqn{C} models
+\strong{observation error}, i.e., under-reporting of infections with delay
+between infection and reporting.
 }
 
 \subsection{2. Default parametrization}{
@@ -273,14 +278,15 @@ where \mjseqn{\phi(t;\epsilon^2)} is the linear interpolant of noise
 
 Care is taken to ensure that random number generation occurs in the
 enclosing environment rather than the body of the function assigned
-by default to \code{beta}. This ensures that the function has noisy but
-non-random output, which is helpful for reproducibility. For details,
-see \code{\link[=make_beta]{make_beta()}}.
+by default to \code{make_data()} argument \code{beta}. This ensures that the
+function has noisy but non-random output, which is helpful for
+reproducibility. For details, see Usage and then see \code{\link[=make_beta]{make_beta()}}.
 
 By default, the reporting probability \mjseqn{p} is constant and equal
-to \mjseqn{p_text{c}}, while the reporting delay is fixed equal to zero,
-so that all infections during a given observation interval are reported
-during the same observation interval, i.e., \mjseqn{C(t_i) = Z(t_i)}.
+to \mjseqn{p_\text{c}}, while the reporting delay is fixed equal to zero,
+so that all infections during a given observation interval that are
+eventually reported, are reported during the same observation interval,
+i.e., \mjseqn{C(t_i) = Z_\text{rep}(t_i)} for all \mjseqn{i}.
 
 The default specification of \code{mu}, \code{nu}, \code{beta}, and \code{p} requires
 that \code{par_list} contains these additional numeric scalar elements:
@@ -314,27 +320,27 @@ a list conforming to these default requirements.
 }
 
 \examples{
-# Stochastic simulation of SEIR model
-par_list <- make_par_list(
+## Stochastic simulation of SEIR model
+pl <- make_par_list(
   epsilon = pi / 4, # environmental stochasticity
   pconst = 0.5, # random under-reporting of infections
   model = "seir"
 )
 set.seed(1422)
-df <- make_data(par_list,
+df <- make_data(pl,
   with_ds = TRUE, # demographic stochasticity
   model = "seir",
   delay_dist = dnbinom(0:10, mu = 2, size = 4) # random delays in reporting
 )
 head(df)
 
-# Deterministic simulation of SIR model
-par_list <- make_par_list(
+## Deterministic simulation of SIR model
+pl <- make_par_list(
   epsilon = 0,
   pconst = 1,
   model = "sir"
 )
-df <- make_data(par_list,
+df <- make_data(pl,
   with_ds = FALSE,
   model = "sir",
   delay_dist = c(1)
