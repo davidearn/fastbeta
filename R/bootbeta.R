@@ -267,10 +267,10 @@ bootbeta <- function(x, y = NULL, n = 100L, p = 1, delay_dist = c(1),
   num_cores <- if (doing_check) 2L else detectCores()
 
   ## Initialize cluster
-  cl <- makeCluster(num_cores)
+  cl <- makeCluster(num_cores, outfile = "")
   clusterSetRNGStream(cl, iseed = iseed)
   varnames <- c("par_list", "n", "with_ds", "model",
-                "mu", "nu", "beta", "p", "delay_dist", "b",
+                "mu", "nu", "beta", "p", "delay_dist",
                 "x", "y")
   clusterExport(cl, varnames, envir = environment())
   clusterEvalQ(cl, library(fastbeta))
@@ -287,7 +287,8 @@ bootbeta <- function(x, y = NULL, n = 100L, p = 1, delay_dist = c(1),
   mat <- parSapply(cl, seq_len(n_boot), function(i) {
 
     ## Data frame containing simulated time series data
-    data <- make_data(par_list, n, with_ds, model, mu, nu, beta, p, delay_dist)
+    data <- make_data(par_list, n, with_ds, model,
+                      mu, nu, beta, p, delay_dist)
 
     ## Data frame containing a deconvolved incidence time series
     deconvol_out <- deconvol(data$C,
@@ -306,7 +307,7 @@ bootbeta <- function(x, y = NULL, n = 100L, p = 1, delay_dist = c(1),
 
     ## Bootstrap estimate of transmission rate
     if (is.null(y)) {
-      fastbeta_out$out$beta
+      out <- fastbeta_out$out$beta
     } else {
       loess_out <- loess(beta ~ t,
         data    = fastbeta_out$out,
@@ -314,8 +315,10 @@ bootbeta <- function(x, y = NULL, n = 100L, p = 1, delay_dist = c(1),
         degree  = y$pars$degree,
         control = loess.control(surface = "direct")
       )
-      predict(loess_out, x$out$t)
+      out <- predict(loess_out, x$out$t)
     }
+    cat(".")
+    out
 
   })
 
