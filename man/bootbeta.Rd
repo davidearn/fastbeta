@@ -60,7 +60,7 @@ Equal to \code{rowMeans(mat)}.
 \item{\code{sd}}{A numeric vector. The standard deviation of
 the bootstrap estimates. Equal to \code{apply(mat, 1, sd)}.
 }
-\item{\code{n}}{An integer scalar. The number of bootstrap estimates.
+\item{\code{n}}{An integer scalar. The number of bootstrap simulations.
 Equal to \code{ncol(mat)}.
 }
 \item{\code{call}}{The function call. The bootbeta object is reproducible
@@ -69,6 +69,9 @@ with \code{eval(call)} provided \code{iseed} is non-\code{NULL}.
 \item{\code{arg_list}}{A list of the arguments in the function call.
 The bootbeta object is reproducible with \code{do.call(bootbeta, arg_list)}
 provided \code{iseed} is non-\code{NULL.}
+}
+\item{\code{elapsed}}{A numeric scalar. The time elapsed
+during the evaluation of \code{call}, in seconds.
 }
 }
 }
@@ -153,12 +156,12 @@ my_loess <- try_loess_out[["q50"]] # `q = 50` seems reasonable
 ## on the loess estimate, conditional on a given
 ## observation model
 bootbeta_out <- bootbeta(fastbeta_out, my_loess,
-  n = 100,                    # 100 bootstrap simulations
-  p = 0.5,                    # reporting probability: 50\%
-  delay_dist = c(0, 0.5, 0.5) # reporting delay: 1 dt or 2 dt
-                              # with equal probability
+  n = 100,
+  p = 0.5,
+  delay_dist = c(0, 0.5, 0.5)
 )
 plot(bootbeta_out)
+bootbeta_out$elapsed # probably less than 120 seconds
 
 }
 \seealso{

@@ -147,9 +147,7 @@
 #'   delay_dist = c(0, 0.5, 0.5)
 #' )
 #' plot(bootbeta_out)
-#'
-#' ## Runtime
-#' bootbeta_out$runtime
+#' bootbeta_out$elapsed # probably less than 120 seconds
 #'
 #' @seealso [methods for class "bootbeta"][bootbeta-methods],
 #'   [fastbeta()], [try_loess()], [make_data()]
