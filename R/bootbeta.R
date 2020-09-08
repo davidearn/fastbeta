@@ -111,8 +111,8 @@
 #'     The bootbeta object is reproducible with `do.call(bootbeta, arg_list)`
 #'     provided `iseed` is non-`NULL.`
 #'   }
-#'   \item{`elapsed`}{A numeric scalar. The time elapsed
-#'     during the evaluation of `call`, in seconds.
+#'   \item{`runtime`}{A proc_time object giving the run time
+#'     for `eval(call)` in seconds.
 #'   }
 #' }
 #'
@@ -344,7 +344,7 @@ bootbeta <- function(x, y = NULL, n = 100L, p = 1, delay_dist = c(1),
     n     = ncol(mat),
     call  = match.call(),
     arg_list = arg_list,
-    elapsed = (proc_time_end - proc_time_start)[["elapsed"]]
+    elapsed = proc_time_end - proc_time_start
   )
   colnames(out$ci95) <- c("lower", "upper")
   structure(out, class = c("bootbeta", "list"))

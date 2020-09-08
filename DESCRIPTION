@@ -10,6 +10,7 @@ Description: Fast methods for estimating time-varying infectious disease
 References: Jagan M, deJonge MS, Krylova O, Earn DJD. Fast estimation of
     time-varying infectious disease transmission rates. PLoS Comput Biol,
     in press.
+Depends: R (>= 3.4.0)
 Imports:
     stats,
     graphics,
@@ -18,6 +19,9 @@ Imports:
     mathjaxr (>= 1.0-1),
     adaptivetau (>= 2.2-3),
     deSolve (>= 1.27.1)
+Suggests:
+    knitr (>= 1.29)
+VignetteBuilder: knitr
 License: MIT + file LICENSE
 Encoding: UTF-8
 LazyData: true

@@ -42,13 +42,12 @@
 #' deconvolved incidence time series can then be passed to
 #' [fastbeta()]. [convol()] can be used for testing [deconvol()].
 #'
-#' [peaks()] and [ptpi()] together implement the **peak-to-peak
-#' iteration** defined in \insertCite{Jaga+20;textual}{fastbeta}.
-#' If the initial number of susceptible individuals (a parameter
-#' to which [fastbeta()] is sensitive) is not known, and if
-#' incidence is roughly periodic, then [peaks()] and [ptpi()]
-#' can be used to produce a reasonable estimate starting from a
-#' poor initial guess.
+#' [ptpi()] implement the **peak-to-peak iteration** introduced in
+#' \insertCite{Jaga+20;textual}{fastbeta}. If the initial number
+#' of susceptible individuals (a parameter to which [fastbeta()]
+#' is sensitive) is not known, and if incidence is roughly periodic,
+#' [ptpi()] can be used to produce a reasonable estimate starting
+#' from a poor initial guess.
 #'
 #' [make_data()] can be used to simulate **epidemic time series
 #' data** against which many of these functions can be tested.

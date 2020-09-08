@@ -1,0 +1,457 @@
+\documentclass[dvipsnames,12pt]{article}
+%\VignetteIndexEntry{fastbeta vignette}
+%\VignetteEngine{knitr::knitr}
+
+
+% Page layout
+\usepackage[top=1in,bottom=1.5in,left=1in,right=1in]{geometry}
+\hfuzz=1in % tolerate \hbox fullness
+\vbadness=\maxdimen % tolerate \vbox badness
+
+% Text layout
+%\usepackage{setspace} % \onehalfspacing, \doublespacing
+\raggedright
+\usepackage[T1]{fontenc} % words with accented characters can be hyphenated
+
+% Title page setup
+\title{\Large The \pkg{fastbeta} package}
+\author{Mikael Jagan, David J.\ D.\ Earn}
+\date{\today}
+
+% Deferred execution
+% front matter
+\usepackage{etoolbox} % document hooks
+\AfterEndPreamble{%
+  \pagenumbering{roman}
+  \maketitle
+  \tableofcontents
+  \thispagestyle{empty}
+  \clearpage
+  \pagenumbering{arabic}
+}
+% back matter
+\AtEndDocument{%
+  \bibliographystyle{vancouver}
+  \bibliography{fastbeta-vignette}
+}
+
+% Math
+\usepackage{amsmath,mathtools}
+\usepackage{amssymb,bm}
+\allowdisplaybreaks % page breaks in display style math mode
+
+% Code
+\usepackage[scaled=0.85]{DejaVuSansMono}
+% Match inline code highlighting to custom knitr theme
+% specified in `theme.css`
+\definecolor{background}{HTML}{f2f2f2} % background
+\definecolor{num}{HTML}{aa4499} % numeric, logical
+\definecolor{str}{HTML}{999933} % character
+\definecolor{com}{HTML}{888888} % comment
+\definecolor{opt}{HTML}{333333} % (unsure)
+\definecolor{std}{HTML}{333333} % variable name, operator, delimiter
+\definecolor{kwa}{HTML}{882255} % function, if, else, for, in, while, NULL
+\definecolor{kwb}{HTML}{333333} % assignment
+\definecolor{kwc}{HTML}{3a9183} % function argument
+\definecolor{kwd}{HTML}{3a9183} % function name
+\usepackage{listings} % \lstinline
+\lstset{%
+  basicstyle=\color{std}\ttfamily,%
+  breaklines=true,%
+  moredelim=[is][\color{num}]{`1}{`1}, % numeric, logical
+  moredelim=[is][\color{str}]{`2}{`2}, % character
+  moredelim=[is][\color{com}\itshape]{`3}{`3}, % comment
+  moredelim=[is][\color{opt}]{`4}{`4}, % (unsure)
+  moredelim=[is][\color{std}]{`5}{`5}, % variable name, operator, delimiter
+  moredelim=[is][\color{kwa}\bfseries]{`6}{`6}, % function, if, else, for, in, while, NULL
+  moredelim=[is][\color{kwb}]{`7}{`7}, % assignment
+  moredelim=[is][\color{kwc}\bfseries]{`8}{`8}, % function argument
+  moredelim=[is][\color{kwd}]{`9}{`9} % function name
+}
+\usepackage{realboxes} % \Colorbox
+\newcommand{\code}[1]{\Colorbox{background}{\lstinline|#1|}}
+
+% Float captions
+\usepackage{caption}
+\captionsetup{%
+  aboveskip=8pt,%
+  labelfont=bf,%
+  labelsep=period,%
+  justification=raggedright,%
+  singlelinecheck=false%
+}
+\renewcommand{\figurename}{Fig}
+
+% Float placement
+\usepackage{float} % \begin{figure}[H]
+\usepackage[section]{placeins} % \FloatBarrier
+
+% Lists
+\usepackage{enumitem}
+\setlist[enumerate]{label=(\roman*),noitemsep}
+\setlist[itemize]{label=\tiny$\blacksquare$,noitemsep}
+
+% Tables
+\usepackage{booktabs} % \toprule, \midrule, \bottomrule, \addlinespace
+\usepackage{array}
+% columns with variable width, top alignment
+\newcolumntype{L}[1]{>{\raggedright\let\newline\\\arraybackslash\hspace{0pt}}p{#1}}
+\newcolumntype{C}[1]{>{\centering\let\newline\\\arraybackslash\hspace{0pt}}p{#1}}
+\newcolumntype{R}[1]{>{\raggedleft\let\newline\\\arraybackslash\hspace{0pt}}p{#1}}
+
+% Citation
+\usepackage{cite}
+\makeatletter
+\renewcommand{\@biblabel}[1]{\quad #1.} % \@biblabel format
+\makeatother
+
+% Ref hyperlinks
+\usepackage[colorlinks=true,allcolors=magenta]{hyperref}
+\usepackage[nameinlink,capitalize]{cleveref}
+% equation
+\crefname{equation}{Eq}{Eqs}
+\crefmultiformat{equation}{#2Eqs #1#3}{ and #2#1#3}{, #2#1#3}{, and #2#1#3}
+\crefformat{blankequation}{#2#1#3}
+\crefalias{blankequation}{equation}
+\crefformat{pluralequation}{#2Eqs #1#3}
+\crefalias{pluralequation}{equation}
+% figure
+\crefname{figure}{Fig}{Figs}
+\crefmultiformat{figure}{#2Figs #1#3}{ and #2#1#3}{, #2#1#3}{, and #2#1#3}
+\crefrangeformat{figure}{#3Figs #1#4--#5#2#6}
+% section
+\crefformat{section}{#2\S#1#3}
+\crefmultiformat{section}{#2\S\S#1#3}{ and #2#1#3}{, #2#1#3}{, and #2#1#3}
+\crefrangeformat{section}{#3\S\S#1#4--#5#2#6}
+% table
+\crefname{table}{Table}{Tables}
+\crefmultiformat{table}{#2Tables #1#3}{ and #2#1#3}{, #2#1#3}{, and #2#1#3}
+\crefrangeformat{table}{#3Tables #1#4--#5#2#6}
+
+% More macros
+% fonts
+\renewcommand{\vec}[1]{\bm{\mathrm{#1}}}
+% diacritics
+\let\wh\widehat
+\let\wt\widetilde
+% delimiters
+\DeclarePairedDelimiter{\abs}{\lvert}{\rvert}
+\DeclarePairedDelimiter{\avg}{\langle}{\rangle}
+\DeclarePairedDelimiter{\floor}{\lfloor}{\rfloor}
+\DeclarePairedDelimiter{\ceil}{\lceil}{\rceil}
+\DeclarePairedDelimiterXPP{\nintdt}[1]{}{[}{]}{_{\dt}}{#1}
+% operators
+\DeclareMathOperator*{\argmin}{arg\,min}
+\DeclareMathOperator{\RRMSE}{RRMSE}
+% symbols
+\newcommand{\dt}{\Delta t}
+\newcommand{\tgen}{t_\text{\normalfont gen}}
+\newcommand{\tlat}{t_\text{\normalfont lat}}
+\newcommand{\tinf}{t_\text{\normalfont inf}}
+\newcommand{\nuconst}{\nu_\text{\normalfont c}}
+\newcommand{\muconst}{\mu_\text{\normalfont c}}
+\newcommand{\pconst}{p_\text{\normalfont c}}
+\newcommand{\R}{\mathcal{R}}
+% abbreviations
+\newcommand{\cf}{\textit{cf}.~}
+\newcommand{\eg}{\textit{e}.\textit{g}.,~}
+\newcommand{\ie}{\textit{i}.\textit{e}.,~}
+\newcommand{\etc}{\textit{etc}.}
+\newcommand{\etal}{\textit{et al}.}
+% code
+\let\pkg\textbf
+\newcommand{\fun}[1]{\code{`9#1`9()}}
+
+
+
+
+%%%%%%%%%%%%%%%%
+%% START HERE %%
+%%%%%%%%%%%%%%%%
+
+\begin{document}
+\setlength{\parskip}{3mm}
+\setlength{\parindent}{0mm}
+
+<<set-chunk-defaults, echo=FALSE>>=
+library(knitr)
+opts_chunk$set(
+  cache    = TRUE,
+  echo     = TRUE,
+  eval     = TRUE,
+  include  = TRUE,
+  error    = TRUE,
+  warning  = TRUE,
+  message  = FALSE,
+  dev      = "pdf",
+  dev.args = list(pointsize = 10),
+  dpi      = 300,
+  fig.pos  = "H"
+)
+knit_hooks$set(document = function(x) {
+  sub('\\usepackage[]{color}', '\\usepackage{xcolor}', x, fixed = TRUE)
+})
+knit_theme$set(knit_theme$get("knit_theme.css"))
+@
+
+\section{Introduction}
+\label{sec:intro}
+
+The R package \pkg{fastbeta} implements fast methods for estimating
+the time-varying rate of transmission of an infectious disease,
+often denoted by $\beta(t)$. \pkg{fastbeta} was initially developed
+to support the analysis of Jagan \etal~\cite{Jaga+20}, but now
+extends their methods and provides additional useful machinery.
+
+\crefrange{sec:make_data}{sec:ptpi} of this vignette explore
+examples of the usage and limitations of \pkg{fastbeta}'s core
+functions, which are summarized in \cref{tab:core-functions}.
+Simulated time series of reported disease incidence are used
+extensively to assist exposition, and therefore \cref{sec:make_data}
+is devoted to function \fun{make_data} and the simulation model.
+
+This document was built using \Sexpr{R.Version()$version.string}
+and these R package versions:
+
+<<package-versions, echo=FALSE>>=
+package_list <- c(
+  "fastbeta",
+  "adaptivetau", # stochastic simulation with adaptive time steps
+  "deSolve",     # numerical solution of ordinary differential equations
+  "knitr"        # integration of R code and LaTeX
+)
+for (package_name in package_list[-4]) {
+  library(package_name, character.only = TRUE)
+}
+print(installed.packages()[package_list, "Version"], quote = FALSE)
+@
+
+\subsection{Installation}
+
+\pkg{fastbeta} can be installed from
+\href{https://github.com/davidearn/fastbeta/}{a GitHub repository}
+using the \pkg{remotes} package.
+
+<<installation, eval=FALSE>>=
+if (!require(remotes)) install.packages("remotes")
+remotes::install_github("davidearn/fastbeta")
+library(fastbeta)
+@
+
+A list of exported functions can be retrieved with \fun{ls}.
+
+<<exported-functions>>=
+ls("package:fastbeta")
+@
+
+The only functions not exported are S3 methods for various classes
+defined by the exported functions. For example, \fun{fastbeta} returns
+an object of class \code{fastbeta}, for which there are methods
+\fun{print.fastbeta} and \fun{plot.fastbeta}.
+
+\subsection{Documentation}
+
+Package documentation can be accessed as follows:
+
+<<documentation, eval=FALSE>>=
+## This vignette
+vignette("fastbeta")
+
+## Help pages
+?"fastbeta-package"   # package
+?function_name        # function "function_name"
+?"class_name-methods" # S3 methods for class "class_name"
+@
+
+\begin{table}
+\renewcommand{\arraystretch}{1.5}
+\caption{%
+  Core functions of the \pkg{fastbeta} package. For a complete
+  list of exported functions, see \cref{sec:intro} or install
+  and run \protect\code{`9library`9(fastbeta); `9ls`9(`2"package:fastbeta"`2)}.
+}
+\begin{tabular}{R{1.1in} C{0.6in} L{4.2in}}
+\toprule
+\textbf{Function} & \textbf{Section} & \textbf{Description} \\
+\midrule
+\fun{make_data} & \cref{sec:make_data} &
+Simulates times series of reported incidence using
+\begin{itemize}[nosep]
+\item a system of SIR or SEIR equations with user-defined,
+  time-varying rates of birth, death, and transmission, and
+\item an observation model with a user-defined, time-varying
+  reporting probability and a user-defined reporting delay
+  distribution.
+\end{itemize}
+\vspace{-\baselineskip}
+\mbox{}
+\\
+\fun{fastbeta} & \cref{sec:fastbeta} &
+A wrapper for functions
+\begin{itemize}[nosep]
+\item \fun{estimate_beta_fc},
+\item \fun{estimate_beta_s},
+\item \fun{estimate_beta_si}, and
+\item \fun{estimate_beta_sei},
+\end{itemize}
+which respectively implement the
+FC~\cite{FineClar82,Jaga+20},
+S~\cite{Jaga+20},
+SI~\cite{Jaga+20},
+and SEI methods of transmission rate estimation from
+time series of incidence, births, and natural mortality.
+\\
+\fun{try_loess} & \cref{sec:try_loess} &
+A wrapper for \code{stats::`9loess`9()} simplifying usage
+for equally spaced time series, with options for plotting.
+Convenient for graphically exploring different loess fits
+to noisy transmission rate estimates.
+\\
+\fun{bootbeta} & \cref{sec:bootbeta} &
+Contructs bootstrap confidence intervals on transmission
+rate estimates returned by \fun{fastbeta}. Uses \fun{make_data}
+(see below) to perform bootstrap simulations.
+\\
+\fun{deconvol} & \cref{sec:deconvol} &
+Deconvolves reported incidence time series, generating
+a reconstruction of the underlying incidence time series.
+Can be used prior to \fun{fastbeta} in the typical case
+where one knows reported incidence but not incidence.
+\\
+\fun{ptpi} & \cref{sec:ptpi} &
+Implements peak-to-peak iteration (PTPI)~\cite{Jaga+20},
+an algorithm for estimating the initial number of
+susceptible individuals (a parameter to which \fun{fastbeta}
+is sensitive~\cite{Jaga+20}) from time series of incidence,
+births, and natural mortality. Requires that incidence is
+roughly periodic. \\
+\bottomrule
+\end{tabular}
+\label{tab:core-functions}
+\end{table}
+
+\section{Simulating reported incidence time series}
+\label{sec:make_data}
+
+Function \fun{make_data} simulates time series of reported incidence.
+It takes arguments:
+
+<<make-data-formals>>=
+names(formals(make_data))
+@
+
+These are explained in the text to follow and summarized in
+\cref{tab:make_data-args}.
+
+Simulations are performed in two stages: given values for the
+above arguments, \fun{make_data} generates incidence by realizing
+a model of disease transmission, then generates reported incidence
+from incidence by realizing a model of observation error.
+\crefrange{sec:make_data-dt}{sec:make_data-oe} describe these
+two models and their relation to the function arguments.
+\cref{sec:make_data-ex} gives examples of \fun{make_data} usage.
+
+\begin{table}
+\renewcommand{\arraystretch}{1.5}
+\caption{Arguments of \protect\fun{make_data}.}
+\begin{tabular}{R{1in} C{0.8in} L{3.8in}}
+\toprule
+{\bfseries Argument} & {\bfseries Notation} & {\bfseries Definition} \\
+\midrule
+\code{par_list} & $\Delta t$ & Meaning \\
+\code{n} & $n$ & Meaning \\
+\code{with_ds} & --- & Meaning \\
+\code{model} & --- & Meaning \\
+\code{mu} & $\mu(t_i) \Delta t$ & Meaning \\
+\code{nu} & $\nu(t_i) \Delta t$ & Meaning \\
+\code{beta} & $\beta(t_i) \Delta t$ & Meaning \\
+\code{p} & $p(t_i)$ & Meaning \\
+\code{delay_dist} & $d_i$ & Meaning \\
+\bottomrule
+\end{tabular}
+\label{tab:make_data-args}
+\end{table}
+
+\subsection{Model of disease transmission}
+\label{sec:make_data-dt}
+
+Depending on the value of argument \code{model}, \fun{make_data}
+generates observations of an SIR model (\code{model = `2"sir"`2})
+or an SEIR model (\code{model = `2"seir"`2}) at equally spaced
+times $t_i = i \Delta t$ ($i = 0,\ldots,n-1$), where $\Delta t$
+is a fixed observation interval.
+
+\begin{minipage}{.5\linewidth}
+\begin{subequations}
+\begin{align}
+\frac{\text{d}S}{\text{d}t} &= \nu(t) - \beta(t) S I - \mu(t) S\,, \\
+\frac{\text{d}I}{\text{d}t} &= \beta(t) S I - \gamma I - \mu(t) I\,, \\
+\frac{\text{d}R}{\text{d}t} &= \gamma I - \mu(t) R\,, \\
+\frac{\text{d}B_\text{cum}}{\text{d}t} &= \nu(t)\,, \\
+\frac{\text{d}Z_\text{cum}}{\text{d}t} &= \beta(t) S I\,.
+\end{align}
+\end{subequations}
+\end{minipage}%
+\begin{minipage}{.5\linewidth}
+\begin{subequations}
+\begin{align}
+\frac{\text{d}S}{\text{d}t} &= \nu(t) - \beta(t) S I - \mu(t) S\,, \\
+\frac{\text{d}E}{\text{d}t} &= \beta(t) S I - \sigma E - \mu(t) E\,, \\
+\frac{\text{d}I}{\text{d}t} &= \sigma E - \gamma I - \mu(t) I\,, \\
+\frac{\text{d}R}{\text{d}t} &= \gamma I - \mu(t) R\,, \\
+\frac{\text{d}B_\text{cum}}{\text{d}t} &= \nu(t)\,, \\
+\frac{\text{d}Z_\text{cum}}{\text{d}t} &= \beta(t) S I\,.
+\end{align}
+\end{subequations}
+\end{minipage}
+
+\subsection{Model of observation error}
+\label{sec:make_data-oe}
+
+\subsection{Examples}
+\label{sec:make_data-ex}
+
+
+
+\section{Estimating time-varying transmission rates}
+\label{sec:fastbeta}
+
+\section{Smoothing noisy transmission rate estimates}
+\label{sec:try_loess}
+
+\section{Constructing bootstrap confidence intervals}
+\label{sec:bootbeta}
+
+\section{Deconvolving reported incidence time series}
+\label{sec:deconvol}
+
+\section{Estimating the initial susceptible population size}
+\label{sec:ptpi}
+
+
+<<knit-theme>>=
+# This is a test of knit_theme.css
+f <- function(a = 0, b = 0) {
+  if (a < b) {
+    mean(c(a, b), na.rm = FALSE)
+  } else if (a > b) {
+    a + b
+  } else {
+    "a = b"
+  }
+  warning("Warning/error color not controlled by knit_theme.css ...")
+}
+f(a = 1, b = 2)
+?f
+?"f"
+@
+
+
+\end{document}
+
+
+
+
+
+
+
