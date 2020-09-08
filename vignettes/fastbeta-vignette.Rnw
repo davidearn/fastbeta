@@ -61,8 +61,8 @@
   moredelim=[is][\color{num}]{`1}{`1}, % numeric, logical
   moredelim=[is][\color{str}]{`2}{`2}, % character
   moredelim=[is][\color{com}\itshape]{`3}{`3}, % comment
-  moredelim=[is][\color{opt}]{`4}{`4}, % (unsure)
-  moredelim=[is][\color{std}]{`5}{`5}, % variable name, operator, delimiter
+  moredelim=[is][\color{opt}]{`4}{`4}, % ?!
+  moredelim=[is][\color{std}]{`5}{`5}, % variable name, operator, delimiter, output
   moredelim=[is][\color{kwa}\bfseries]{`6}{`6}, % function, if, else, for, in, while, NULL
   moredelim=[is][\color{kwb}]{`7}{`7}, % assignment
   moredelim=[is][\color{kwc}\bfseries]{`8}{`8}, % function argument
@@ -255,7 +255,7 @@ Package documentation can be accessed as follows:
 
 <<documentation, eval=FALSE>>=
 ## This vignette
-vignette("fastbeta")
+vignette("fastbeta-vignette")
 
 ## Help pages
 ?"fastbeta-package"   # package
@@ -433,17 +433,18 @@ is a fixed observation interval.
 # This is a test of knit_theme.css
 f <- function(a = 0, b = 0) {
   if (a < b) {
-    mean(c(a, b), na.rm = FALSE)
+    x <- mean(c(a, b), na.rm = FALSE)
   } else if (a > b) {
-    a + b
+    x <- a + b
   } else {
-    "a = b"
+    x <- "a = b"
   }
-  warning("Warning/error color not controlled by knit_theme.css ...")
+  x
 }
 f(a = 1, b = 2)
-?f
-?"f"
+
+warning("Warning color not controlled by knit_theme.css ...")
+stop("Error color not controlled by knit_theme.css ...")
 @
 
 

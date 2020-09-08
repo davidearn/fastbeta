@@ -15,4 +15,7 @@ $(name).tex: $(name).Rnw knit_theme.css
 
 new : $(name).pdf
 	rm -rf cache figure
-	rm -f *.{bbl,blg,log,out,synctex.gz,toc,aux,tex}
+	rm -f *.{bbl,blg,log,out,synctex.gz,tex,toc,aux}
+
+clean :
+	rm -f *.{bbl,blg,log,out,synctex.gz,tex,toc}
