@@ -234,7 +234,7 @@ using the \pkg{remotes} package.
 
 <<installation, eval=FALSE>>=
 if (!require(remotes)) install.packages("remotes")
-remotes::install_github("davidearn/fastbeta")
+remotes::install_github("davidearn/fastbeta", build_vignettes = TRUE)
 library(fastbeta)
 @
 
