@@ -2,7 +2,7 @@
 
 ### Bugs
 
-* no bugs?!
+* David's R session hangs at `makeCluster()`
 
 ### Issues
 
