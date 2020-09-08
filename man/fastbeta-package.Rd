@@ -51,13 +51,12 @@ reconstruct incidence from reported incidence. The resulting
 deconvolved incidence time series can then be passed to
 \code{\link[=fastbeta]{fastbeta()}}. \code{\link[=convol]{convol()}} can be used for testing \code{\link[=deconvol]{deconvol()}}.
 
-\code{\link[=peaks]{peaks()}} and \code{\link[=ptpi]{ptpi()}} together implement the \strong{peak-to-peak
-iteration} defined in \insertCite{Jaga+20;textual}{fastbeta}.
-If the initial number of susceptible individuals (a parameter
-to which \code{\link[=fastbeta]{fastbeta()}} is sensitive) is not known, and if
-incidence is roughly periodic, then \code{\link[=peaks]{peaks()}} and \code{\link[=ptpi]{ptpi()}}
-can be used to produce a reasonable estimate starting from a
-poor initial guess.
+\code{\link[=ptpi]{ptpi()}} implement the \strong{peak-to-peak iteration} introduced in
+\insertCite{Jaga+20;textual}{fastbeta}. If the initial number
+of susceptible individuals (a parameter to which \code{\link[=fastbeta]{fastbeta()}}
+is sensitive) is not known, and if incidence is roughly periodic,
+\code{\link[=ptpi]{ptpi()}} can be used to produce a reasonable estimate starting
+from a poor initial guess.
 
 \code{\link[=make_data]{make_data()}} can be used to simulate \strong{epidemic time series
 data} against which many of these functions can be tested.

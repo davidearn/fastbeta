@@ -70,8 +70,8 @@ with \code{eval(call)} provided \code{iseed} is non-\code{NULL}.
 The bootbeta object is reproducible with \code{do.call(bootbeta, arg_list)}
 provided \code{iseed} is non-\code{NULL.}
 }
-\item{\code{elapsed}}{A numeric scalar. The time elapsed
-during the evaluation of \code{call}, in seconds.
+\item{\code{runtime}}{A proc_time object giving the run time
+for \code{eval(call)} in seconds.
 }
 }
 }
