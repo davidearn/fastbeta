@@ -44,15 +44,15 @@
 \usepackage[scaled=0.85]{DejaVuSansMono}
 % Match inline code highlighting to custom knitr theme
 % specified in `theme.css`
-\definecolor{background}{HTML}{f2f2f2} % background
+\definecolor{background}{HTML}{f4f4f4} % background
 \definecolor{num}{HTML}{aa4499} % numeric, logical
 \definecolor{str}{HTML}{999933} % character
-\definecolor{com}{HTML}{888888} % comment
-\definecolor{opt}{HTML}{333333} % (unsure)
-\definecolor{std}{HTML}{333333} % variable name, operator, delimiter
+\definecolor{com}{HTML}{999999} % comment
+\definecolor{opt}{HTML}{555555} % (unsure)
+\definecolor{std}{HTML}{555555} % variable name, operator, delimiter
 \definecolor{kwa}{HTML}{882255} % function, if, else, for, in, while, NULL
-\definecolor{kwb}{HTML}{333333} % assignment
-\definecolor{kwc}{HTML}{3a9183} % function argument
+\definecolor{kwb}{HTML}{555555} % assignment
+\definecolor{kwc}{HTML}{777777} % function argument
 \definecolor{kwd}{HTML}{3a9183} % function name
 \usepackage{listings} % \lstinline
 \lstset{%
@@ -65,7 +65,7 @@
   moredelim=[is][\color{std}]{`5}{`5}, % variable name, operator, delimiter, output
   moredelim=[is][\color{kwa}\bfseries]{`6}{`6}, % function, if, else, for, in, while, NULL
   moredelim=[is][\color{kwb}]{`7}{`7}, % assignment
-  moredelim=[is][\color{kwc}\bfseries]{`8}{`8}, % function argument
+  moredelim=[is][\color{kwc}]{`8}{`8}, % function argument
   moredelim=[is][\color{kwd}]{`9}{`9} % function name
 }
 \usepackage{realboxes} % \Colorbox
