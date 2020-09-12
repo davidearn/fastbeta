@@ -1,21 +1,24 @@
-SHELL = /bin/bash
-R_HOME = /usr/lib/R
-name = fastbeta-vignette
+SHELL = bash
+R = R
+NAME = fastbeta-vignette
 
-all : $(name).pdf new
-
-$(name).pdf : $(name).tex $(name).bib
-	pdflatex -interaction=batchmode $<
-	bibtex $(name)
-	pdflatex -interaction=batchmode $<
-	pdflatex $<
-
-$(name).tex: $(name).Rnw knit_theme.css
-	$(R_HOME)/bin/Rscript -e "knitr::knit('$<')"
-
-new : $(name).pdf
+build: $(NAME).pdf
 	rm -rf cache figure
 	rm -f *.{bbl,blg,log,out,synctex.gz,tex,toc,aux}
 
-clean :
+$(name).pdf: $(NAME).tex $(NAME).bib
+	pdflatex -interaction=batchmode $<
+	bibtex $(NAME)
+	pdflatex -interaction=batchmode $<
+	pdflatex $<
+
+$(name).tex: $(NAME).Rnw knit_theme.css
+	$(R) --no-echo -e 'knitr::knit("$<")'
+
+all: $(name).pdf
+
+new: clean
+	rm -rf cache figure *.{aux,pdf}
+
+clean:
 	rm -f *.{bbl,blg,log,out,synctex.gz,tex,toc}
