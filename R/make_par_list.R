@@ -38,8 +38,8 @@
 #'
 #' \mjsdeqn{\beta(t) = \langle\beta\rangle \left\lbrack 1 + \alpha \cos\left(\frac{2 \pi t}{\text{365 days}}\right) \right\rbrack}
 #'
-#' between times \mjseqn{t = t_{-(n-1)} = -(n-1) \Delta t}
-#' and \mjseqn{t = 0} years, taking
+#' between times \mjseqn{t_{-(n-1)} = -(n-1) \Delta t}
+#' and \mjseqn{t_0 = 0 \Delta t}, taking
 #'
 #' \mjsdeqn{\begin{bmatrix} S(t_{-(n-1)}) \cr I(t_{-(n-1)}) \end{bmatrix} = N_0 \begin{bmatrix} \frac{1}{\mathcal{R}_0} \cr \big(1 - \frac{1}{\mathcal{R}_0}\big) \frac{\mu}{\gamma + \mu} \end{bmatrix}}
 #'
@@ -61,8 +61,8 @@
 #'
 #' \mjsdeqn{\beta(t) = \langle\beta\rangle \left\lbrack 1 + \alpha \cos\left(\frac{2 \pi t}{\text{365 days}}\right) \right\rbrack}
 #'
-#' between times \mjseqn{t = t_{-(n-1)} = -(n-1) \Delta t}
-#' and \mjseqn{t = 0} years, taking
+#' between times \mjseqn{t_{-(n-1)} = -(n-1) \Delta t}
+#' and \mjseqn{t_0 = 0 \Delta t}, taking
 #'
 #' \mjsdeqn{\begin{bmatrix} S(t_{-(n-1)}) \cr E(t_{-(n-1)}) \cr I(t_{-(n-1)}) \end{bmatrix} = N_0 \begin{bmatrix} \frac{1}{\mathcal{R}_0} \cr \big(1 - \frac{1}{\mathcal{R}_0}\big) \frac{\mu}{\sigma + \mu} \cr \big(1 - \frac{1}{\mathcal{R}_0}\big) \frac{\sigma}{\sigma + \mu} \frac{\mu}{\gamma + \mu} \end{bmatrix}}
 #'
@@ -77,14 +77,14 @@
 #' years (the default) is typically enough to ensure that
 #' \mjseqn{\big(S(0),I(0)\big)} (`model = "sir"`) or
 #' \mjseqn{\big(S(0),I(0),E(0)\big)} (`model = "seir"`)
-#' are near the attractor of the system of S(E)IR equations,
-#' which can be desirable when using [make_data()] to simulate
+#' is near the attractor of the system of S(E)IR equations.
+#' This can be desirable when using [make_data()] to simulate
 #' epidemic time series.
 #'
 #' @param dt_days \mjseqn{\lbrace\,\Delta t\,\rbrace}
 #'   A numeric scalar. Observation interval in days.
 #' @param N0 \mjseqn{\lbrace\,N_0\,\rbrace}
-#'   A numeric scalar. Population size at time \mjseqn{t = 0} years.
+#'   A numeric scalar. Population size at time \mjseqn{t_0 = 0 \Delta t}.
 #' @param tlat \mjseqn{\lbrace\,t_\text{lat}/\Delta t\,\rbrace}
 #'   A numeric scalar. Mean latent period
 #'   of the disease of interest in units \mjseqn{\Delta t}.
@@ -107,14 +107,13 @@
 #' @param pconst \mjseqn{\lbrace\,p_\text{c}\,\rbrace}
 #'   A numeric scalar. Probability that an infection is eventually reported.
 #' @param model A character scalar, either `"sir"` or `"seir"`,
-#'   indicating a system of equations to be numerically integrated
-#'   (see Details 2).
+#'   indicating a model of disease dynamics (see Details 2).
 #' @param n \mjseqn{\lbrace\,n\,\rbrace}
 #'   A positive integer scalar. A system of SIR (`model = "sir"`)
-#'   or SEIR (`model = "seir"`) equations will be numerically integrated
-#'   between times \mjseqn{t = -(n-1) \Delta t} and \mjseqn{t = 0} years
-#'   to obtain values for \mjseqn{S_0}, \mjseqn{E_0}, and \mjseqn{I_0}
-#'   (see Details 2 and 3).
+#'   or SEIR (`model = "seir"`) equations will be numerically
+#'   integrated between times \mjseqn{t_{-(n-1)} = -(n-1) \Delta t}
+#'   and \mjseqn{t_0 = 0 \Delta t} years to obtain values for
+#'   \mjseqn{S_0}, \mjseqn{E_0}, and \mjseqn{I_0} (see Details 2 and 3).
 #'
 #' @return
 #' A list of the arguments in the function call,
@@ -122,10 +121,6 @@
 #' these additional numeric scalar elements:
 #'
 #' \describe{
-#'   \item{`tgen`}{\mjseqn{\lbrace\,t_\text{gen} / \Delta t\,\rbrace}
-#'     Mean generation interval of the disease of interest
-#'     in units \mjseqn{\Delta t}. Equal to `tlat + tinf`.
-#'   }
 #'   \item{`beta_mean`}{\mjseqn{\lbrace\,\langle\beta\rangle \Delta t\,\rbrace}
 #'     Mean (long-term average) of the seasonally forced
 #'     transmission rate expressed per unit \mjseqn{\Delta t}
@@ -183,9 +178,8 @@ make_par_list <- function(dt_days  = 7,
                           n        = 1000 * 365 / dt_days) {
   ## Some derived quantities
   one_year <- 365 / dt_days
-  tgen <- tlat + tinf
   if (model == "sir") {
-    gamma <- 1 / tgen
+    gamma <- 1 / (tlat + tinf)
     beta_mean <- Rnaught * (gamma + muconst) / N0
   } else if (model == "seir") {
     sigma <- 1 / tlat
@@ -258,11 +252,11 @@ make_par_list <- function(dt_days  = 7,
 
   if (model == "sir") {
     as.list(environment())[c("dt_days", "N0", "S0", "I0",
-                             "tlat", "tinf", "tgen", "muconst", "Rnaught",
+                             "tlat", "tinf", "muconst", "Rnaught",
                              "beta_mean", "alpha", "epsilon", "pconst")]
   } else if (model == "seir") {
     as.list(environment())[c("dt_days", "N0", "S0", "E0", "I0",
-                             "tlat", "tinf", "tgen", "muconst", "Rnaught",
+                             "tlat", "tinf", "muconst", "Rnaught",
                              "beta_mean", "alpha", "epsilon", "pconst")]
   }
 }

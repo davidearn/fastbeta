@@ -110,17 +110,13 @@
 #' @param par_list A list with numeric scalar elements:
 #'
 #'   \describe{
-#'     \item{`tgen`}{\mjseqn{\lbrace\,t_\text{gen} / \Delta t\,\rbrace}
-#'       Mean generation interval of the disease of interest
-#'       in units \mjseqn{\Delta t}. FC, S, and SI methods only.
-#'     }
 #'     \item{`tlat`}{\mjseqn{\lbrace\,t_\text{lat} / \Delta t\,\rbrace}
 #'       Mean latent period of the disease of interest
-#'       in units \mjseqn{\Delta t}. SEI method only.
+#'       in units \mjseqn{\Delta t}.
 #'     }
 #'     \item{`tinf`}{\mjseqn{\lbrace\,t_\text{inf} / \Delta t\,\rbrace}
 #'       Mean infectious period of the disease of interest
-#'       in units \mjseqn{\Delta t}. SEI method only.
+#'       in units \mjseqn{\Delta t}.
 #'     }
 #'     \item{`S0`}{\mjseqn{\lbrace\,S_0\,\rbrace}
 #'       Number of susceptible individuals at time \mjseqn{t = t_0}.
@@ -216,9 +212,9 @@ fastbeta <- function(data, par_list, method) {
   } else if (!is.list(par_list)) {
     stop("`par_list` must be a list.")
   } else if ((method %in% c("fc", "s") &&
-                !all(c("S0", "tgen") %in% names(par_list))) ||
+                !all(c("S0", "tlat", "tinf") %in% names(par_list))) ||
              (method == "si" &&
-                !all(c("S0", "I0", "tgen") %in% names(par_list))) ||
+                !all(c("S0", "I0", "tlat", "tinf") %in% names(par_list))) ||
              (method == "sei" &&
                 !all(c("S0", "E0", "I0", "tlat", "tinf") %in% names(par_list)))) {
     stop("`par_list` is missing necessary elements.")

@@ -35,17 +35,13 @@ S, SI, and SEI methods only.
 \item{par_list}{A list with numeric scalar elements:
 
 \describe{
-\item{\code{tgen}}{\mjseqn{\lbrace\,t_\text{gen} / \Delta t\,\rbrace}
-Mean generation interval of the disease of interest
-in units \mjseqn{\Delta t}. FC, S, and SI methods only.
-}
 \item{\code{tlat}}{\mjseqn{\lbrace\,t_\text{lat} / \Delta t\,\rbrace}
 Mean latent period of the disease of interest
-in units \mjseqn{\Delta t}. SEI method only.
+in units \mjseqn{\Delta t}.
 }
 \item{\code{tinf}}{\mjseqn{\lbrace\,t_\text{inf} / \Delta t\,\rbrace}
 Mean infectious period of the disease of interest
-in units \mjseqn{\Delta t}. SEI method only.
+in units \mjseqn{\Delta t}.
 }
 \item{\code{S0}}{\mjseqn{\lbrace\,S_0\,\rbrace}
 Number of susceptible individuals at time \mjseqn{t = t_0}.

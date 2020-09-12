@@ -5,7 +5,15 @@
 \title{\loadmathjax
 Bootstrap CIs on transmission rate estimates}
 \usage{
-bootbeta(x, y = NULL, n = 100L, p = 1, delay_dist = c(1), iseed = NULL)
+bootbeta(
+  x,
+  y = NULL,
+  nboot = 100L,
+  p = 1,
+  delay_dist = c(1),
+  ncores = 2,
+  iseed = NULL
+)
 }
 \arguments{
 \item{x}{A fastbeta object defining a \code{\link[=fastbeta]{fastbeta()}} estimate
@@ -16,7 +24,7 @@ of \mjseqn{\beta(t)}. Must satisfy \code{x$method \%in\% c("si", "sei")}.}
 \code{\link[=try_loess]{try_loess()}} can help define a reasonable value for \code{y}
 (see Examples).}
 
-\item{n}{An integer scalar. The desired number of bootstrap
+\item{nboot}{An integer scalar. The desired number of bootstrap
 simulations.}
 
 \item{p}{A numeric vector of length \code{nrow(x$out)}. \code{p[i]} is the
@@ -30,6 +38,10 @@ number of observation intervals between infection and reporting.
 eventually reported is reported after \code{i-1} observation intervals.
 \code{delay_dist} is replaced with \code{delay_dist / sum(delay_dist)} in
 the event that \code{sum(delay_dist) != 1}.}
+
+\item{ncores}{An integer scalar. The number of (logical) CPUs used
+to perform bootstrap simulations. The maximum number is
+\code{parallel::detectCores(logical = TRUE)}.}
 
 \item{iseed}{An optional integer scalar, defining a seed for RNG.
 The output is reproducible if and only if \code{iseed} is specified.}
@@ -127,6 +139,10 @@ The bootstrap simulations are "embarassingly parallel"
 and so are parallelized using \code{\link[parallel:clusterApply]{parallel::parSapply()}},
 with care taken to ensure that each process has its own
 RNG stream.
+
+If the R session hangs due to an error in \code{\link[parallel:makeCluster]{parallel::makePSOCKcluster()}},
+then try the solution suggested
+\href{https://github.com/rstudio/rstudio/issues/6692}{here}.
 }
 }
 
@@ -156,7 +172,7 @@ my_loess <- try_loess_out[["q50"]] # `q = 50` seems reasonable
 ## on the loess estimate, conditional on a given
 ## observation model
 bootbeta_out <- bootbeta(fastbeta_out, my_loess,
-  n = 100,
+  nboot = 100,
   p = 0.5,
   delay_dist = c(0, 0.5, 0.5)
 )

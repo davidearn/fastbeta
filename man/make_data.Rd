@@ -25,92 +25,92 @@ make_data(
 Observation interval in days.
 }
 \item{\code{N0}}{\mjseqn{\lbrace\,N_0\,\rbrace}
-Population size at time \mjseqn{t = 0} years.
+Population size at time \mjseqn{t_0 = 0 \Delta t}.
 }
 \item{\code{S0}}{\mjseqn{\lbrace\,S_0\,\rbrace}
-Number of susceptible individuals at time \mjseqn{t = 0} years.
+Number of susceptible individuals at time \mjseqn{t_0 = 0 \Delta t}.
 }
 \item{\code{E0}}{\mjseqn{\lbrace\,E_0\,\rbrace}
 Number of exposed (infected but not infectious) individuals
-at time \mjseqn{t = 0} years. Necessary only if \code{model = "seir"}.
+at time \mjseqn{t_0 = 0 \Delta t}. Necessary only if \code{model = "seir"}.
 }
 \item{\code{I0}}{\mjseqn{\lbrace\,I_0\,\rbrace}
-Number of infectious individuals at time \mjseqn{t = 0} years.
-}
-\item{\code{tgen}}{\mjseqn{\lbrace\,t_\text{gen}/\Delta t\,\rbrace}
-Mean generation interval of the disease of interest
-in units \mjseqn{\Delta t}. Necessary only if \code{model = "sir"}.
+Number of infectious individuals at time \mjseqn{t_0 = 0 \Delta t}.
 }
 \item{\code{tlat}}{\mjseqn{\lbrace\,t_\text{lat}/\Delta t\,\rbrace}
 Mean latent period of the disease of interest
-in units \mjseqn{\Delta t}. Necessary only if \code{model = "seir"}.
+in units \mjseqn{\Delta t}.
 }
 \item{\code{tinf}}{\mjseqn{\lbrace\,t_\text{inf}/\Delta t\,\rbrace}
 Mean infectious period of the disease of interest
-in units \mjseqn{\Delta t}. Necessary only if \code{model = "seir"}.
+in units \mjseqn{\Delta t}.
 }
 }
 
 Additional elements must be included as necessary to ensure
-that the arguments \code{mu}, \code{nu}, \code{beta}, and \code{p} are well-defined
+that arguments \code{mu}, \code{nu}, \code{beta}, and \code{p} are well-defined
 (see Details 2).}
 
-\item{n}{An integer scalar. The number of observations in the
+\item{n}{\mjseqn{\lbrace\,n\,\rbrace}
+An integer scalar. The number of observations in the
 simulated time series, which will have time points
-\mjseqn{t_i = i \Delta t} (for \mjseqn{i = 0,\ldots,n-1}).}
+\mjseqn{t_i = i \Delta t} (\mjseqn{i = 0,\ldots,n-1}).}
 
 \item{with_ds}{A logical scalar. Should the simulation include
 demographic stochasticity? The simulation is performed using
-\code{\link[adaptivetau:ssa.adaptivetau]{adaptivetau::ssa.adaptivetau()}} if \code{TRUE} and \code{\link[deSolve:ode]{deSolve::ode()}}
-if \code{FALSE}.}
+\code{\link[deSolve:ode]{deSolve::ode()}} if \code{FALSE} and \code{\link[adaptivetau:ssa.adaptivetau]{adaptivetau::ssa.adaptivetau()}}
+if \code{TRUE}.}
 
 \item{model}{A character scalar, either \code{"sir"} or \code{"seir"},
-indicating a system of equations to simulate (see Details 1).}
+indicating a model of disease dynamics (see Details 1).}
 
-\item{mu}{A function taking as input a numeric vector \code{s} and a list
-\code{par_list} and returning as output a numeric vector of the same length
-as \code{s} containing the value of \mjseqn{f(s) = \mu(s \Delta t) \Delta t}
-at each element of \code{s}. The function must define \mjseqn{f(s)} for all
+\item{mu}{\mjseqn{\lbrace\,\mu(s \Delta t) \Delta t\,\rbrace}
+A function taking as arguments a numeric vector \code{s} and a list \code{par_list}
+and returning as output a numeric vector of length \code{length(s)} containing
+the value of \mjseqn{\mu(s \Delta t) \Delta t} at each element of \code{s}.
+Must define \mjseqn{\mu(s \Delta t) \Delta t} for all
 \mjseqn{s \in \lbrack 0,n-1 \rbrack}. Here, \mjseqn{\mu(t) \Delta t}
 is the per capita natural mortality rate at time \mjseqn{t} expressed
 per unit \mjseqn{\Delta t}. Alternatively, a numeric scalar indicating
 a constant rate \mjseqn{\mu_\text{c} \Delta t}.}
 
-\item{nu}{A function taking as input a numeric vector \code{s} and a list
-\code{par_list} and returning as output a numeric vector of the same length
-as \code{s} containing the value of \mjseqn{f(s) = \nu(s \Delta t) \Delta t}
-at each element of \code{s}. The function must define \mjseqn{f(s)} for all
+\item{nu}{\mjseqn{\lbrace\,\nu(s \Delta t) \Delta t\,\rbrace}
+A function taking as arguments a numeric vector \code{s} and a list \code{par_list}
+and returning as output a numeric vector of length \code{length(s)} containing
+the value of \mjseqn{\nu(s \Delta t) \Delta t} at each element of \code{s}.
+Must define \mjseqn{\nu(s \Delta t) \Delta t} for all
 \mjseqn{s \in \lbrack 0,n-1 \rbrack}. Here, \mjseqn{\nu(t) \Delta t}
 is the birth rate at time \mjseqn{t} expressed per unit \mjseqn{\Delta t}.
 Alternatively, a numeric scalar indicating a constant rate
 \mjseqn{\nu_\text{c} \Delta t}.}
 
-\item{beta}{A function taking as input a numeric vector \code{s} and a list
-\code{par_list} and returning as output a numeric vector of the same length
-as \code{s} containing the value of \mjseqn{f(s) = \beta(s \Delta t) \Delta t}
-at each element of \code{s}. The function must define \mjseqn{f(s)} for all
+\item{beta}{\mjseqn{\lbrace\,\beta(s \Delta t) \Delta t\,\rbrace}
+A function taking as arguments a numeric vector \code{s} and a list \code{par_list}
+and returning as output a numeric vector of length \code{length(s)} containing
+the value of \mjseqn{\beta(s \Delta t) \Delta t} at each element of \code{s}.
+Must define \mjseqn{\beta(s \Delta t) \Delta t} for all
 \mjseqn{s \in \lbrack 0,n-1 \rbrack}. Here, \mjseqn{\beta(t) \Delta t}
 is the transmission rate at time \mjseqn{t} expressed per unit
 \mjseqn{\Delta t} per susceptible individual per infectious individual.
 Alternatively, a numeric scalar indicating a constant rate
 \mjseqn{\beta_\text{c} \Delta t}.}
 
-\item{p}{A numeric vector of length \code{n} listing the probabilities
-\mjseqn{p(t_i)} that an infection between times \mjseqn{t_{i-1}}
-and \mjseqn{t_i} is eventually reported
-(for \mjseqn{i = 0,\ldots,n-1}). Alternatively, a numeric scalar
-indicating a constant probability \mjseqn{p_\text{c}}.}
+\item{p}{\mjseqn{\lbrace\,p_i\,\rbrace}
+A numeric vector of length \code{n} listing the probability \mjseqn{p_i}
+(\mjseqn{i = 0,\ldots,n-1}) that an infection between times
+\mjseqn{t_{i-1}} and \mjseqn{t_i} is eventually reported.
+Alternatively, a numeric scalar indicating a constant probability
+\mjseqn{p_\text{c}}.}
 
-\item{delay_dist}{A numeric vector. The distribution of the integer
-number of observation intervals between infection and reporting.
-\code{delay_dist[i]} is the probability that an infection that is
-eventually reported is reported after \code{i-1} observation intervals.
-\code{delay_dist} is replaced with \code{delay_dist / sum(delay_dist)} in
-the event that \code{sum(delay_dist) != 1}.}
+\item{delay_dist}{\mjseqn{\lbrace\,q_i\,\rbrace}
+A numeric vector listing the probability \mjseqn{q_i}
+(\mjseqn{i = 0,\ldots,b}) that an infection that is eventually reported
+replaced with \code{delay_dist / sum(delay_dist)} in the event that
+\code{sum(delay_dist) != 1}.}
 }
 \value{
 A data frame with \code{n} rows corresponding to equally spaced time points
-\mjseqn{t_i = i \Delta t} (for \mjseqn{i = 0, \ldots, n-1}), and numeric
+\mjseqn{t_i = i \Delta t} (\mjseqn{i = 0,\ldots,n-1}), and numeric
 columns:
 
 \describe{
@@ -156,7 +156,7 @@ Incidence. \code{Z[i]} is the number of infections
 between times \code{t[i-1]} and \code{t[i]}. For
 simplicity, \code{make_data()} assigns \code{Z[1] <- Z[2]}.
 }
-\item{\code{p}}{\mjseqn{\lbrace\,p(t_i)\,\rbrace}
+\item{\code{p}}{\mjseqn{\lbrace\,p_i\,\rbrace}
 Reporting probability. \code{p[i]} is the probability
 that an infection between times \code{t[i-1]} and \code{t[i]}
 is eventually reported. Equal to the value of \code{p}
@@ -170,15 +170,15 @@ that are eventually reported.
 \item{\code{C}}{\mjseqn{\lbrace\,C(t_i)\,\rbrace}
 Reported incidence. \code{C[i]} is the number of infections reported
 between times \code{t[i-1]} and \code{t[i]}.
-If \code{b = max(which(delay_dist > 0)) - 1} and \code{b > 0}, then \code{C[1:b]}
-are generated based on assumptions about \mjseqn{Z_\text{rep}}
-(see Details).
+If \code{b = max(which(delay_dist > 0)) - 1} and \code{b > 0},
+then attempts are made to ensure that \code{C[1:b]} have
+the correct scale (see Details 1).
 }
 }
 
 The data frame has attributes \code{call} and \code{arg_list}, making it
 reproducible with \code{eval(call)} or \code{do.call(make_data, arg_list)},
-possibly preceded by a call to \code{\link[base:Random]{base::set.seed()}}.
+preceded by a call to \code{\link[base:Random]{base::set.seed()}}.
 }
 \description{
 Simulates epidemic time series data using a system of S(E)IR equations
@@ -200,7 +200,7 @@ then the system is
 
 \mjsdeqn{\begin{align*} \frac{\text{d}S}{\text{d}t} &= \nu(t) - \beta(t) S I - \mu(t) S\,, \cr \frac{\text{d}I}{\text{d}t} &= \beta(t) S I - \gamma I - \mu(t) I\,, \cr \frac{\text{d}R}{\text{d}t} &= \gamma I - \mu(t) R\,, \cr \frac{\text{d}B_\text{cum}}{\text{d}t} &= \nu(t)\,, \cr \frac{\text{d}Z_\text{cum}}{\text{d}t} &= \beta(t) S I\,, \end{align*}}
 
-where \mjseqn{\gamma = 1 / t_\text{gen}}.
+where \mjseqn{\gamma = 1 / (t_\text{lat} + t_\text{inf})}.
 If \code{model = "seir"}, then the system is
 
 \mjsdeqn{\begin{align*} \frac{\text{d}S}{\text{d}t} &= \nu(t) - \beta(t) S I - \mu(t) S\,, \cr \frac{\text{d}E}{\text{d}t} &= \beta(t) S I - \sigma E - \mu(t) E\,, \cr \frac{\text{d}I}{\text{d}t} &= \sigma E - \gamma I - \mu(t) I\,, \cr \frac{\text{d}R}{\text{d}t} &= \gamma I - \mu(t) R\,, \cr \frac{\text{d}B_\text{cum}}{\text{d}t} &= \nu(t)\,, \cr \frac{\text{d}Z_\text{cum}}{\text{d}t} &= \beta(t) S I\,, \end{align*}}
@@ -209,8 +209,7 @@ where \mjseqn{\sigma = 1 / t_\text{lat}} and
 \mjseqn{\gamma = 1 / t_\text{inf}}.
 
 \code{make_data()} generates observations of the system at equally spaced
-times \mjseqn{t_i = i \Delta t} (for \mjseqn{i = 0, \ldots, n-1}) by
-either
+times \mjseqn{t_i = i \Delta t} (\mjseqn{i = 0,\ldots,n-1}) by either
 (i) numerically integrating the ODE using \code{\link[deSolve:ode]{deSolve::ode()}}
 (\code{with_ds = FALSE}), or
 (ii) realizing a corresponding continuous-time stochastic process
@@ -233,7 +232,7 @@ to zero whenever the infected population size is one.
 
 \code{make_data()} calculates births \mjseqn{B} and incidence \mjseqn{Z}
 from cumulative births \mjseqn{B_\text{cum}} and cumulative incidence
-\mjseqn{Z_\text{cum}} via first differences:
+\mjseqn{Z_\text{cum}} by first differences:
 
 \mjsdeqn{\begin{align*} B(t_i) &= B_\text{cum}(t_i) - B_\text{cum}(t_{i-1}), \cr Z(t_i) &= Z_\text{cum}(t_i) - Z_\text{cum}(t_{i-1}). \end{align*}}
 
@@ -245,21 +244,23 @@ For simplicity, they are assigned the values of \mjseqn{B(t_1)} and
 observation of \mjseqn{Z}, a number of infections that is eventually
 reported:
 
-\mjsdeqn{Z_\text{rep}(t_i) \sim \mathrm{Binomial}\big(Z(t_i),p(t_i)\big)\,.}
+\mjsdeqn{Z_\text{rep}(t_i) \sim \mathrm{Binomial}\big(\mathrm{nint}(Z(t_i)),p_i\big)\,.}
 
-Here, \mjseqn{p_\text{rep}(t_i)} is the probability that an infection
-between times \mjseqn{t_{i-1}} and \mjseqn{t_i} (counted by \mjseqn{Z(t_i)})
-is eventually reported. Finally, it generates reported incidence \mjseqn{C}
-by sampling from a supplied reporting delay distribution and binning
-infections counted by \mjseqn{Z_\text{rep}} forward in time. If the
-maximum possible delay is \mjseqn{b \Delta t} and \mjseqn{b > 0}, then,
-for simplicity,
-\mjseqn{Z_\text{rep}(-b\Delta t),\ldots,Z_\text{rep}(t_{-\Delta t})}
-are assigned the value of \mjseqn{Z_\text{rep}(0)}, in order to ensure
-that \mjseqn{C(t_0),\ldots,C(t_{b-1})} are based on complete information
-about \mjseqn{Z_\text{rep}}. Compared to \mjseqn{Z}, \mjseqn{C} models
-\strong{observation error}, i.e., under-reporting of infections with delay
-between infection and reporting.
+Here, \mjseqn{\mathrm{nint}(Z(t_i))} \mjseqn{Z(t_i)} rounded to the nearest
+integer and \mjseqn{p_i} is the probability that an infection between times
+\mjseqn{t_{i-1}} and \mjseqn{t_i} (counted by \mjseqn{Z(t_i)}) is eventually
+reported. Finally, it generates reported incidence \mjseqn{C} by sampling
+from a supplied reporting delay distribution and binning infections counted
+by \mjseqn{Z_\text{rep}} forward in time. If the maximum possible delay is
+\mjseqn{b \Delta t} and \mjseqn{b > 0}, then, for simplicity, \code{make_data()}
+simulates
+
+\mjsdeqn{Z_\text{rep}(t_i) \sim \mathrm{Binomial}\big(\mathrm{nint}(Z(t_0)),p_0\big)\,.}
+
+for \mjseqn{i = -b,\ldots,-1}, in order to ensure that \mjseqn{C} is based
+on complete information about \mjseqn{Z_\text{rep}}. Compared to \mjseqn{Z},
+\mjseqn{C} models \strong{observation error}, i.e., under-reporting of infections
+with delays between infection and reporting.
 }
 
 \subsection{2. Default parametrization}{
@@ -280,7 +281,7 @@ Care is taken to ensure that random number generation occurs in the
 enclosing environment rather than the body of the function assigned
 by default to \code{make_data()} argument \code{beta}. This ensures that the
 function has noisy but non-random output, which is helpful for
-reproducibility. For details, see Usage and then see \code{\link[=make_beta]{make_beta()}}.
+reproducibility. For details, see helper function\code{\link[=make_beta]{make_beta()}}.
 
 By default, the reporting probability \mjseqn{p} is constant and equal
 to \mjseqn{p_\text{c}}, while the reporting delay is fixed equal to zero,

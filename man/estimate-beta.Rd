@@ -45,17 +45,13 @@ S, SI, and SEI methods only.
 \item{par_list}{A list with numeric scalar elements:
 
 \describe{
-\item{\code{tgen}}{\mjseqn{\lbrace\,t_\text{gen} / \Delta t\,\rbrace}
-Mean generation interval of the disease of interest
-in units \mjseqn{\Delta t}. FC, S, and SI methods only.
-}
 \item{\code{tlat}}{\mjseqn{\lbrace\,t_\text{lat} / \Delta t\,\rbrace}
 Mean latent period of the disease of interest
-in units \mjseqn{\Delta t}. SEI method only.
+in units \mjseqn{\Delta t}.
 }
 \item{\code{tinf}}{\mjseqn{\lbrace\,t_\text{inf} / \Delta t\,\rbrace}
 Mean infectious period of the disease of interest
-in units \mjseqn{\Delta t}. SEI method only.
+in units \mjseqn{\Delta t}.
 }
 \item{\code{S0}}{\mjseqn{\lbrace\,S_0\,\rbrace}
 Number of susceptible individuals at time \mjseqn{t = t_0}.
@@ -142,18 +138,20 @@ The SEI method is a generalization of the SI method to the SEIR model
 \subsection{2. Algorithms}{
 \subsection{FC method}{
 
-The supplied incidence time series \mjseqn{Z_i} (\code{data$Z}) is aggregated
-over generation intervals:
+The supplied incidence time series \mjseqn{Z_i} is aggregated over
+generation intervals:
 
 \mjsdeqn{Z_i^\text{agg} = \sum_{k=i-g+1}^k Z_k\,,\quad i=jg\,,\quad j = 1,2,\ldots\,,}
 
-where \mjseqn{g = \mathrm{nint}(t_\text{gen} / \Delta t)} is the mean
-generation interval \mjseqn{t_\text{gen}} in units of the observation
-interval \mjseqn{\Delta t} (\code{par_list$tgen}), rounded to the nearest
-integer. The supplied births time series \mjseqn{B_i} (\code{data$B})
-is aggregated similarly. The susceptible population size is estimated
-recursively starting from the supplied initial value \mjseqn{S_0}
-(\code{par_list$S0}):
+where
+
+\mjsdeqn{g = \mathrm{nint}\left(\frac{t_\text{lat} + t_\text{inf}}{\Delta t}\right)}
+
+is the mean generation interval \mjseqn{t_\text{lat} + t_\text{inf}}
+in units of the observation interval \mjseqn{\Delta t}, rounded to
+the nearest integer. The supplied births time series \mjseqn{B_i} is
+aggregated similarly. The susceptible population size is estimated
+recursively starting from the supplied initial value \mjseqn{S_0}:
 
 \mjsdeqn{S_{i+g} = S_i + B_{i+g}^\text{agg} - Z_{i+g}^\text{agg}\,,\quad i=jg\,,\quad j = 0,1,\ldots\,,}
 
@@ -175,18 +173,21 @@ Note that this algorithm was first published by
 \subsection{S method}{
 
 The susceptible population size is estimated recursively starting from
-the supplied initial value \mjseqn{S_0} (\code{par_list$S0}):
+the supplied initial value \mjseqn{S_0}:
 
 \mjsdeqn{S_{i+1} = S_i + B_{i+1} - Z_{i+1} - \mu_i S_i \Delta t\,.}
 
 The infectious population size is approximated by a scaling of incidence:
 
-\mjsdeqn{I_i = \frac{Z_{i-g+1}}{(\gamma + \mu_i) \Delta t}\,,\quad \gamma = 1 / t_\text{gen}\,,}
+\mjsdeqn{I_i = \frac{Z_{i-g+1}}{(\gamma + \mu_i) \Delta t}\,,\quad \gamma^{-1} = t_\text{lat} + t_\text{inf}\,,}
 
-where \mjseqn{g = \mathrm{nint}(t_\text{gen} / \Delta t)} is the mean
-generation interval \mjseqn{t_\text{gen}} in units of the observation
-interval \mjseqn{\Delta t} (\code{par_list$tgen}), rounded to the nearest
-integer. The transmission rate per susceptible individual
+where
+
+\mjsdeqn{g = \mathrm{nint}\left(\frac{t_\text{lat} + t_\text{inf}}{\Delta t}\right)}
+
+is the mean generation interval \mjseqn{t_\text{lat} + t_\text{inf}}
+in units of the observation interval \mjseqn{\Delta t}, rounded to
+the nearest integer. The transmission rate per susceptible individual
 per infectious individual is then estimated as
 
 \mjsdeqn{\beta_i = \frac{Z_{i+1}}{S_i I_i \Delta t}\,.}
@@ -195,10 +196,9 @@ per infectious individual is then estimated as
 \subsection{SI method}{
 
 The susceptible and infectious population sizes are estimated recursively
-starting from the supplied initial values \mjseqn{S_0} (\code{par_list$S0})
-and \mjseqn{I_0} (\code{par_list$I0}):
+starting from the supplied initial values \mjseqn{S_0} and \mjseqn{I_0}:
 
-\mjsdeqn{\begin{align*} S_{i+1} &= \frac{\big\lbrack 1 - \frac{1}{2} \mu_i \Delta t \big\rbrack S_i + B_{i+1} - Z_{i+1}}{1 + \frac{1}{2} \mu_{i+1} \Delta t}\,, \cr I_{i+1} &= \frac{\big\lbrack 1 - \frac{1}{2} (\gamma + \mu_i) \Delta t \big\rbrack I_i + Z_{i+1}}{1 + \frac{1}{2} (\gamma + \mu_{i+1}) \Delta t}\,,\quad \gamma = 1 / t_\text{gen}\,. \end{align*}}
+\mjsdeqn{\begin{align*} S_{i+1} &= \frac{\big\lbrack 1 - \frac{1}{2} \mu_i \Delta t \big\rbrack S_i + B_{i+1} - Z_{i+1}}{1 + \frac{1}{2} \mu_{i+1} \Delta t}\,, \cr I_{i+1} &= \frac{\big\lbrack 1 - \frac{1}{2} (\gamma + \mu_i) \Delta t \big\rbrack I_i + Z_{i+1}}{1 + \frac{1}{2} (\gamma + \mu_{i+1}) \Delta t}\,,\quad \gamma^{-1} = t_\text{lat} + t_\text{inf}\,. \end{align*}}
 
 The transmission rate per susceptible individual
 per infectious individual is then estimated as
@@ -213,7 +213,7 @@ population sizes are estimated recursively starting from the supplied
 initial values \mjseqn{S_0} (\code{par_list$S0}), \mjseqn{E_0} (\code{par_list$E0}),
 and \mjseqn{I_0} (\code{par_list$I0}):
 
-\mjsdeqn{\begin{align*} S_{i+1} &= \frac{\big\lbrack 1 - \frac{1}{2} \mu_i \Delta t \big\rbrack S_i + B_{i+1} - Z_{i+1}}{1 + \frac{1}{2} \mu_{i+1} \Delta t}\,, \cr E_{i+1} &= \frac{\big\lbrack 1 - \frac{1}{2} (\sigma + \mu_i) \Delta t \big\rbrack E_i + Z_i}{1 + \frac{1}{2} (\sigma + \mu_{i+1}) \Delta t}\,,\quad \sigma = 1 / t_\text{lat}\,, \cr I_{i+1} &= \frac{\big\lbrack 1 - \frac{1}{2} (\gamma + \mu_i) \Delta t \big\rbrack I_i + \frac{1}{2} \sigma (E_i + E_{i+1}) \Delta t}{1 + \frac{1}{2} (\gamma + \mu_{i+1}) \Delta t}\,,\quad \sigma = 1 / t_\text{lat}\,,\quad \gamma = 1 / t_\text{inf}\,. \end{align*}}
+\mjsdeqn{\begin{align*} S_{i+1} &= \frac{\big\lbrack 1 - \frac{1}{2} \mu_i \Delta t \big\rbrack S_i + B_{i+1} - Z_{i+1}}{1 + \frac{1}{2} \mu_{i+1} \Delta t}\,, \cr E_{i+1} &= \frac{\big\lbrack 1 - \frac{1}{2} (\sigma + \mu_i) \Delta t \big\rbrack E_i + Z_i}{1 + \frac{1}{2} (\sigma + \mu_{i+1}) \Delta t}\,,\quad \sigma^{-1} = t_\text{lat}\,, \cr I_{i+1} &= \frac{\big\lbrack 1 - \frac{1}{2} (\gamma + \mu_i) \Delta t \big\rbrack I_i + \frac{1}{2} \sigma (E_i + E_{i+1}) \Delta t}{1 + \frac{1}{2} (\gamma + \mu_{i+1}) \Delta t}\,,\quad \sigma^{-1} = t_\text{lat}\,,\quad \gamma^{-1} = t_\text{inf}\,. \end{align*}}
 
 The transmission rate per susceptible individual
 per infectious individual is then estimated as

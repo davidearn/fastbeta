@@ -54,13 +54,17 @@
 #' with care taken to ensure that each process has its own
 #' RNG stream.
 #'
+#' If the R session hangs due to an error in [parallel::makePSOCKcluster()],
+#' then try the solution suggested
+#' \href{https://github.com/rstudio/rstudio/issues/6692}{here}.
+#'
 #' @param x A fastbeta object defining a [fastbeta()] estimate
 #'   of \mjseqn{\beta(t)}. Must satisfy `x$method %in% c("si", "sei")`.
 #' @param y An optional loess object defining a loess fit to the
 #'   [fastbeta()] estimate of \mjseqn{\beta(t)} (see Details).
 #'   [try_loess()] can help define a reasonable value for `y`
 #'   (see Examples).
-#' @param n An integer scalar. The desired number of bootstrap
+#' @param nboot An integer scalar. The desired number of bootstrap
 #'   simulations.
 #' @param p A numeric vector of length `nrow(x$out)`. `p[i]` is the
 #'   positive probability that an infection between times `x$out$t[i-1]`
@@ -72,6 +76,9 @@
 #'   eventually reported is reported after `i-1` observation intervals.
 #'   `delay_dist` is replaced with `delay_dist / sum(delay_dist)` in
 #'   the event that `sum(delay_dist) != 1`.
+#' @param ncores An integer scalar. The number of (logical) CPUs used
+#'   to perform bootstrap simulations. The maximum number is
+#'   `parallel::detectCores(logical = TRUE)`.
 #' @param iseed An optional integer scalar, defining a seed for RNG.
 #'   The output is reproducible if and only if `iseed` is specified.
 #'
@@ -142,7 +149,7 @@
 #' ## on the loess estimate, conditional on a given
 #' ## observation model
 #' bootbeta_out <- bootbeta(fastbeta_out, my_loess,
-#'   n = 100,
+#'   nboot = 100,
 #'   p = 0.5,
 #'   delay_dist = c(0, 0.5, 0.5)
 #' )
@@ -155,8 +162,8 @@
 #' @export
 #' @import stats
 #' @import parallel
-bootbeta <- function(x, y = NULL, n = 100L, p = 1, delay_dist = c(1),
-                     iseed = NULL) {
+bootbeta <- function(x, y = NULL, nboot = 100L, p = 1, delay_dist = c(1),
+                     ncores = 2, iseed = NULL) {
   if (missing(x)) {
     stop("Missing argument `x`.")
   } else if (!inherits(x, "fastbeta")) {
@@ -167,8 +174,8 @@ bootbeta <- function(x, y = NULL, n = 100L, p = 1, delay_dist = c(1),
   if (!is.null(y) && !inherits(y, "loess")) {
     stop("`y` must be a loess object or `NULL`.")
   }
-  if (!is.numeric(n) || length(n) != 1 || !isTRUE(n >= 1)) {
-    stop("`n` must be a positive integer scalar.")
+  if (!is.numeric(nboot) || length(nboot) != 1 || !isTRUE(nboot >= 1)) {
+    stop("`nboot` must be a positive integer scalar.")
   }
   if (!is.numeric(p) || !length(p) %in% c(1, nrow(x$out)) ||
         !isTRUE(all(p > 0))) {
@@ -179,6 +186,9 @@ bootbeta <- function(x, y = NULL, n = 100L, p = 1, delay_dist = c(1),
     stop("`delay_dist` must be a non-negative numeric vector.")
   } else if (!any(delay_dist > 0)) {
     stop("`delay_dist` must have at least one positive element.")
+  }
+  if (!is.numeric(ncores) || length(ncores) != 1 || !isTRUE(ncores >= 1)) {
+    stop("`ncores` must be a positive integer scalar.")
   }
   if (!is.null(iseed) &&
         (!is.numeric(iseed) || length(iseed) != 1 || iseed %% 1 != 0)) {
@@ -193,8 +203,14 @@ bootbeta <- function(x, y = NULL, n = 100L, p = 1, delay_dist = c(1),
   ## Save start time
   proc_time_start <- proc.time()
 
-  ## Reserve variable name `n` for `make_data()` argument
-  n_boot <- floor(n)
+  ## Tolerate non-integer `nboot` and `ncores`
+  nboot <- floor(nboot)
+  ncores <- floor(ncores)
+
+  ## `R CMD check` allows at most 2 cores
+  check_env_var <- Sys.getenv("_R_CHECK_LIMIT_CORES_", "")
+  doing_check <- nzchar(check_env_var) && check_env_var == "TRUE"
+  ncores <- if (doing_check) min(ncores, 2) else min(ncores, detectCores())
 
   ### Construct a valid call to `make_data()` using ... ----------------
   ### information stored in the fastbeta object `x`
@@ -227,7 +243,7 @@ bootbeta <- function(x, y = NULL, n = 100L, p = 1, delay_dist = c(1),
 
   ## Birth rate:
   ## * Defined as the linear interpolant of a 2-point
-  ##   moving average applied the births time series
+  ##   moving average applied to the births time series
   ##   in `x`.
   ## * `B[i] + B[i+1]` is the number of births in the
   ##   two observation intervals between times `t[i-1]`
@@ -258,16 +274,11 @@ bootbeta <- function(x, y = NULL, n = 100L, p = 1, delay_dist = c(1),
   }
 
 
-  ### Generate `n_boot` bootstrap estimates ... ------------------------
+  ### Generate `nboot` bootstrap estimates ... ------------------------
   ### of the transmission rate, in parallel
 
-  ## `R CMD check` allows at most 2 cores
-  check_env_var <- Sys.getenv("_R_CHECK_LIMIT_CORES_", "")
-  doing_check <- nzchar(check_env_var) && check_env_var == "TRUE"
-  num_cores <- if (doing_check) 2L else detectCores()
-
   ## Initialize cluster
-  cl <- makeCluster(num_cores, outfile = "")
+  cl <- makeCluster(ncores, outfile = "")
   clusterSetRNGStream(cl, iseed = iseed)
   varnames <- c("par_list", "n", "with_ds", "model",
                 "mu", "nu", "beta", "p", "delay_dist",
@@ -277,8 +288,8 @@ bootbeta <- function(x, y = NULL, n = 100L, p = 1, delay_dist = c(1),
   clusterEvalQ(cl, b <- max(which(delay_dist > 0)) - 1)
 
   ## Print user notification
-  line1 <- paste("Running", n_boot, "bootstrap simulations",
-                 "on", num_cores, "cores.")
+  line1 <- paste("Running", nboot, "bootstrap simulations",
+                 "on", ncores, "cores.")
   line2 <- "This could take several minutes."
   line3 <- "Each dot below is one complete simulation."
   border <- rep("=", nchar(line1))
@@ -289,7 +300,7 @@ bootbeta <- function(x, y = NULL, n = 100L, p = 1, delay_dist = c(1),
           border)
 
   ## Pass job to cluster
-  mat <- parSapply(cl, seq_len(n_boot), function(i) {
+  mat <- parSapply(cl, seq_len(nboot), function(i) {
 
     ## Data frame containing simulated time series data
     data <- make_data(par_list, n, with_ds, model,
@@ -344,8 +355,7 @@ bootbeta <- function(x, y = NULL, n = 100L, p = 1, delay_dist = c(1),
     n     = ncol(mat),
     call  = match.call(),
     arg_list = arg_list,
-    elapsed = proc_time_end - proc_time_start
+    runtime  = proc_time_end - proc_time_start
   )
   colnames(out$ci95) <- c("lower", "upper")
-  structure(out, class = c("bootbeta", "list"))
-}
+  structure(out, class = c("bootbeta", "list"))}

@@ -1,41 +1,48 @@
 SHELL = bash
 R = R
 PACKAGE = fastbeta
-VERSION := $(shell sed -n '/^Version: /s///p' ./DESCRIPTION)
+VERSION := $(shell sed -n '/^Version: /s/Version: // p' DESCRIPTION)
 TARBALL := $(PACKAGE)_$(VERSION).tar.gz
+VIGNETTE = fastbeta-vignette.Rnw fastbeta-vignette.bib knit_theme.css Makefile
 
-basic:
-	Rscript -e "devtools::document()"
-	R CMD build --no-manual .
-	R CMD INSTALL *.tar.gz
+basic :
+	$(R) --no-echo -e 'devtools::document(".")'
+	$(R) CMD build --no-manual .
+	$(R) CMD INSTALL $(TARBALL)
 
-fancy: doc-update install
+fancy : rd namespace install
 
-pkgall: clean doc-update namespace-update install pkgcheck
+all : clean install check
 
-doc-update: R/*.R
-	echo "suppressWarnings(roxygen2::roxygenize(\".\",roclets = c(\"collate\", \"rd\")))" | $(R) --slave
-	@touch $@
+install : build
+	export NOT_CRAN=true
+	$(R) CMD INSTALL ../$<
 
-namespace-update: R/*.R
-	echo "suppressWarnings(roxygen2::roxygenize('.',roclets = 'namespace'))" | $(R) --slave
-	@touch $@
+build : $(TARBALL)
 
-$(TARBALL): ./NAMESPACE
-	$(R) CMD build .
+$(TARBALL) : R/*.R man/*.Rd vignettes/$(VIGNETTE) DESCRIPTION NAMESPACE
+	$(R) CMD build --no-manual .
 	mv $@ ..
 
-install: $(TARBALL)
-	##export NOT_CRAN=true; $(R) CMD INSTALL --preclean --no-manual ../$<
-	$(R) CMD INSTALL *.tar.gz
+man/*.Rd &: R/*.R inst/REFERENCES.bib
+	$(R) --no-echo -e 'devtools::document(".", roclets = "rd")'
 	@touch $@
 
-pkgtest:
-	echo "devtools::test('.')" | $(R) --slave
+DESCRIPTION : R/*.R
+	$(R) --no-echo -e 'devtools::document(".", roclets = "collate")'
+	@touch $@
 
-pkgcheck:
-	echo "devtools::check('.')" | $(R) --slave
+NAMESPACE : R/*.R
+	$(R) --no-echo -e 'devtools::document(".", roclets = "namespace")'
+	@touch $@
 
-clean:
-	rm -f *.tar.gz
-	find . \( -name "\.#*" -o -name "*~" -o -name ".Rhistory" \) -exec rm {} \;
+check :
+	$(R) --no-echo -e 'devtools::check(".")'
+
+test :
+	$(R) --no-echo -e 'devtools::test(".")'
+
+clean :
+	rm -f ../$(TARBALL)
+	find . \( -name "\.#*" -o -name "*~" -o -name ".Rhistory" \) \
+		-exec rm {} +

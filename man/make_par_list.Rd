@@ -24,7 +24,7 @@ make_par_list(
 A numeric scalar. Observation interval in days.}
 
 \item{N0}{\mjseqn{\lbrace\,N_0\,\rbrace}
-A numeric scalar. Population size at time \mjseqn{t = 0} years.}
+A numeric scalar. Population size at time \mjseqn{t_0 = 0 \Delta t}.}
 
 \item{tlat}{\mjseqn{\lbrace\,t_\text{lat}/\Delta t\,\rbrace}
 A numeric scalar. Mean latent period
@@ -55,15 +55,14 @@ transmission rate.}
 A numeric scalar. Probability that an infection is eventually reported.}
 
 \item{model}{A character scalar, either \code{"sir"} or \code{"seir"},
-indicating a system of equations to be numerically integrated
-(see Details 2).}
+indicating a model of disease dynamics (see Details 2).}
 
 \item{n}{\mjseqn{\lbrace\,n\,\rbrace}
 A positive integer scalar. A system of SIR (\code{model = "sir"})
-or SEIR (\code{model = "seir"}) equations will be numerically integrated
-between times \mjseqn{t = -(n-1) \Delta t} and \mjseqn{t = 0} years
-to obtain values for \mjseqn{S_0}, \mjseqn{E_0}, and \mjseqn{I_0}
-(see Details 2 and 3).}
+or SEIR (\code{model = "seir"}) equations will be numerically
+integrated between times \mjseqn{t_{-(n-1)} = -(n-1) \Delta t}
+and \mjseqn{t_0 = 0 \Delta t} years to obtain values for
+\mjseqn{S_0}, \mjseqn{E_0}, and \mjseqn{I_0} (see Details 2 and 3).}
 }
 \value{
 A list of the arguments in the function call,
@@ -71,10 +70,6 @@ excluding \code{model} and \code{n} while including
 these additional numeric scalar elements:
 
 \describe{
-\item{\code{tgen}}{\mjseqn{\lbrace\,t_\text{gen} / \Delta t\,\rbrace}
-Mean generation interval of the disease of interest
-in units \mjseqn{\Delta t}. Equal to \code{tlat + tinf}.
-}
 \item{\code{beta_mean}}{\mjseqn{\lbrace\,\langle\beta\rangle \Delta t\,\rbrace}
 Mean (long-term average) of the seasonally forced
 transmission rate expressed per unit \mjseqn{\Delta t}
@@ -132,8 +127,8 @@ with \mjseqn{\gamma = 1 / (t_\text{lat} + t_\text{inf})} and
 
 \mjsdeqn{\beta(t) = \langle\beta\rangle \left\lbrack 1 + \alpha \cos\left(\frac{2 \pi t}{\text{365 days}}\right) \right\rbrack}
 
-between times \mjseqn{t = t_{-(n-1)} = -(n-1) \Delta t}
-and \mjseqn{t = 0} years, taking
+between times \mjseqn{t_{-(n-1)} = -(n-1) \Delta t}
+and \mjseqn{t_0 = 0 \Delta t}, taking
 
 \mjsdeqn{\begin{bmatrix} S(t_{-(n-1)}) \cr I(t_{-(n-1)}) \end{bmatrix} = N_0 \begin{bmatrix} \frac{1}{\mathcal{R}_0} \cr \big(1 - \frac{1}{\mathcal{R}_0}\big) \frac{\mu}{\gamma + \mu} \end{bmatrix}}
 
@@ -156,8 +151,8 @@ and
 
 \mjsdeqn{\beta(t) = \langle\beta\rangle \left\lbrack 1 + \alpha \cos\left(\frac{2 \pi t}{\text{365 days}}\right) \right\rbrack}
 
-between times \mjseqn{t = t_{-(n-1)} = -(n-1) \Delta t}
-and \mjseqn{t = 0} years, taking
+between times \mjseqn{t_{-(n-1)} = -(n-1) \Delta t}
+and \mjseqn{t_0 = 0 \Delta t}, taking
 
 \mjsdeqn{\begin{bmatrix} S(t_{-(n-1)}) \cr E(t_{-(n-1)}) \cr I(t_{-(n-1)}) \end{bmatrix} = N_0 \begin{bmatrix} \frac{1}{\mathcal{R}_0} \cr \big(1 - \frac{1}{\mathcal{R}_0}\big) \frac{\mu}{\sigma + \mu} \cr \big(1 - \frac{1}{\mathcal{R}_0}\big) \frac{\sigma}{\sigma + \mu} \frac{\mu}{\gamma + \mu} \end{bmatrix}}
 
@@ -175,8 +170,8 @@ Choosing \mjseqn{n} such that \mjseqn{n \Delta t \sim 1000}
 years (the default) is typically enough to ensure that
 \mjseqn{\big(S(0),I(0)\big)} (\code{model = "sir"}) or
 \mjseqn{\big(S(0),I(0),E(0)\big)} (\code{model = "seir"})
-are near the attractor of the system of S(E)IR equations,
-which can be desirable when using \code{\link[=make_data]{make_data()}} to simulate
+is near the attractor of the system of S(E)IR equations.
+This can be desirable when using \code{\link[=make_data]{make_data()}} to simulate
 epidemic time series.
 }
 }
