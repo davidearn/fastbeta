@@ -12,10 +12,10 @@ $(name).pdf: $(NAME).tex $(NAME).bib
 	pdflatex -interaction=batchmode $<
 	pdflatex $<
 
-$(name).tex: $(NAME).Rnw knit_theme.css
+$(NAME).tex: $(NAME).Rnw knit_theme.css
 	$(R) --no-echo -e 'knitr::knit("$<")'
 
-all: $(name).pdf
+all: $(NAME).pdf
 
 new: clean
 	rm -rf cache figure *.{aux,pdf}
