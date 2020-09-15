@@ -146,6 +146,14 @@
 #'     \item{`dt_days`}{\mjseqn{\lbrace\,\Delta t\,\rbrace}
 #'       Observation interval in days.
 #'     }
+#'     \item{`tlat`}{\mjseqn{\lbrace\,t_\text{lat}/\Delta t\,\rbrace}
+#'       Mean latent period of the disease of interest
+#'       in units \mjseqn{\Delta t}.
+#'     }
+#'     \item{`tinf`}{\mjseqn{\lbrace\,t_\text{inf}/\Delta t\,\rbrace}
+#'       Mean infectious period of the disease of interest
+#'       in units \mjseqn{\Delta t}.
+#'     }
 #'     \item{`N0`}{\mjseqn{\lbrace\,N_0\,\rbrace}
 #'       Population size at time \mjseqn{t_0 = 0 \Delta t}.
 #'     }
@@ -159,18 +167,10 @@
 #'     \item{`I0`}{\mjseqn{\lbrace\,I_0\,\rbrace}
 #'       Number of infectious individuals at time \mjseqn{t_0 = 0 \Delta t}.
 #'     }
-#'     \item{`tlat`}{\mjseqn{\lbrace\,t_\text{lat}/\Delta t\,\rbrace}
-#'       Mean latent period of the disease of interest
-#'       in units \mjseqn{\Delta t}.
-#'     }
-#'     \item{`tinf`}{\mjseqn{\lbrace\,t_\text{inf}/\Delta t\,\rbrace}
-#'       Mean infectious period of the disease of interest
-#'       in units \mjseqn{\Delta t}.
-#'     }
 #'   }
 #'
 #'   Additional elements must be included as necessary to ensure
-#'   that arguments `mu`, `nu`, `beta`, and `p` are well-defined
+#'   that arguments `mu`, `nu`, and `beta` are well-defined
 #'   (see Details 2).
 #' @param n \mjseqn{\lbrace\,n\,\rbrace}
 #'   An integer scalar. The number of observations in the

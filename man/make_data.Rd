@@ -24,6 +24,14 @@ make_data(
 \item{\code{dt_days}}{\mjseqn{\lbrace\,\Delta t\,\rbrace}
 Observation interval in days.
 }
+\item{\code{tlat}}{\mjseqn{\lbrace\,t_\text{lat}/\Delta t\,\rbrace}
+Mean latent period of the disease of interest
+in units \mjseqn{\Delta t}.
+}
+\item{\code{tinf}}{\mjseqn{\lbrace\,t_\text{inf}/\Delta t\,\rbrace}
+Mean infectious period of the disease of interest
+in units \mjseqn{\Delta t}.
+}
 \item{\code{N0}}{\mjseqn{\lbrace\,N_0\,\rbrace}
 Population size at time \mjseqn{t_0 = 0 \Delta t}.
 }
@@ -37,18 +45,10 @@ at time \mjseqn{t_0 = 0 \Delta t}. Necessary only if \code{model = "seir"}.
 \item{\code{I0}}{\mjseqn{\lbrace\,I_0\,\rbrace}
 Number of infectious individuals at time \mjseqn{t_0 = 0 \Delta t}.
 }
-\item{\code{tlat}}{\mjseqn{\lbrace\,t_\text{lat}/\Delta t\,\rbrace}
-Mean latent period of the disease of interest
-in units \mjseqn{\Delta t}.
-}
-\item{\code{tinf}}{\mjseqn{\lbrace\,t_\text{inf}/\Delta t\,\rbrace}
-Mean infectious period of the disease of interest
-in units \mjseqn{\Delta t}.
-}
 }
 
 Additional elements must be included as necessary to ensure
-that arguments \code{mu}, \code{nu}, \code{beta}, and \code{p} are well-defined
+that arguments \code{mu}, \code{nu}, and \code{beta} are well-defined
 (see Details 2).}
 
 \item{n}{\mjseqn{\lbrace\,n\,\rbrace}

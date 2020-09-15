@@ -8,11 +8,9 @@ Define a seasonally forcing function for simulations}
 make_beta(epsilon, n)
 }
 \arguments{
-\item{epsilon}{A numeric scalar. The standard deviation of
-the noise process.}
+\item{epsilon}{A numeric scalar. Standard deviation of the noise process.}
 
-\item{n}{An integer scalar. The number of observations in
-the noise process.}
+\item{n}{An integer scalar. Number of observations in the noise process.}
 }
 \value{
 A function with arguments \code{s} and \code{par_list} (see Details).

@@ -42,11 +42,8 @@
 #' while the output of `f()` is determined and reproducible without
 #' [base::set.seed()].
 #'
-#' @param epsilon A numeric scalar. The standard deviation of
-#'   the noise process.
-#'
-#' @param n An integer scalar. The number of observations in
-#'   the noise process.
+#' @param epsilon A numeric scalar. Standard deviation of the noise process.
+#' @param n An integer scalar. Number of observations in the noise process.
 #'
 #' @return
 #' A function with arguments `s` and `par_list` (see Details).

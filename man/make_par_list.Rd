@@ -7,24 +7,21 @@ Create a list of parameter values for simulations}
 \usage{
 make_par_list(
   dt_days = 7,
-  N0 = 1e+06,
   tlat = 5/dt_days,
   tinf = 7/dt_days,
   muconst = 0.04 * dt_days/365,
   Rnaught = 20,
   alpha = 0.08,
   epsilon = 0,
+  N0 = 1e+06,
   pconst = 1,
   model = "sir",
-  n = 1000 * 365/dt_days
+  m = 1000 * 365/dt_days
 )
 }
 \arguments{
 \item{dt_days}{\mjseqn{\lbrace\,\Delta t\,\rbrace}
 A numeric scalar. Observation interval in days.}
-
-\item{N0}{\mjseqn{\lbrace\,N_0\,\rbrace}
-A numeric scalar. Population size at time \mjseqn{t_0 = 0 \Delta t}.}
 
 \item{tlat}{\mjseqn{\lbrace\,t_\text{lat}/\Delta t\,\rbrace}
 A numeric scalar. Mean latent period
@@ -51,22 +48,25 @@ A numeric scalar. Standard deviation of the standard
 normally distributed phase shift in the seasonally forced
 transmission rate.}
 
+\item{N0}{\mjseqn{\lbrace\,N_0\,\rbrace}
+A numeric scalar. Population size at time \mjseqn{t_0 = 0 \Delta t}.}
+
 \item{pconst}{\mjseqn{\lbrace\,p_\text{c}\,\rbrace}
 A numeric scalar. Probability that an infection is eventually reported.}
 
 \item{model}{A character scalar, either \code{"sir"} or \code{"seir"},
 indicating a model of disease dynamics (see Details 2).}
 
-\item{n}{\mjseqn{\lbrace\,n\,\rbrace}
+\item{m}{\mjseqn{\lbrace\,n\,\rbrace}
 A positive integer scalar. A system of SIR (\code{model = "sir"})
-or SEIR (\code{model = "seir"}) equations will be numerically
-integrated between times \mjseqn{t_{-(n-1)} = -(n-1) \Delta t}
-and \mjseqn{t_0 = 0 \Delta t} years to obtain values for
-\mjseqn{S_0}, \mjseqn{E_0}, and \mjseqn{I_0} (see Details 2 and 3).}
+or SEIR (\code{model = "seir"}) equations is numerically
+integrated between times \mjseqn{t_{-(m-1)} = -(m-1) \Delta t}
+and \mjseqn{t_0 = 0 \Delta t} to obtain values for \mjseqn{S_0},
+\mjseqn{E_0}, and \mjseqn{I_0} (see Details 2 and 3).}
 }
 \value{
 A list of the arguments in the function call,
-excluding \code{model} and \code{n} while including
+excluding \code{model} and \code{m} while including
 these additional numeric scalar elements:
 
 \describe{
@@ -104,12 +104,12 @@ are accepted for its arguments \code{mu}, \code{nu}, \code{beta}, and
 \code{make_par_list()} defines \mjseqn{\langle\beta\rangle} as a function
 of \mjseqn{\mathcal{R}_0} by enforcing the identity
 
-\mjsdeqn{\mathcal{R}_0 = \frac{\langle\beta\rangle N_0}{\gamma + \mu}}
+\mjsdeqn{\mathcal{R}\emph{0 = \frac{\langle\beta\rangle N_0}{\gamma + \mu}\text{c}}}
 
 if \code{model = "sir"}, where \mjseqn{\gamma = 1 / (t_\text{lat} + t_\text{inf})},
 and the identity
 
-\mjsdeqn{\mathcal{R}_0 = \frac{\langle\beta\rangle N_0}{\gamma + \mu} \frac{\sigma}{\sigma + \mu}}
+\mjsdeqn{\mathcal{R}\emph{0 = \frac{\langle\beta\rangle N_0}{\gamma + \mu}\text{c}} \frac{\sigma}{\sigma + \mu_\text{c}}}
 
 if \code{model = "seir"}, where \mjseqn{\sigma = 1 / t_\text{lat}}
 and \mjseqn{\gamma = 1 / t_\text{inf}}.
@@ -127,10 +127,10 @@ with \mjseqn{\gamma = 1 / (t_\text{lat} + t_\text{inf})} and
 
 \mjsdeqn{\beta(t) = \langle\beta\rangle \left\lbrack 1 + \alpha \cos\left(\frac{2 \pi t}{\text{365 days}}\right) \right\rbrack}
 
-between times \mjseqn{t_{-(n-1)} = -(n-1) \Delta t}
+between times \mjseqn{t_{-(m-1)} = -(m-1) \Delta t}
 and \mjseqn{t_0 = 0 \Delta t}, taking
 
-\mjsdeqn{\begin{bmatrix} S(t_{-(n-1)}) \cr I(t_{-(n-1)}) \end{bmatrix} = N_0 \begin{bmatrix} \frac{1}{\mathcal{R}_0} \cr \big(1 - \frac{1}{\mathcal{R}_0}\big) \frac{\mu}{\gamma + \mu} \end{bmatrix}}
+\mjsdeqn{\begin{bmatrix} S(t_{-(m-1)}) \cr I(t_{-(m-1)}) \end{bmatrix} = N_0 \begin{bmatrix} \frac{1}{\mathcal{R}\emph{0} \cr \big(1 - \frac{1}{\mathcal{R}\emph{0}\big) \frac{\mu}\text{c}}{\gamma + \mu}\text{c}} \end{bmatrix}}
 
 for the initial state. This is the endemic equilibrium of the above system
 with constant transmission rate \mjseqn{\beta(t) \equiv \langle\beta\rangle}.
@@ -151,10 +151,10 @@ and
 
 \mjsdeqn{\beta(t) = \langle\beta\rangle \left\lbrack 1 + \alpha \cos\left(\frac{2 \pi t}{\text{365 days}}\right) \right\rbrack}
 
-between times \mjseqn{t_{-(n-1)} = -(n-1) \Delta t}
+between times \mjseqn{t_{-(m-1)} = -(m-1) \Delta t}
 and \mjseqn{t_0 = 0 \Delta t}, taking
 
-\mjsdeqn{\begin{bmatrix} S(t_{-(n-1)}) \cr E(t_{-(n-1)}) \cr I(t_{-(n-1)}) \end{bmatrix} = N_0 \begin{bmatrix} \frac{1}{\mathcal{R}_0} \cr \big(1 - \frac{1}{\mathcal{R}_0}\big) \frac{\mu}{\sigma + \mu} \cr \big(1 - \frac{1}{\mathcal{R}_0}\big) \frac{\sigma}{\sigma + \mu} \frac{\mu}{\gamma + \mu} \end{bmatrix}}
+\mjsdeqn{\begin{bmatrix} S(t_{-(m-1)}) \cr E(t_{-(m-1)}) \cr I(t_{-(m-1)}) \end{bmatrix} = N_0 \begin{bmatrix} \frac{1}{\mathcal{R}\emph{0} \cr \big(1 - \frac{1}{\mathcal{R}\emph{0}\big) \frac{\mu}\text{c}}{\sigma + \mu}\text{c}} \cr \big(1 - \frac{1}{\mathcal{R}\emph{0}\big) \frac{\sigma}{\sigma + \mu}\text{c}} \frac{\mu_\text{c}}{\gamma + \mu_\text{c}} \end{bmatrix}}
 
 for the initial state. This is the endemic equilibrium of the above system
 with constant transmission rate \mjseqn{\beta(t) \equiv \langle\beta\rangle}.
@@ -164,13 +164,13 @@ the value of \mjseqn{S(0)}, \mjseqn{E(0)}, and \mjseqn{I(0)}, respectively.
 
 }
 
-\subsection{3. Choosing \mjseqn{n}}{
+\subsection{3. Choosing \mjseqn{m}}{
 
-Choosing \mjseqn{n} such that \mjseqn{n \Delta t \sim 1000}
+Choosing \mjseqn{m} such that \mjseqn{m \Delta t \sim 1000}
 years (the default) is typically enough to ensure that
-\mjseqn{\big(S(0),I(0)\big)} (\code{model = "sir"}) or
+\mjseqn{\big(S(0),I(0)\big)} (\code{model = "sir"}) and
 \mjseqn{\big(S(0),I(0),E(0)\big)} (\code{model = "seir"})
-is near the attractor of the system of S(E)IR equations.
+are near the attractor of the system of S(E)IR equations.
 This can be desirable when using \code{\link[=make_data]{make_data()}} to simulate
 epidemic time series.
 }
