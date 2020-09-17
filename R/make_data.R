@@ -32,9 +32,10 @@
 #' \mjseqn{\gamma = 1 / t_\text{inf}}.
 #'
 #' `make_data()` generates observations of the system at equally spaced
-#' times \mjseqn{t_i = i \Delta t} (\mjseqn{i = 0,\ldots,n-1}) by either
-#' (i) numerically integrating the ODE using [deSolve::ode()]
-#' (`with_ds = FALSE`), or
+#' time points \mjseqn{t_i = i \Delta t} (\mjseqn{i = 0,\ldots,n-1}) by
+#' either
+#' (i) numerically integrating the system of ODE using [deSolve::ode()]
+#' (`with_ds = FALSE`) or
 #' (ii) realizing a corresponding continuous-time stochastic process
 #' using [adaptivetau::ssa.adaptivetau()] (`with_ds = TRUE`).
 #' Both methods use initial state
@@ -69,14 +70,14 @@
 #'
 #' \mjsdeqn{Z_\text{rep}(t_i) \sim \mathrm{Binomial}\big(\mathrm{nint}(Z(t_i)),p_i\big)\,.}
 #'
-#' Here, \mjseqn{\mathrm{nint}(Z(t_i))} \mjseqn{Z(t_i)} rounded to the nearest
-#' integer and \mjseqn{p_i} is the probability that an infection between times
-#' \mjseqn{t_{i-1}} and \mjseqn{t_i} (counted by \mjseqn{Z(t_i)}) is eventually
-#' reported. Finally, it generates reported incidence \mjseqn{C} by sampling
-#' from a supplied reporting delay distribution and binning infections counted
-#' by \mjseqn{Z_\text{rep}} forward in time. If the maximum possible delay is
-#' \mjseqn{b \Delta t} and \mjseqn{b > 0}, then, for simplicity, `make_data()`
-#' simulates
+#' Here, \mjseqn{\mathrm{nint}(Z(t_i))} is \mjseqn{Z(t_i)} rounded to the
+#' nearest integer and \mjseqn{p_i} is the probability that an infection
+#' between times \mjseqn{t_{i-1}} and \mjseqn{t_i} (counted by \mjseqn{Z(t_i)})
+#' is eventually reported. Finally, it generates reported incidence \mjseqn{C}
+#' by sampling from a supplied reporting delay distribution and binning
+#' infections counted by \mjseqn{Z_\text{rep}} forward in time. If the
+#' maximum possible delay is \mjseqn{b \Delta t} and \mjseqn{b > 0},
+#' then, for simplicity, `make_data()` simulates
 #'
 #' \mjsdeqn{Z_\text{rep}(t_i) \sim \mathrm{Binomial}\big(\mathrm{nint}(Z(t_0)),p_0\big)\,.}
 #'
@@ -101,9 +102,9 @@
 #'
 #' Care is taken to ensure that random number generation occurs in the
 #' enclosing environment rather than the body of the function assigned
-#' by default to `make_data()` argument `beta`. This ensures that the
-#' function has noisy but non-random output, which is helpful for
-#' reproducibility. For details, see helper function[make_beta()].
+#' by default to argument `beta`. This ensures that the function has
+#' noisy but non-random output, which is helpful for reproducibility.
+#' For details, see helper function [make_beta()].
 #'
 #' By default, the reporting probability \mjseqn{p} is constant and equal
 #' to \mjseqn{p_\text{c}}, while the reporting delay is fixed equal to zero,
@@ -114,31 +115,31 @@
 #' The default specification of `mu`, `nu`, `beta`, and `p` requires
 #' that `par_list` contains these additional numeric scalar elements:
 #'
-#'   \describe{
-#'     \item{`muconst`}{\mjseqn{\lbrace\,\mu_\text{c} \Delta t\,\rbrace}
-#'       Per capita natural mortality rate
-#'       expressed per unit \mjseqn{\Delta t}.
-#'     }
-#'     \item{`beta_mean`}{\mjseqn{\lbrace\,\langle\beta\rangle \Delta t\,\rbrace}
-#'       Mean (long-term average) of the seasonally forced
-#'       transmission rate expressed per unit \mjseqn{\Delta t}
-#'       per susceptible individual per infectious individual.
-#'     }
-#'     \item{`alpha`}{\mjseqn{\lbrace\,\alpha\,\rbrace}
-#'       Amplitude of the seasonally forced transmission rate
-#'       relative to the mean.
-#'     }
-#'     \item{`epsilon`}{\mjseqn{\lbrace\,\epsilon\,\rbrace}
-#'       Standard deviation of the standard normally distributed
-#'       phase shift in the seasonally forced transmission rate.
-#'     }
-#'     \item{`pconst`}{\mjseqn{\lbrace\,p_\text{c}\,\rbrace}
-#'       Probability that an infection is eventually reported.
-#'     }
+#' \describe{
+#'   \item{`muconst`}{\mjseqn{\lbrace\,\mu_\text{c} \Delta t\,\rbrace}
+#'     Per capita natural mortality rate
+#'     expressed per unit \mjseqn{\Delta t}.
 #'   }
+#'   \item{`beta_mean`}{\mjseqn{\lbrace\,\langle\beta\rangle \Delta t\,\rbrace}
+#'     Mean (long-term average) of the seasonally forced
+#'     transmission rate expressed per unit \mjseqn{\Delta t}
+#'     per susceptible individual per infectious individual.
+#'   }
+#'   \item{`alpha`}{\mjseqn{\lbrace\,\alpha\,\rbrace}
+#'     Amplitude of the seasonally forced transmission rate
+#'     relative to the mean.
+#'   }
+#'   \item{`epsilon`}{\mjseqn{\lbrace\,\epsilon\,\rbrace}
+#'     Standard deviation of the standard normally distributed
+#'     phase shift in the seasonally forced transmission rate.
+#'   }
+#'   \item{`pconst`}{\mjseqn{\lbrace\,p_\text{c}\,\rbrace}
+#'     Probability that an infection is eventually reported.
+#'   }
+#' }
 #'
-#' The helper function [make_par_list()] can be used to construct
-#' a list conforming to these default requirements.
+#' Helper function [make_par_list()] can be used to construct
+#' a list conforming to this requirement.
 #'
 #' @param par_list A list of parameter values with numeric scalar elements:
 #'
@@ -218,14 +219,15 @@
 #'   \mjseqn{p_\text{c}}.
 #' @param delay_dist \mjseqn{\lbrace\,q_i\,\rbrace}
 #'   A numeric vector listing the probability \mjseqn{q_i}
-#'   (\mjseqn{i = 0,\ldots,b}) that an infection that is eventually reported
-#'   replaced with `delay_dist / sum(delay_dist)` in the event that
-#'   `sum(delay_dist) != 1`.
+#'   (\mjseqn{i = 0,\ldots,b}) that an infection that is eventually
+#'   reported is reported after \mjseqn{i} observation intervals.
+#'   `delay_dist` is replaced with `delay_dist / sum(delay_dist)`
+#'   in the event that `sum(delay_dist) != 1`.
 #'
 #' @return
 #' A data frame with `n` rows corresponding to equally spaced time points
-#' \mjseqn{t_i = i \Delta t} (\mjseqn{i = 0,\ldots,n-1}), and numeric
-#' columns:
+#' \mjseqn{t_i = i \Delta t} (\mjseqn{i = 0,\ldots,n-1}),
+#' and numeric columns:
 #'
 #' \describe{
 #'   \item{`t`}{\mjseqn{\lbrace\,t_i / \Delta t\,\rbrace}
@@ -237,20 +239,23 @@
 #'   \item{`beta`}{\mjseqn{\lbrace\,\beta(t_i) \Delta t\,\rbrace}
 #'     Transmission rate expressed per unit \mjseqn{\Delta t}
 #'     per susceptible individual per infectious individual.
-#'     Equal to `beta(0:(n-1))`.
+#'     Equal to `beta(0:(n-1))` if argument `beta` is a function
+#'     and `rep(beta, n)` if it is a numeric scalar.
 #'   }
 #'   \item{`mu`}{\mjseqn{\lbrace\,\mu(t_i) \Delta t\,\rbrace}
 #'     Per capita natural mortality rate expressed
-#'     per unit \mjseqn{\Delta t}. Equal to `mu(0:(n-1))`.
+#'     per unit \mjseqn{\Delta t}. Equal to `mu(0:(n-1))`
+#'     if argument `mu` is a function and `rep(mu, n)`
+#'     if it is a numeric scalar.
 #'   }
 #'   \item{`nu`}{\mjseqn{\lbrace\,\nu(t_i) \Delta t\,\rbrace}
 #'     Birth rate expressed per unit \mjseqn{\Delta t}.
-#'     Equal to `nu(0:(n-1))`.
+#'     Equal to `nu(0:(n-1))` if argument `nu` is a function
+#'     and `rep(nu, n)` if it is a numeric scalar.
 #'   }
 #'   \item{`B`}{\mjseqn{\lbrace\,B(t_i)\,\rbrace}
 #'     Births. `B[i]` is the number of births
-#'     between times `t[i-1]` and `t[i]`. For
-#'     simplicity, `make_data()` assigns `B[1] <- B[2]`.
+#'     between times `t[i-1]` and `t[i]`.
 #'   }
 #'   \item{`N`}{\mjseqn{\lbrace\,N(t_i)\,\rbrace}
 #'     Population size.
@@ -267,8 +272,7 @@
 #'   }
 #'   \item{`Z`}{\mjseqn{\lbrace\,Z(t_i)\,\rbrace}
 #'     Incidence. `Z[i]` is the number of infections
-#'     between times `t[i-1]` and `t[i]`. For
-#'     simplicity, `make_data()` assigns `Z[1] <- Z[2]`.
+#'     between times `t[i-1]` and `t[i]`.
 #'   }
 #'   \item{`p`}{\mjseqn{\lbrace\,p_i\,\rbrace}
 #'     Reporting probability. `p[i]` is the probability
@@ -290,18 +294,18 @@
 #'   }
 #' }
 #'
-#' The data frame has attributes `call` and `arg_list`, making it
-#' reproducible with `eval(call)` or `do.call(make_data, arg_list)`,
-#' preceded by a call to [base::set.seed()].
+#' The data frame has attributes `call` and `arg_list` and
+#' is reproducible with `eval(call)` preceded by a call to
+#' [base::set.seed()].
 #'
 #' @examples
 #' ## Stochastic simulation of SEIR model
 #' pl <- make_par_list(
-#'   epsilon = pi / 4, # environmental stochasticity
-#'   pconst = 0.5, # random under-reporting of infections
+#'   epsilon = 0.8, # environmental stochasticity
+#'   pconst = 0.4, # random under-reporting of infections
 #'   model = "seir"
 #' )
-#' set.seed(1422)
+#' set.seed(17090019)
 #' df <- make_data(pl,
 #'   with_ds = TRUE, # demographic stochasticity
 #'   model = "seir",
@@ -309,7 +313,7 @@
 #' )
 #' head(df)
 #'
-#' ## Deterministic simulation of SIR model
+#' ## Deterministic simulation of SEIR model
 #' pl <- make_par_list(
 #'   epsilon = 0,
 #'   pconst = 1,

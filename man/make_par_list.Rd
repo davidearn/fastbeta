@@ -44,8 +44,8 @@ A numeric scalar. Amplitude of the seasonally forced
 transmission rate relative to its mean.}
 
 \item{epsilon}{\mjseqn{\lbrace\,\epsilon\,\rbrace}
-A numeric scalar. Standard deviation of the standard
-normally distributed phase shift in the seasonally forced
+A numeric scalar. Standard deviation of the noise process
+realized to generate a phase shift in the seasonally forced
 transmission rate.}
 
 \item{N0}{\mjseqn{\lbrace\,N_0\,\rbrace}
@@ -76,14 +76,15 @@ transmission rate expressed per unit \mjseqn{\Delta t}
 per susceptible individual per infectious individual.
 }
 \item{\code{S0}}{\mjseqn{\lbrace\,S_0\,\rbrace}
-Number of susceptible individuals at time \mjseqn{t = 0} years.
+Number of susceptible individuals at time \mjseqn{t_0 = 0 \Delta t}.
 }
 \item{\code{E0}}{\mjseqn{\lbrace\,E_0\,\rbrace}
 Number of exposed (infected but not infectious) individuals
-at time \mjseqn{t = 0} years. Included only if \code{model = "seir"}.
+at time \mjseqn{t_0 = 0 \Delta t}.
+Included only if \code{model = "seir"}.
 }
 \item{\code{I0}}{\mjseqn{\lbrace\,I_0\,\rbrace}
-Number of infectious individuals at time \mjseqn{t = 0} years.
+Number of infectious individuals at time \mjseqn{t_9 = 0 \Delta t}.
 }
 }
 
@@ -104,21 +105,22 @@ are accepted for its arguments \code{mu}, \code{nu}, \code{beta}, and
 \code{make_par_list()} defines \mjseqn{\langle\beta\rangle} as a function
 of \mjseqn{\mathcal{R}_0} by enforcing the identity
 
-\mjsdeqn{\mathcal{R}\emph{0 = \frac{\langle\beta\rangle N_0}{\gamma + \mu}\text{c}}}
+\mjsdeqn{\out{\mathcal{R}_0 = \frac{\langle\beta\rangle N_0}{\gamma + \mu_\text{c}}}\,,}
 
-if \code{model = "sir"}, where \mjseqn{\gamma = 1 / (t_\text{lat} + t_\text{inf})},
-and the identity
+where \mjseqn{\gamma = 1 / (t_\text{lat} + t_\text{inf})},
+if \code{model = "sir"}, and the identity
 
-\mjsdeqn{\mathcal{R}\emph{0 = \frac{\langle\beta\rangle N_0}{\gamma + \mu}\text{c}} \frac{\sigma}{\sigma + \mu_\text{c}}}
+\mjsdeqn{\out{\mathcal{R}_0 = \frac{\langle\beta\rangle N_0}{\gamma + \mu_\text{c}} \frac{\sigma}{\sigma + \mu_\text{c}}}\,,}
 
-if \code{model = "seir"}, where \mjseqn{\sigma = 1 / t_\text{lat}}
-and \mjseqn{\gamma = 1 / t_\text{inf}}.
+where \mjseqn{\sigma = 1 / t_\text{lat}}
+and \mjseqn{\gamma = 1 / t_\text{inf}},
+if \code{model = "seir"}.
 }
 
 \subsection{2. Defining \mjseqn{S_0}, \mjseqn{E_0}, and \mjseqn{I_0}}{
 \subsection{SIR model}{
 
-If \code{model == "sir"}, then \code{make_par_list()} defines \mjseqn{S_0},
+If \code{model = "sir"}, then \code{make_par_list()} defines \mjseqn{S_0},
 and \mjseqn{I_0} by numerically integrating the system of equations
 
 \mjsdeqn{\begin{align*} \frac{\text{d}S}{\text{d}t} &= \mu_\text{c} N_0 - \beta(t) S I - \mu_\text{c} S \cr \frac{\text{d}I}{\text{d}t} &= \beta(t) S I - \gamma I - \mu_\text{c} I \end{align*}}
@@ -130,17 +132,17 @@ with \mjseqn{\gamma = 1 / (t_\text{lat} + t_\text{inf})} and
 between times \mjseqn{t_{-(m-1)} = -(m-1) \Delta t}
 and \mjseqn{t_0 = 0 \Delta t}, taking
 
-\mjsdeqn{\begin{bmatrix} S(t_{-(m-1)}) \cr I(t_{-(m-1)}) \end{bmatrix} = N_0 \begin{bmatrix} \frac{1}{\mathcal{R}\emph{0} \cr \big(1 - \frac{1}{\mathcal{R}\emph{0}\big) \frac{\mu}\text{c}}{\gamma + \mu}\text{c}} \end{bmatrix}}
+\mjsdeqn{\out{\begin{bmatrix} S(t_{-(m-1)}) \cr I(t_{-(m-1)}) \end{bmatrix} = N_0 \begin{bmatrix} \frac{1}{\mathcal{R}_0} \cr \big(1 - \frac{1}{\mathcal{R}_0}\big) \frac{\mu_\text{c}}{\gamma + \mu_\text{c}} \end{bmatrix}}}
 
 for the initial state. This is the endemic equilibrium of the above system
 with constant transmission rate \mjseqn{\beta(t) \equiv \langle\beta\rangle}.
-Then \code{make_par_list()} assigns \mjseqn{S_0}, \mjseqn{E_0}, and \mjseqn{I_0}
-the value of \mjseqn{S(0)}, \mjseqn{E(0)}, and \mjseqn{I(0)}, respectively.
+Then \code{make_par_list()} assigns \mjseqn{S_0} and \mjseqn{I_0} the value of
+\mjseqn{S(0)} and \mjseqn{I(0)}, respectively.
 }
 
 \subsection{SEIR model}{
 
-If \code{model == "seir"}, then \code{make_par_list()} defines \mjseqn{S_0},
+If \code{model = "seir"}, then \code{make_par_list()} defines \mjseqn{S_0},
 \mjseqn{E_0}, and \mjseqn{I_0} by numerically integrating the system
 of equations
 
@@ -154,7 +156,7 @@ and
 between times \mjseqn{t_{-(m-1)} = -(m-1) \Delta t}
 and \mjseqn{t_0 = 0 \Delta t}, taking
 
-\mjsdeqn{\begin{bmatrix} S(t_{-(m-1)}) \cr E(t_{-(m-1)}) \cr I(t_{-(m-1)}) \end{bmatrix} = N_0 \begin{bmatrix} \frac{1}{\mathcal{R}\emph{0} \cr \big(1 - \frac{1}{\mathcal{R}\emph{0}\big) \frac{\mu}\text{c}}{\sigma + \mu}\text{c}} \cr \big(1 - \frac{1}{\mathcal{R}\emph{0}\big) \frac{\sigma}{\sigma + \mu}\text{c}} \frac{\mu_\text{c}}{\gamma + \mu_\text{c}} \end{bmatrix}}
+\mjsdeqn{\out{\begin{bmatrix} S(t_{-(m-1)}) \cr E(t_{-(m-1)}) \cr I(t_{-(m-1)}) \end{bmatrix} = N_0 \begin{bmatrix} \frac{1}{\mathcal{R}_0} \cr \big(1 - \frac{1}{\mathcal{R}_0}\big) \frac{\mu_\text{c}}{\sigma + \mu_\text{c}} \cr \big(1 - \frac{1}{\mathcal{R}_0}\big) \frac{\sigma}{\sigma + \mu_\text{c}} \frac{\mu_\text{c}}{\gamma + \mu_\text{c}} \end{bmatrix}}}
 
 for the initial state. This is the endemic equilibrium of the above system
 with constant transmission rate \mjseqn{\beta(t) \equiv \langle\beta\rangle}.
@@ -166,13 +168,13 @@ the value of \mjseqn{S(0)}, \mjseqn{E(0)}, and \mjseqn{I(0)}, respectively.
 
 \subsection{3. Choosing \mjseqn{m}}{
 
-Choosing \mjseqn{m} such that \mjseqn{m \Delta t \sim 1000}
-years (the default) is typically enough to ensure that
-\mjseqn{\big(S(0),I(0)\big)} (\code{model = "sir"}) and
-\mjseqn{\big(S(0),I(0),E(0)\big)} (\code{model = "seir"})
-are near the attractor of the system of S(E)IR equations.
-This can be desirable when using \code{\link[=make_data]{make_data()}} to simulate
-epidemic time series.
+Choosing \mjseqn{m} such that \mjseqn{m \Delta t \sim 1000} years
+(the default) is typically enough to ensure that \mjseqn{(S(0),I(0))}
+(\code{model = "sir"}) and \mjseqn{(S(0),I(0),E(0))} (\code{model = "seir"})
+are near the attractor of the system of S(E)IR equations (specifically,
+the state of the attractor at time \mjseqn{t_0 = 0 \Delta}). This
+ensures that simulations by \code{\link[=make_data]{make_data()}} using these initial values
+do not display pronounced transient dynamics, which is often desirable.
 }
 }
 
@@ -185,7 +187,7 @@ unlist(pl)
 ## in units (per unit) of the observation interval
 dt_days <- 7
 tlat_days <- 5
-tinf_weeks <- 8 / 7
+tinf_weeks <- 1
 muconst_peryear <- 0.04
 pl <- make_par_list(
   dt_days = dt_days,

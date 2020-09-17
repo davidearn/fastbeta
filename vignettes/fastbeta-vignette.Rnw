@@ -1,10 +1,12 @@
 \documentclass[dvipsnames,12pt]{article}
-%\VignetteIndexEntry{fastbeta vignette}
+%\VignetteIndexEntry{fastbeta-vignette}
 %\VignetteEngine{knitr::knitr}
 
 
 % Page layout
 \usepackage[top=1in,bottom=1.5in,left=1in,right=1in]{geometry}
+\usepackage{lineno} % line numbering
+\renewcommand{\linenumberfont}{\normalfont\tiny\sffamily\color[gray]{0.5}}
 \hfuzz=1in % tolerate \hbox fullness
 \vbadness=\maxdimen % tolerate \vbox badness
 
@@ -28,6 +30,7 @@
   \thispagestyle{empty}
   \clearpage
   \pagenumbering{arabic}
+  \linenumbers
 }
 % back matter
 \AtEndDocument{%
@@ -110,25 +113,25 @@
 \usepackage[nameinlink,capitalize]{cleveref}
 % equation
 \crefformat{equation}{#2Eq~#1#3}
-\crefmultiformat{equation}{#2Eqs~#1#3}{ and #2#1#3}{, #2#1#3}{, and #2#1#3}
+\crefmultiformat{equation}{#2Eqs~#1#3}{ and~#2#1#3}{, #2#1#3}{, and~#2#1#3}
 \crefrangeformat{equation}{#3Eqs~#1#4--#5#2#6}
 \crefformat{blankequation}{#2#1#3}
-\crefmultiformat{blankequation}{#2#1#3}{ and #2#1#3}{, #2#1#3}{, and #2#1#3}
+\crefmultiformat{blankequation}{#2#1#3}{ and~#2#1#3}{, #2#1#3}{, and~#2#1#3}
 \crefrangeformat{blankequation}{#3#1#4--#5#2#6}
 \crefalias{blankequation}{equation}
 \crefformat{pluralequation}{#2Eqs~#1#3}
 \crefalias{pluralequation}{equation}
 % figure
 \crefformat{figure}{#2Fig~#1#3}
-\crefmultiformat{figure}{#2Figs~#1#3}{ and #2#1#3}{, #2#1#3}{, and #2#1#3}
+\crefmultiformat{figure}{#2Figs~#1#3}{ and~#2#1#3}{, #2#1#3}{, and~#2#1#3}
 \crefrangeformat{figure}{#3Figs~#1#4--#5#2#6}
 % section
 \crefformat{section}{#2\S#1#3}
-\crefmultiformat{section}{#2\S\S#1#3}{ and #2#1#3}{, #2#1#3}{, and #2#1#3}
+\crefmultiformat{section}{#2\S\S#1#3}{ and~#2#1#3}{, #2#1#3}{, and~#2#1#3}
 \crefrangeformat{section}{#3\S\S#1#4--#5#2#6}
 % table
 \crefformat{Table}{#2Table~#1#3}
-\crefmultiformat{table}{#2Tables~#1#3}{ and #2#1#3}{, #2#1#3}{, and #2#1#3}
+\crefmultiformat{table}{#2Tables~#1#3}{ and~#2#1#3}{, #2#1#3}{, and~#2#1#3}
 \crefrangeformat{table}{#3Tables~#1#4--#5#2#6}
 
 % More macros
@@ -176,65 +179,57 @@
 %%%%%%%%%%%%%%%%
 
 \begin{document}
-\setlength{\parskip}{1mm}
+\setlength{\parskip}{0.5mm}
 \setlength{\parindent}{7mm}
 
 <<set-chunk-defaults, echo=FALSE>>=
 library(knitr)
+## Make some substitutions in the .tex output in order to:
+## * Prevent lineno from messing up breaking of chunks over pages.
+## * Dispense with compile errors due to knitr-xcolor interaction.
+##   See https://tex.stackexchange.com/questions/148188/.
 knit_hooks$set(document = function(x) {
-  sub('\\usepackage[]{color}', '\\usepackage{xcolor}', x, fixed = TRUE)
+  x <- sub("\\begin{knitrout}", "\\nolinenumbers\\begin{knitrout}", x, fixed = TRUE)
+  x <- sub("\\end{knitrout}", "\\end{knitrout}\\linenumbers", x, fixed = TRUE)
+  sub("\\usepackage[]{color}", "\\usepackage{xcolor}", x, fixed = TRUE)
 })
+## Set number of digits printed in chunk output with chunk option "digits"
 knit_hooks$set(digits = function(before, options, envir) {
   if (before) {
     options(digits = options$digits)
   }
 })
+## Set character width of chunk with chunk option "width"
+## (can be used to prevent intrusions into right margin)
 knit_hooks$set(width = function(before, options, envir) {
   if (before) {
     options(width = options$width)
   }
 })
+## Use custom palette for code highlighting
 knit_theme$set(knit_theme$get("knit_theme.css"))
+## Set chunk defaults
 opts_chunk$set(
-  cache    = TRUE,
-  echo     = TRUE,
-  eval     = TRUE,
-  include  = TRUE,
-  error    = TRUE,
-  warning  = TRUE,
-  message  = FALSE,
-  dev      = "pdf",
-  dev.args = list(pointsize = 10),
-  dpi      = 300,
-  fig.pos  = "H",
-  digits   = 7,
-  width    = 74,
-  strip.white = TRUE
+  cache   = TRUE,  # if `FALSE`, chunk is evaluated from scratch with compile
+  echo    = TRUE,  # if `FALSE`, chunk is not displayed
+  eval    = TRUE,  # if `FALSE`, chunk is not evaluated
+  include = TRUE,  # if `FALSE`, chunk output is not displayed and `error = FALSE`
+  error   = TRUE,  # if `FALSE`, evaluation stops on errors
+  warning = TRUE,  # if `FALSE`, warnings printed in console, not document
+  message = FALSE, # if `FALSE`, messages printed in console, not document
+  digits  = 7,     # number of digits printed in chunk output
+  width   = 74,    # character width of chunks
+  fig.pos = "H",   # figure position in document
+  dev     = "pdf", # plotting device
+  dev.args = list(pointsize = 10), # base point size in plots
+  strip.white = TRUE # reduce white space around chunks (?)
 )
-@
-
-<<knit-theme>>=
-# This is a test of knit_theme.css
-f <- function(a = 0, b = 0) {
-  if (a < b) {
-    x <- mean(c(a, b), na.rm = FALSE)
-  } else if (a > b) {
-    x <- a + b
-  } else {
-    x <- "a = b"
-  }
-  x
-}
-f(a = 1, b = 2)
-
-warning("Warning color not controlled by knit_theme.css ...")
-stop("Error color not controlled by knit_theme.css ...")
 @
 
 \section{Introduction}
 \label{sec:intro}
 
-The R package \pkg{fastbeta} implements fast methods for estimating
+R package \pkg{fastbeta} implements fast methods for estimating
 the time-varying rate of transmission of an infectious disease,
 often denoted by $\beta(t)$. \pkg{fastbeta} was initially developed
 to support the analysis of Jagan \etal~\cite{Jaga+20}, but now
@@ -245,7 +240,7 @@ examples of the usage and limitations of \pkg{fastbeta}'s core
 functions, which are summarized in \cref{tab:core-functions}.
 Simulated time series of reported disease incidence are used
 to assist exposition, and so \cref{sec:make-data} is devoted
-to a description of the simulation model and function \fun{make_data}.
+to a description of the simulation model and of function \fun{make_data}.
 
 This document was built using \Sexpr{R.Version()$version.string}
 and these R package versions:
@@ -267,7 +262,7 @@ print(installed.packages()[package_list, "Version"], quote = FALSE)
 
 \pkg{fastbeta} can be installed from a
 \href{https://github.com/davidearn/fastbeta/}{GitHub repository}
-using the \pkg{remotes} package.
+using function \fun{install_github} from the \pkg{remotes} package.
 
 <<installation, eval=FALSE>>=
 if (!require(remotes)) {
@@ -285,9 +280,9 @@ ls("package:fastbeta")
 @
 
 \noindent
-Only S3 methods are not exported. These need not be called directly,
-as they are found by the corresponding generic functions. S3 methods
-implemented in \pkg{fastbeta} are listed here.
+Only S3 methods are not exported. However, these need not be called
+directly, as they are found by the corresponding generic functions.
+S3 methods implemented in \pkg{fastbeta} are listed here.
 
 <<s3methods>>=
 setdiff(ls(getNamespace("fastbeta")), ls("package:fastbeta"))
@@ -379,18 +374,270 @@ roughly periodic. \\
 
 Function \fun{make_data} simulates time series of reported disease
 incidence in two stages: it generates an incidence time series by
-realizing a model of disease transmission, then generates reported
+realizing a model of disease dynamics, then generates reported
 incidence from incidence by realizing a model of observation error.
-\crefrange{sec:make-data-dt}{sec:make-data-par} describe these two
-models and their parametrization by the arguments of \fun{make_data},
-which are listed here and summarized in \cref{tab:make-data-args}.
+\cref{sec:make-data-dt,sec:make-data-oe} below describe these two
+models, while \cref{sec:make-data-usage} demonstrates \fun{make_data}
+usage.
+
+\subsection{Model of disease dynamics}
+\label{sec:make-data-dt}
+
+\fun{make_data} generates incidence time series using a system of
+SIR or SEIR equations:
+%
+\noindent
+\begin{minipage}[t]{.5\linewidth}
+\begin{linenomath}
+\begin{subequations}
+\label[pluralequation]{pleq:sir}
+\label[blankequation]{bleq:sir}
+\begin{align}
+\frac{\text{d}S}{\text{d}t} &= \nu(t) - \beta(t) S I - \mu(t) S\,, \label{eq:sir-s} \\
+\frac{\text{d}I}{\text{d}t} &= \beta(t) S I - \gamma I - \mu(t) I\,, \label{eq:sir-i} \\
+\frac{\text{d}R}{\text{d}t} &= \gamma I - \mu(t) R\,. \label{eq:sir-r}
+\end{align}
+\end{subequations}
+\end{linenomath}
+\end{minipage}%
+\begin{minipage}[t]{.5\linewidth}
+\begin{linenomath}
+\begin{subequations}
+\label[pluralequation]{pleq:seir}
+\label[blankequation]{bleq:seir}
+\begin{align}
+\frac{\text{d}S}{\text{d}t} &= \nu(t) - \beta(t) S I - \mu(t) S\,, \label{eq:seir-s} \\
+\frac{\text{d}E}{\text{d}t} &= \beta(t) S I - \sigma E - \mu(t) E\,, \label{eq:seir-e} \\
+\frac{\text{d}I}{\text{d}t} &= \sigma E - \gamma I - \mu(t) I\,, \label{eq:seir-i} \\
+\frac{\text{d}R}{\text{d}t} &= \gamma I - \mu(t) R\,. \label{eq:seir-r}
+\end{align}
+\end{subequations}
+\end{linenomath}
+\null\par\xdef\tpd{\the\prevdepth}
+\end{minipage}
+\par\prevdepth\tpd\noindent
+%
+Here, $S$, $E$, $I$, and $R$ are the number of susceptible, exposed,%
+\footnote{Infected but not infectious.}
+infectious, and removed%
+\footnote{Previously but no longer infected due to recovery or death
+from infection.}
+individuals, respectively. The SIR model assumes that the time between
+infection and onset of infectiousness, called the latent period, can be
+ignored (\ie that all infected individuals are infectious) and therefore
+excludes an ``exposed'' compartment. Hence the population size is
+$N = S + I + R$ in the SIR model and $N = S + E + I + R$ in the SEIR model.
+The model parameters are
+
+\begin{tabular}{rl}
+$\mu(t)$ & \textit{per capita} natural mortality rate, \\
+$\nu(t)$ & birth rate, \\
+$\beta(t)$ & transmission rate, expressed per susceptible individual per infectious individual, \\
+$\sigma^{-1}$ & theoretical mean latent period, and \\
+$\gamma^{-1}$ & theoretical mean infectious period.
+\end{tabular}
+
+\noindent
+The SIR and SEIR models have similar long-term dynamics when the
+implied mean generation intervals%
+\footnote{The mean generation interval is the mean time between
+onset of infection (in infector) and subsequent transmission of
+infection (by infector).}%
+---$\gamma^{-1}$ in the SIR model and $\sigma^{-1} + \gamma^{-1}$
+in the SEIR model---coincide. For this reason, \fun{make_data}
+sets $\gamma^{-1} = \tlat + \tinf$ in system \cref{bleq:sir}
+and $\sigma^{-1} = \tlat$ and $\gamma^{-1} = \tinf$ in system
+\cref{bleq:seir}, where $\tlat$ and $\tinf$ are the \emph{observed}
+mean latent and infectious periods specified by the user.%
+\footnote{The sum of the mean latent and infectious periods is the
+mean generation interval if the latent and infectious periods are
+exponentially distributed (as in the SEIR model) and remains a
+good estimate of the mean generation interval under more general
+distributional assumptions.}
+
+In order to track cumulative births $B_\text{cum}$ and cumulative
+incidence $Z_\text{cum}$, systems \cref{bleq:sir,bleq:seir} are
+extended to include two additional equations:
+%
+\begin{linenomath}
+\begin{subequations}
+\begin{align}
+\frac{\text{d}B_\text{cum}}{\text{d}t} &= \nu(t)\,, \label{eq:bcum} \\
+\frac{\text{d}Z_\text{cum}}{\text{d}t} &= \beta(t) S I\,. \label{eq:zcum}
+\end{align}
+\end{subequations}
+\end{linenomath}
+%
+\fun{make_data} generates observations of this extended system
+at equally spaced time points
+%
+\begin{linenomath}
+\begin{equation}
+t_i = i \Delta t\,,\quad i = 0,\ldots,n-1\,,
+\end{equation}
+\end{linenomath}
+%
+where $\Delta t$ is a fixed observation interval specified by
+the user. It does this in one of two ways:
+%
+\begin{enumerate}
+\item By numerically integrating the system of ODE using \fun{ode} from the
+  \pkg{deSolve} package. In this case, \cref{eq:sir-i,eq:seir-e,eq:seir-i}
+  are log-transformed to prevent issues encountered by the ODE solver when
+  the numerical solution approaches the boundary of the state space
+  (in this case, when $E \ll 1$ or $I \ll 1$). For example, \cref{eq:sir-i}
+  is replaced by $\text{d}(\log I)/\text{d}t = \beta(t) S - \gamma - \mu(t)$
+  and $I$ is recovered from $\log I$ as $\exp(\log I)$.
+\item By realizing a corresponding continuous-time stochastic process using
+  \fun{ssa.adaptivetau} from the \pkg{adaptivetau} package. This method
+  defines event probabilities as proportional to terms in the ODE,
+  modeling demographic stochasticity (a type of process error). To prevent
+  disease fadeout ($I = 0$ in system \cref{bleq:sir}, $E + I = 0$ in system
+  \cref{bleq:seir}), the probability of a decrease in the infected population
+  size is set to zero whenever the infected population size is one ($I = 1$
+  in system \cref{bleq:sir}, $E + I = 1$ in system \cref{bleq:seir}).
+\end{enumerate}
+%
+Both methods use initial state
+%
+\begin{linenomath}
+\begin{equation}
+\label{eq:ic}
+\begin{bmatrix}
+S(0) \\ I(0) \\ R(0) \\ B_\text{cum}(0) \\ Z_\text{cum}(0)
+\end{bmatrix}
+=
+\begin{bmatrix}
+S_0 \\ I_0 \\ N_0 - S_0 - I_0 \\ 0 \\ 0
+\end{bmatrix}
+\qquad
+\text{or}
+\qquad
+\begin{bmatrix}
+S(0) \\ E(0) \\ I(0) \\ R(0) \\ B_\text{cum}(0) \\ Z_\text{cum}(0)
+\end{bmatrix}
+=
+\begin{bmatrix}
+S_0 \\ E_0 \\ I_0 \\ N_0 - S_0 - E_0 - I_0 \\ 0 \\ 0
+\end{bmatrix}
+\end{equation}
+\end{linenomath}
+%
+(depending on the model of disease dynamics),
+where $N_0$, $S_0$, $E_0$, and $I_0$ are initial values
+specified by the user.
+
+Finally, \fun{make_data} calculates births $B$ and incidence $Z$
+from $B_\text{cum}$ and $Z_\text{cum}$ by first differences:
+%
+\begin{linenomath}
+\begin{subequations}
+\begin{align}
+B(t_i) &= B_\text{cum}(t_i) - B_\text{cum}(t_{i-1})\,, \\
+Z(t_i) &= Z_\text{cum}(t_i) - Z_\text{cum}(t_{i-1})\,. \\
+\end{align}
+\end{subequations}
+\end{linenomath}
+%
+$B(t_i)$ and $Z(t_i)$ are the number of births and infections
+between times $t_{i-1}$ and $t_i$. This calculation leaves
+$B(t_0)$ and $Z(t_0)$ undefined, as there is no value for
+$B_\text{cum}(t_{-1})$ or $Z_\text{cum}(t_{-1})$. For simplicity,
+\fun{make_data} sets $B(t_0) = B(t_1)$ and $Z(t_0) = Z(t_1)$.
+
+\subsection{Model of observation error}
+\label{sec:make-data-oe}
+
+\fun{make_data} generates reported incidence from incidence
+in three steps. First, \fun{make_data} realizes
+%
+\begin{linenomath}
+\begin{equation}
+Z_\text{rep}(t_i) \sim \mathrm{Binomial}\big(\mathrm{nint}(Z(t_i)), p_i\big)\,,\quad i = 0,\ldots,n-1\,,
+\end{equation}
+\end{linenomath}
+%
+where
+$\mathrm{nint}(Z(t_i))$ is $Z(t_i)$ rounded to the nearest integer,%
+\footnote{Rounding is necessary only if $Z_\text{cum}$ was obtained by
+numerical integration, in which case $Z$ can take non-integer values.}
+$p_i$ is the probability that an infection counted in
+$\mathrm{nint}(Z(t_i))$ is eventually reported, and
+$Z_\text{rep}(t_i)$ is the number of infections out of
+$\mathrm{nint}(Z(t_i))$ that is eventually reported.
+
+Second, for the $k$th infection counted in $Z_\text{rep}(t_j)$,
+\fun{make_data} realizes a time to reporting $D$ with probability
+mass function
+%
+\begin{linenomath}
+\begin{equation}
+\label[blankequation]{bleq:delay-pmf}
+\mathcal{P}(D = s \dt) = \begin{cases}
+q_i & \text{if}\hspace{0.5em} s = i\,,\hspace{0.5em} i = 0,\ldots,b\,,\\
+0 & \text{otherwise}\,,
+\end{cases}
+\end{equation}
+\end{linenomath}
+%
+where $q_i$ ($i = 0,\ldots,b$) is a probability specified by the user.
+This is done
+for all $k = 1,\ldots,Z_\text{rep}(t_j)$,
+for all $j = -b,\ldots,n-1$.
+If $b > 0$, then, for simplicity, \fun{make_data} simulates
+%
+\begin{linenomath}
+\begin{equation}
+Z_\text{rep}(t_j) \sim \mathrm{Binomial}\big(\mathrm{nint}(Z(t_0)), p_0\big)\,,\quad j = -b,\ldots,-1\,.
+\end{equation}
+\end{linenomath}
+
+Finally, \fun{make_data} calculates reported incidence $C$ as
+%
+\begin{linenomath}
+\begin{equation}
+\label{eq:C}
+C(t_i) = \sum_{j=i-b}^{i} \sum_{k=1}^{Z_\text{rep}(t_j)} \scalebox{1.2}{$\mathbbm{1}$}_{\{(i-j) \dt\}}(d_{j,k})\,,\quad i = 0,\ldots,n-1\,,
+\end{equation}
+\end{linenomath}
+%
+where $d_{j,k}$ is the $(j,k)$th realization of reporting delay $D$;
+\scalebox{1.2}{$\mathbbm{1}$} is an indicator function, so that
+%
+\begin{linenomath}
+\begin{equation}
+\scalebox{1.2}{$\mathbbm{1}$}_{\{y\}}(x) = \begin{cases}
+1 & \text{if}\hspace{0.5em} x = y\,, \\
+0 & \text{otherwise}\,;
+\end{cases}
+\end{equation}
+\end{linenomath}
+%
+and $C(t_i)$ is the the number of infections reported between times
+$t_{i-1}$ and $t_i$. \cref{eq:C} says that $C(t_i)$ counts an infection
+if and only if
+%
+\begin{itemize}
+\item it occurred at some time $t$ between $t_{i-b-1}$ and $t_i$
+  (as the maximum possible reporting delay is $b \dt$),
+\item it was selected for reporting, and
+\item its reporting time $t + D$ falls between $t_{i-1}$ and $t_i$.
+\end{itemize}
+
+\subsection{Usage}
+\label{sec:make-data-usage}
+
+\subsubsection{Details}
+\label{sec:make-data-usage-details}
+
+\cref{tab:make-data-args} outlines in detail how the arguments of
+\fun{make_data} together specify a parametrization of the simulation
+model described in \cref{sec:make-data-dt,sec:make-data-oe}. These
+arguments are listed here.
 
 <<make-data-formals-names>>=
 names(formals(make_data))
 @
-
-\noindent
-\cref{sec:make-data-example} gives examples of \fun{make_data} usage.
 
 \begin{table}
 \renewcommand{\arraystretch}{1.5}
@@ -405,12 +652,12 @@ A list of parameter values with numeric scalar elements:
 \newline\vspace{3mm}
 \begin{tabular}{R{0.6in} C{0.7in} L{2.6in}}
 \code{dt_days} & $\Delta t$ & Observation interval in days. \\
+\code{tlat} & $\tlat/\Delta t$ & Mean latent period of the disease of interest in units $\dt$. \\
+\code{tinf} & $\tinf/\Delta t$ & Mean infectious period of the disease of interest in units $\dt$. \\
 \code{N0} & $N_0$ & Population size at time $t_0 = 0 \dt$. \\
 \code{S0} & $S_0$ & Number of susceptible individuals at time $t_0 = 0 \dt$. \\
 \code{E0} & $E_0$ & Number of exposed (infected but not infectious) individuals at time $t_0 = 0 \dt$. Necessary only if \code{model = `2"seir"`2}. \\
-\code{I0} & $I_0$ & Number of infectious individuals at time $t_0 = 0 \dt$. \\
-\code{tlat} & $\tlat/\Delta t$ & Mean latent period of the disease of interest in units $\dt$. \\
-\code{tinf} & $\tinf/\Delta t$ & Mean infectious period of the disease of interest in units $\dt$.
+\code{I0} & $I_0$ & Number of infectious individuals at time $t_0 = 0 \dt$.
 \end{tabular}
 \newline
 \vspace{3mm}
@@ -433,576 +680,276 @@ Additional elements must be included as necessary to ensure that arguments
 \toprule
 {\bfseries Argument} & {\bfseries Notation} & {\bfseries Details} \\
 \midrule
-\code{mu} & $\mu(t_i) \Delta t$ & A function taking as arguments a numeric vector \code{s} and a list \code{par_list} and returning as output a numeric vector of length \code{`9length`9(s)} containing the value of $\mu(s \dt) \dt$ at each element of \code{s}. Must define $\mu(s \dt) \dt$ for all $s \in [0,n-1]$. Here, $\mu(t) \dt$ is the per capita natural mortality rate at time $t$ expressed per unit $\dt$. Alternatively, a numeric scalar indicating a constant rate $\muconst \dt$. \\
-\code{nu} & $\nu(t_i) \Delta t$ & A function taking as arguments a numeric vector \code{s} and a list \code{par_list} and returning as output a numeric vector of length \code{`9length`9(s)} containing the value of $\nu(s \dt) \dt$ at each element of \code{s}. Must define $\nu(s \dt) \dt$ for all $s \in [0,n-1]$. Here, $\nu(t) \dt$ is the birth rate at time $t$ expressed per unit $\dt$. Alternatively, a numeric scalar indicating a constant rate $\nuconst \dt$. \\
-\code{beta} & $\beta(t_i) \Delta t$ & A function taking as arguments a numeric vector \code{s} and a list \code{par_list} and returning as output a numeric vector of length \code{`9length`9(s)} containing the value of $\beta(s \dt) \dt$ at each element of \code{s}. Must define $\beta(s \dt) \dt$ for all $s \in [0,n-1]$. Here, $\beta(t) \dt$ is the transmission rate at time $t$ expressed per unit $\dt$ per susceptible individual per infectious individual. Alternatively, a numeric scalar indicating a constant rate $\betaconst \dt$. \\
+\code{mu} & $\mu(s \dt) \Delta t$ & A function taking as arguments a numeric vector \code{s} and a list \code{par_list} and returning as output a numeric vector of length \code{`9length`9(s)} containing the value of $\mu(s \dt) \dt$ at each element of \code{s}. Must define $\mu(s \dt) \dt$ for all $s \in [0,n-1]$. Here, $\mu(t) \dt$ is the per capita natural mortality rate at time $t$ expressed per unit $\dt$. Alternatively, a numeric scalar indicating a constant rate $\muconst \dt$. \\
+\code{nu} & $\nu(s \dt) \Delta t$ & A function taking as arguments a numeric vector \code{s} and a list \code{par_list} and returning as output a numeric vector of length \code{`9length`9(s)} containing the value of $\nu(s \dt) \dt$ at each element of \code{s}. Must define $\nu(s \dt) \dt$ for all $s \in [0,n-1]$. Here, $\nu(t) \dt$ is the birth rate at time $t$ expressed per unit $\dt$. Alternatively, a numeric scalar indicating a constant rate $\nuconst \dt$. \\
+\code{beta} & $\beta(s \dt) \Delta t$ & A function taking as arguments a numeric vector \code{s} and a list \code{par_list} and returning as output a numeric vector of length \code{`9length`9(s)} containing the value of $\beta(s \dt) \dt$ at each element of \code{s}. Must define $\beta(s \dt) \dt$ for all $s \in [0,n-1]$. Here, $\beta(t) \dt$ is the transmission rate at time $t$ expressed per unit $\dt$ per susceptible individual per infectious individual. Alternatively, a numeric scalar indicating a constant rate $\betaconst \dt$. \\
 \code{p} & $p_i$ & A numeric vector of length \code{n} listing the probability $p_i$ ($i = 0,\ldots,n-1$) that an infection between times $t_{i-1}$ and $t_i$ is eventually reported. Alternatively, a numeric scalar listing a constant probability $\pconst$. \\
 \code{delay_dist} & $q_i$ & A numeric vector listing the probability $q_i$ ($i = 0,\ldots,b$) that an infection that is eventually reported is reported after $i$ observation intervals. \code{delay_dist} is replaced with \code{delay_dist / `9sum`9(delay_dist)} in the event that \code{`9sum`9(delay_dist) != `11`1}. \\
 \bottomrule
 \end{tabular}
 \end{table}
 
-\subsection{Model of disease transmission}
-\label{sec:make-data-dt}
-
-\fun{make_data} generates incidence time series using a system of
-SIR (\code{model = `2"sir"`2}) or SEIR (\code{model = `2"seir"`2})
-equations:
-
 \noindent
-\begin{minipage}[t]{.5\linewidth}
-\begin{subequations}
-\label[pluralequation]{pleq:sir}
-\label[blankequation]{bleq:sir}
-\begin{align}
-\frac{\text{d}S}{\text{d}t} &= \nu(t) - \beta(t) S I - \mu(t) S\,, \label{eq:sir-s} \\
-\frac{\text{d}I}{\text{d}t} &= \beta(t) S I - \gamma I - \mu(t) I\,, \label{eq:sir-i} \\
-\frac{\text{d}R}{\text{d}t} &= \gamma I - \mu(t) R\,. \label{eq:sir-r}
-\end{align}
-\end{subequations}
-\end{minipage}%
-\begin{minipage}[t]{.5\linewidth}
-\begin{subequations}
-\label[pluralequation]{pleq:seir}
-\label[blankequation]{bleq:seir}
-\begin{align}
-\frac{\text{d}S}{\text{d}t} &= \nu(t) - \beta(t) S I - \mu(t) S\,, \label{eq:seir-s} \\
-\frac{\text{d}E}{\text{d}t} &= \beta(t) S I - \sigma E - \mu(t) E\,, \label{eq:seir-e} \\
-\frac{\text{d}I}{\text{d}t} &= \sigma E - \gamma I - \mu(t) I\,, \label{eq:seir-i} \\
-\frac{\text{d}R}{\text{d}t} &= \gamma I - \mu(t) R\,. \label{eq:seir-r}
-\end{align}
-\end{subequations}
-\null\par\xdef\tpd{\the\prevdepth}
-\end{minipage}
-
-\prevdepth\tpd\noindent
-Here, $S$, $E$, $I$, and $R$ are the number of susceptible, exposed,%
-\footnote{Infected but not infectious.}
-infectious, and removed%
-\footnote{Previously but no longer infected due to recovery or death
-from infection.}
-individuals, respectively. The SIR model assumes that the time between
-infection and onset of infectiousness, called the latent period, can be
-ignored (\ie that all infected individuals are infectious) and therefore
-excludes an ``exposed'' compartment. Hence the population size is
-$N = S + I + R$ in the SIR model and $N = S + E + I + R$ in the SEIR model.
-The model parameters are
-
-\begin{tabular}{rl}
-$\mu(t)$ & \textit{per capita} natural mortality rate, \\
-$\nu(t)$ & birth rate, \\
-$\beta(t)$ & transmission rate, expressed per susceptible individual per infectious individual, \\
-$\sigma^{-1}$ & theoretical mean latent period, \\
-$\gamma^{-1}$ & theoretical mean infectious period.
-\end{tabular}
-
-The SIR and SEIR models have similar long-term dynamics when the
-implied mean generation intervals%
-\footnote{The mean generation interval is the mean time between
-onset of infection (in infector) and subsequent transmission of
-infection (by infector).}%
----$\gamma^{-1}$ in the SIR model and $\sigma^{-1} + \gamma^{-1}$
-in the SEIR model---coincide. For this reason, \fun{make_data}
-sets $\gamma^{-1} = \tlat + \tinf$ in system \cref{bleq:sir}
-and $\sigma^{-1} = \tlat$ and $\gamma^{-1} = \tinf$ in system
-\cref{bleq:seir}, where $\tlat$ and $\tinf$ are the \emph{observed}
-mean latent and infectious periods specified by the user.%
-\footnote{The sum of the mean latent and infectious periods is the
-mean generation interval if the latent and infectious periods are
-exponentially distributed (as in the SEIR model) and remains a
-good estimate of the mean generation interval under more general
-distributional assumptions.}
-
-In order to track cumulative births $B_\text{cum}$ and cumulative
-incidence $Z_\text{cum}$, systems \cref{bleq:sir,bleq:seir} are
-extended to include two additional equations:
+Notably, users can specify
 %
-\begin{subequations}
-\begin{align}
-\frac{\text{d}B_\text{cum}}{\text{d}t} &= \nu(t)\,, \label{eq:bcum} \\
-\frac{\text{d}Z_\text{cum}}{\text{d}t} &= \beta(t) S I\,. \label{eq:zcum}
-\end{align}
-\end{subequations}
+\begin{enumerate}[label=(\Roman*)]
+\item any time-varying vital rates $\mu(t)$ and $\nu(t)$
+  with arguments \code{mu} and \code{nu},
+\item any time-varying transmission rate $\beta(t)$
+  with argument \code{beta},
+\item any time-varying reporting probability $p_i$
+  with argument \code{p}, and
+\item any probabilities $q_i$ defining probability mass function
+  \cref{bleq:delay-pmf} (\ie any discrete distribution of reporting delay $D$)
+  with argument \code{delay_dist}.
+\end{enumerate}
 %
-\fun{make_data} generates observations of this extended system
-at equally spaced time points
+However, for simplicity, this vignette only considers
+simulations with
 %
+\begin{enumerate}[label=(\roman*)]
+\item constant vital rates $\mu(t) \equiv \muconst$ and
+  $\nu(t) \equiv \muconst N_0$;%
+  \footnote{If $\mu(t) \equiv \muconst$ and $\nu(t) \equiv \muconst N_0$,
+  then systems \cref{bleq:sir,bleq:seir} both imply
+  $\text{d}N/\text{d}t = \muconst(N_0 - N)$.
+  It follows that $N \equiv N_0$, since $N(0) = N_0$ (see \cref{eq:ic}).
+  That is, in the absence of demographic stochasticity,
+  the population size $N$ is constant and equal to $N_0$.}
+\item a seasonally forced transmission rate
+  %
+  \begin{linenomath}
+  \begin{equation}
+  \label{eq:beta-phi}
+  \beta(t) = \avg{\beta} \left[1 + \alpha \cos\left(\frac{2 \pi t}{365\ \text{days}} + \phi(t;\epsilon^2)\right)\right]\,,
+  \end{equation}
+  \end{linenomath}
+  %
+  where $\avg{\beta}$ is the mean (long-term average) transmission rate,
+  $\alpha$ is the amplitude relative to the mean, and $\phi(t;\epsilon^2)$
+  is the linear interpolant of noise $\{(t_i,\Phi_i)\}_{i=0}^{n-1}$ with
+  %
+  \begin{linenomath}
+  \begin{equation}
+  \Phi_i \sim \mathrm{Normal}(0,\epsilon^2)\,,\quad i = 0,\ldots,n-1\,,
+  \end{equation}
+  \end{linenomath}
+  %
+  modeling environmental stochasticity (a type of process error); and
+\item a constant reporting probability $p_i \equiv \pconst$.
+\end{enumerate}
+%
+The basic reproduction number%
+\footnote{The number of individuals that a typical infected person
+is expected to infect in an otherwise completely susceptible population.}
+of SIR model \cref{bleq:sir} with settings (i) and (ii)
+(ignoring the phase shift $\phi(t;\epsilon)$ in \cref{eq:beta-phi})
+is
+%
+\begin{linenomath}
 \begin{equation}
-t_i = i \Delta t\,,\quad i = 0,\ldots,n-1\,,
+\label[blankequation]{bleq:Rnaught-sir}
+\R_0 = \frac{\avg{\beta} N_0}{\gamma + \muconst}\,.
 \end{equation}
+\end{linenomath}
 %
-where $\Delta t$ is a fixed observation interval specified by
-the user. If \code{with_ds = `1FALSE`1}, then this is done by
-numerically integrating the ODE using \fun{ode} from the
-\pkg{deSolve} package.%
-\footnote{\cref{eq:sir-i,eq:seir-e,eq:seir-i} are log-transformed
-to prevent issues encountered by the ODE solver when the numerical
-solution approaches the boundary of the state space (in this case,
-when $E \ll 1$ or $I \ll 1$). For example, \cref{eq:sir-i} is
-replaced by $\text{d}(\log I)/\text{d}t = \beta(t) S - \gamma - \mu(t)$
-and $I$ is recovered from $\log I$ as $\exp(\log I)$.}
-If \code{with_ds = `1FALSE`1}, then this is done by realizing
-a corresponding continuous-time stochastic process using
-\fun{ssa.adaptivetau} from the \pkg{adaptivetau} package.
-The latter method defines event probabilities as proportional
-to terms in the ODE, modeling demographic stochasticity.%
-\footnote{To prevent disease fadeout ($I = 0$ in system
-\cref{bleq:sir}, $E + I = 0$ in system \cref{bleq:seir}),
-the probability of a decrease in the infected population
-size is set to zero whenever the infected population size
-($I$ in system \cref{bleq:sir}, $E + I$ in system \cref{bleq:seir})
-is one.}
-Both methods use initial state
+For SEIR model \cref{bleq:seir} with settings (i) and (ii), it is
 %
+\begin{linenomath}
 \begin{equation}
-\begin{bmatrix}
-S(0) \\ I(0) \\ R(0) \\ B_\text{cum}(0) \\ Z_\text{cum}(0)
-\end{bmatrix}
-=
-\begin{bmatrix}
-S_0 \\ I_0 \\ N_0 - S_0 - I_0 \\ 0 \\ 0
-\end{bmatrix}
-\qquad
-\text{or}
-\qquad
-\begin{bmatrix}
-S(0) \\ E(0) \\ I(0) \\ R(0) \\ B_\text{cum}(0) \\ Z_\text{cum}(0)
-\end{bmatrix}
-=
-\begin{bmatrix}
-S_0 \\ E_0 \\ I_0 \\ N_0 - S_0 - E_0 - I_0 \\ 0 \\ 0
-\end{bmatrix}
+\label[blankequation]{bleq:Rnaught-seir}
+\R_0 = \frac{\avg{\beta} N_0}{\gamma + \muconst} \frac{\sigma}{\sigma + \muconst}\,.
 \end{equation}
-%
-(depending on \code{model}), where $N_0$, $S_0$, $E_0$, and $I_0$
-are initial values specified by the user.
+\end{linenomath}
 
-Finally, \fun{make_data} calculates births $B$ and incidence $Z$ from
-$B_\text{cum}$ and $Z_\text{cum}$ by first differences:
-%
-\begin{subequations}
-\begin{align}
-B(t_i) &= B_\text{cum}(t_i) - B_\text{cum}(t_{i-1})\,, \\
-Z(t_i) &= Z_\text{cum}(t_i) - Z_\text{cum}(t_{i-1})\,. \\
-\end{align}
-\end{subequations}
-%
-$B(t_i)$ and $Z(t_i)$ are the number of births and infections
-between times $t_{i-1}$ and $t_i$. This calculation leaves
-$B(t_0)$ and $Z(t_0)$ undefined, as there is no value for
-$B_\text{cum}(t_{-1})$ or $Z_\text{cum}(t_{-1})$. For simplicity,
-\fun{make_data} sets $B(t_0) = B(t_1)$ and $Z(t_0) = Z(t_1)$.
-
-\subsection{Model of observation error}
-\label{sec:make-data-oe}
-
-\fun{make_data} generates reported incidence from incidence
-in three steps. First, \fun{make_data} realizes
-%
-\begin{equation}
-Z_\text{rep}(t_i) \sim \mathrm{Binomial}\big(\mathrm{nint}(Z(t_i)), p_i\big)\,,\quad i = 0,\ldots,n-1\,,
-\end{equation}
-%
-where
-$\mathrm{nint}(Z(t_i))$ is $Z(t_i)$ rounded to the nearest integer,%
-\footnote{Rounding is necessary only if $Z$ was obtained by
-numerical integration, in which case $Z$ can take non-integer values.}
-$p_i$ is the probability that an infection counted in
-$\mathrm{nint}(Z(t_i))$ is eventually reported, and
-$Z_\text{rep}(t_i)$ is the number of infections out of
-$\mathrm{nint}(Z(t_i))$ that is eventually reported.
-
-Second, for the $k$th infection counted in $Z_\text{rep}(t_j)$,
-\fun{make_data} realizes a time to reporting $D$ with probability
-mass function
-%
-\begin{equation}
-\mathcal{P}(D = d) = \begin{cases}
-q_i & \text{if}\hspace{0.5em} d = i \Delta t\,,\hspace{0.5em} i = 0,\ldots,b\,,\\
-0 & \text{otherwise}\,,
-\end{cases}
-\end{equation}
-%
-where $q_i$ ($i = 0,\ldots,b$) is a probability specified by the user.
-This is done
-for all $k = 1,\ldots,Z_\text{rep}(t_j)$,
-for all $j = -b,\ldots,n-1$.
-If $b > 0$, then, for simplicity, \fun{make_data} simulates
-%
-\begin{equation}
-Z_\text{rep}(t_j) \sim \mathrm{Binomial}\big(\mathrm{nint}(Z(t_0)), p_0\big)\,,\quad j = -b,\ldots,-1\,.
-\end{equation}
-
-Finally, \fun{make_data} calculates reported incidence $C$ as
-%
-\begin{equation}
-\label{eq:C}
-C(t_i) = \sum_{j=i-b}^{i} \sum_{k=1}^{Z_\text{rep}(t_j)} \scalebox{1.2}{$\mathbbm{1}$}_{\{(i-j) \dt\}}(d_{j,k})\,,\quad i = 0,\ldots,n-1\,,
-\end{equation}
-%
-where $d_{j,k}$ is the $(j,k)$th realization of reporting delay $D$;
-\scalebox{1.2}{$\mathbbm{1}$} is an indicator function, so that
-%
-\begin{equation}
-\scalebox{1.2}{$\mathbbm{1}$}_{\{y\}}(x) = \begin{cases}
-1 & \text{if}\hspace{0.5em} x = y\,, \\
-0 & \text{otherwise}\,;
-\end{cases}
-\end{equation}
-%
-and $C(t_i)$ is the the number of infections reported between times
-$t_{i-1}$ and $t_i$. \cref{eq:C} says that $C(t_i)$ counts an infection
-if and only if
-%
-\begin{itemize}
-\item it occurred at some time $t$ between $t_{i-b-1}$ and $t_i$
-  (as the maximum possible reporting delay is $b \dt$),
-\item it was selected for reporting, and
-\item its reporting time $t + D$ falls between $t_{i-1}$ and $t_i$.
-\end{itemize}
-
-\subsection{Parametrization}
-\label{sec:make-data-par}
-
-The simulation model outlined in \cref{sec:make-data-dt,sec:make-data-oe}
-is parametrized by the arguments of \fun{make_data}, as outlined in
-\cref{tab:make-data-args}. Functions assigned to \code{mu}, \code{nu}, and
-\code{beta} must have the form \code{`6function`6(`8s`8, `8par_list`8) \{\}}.
-The second argument allows $\mu(t)$, $\nu(t)$, and $\beta(t)$ to depend on
-additional parameters. Internally, \fun{make_data} assigns this argument
-the value of \code{par_list} in its call, hence this list must contain not
-only the elements listed in \cref{tab:make-data-args}, but also additional
-elements required for the evaluation of \fun{mu}, \fun{nu}, and \fun{beta}.
-
-\subsubsection{Default parametrization}
-
-By default, \fun{make_data} uses constant vital rates
-$\mu(t) \equiv \muconst$ and $\nu(t) \equiv \muconst N_0$
-and seasonally forced transmission rate
-%
-\begin{equation}
-\label{eq:beta-phi}
-\beta(t) = \avg{\beta} \left[1 + \alpha \cos\left(\frac{2 \pi t}{365\ \text{days}} + \phi(t;\epsilon^2)\right)\right]\,,
-\end{equation}
-%
-where $\avg{\beta}$ is the mean (long-term average) transmission rate,
-$\alpha$ is the amplitude relative to the mean, and $\phi(t;\epsilon^2)$
-is the linear interpolant of noise $\{(t_i,\Phi_i)\}_{i=0}^{n-1}$ with
-%
-\begin{equation}
-\Phi_i \sim \mathrm{Normal}(0,\epsilon^2)\,,\quad i = 0,\ldots,n-1\,,
-\end{equation}
-%
-modeling environmental stochasticity. In addition, it assumes
-a constant reporting probability $\pconst$ ($p_i \equiv \pconst$)
-and no reporting delay ($q_0 = 1$). These defaults are implemented
-as follows:
+To facilitate usage of \fun{make_data} with settings (i)--(iii),
+they are implemented by the default values of arguments \code{mu},
+\code{nu}, \code{beta}, and \code{p}:
 
 <<make-data-formals>>=
 formals(make_data)
 @
 
 \noindent
-Some things to note:
-%
-\begin{itemize}
-\item The default values of \code{mu} and \code{nu} are
-  $\muconst \dt$ and $\muconst N_0 \dt$, respectively.
-  \cref{tab:make-data-args} explains that \code{mu} and
-  \code{nu} should define $\mu(s \dt) \dt$ and $\nu(s \dt) \dt$
-  for all $s \in [0,n-1]$, hence the multiplication of
-  $\mu(s \dt) \equiv \muconst$ and $\nu(s \dt) \equiv \muconst N_0$
-  by $\dt$. To support these defaults, \code{par_list} must
-  contain an element \code{muconst} specifying $\muconst \dt$.
-\item The default value of \code{beta} is a closure%
-  \footnote{A function with an enclosing environment
-  containing variables to which the function has access
-  regardless of where it is called.}
-  generated by helper function \fun{make_beta} for given
-  $\epsilon$ and $n$. As required, the closure takes arguments
-  \code{s} and \code{par_list} and evaluates $\beta(s \dt) \dt$
-  for all $s \in [0,n-1]$, where $\beta(t)$ is defined as in
-  \cref{eq:beta-phi}. To support this default, \code{par_list}
-  must contain elements \code{beta_mean}, \code{alpha},
-  and \code{epsilon} specifying $\avg{\beta} \dt$, $\alpha$,
-  and $\epsilon$. For details about \fun{make_beta},
-  see \cref{sec:make-beta}.
-\item The default value of \code{p} is $\pconst$. To support
-  this default, \code{par_list} must contain an element
-  \code{pconst} specifying $\pconst$.
-\item The default value of \code{delay_dist} is \code{`9c`9(`11`1)}
-  indicating $q_0 = 1$ (whereas, for example,
-  \code{`9c`9(`10.1`1, `10.3`1, `10.6`1)} would indicate
-  $q_0 = 0.1$, $q_1 = 0.3$, and $q_2 = 0.6$).
-\end{itemize}
+The default value of \code{beta} is a closure \fun{f} generated
+by helper function \fun{make_beta}. \fun{f} takes arguments \code{s}
+and \code{par_list} and evaluates $\beta(s \dt) \dt$ for all
+$s \in [0,n-1]$, where $\beta(t)$ is as defined in \cref{eq:beta-phi}.
+For more details, run \code{?make_beta} or simply print \code{make_beta}.
 
-In summary, if the default values of \fun{make_data} arguments
-\code{mu}, \code{nu}, \code{beta}, and \code{p} are accepted,
-then argument \code{par_list} must specify parameters
-$\muconst \dt$, $\avg{\beta}$, $\alpha$, $\epsilon$, and
-$\pconst$ \emph{in addition to} those parameters listed in
-\cref{tab:make-data-args}. Helper function \fun{make_par_list}
-can be (and is by default) used to create a list conforming
-to this requirement. For details about \fun{make_par_list},
-see \cref{sec:make-par-list}.
+The default values of \code{mu}, \code{nu}, \code{beta}, and \code{p}
+require \code{par_list} to specify values for $\muconst \dt$,
+$\avg{\beta} \dt$, $\alpha$, $\epsilon$, and $\pconst$
+\textit{in addition to} those parameters listed in
+\cref{tab:make-data-args}, namely $\dt$, $\tlat / \dt$, $\tinf / \dt$,
+$N_0$, $S_0$, $E_0$ (\code{model = `2"seir"`2}), and $I_0$.
+The sole purpose of helper function \fun{make_par_list} is to create
+such a list. (This means that \fun{make_par_list} is intended
+to be used only in conjunction with \fun{make_data} and only if
+\fun{make_data} arguments \code{mu}, \code{nu}, \code{beta}, and
+\code{p} are assigned their default values.)
 
-\subsubsection{Some details about \tops{\protect\fun{make_beta}}{make\_beta()}}
-\label{sec:make-beta}
-
-The sole intended purpose of function \fun{make_beta} is to
-define the default value of \fun{make_data} argument \fun{beta}.
-The definition of \fun{make_beta} is printed below.
-
-<<make-beta>>=
-make_beta
-@
-
-\noindent
-Given arguments \code{epsilon} and \code{n} as in \cref{tab:make-beta-args},
-\fun{make_beta} first defines $a(s) = \phi(s \dt;\epsilon^2)$, where $\phi$
-is defined as in \cref{eq:beta-phi}. It then returns a closure \fun{f} that,
-given arguments \code{s} and \code{par_list}, evaluates
-$f(s) = \beta(s \dt) \dt$, where $\beta(t)$ is defined as in \cref{eq:beta-phi}.
-The evaluation uses
-%
-\begin{itemize}
-\item values for $\dt$, $\avg{\beta} \dt$, and $\alpha$ found in
-  \code{par_list}, and
-\item the function $a(s)$ found in \code{`9environment`9(f)}.
-\end{itemize}
-%
-In effect, the output of \fun{make_beta} (\ie the closure \fun{f})
-is randomly generated and reproducible with \fun{set.seed}, while
-the output of \fun{f} is determined and reproducible without
-\fun{set.seed}.
-
-\begin{table}
-\renewcommand{\arraystretch}{1.5}
-\caption{Arguments of \protect\fun{make_beta}.}
-\footnotesize
-\begin{tabular}{R{0.8in} C{0.7in} L{4.4in}}
-\toprule
-{\bfseries Argument} & {\bfseries Notation} & {\bfseries Details} \\
-\midrule
-\code{epsilon} & $\epsilon$ & A numeric scalar. Standard deviation of the noise process. \\
-\code{n} & $n$ & An integer scalar. Number of observations in the noise process. Should match argument \code{n} of \fun{make_data}. \\
-\bottomrule
-\end{tabular}
-\label{tab:make-beta-args}
-\end{table}
-
-Here is an example of \fun{make_beta} usage with
-$\dt = 7$ days, $\avg{\beta} \dt = 10^{-5}$, $\alpha = 0.05$,
-$\epsilon = 0.5$, and $n = 1000$:
-
-<<make-beta-example, fig.height=4>>=
-epsilon <- 0.5
-n <- 1000
-pl <- list(dt_days = 7, beta_mean = 1e-05, alpha = 0.05)
-f <- make_beta(epsilon, n)
-names(as.list(environment(f)))
-a <- get("a", envir = environment(f))
-s <- 0:(n-1)
-par(mfrow = c(2, 1), mar = c(4, 4, 2, 1))
-plot(s, a(s), type = "l")
-plot(s, f(s, pl), type = "l")
-@
-
-\subsubsection{Some details about \tops{\protect\fun{make_par_list}}{make\_par\_list()}}
-\label{sec:make-par-list}
-
-The sole intended purpose of function \fun{make_par_list} is to define
-a value for \fun{make_data} argument \code{par_list} when defaults are
-desired for arguments \code{mu}, \code{nu}, \code{beta}, and \code{p}.
-The arguments of \fun{make_par_list} are listed below and summarized
-in \cref{tab:make-par-list-args}.
+The arguments of \fun{make_par_list}, listed below, specify a value
+for $\R_0$ and values for all of the required parameters listed above
+except for $\avg{\beta} \dt$, $S_0$, $E_0$, and $I_0$.
 
 <<make-par-list-formals-names>>=
 names(formals(make_par_list))
 @
 
-\begin{table}
-\renewcommand{\arraystretch}{1.5}
-\caption{Arguments of \protect\fun{make_par_list}.}
-\footnotesize
-\begin{tabular}{R{0.8in} C{0.7in} L{4.4in}}
-\toprule
-{\bfseries Argument} & {\bfseries Notation} & {\bfseries Details} \\
-\midrule
-\code{dt_days} & $\dt$ & A numeric scalar. Observation interval in days. \\
-\code{tlat} & $\tlat/\dt$ & A numeric scalar. Mean latent period of the disease of interest in units $\dt$. \\
-\code{tinf} & $\tinf/\dt$ & A numeric scalar. Mean infectious period of the disease of interest in units $\dt$. \\
-\code{muconst} & $\muconst \dt$ & A numeric scalar. \textit{Per capita} natural mortality rate expressed per unit $\dt$. \\
-\code{Rnaught} & $\R_0$ & A numeric scalar. Basic reproduction number of the disease of interest. \\
-\code{alpha} & $\alpha$ & A numeric scalar. Amplitude of the seasonally forced transmission rate relative to its mean. \\
-\code{epsilon} & $\epsilon$ & A numeric scalar. Standard deviation of the standard normally distributed phase shift in the seasonally forced transmission rate. \\
-\code{N0} & $N_0$ & A numeric scalar. Population size at time $t_0 = 0 \dt$. \\
-\code{pconst} & $\pconst$ & A numeric scalar. Probability that an infection is eventually reported. \\
-\code{model} & --- & A character scalar, either \code{`2"sir"`2} or \code{`2"seir"`2}, indicating a model of disease dynamics. Should match argument \code{model} of \fun{make_data}. \\
-\code{m} & $m$ & A positive integer scalar. A system of SIR (\code{model = `2"sir"`2}) or SEIR (\code{model = `2"seir"`2}) equations is numerically integrated between times $t_{-(m-1)} = -(m-1) \dt$ and $t_0 = 0 \dt$ to obtain values for $S_0$, $E_0$, and $I_0$. \\
-\bottomrule
-\end{tabular}
-\label{tab:make-par-list-args}
-\end{table}
-
 \noindent
-Parameters $\avg{\beta} \dt$, $S_0$, $E_0$, or $I_0$ are not
-defined among the arguments, and instead defined internally.
+\fun{make_par_list} ``fills in the blanks'' by defining the missing
+parameters as functions of the specified parameters. It defines
+$\avg{\beta} \dt$ as a function of $\R_0$ by enforcing identity
+\cref{bleq:Rnaught-sir} or \cref{bleq:Rnaught-seir}. For the SIR
+model (\code{model = `2"sir"`2}), it defines $S_0$ and $I_0$ such
+that $(S_0,I_0,N_0-S_0-I_0)$ is very near the attractor of system
+\cref{bleq:sir} with settings (i) and (ii) (specifically, the state
+of the attractor at time $t_0 = 0 \dt$, which is the initial time
+in all simulations). For the SEIR model (\code{model = `2"seir"`2}),
+it defines $S_0$, $E_0$, and $I_0$ in an analogous way. This ensures
+that simulations by \fun{make_data} using these initial values do
+not display pronounced transient dynamics. \fun{make_par_list} then
+returns a list containing values for $\dt$, $\tlat / \dt$, $\tinf / \dt$,
+$N_0$, $S_0$, $E_0$ (\code{model = `2"seir"`2}), $I_0$, $\muconst \dt$,
+$\avg{\beta} \dt$, $\alpha$, $\epsilon$, and $\pconst$, which can be
+passed to \fun{make_data}. For more details, run \code{?make_par_list}.
 
-Specifically, \fun{make_par_list} defines $\avg{\beta}$ as
-a function of the basic reproduction number $\R_0$ (which,
-compared to $\avg{\beta}$, has a more natural epidemiological
-interpretation%
-\footnote{The basic reproduction number $\R_0$ is the number
-of individuals that a typical infected person is expected to
-infect in an otherwise completely susceptible population.})
-by enforcing the identity
-%
-\begin{equation}
-\R_0 = \frac{\avg{\beta} N_0}{\gamma + \muconst}
-\end{equation}
-%
-for \code{model = `2"sir"`2} and the identity
-%
-\begin{equation}
-\R_0 = \frac{\avg{\beta} N_0}{\gamma + \muconst} \frac{\sigma}{\sigma + \muconst}
-\end{equation}
-%
-for \code{model = `2"seir"`2}. These are valid for systems
-\cref{bleq:sir,bleq:seir} with constant vital rates
-$\mu(t) \equiv \muconst$ and $\nu(t) \equiv \muconst N_0$
-and seasonally forced transmission rate
-%
-\begin{equation}
-\label{eq:beta}
-\beta(t) = \avg{\beta} \left[1 + \alpha \cos\left(\frac{2 \pi t}{365\ \text{days}}\right)\right]\,.
-\end{equation}
-%
-(\cref{eq:beta} is identical to \cref{eq:beta-phi} except it
-omits the randomly generated phase shift $\phi(t;\epsilon^2)$.)
+\subsubsection{Example}
+\label{eq:make-data-usage-example}
 
-\fun{make_par_list} defines $S_0$, $E_0$, and $I_0$ as a function
-of other parameters in order that simulations by \fun{make_data}
-do not display pronounced transient dynamics. More precisely, it
-chooses values from a point near the attractor of system
-\cref{bleq:sir} or \cref{bleq:seir} (depending on \code{model})
-with
-$\mu(t) \equiv \muconst$,
-$\nu(t) \equiv \muconst N_0$, and
-$\beta(t)$ as in \cref{eq:beta}.
-It finds such a point by numerically integrating the system
-(omitting the redundant ``removed'' compartment%
-\footnote{If $\mu(t) \equiv \muconst$ and $\nu(t) \equiv \muconst N_0$
-in systems \cref{bleq:sir,bleq:seir}, then $N(t) \equiv N_0$ and
-so $R(t) \equiv N_0 - S(t) - I(t)$ in system \cref{bleq:sir} and
-$R(t) \equiv N_0 - S(t) - E(t) - I(t)$ in system \cref{bleq:seir}.})
-over a transient period between times $t_{-(m-1)} = -(m-1) \dt$
-and $t_0 = 0 \dt$, where $m$ is an integer specified by the user,
-taking initial state
+This example employs \fun{make_data} with \code{model = `2"seir"`2}
+to simulate a time series of weekly reported incidence spanning
+10 years. It applies settings (i)--(iii)
+(listed in \cref{sec:make-data-usage-details})
+to the simulation model and uses these parameter values:
 %
-\begin{equation}
-\begin{bmatrix}
-S(t_{-(m-1)}) \\
-I(t_{-(m-1)})
-\end{bmatrix}
-=
-N_0
-\begin{bmatrix}
-\frac{1}{\R_0} \\
-\big(1 - \frac{1}{\R_0}\big) \frac{\muconst}{\gamma + \muconst}
-\end{bmatrix}
-\quad
-\text{or}
-\quad
-\begin{bmatrix}
-S(t_{-(m-1)}) \\
-E(t_{-(m-1)}) \\
-I(t_{-(m-1)})
-\end{bmatrix}
-=
-N_0
-\begin{bmatrix}
-\frac{1}{\R_0} \\
-\big(1 - \frac{1}{\R_0}\big) \frac{\muconst}{\sigma + \muconst} \\
-\big(1 - \frac{1}{\R_0}\big) \frac{\sigma}{\sigma + \muconst} \frac{\muconst}{\gamma + \muconst}
-\end{bmatrix}
-\end{equation}
-%
-(depending on \code{model}). These are the endemic equilibria of
-systems \cref{bleq:sir,bleq:seir} with $\mu(t) \equiv \muconst$,
-$\nu(t) \equiv \muconst N_0$, and $\beta(t) \equiv \avg{\beta}$.
-Then \fun{make_par_list} defines $S_0 = S(0)$, $E_0 = E(0)$, and
-$I_0 = I(0)$.
-
-The default value of $m$ is $(1000\ \text{years}) / \dt$ and
-yields a transient period of close to 1000 years. This is typically
-long enough to ensure that $(S(0),I(0))$ or $(S(0),E(0),I(0))$
-(depending on \code{model}) is near the attractor of the system.
-
-Here is an example of \fun{make_par_list} usage with
-\code{model = `2"seir"`2}, $m = (1000\ \text{years}) / \dt$,
-and
-%
+\begin{linenomath}
 \begin{align*}
 \dt &= 7\ \text{days} &\qquad \R_0 &= 20 & \qquad \muconst &= 0.04\ \text{year}^{-1} \\
 \tlat &= 5\ \text{days} & \alpha &= 0.08 & N_0 &= 10^6 \\
-\tinf &= 7\ \text{days} & \epsilon &= 0 & \pconst &= 1
+\tinf &= 7\ \text{days} & \epsilon &= 0.8 & \pconst &= 0.4
 \end{align*}
+\end{linenomath}
+%
+A list \code{pl} of parameter values complete with values for
+$\avg{\beta} \dt$, $S_0$, $E_0$, and $I_0$ is obtained with the
+following call to \fun{make_par_list}.
 
-<<make-par-list-example>>=
-dt_days <- 7
+<<make-data-example-1>>=
 pl <- make_par_list(
-  dt_days = dt_days,
-  tlat    = 5 / dt_days,
-  tinf    = 7 / dt_days,
-  muconst = 0.04 * dt_days / 365,
-  Rnaught = 20,
-  alpha   = 0.08,
-  epsilon = 0,
-  N0      = 1e06,
-  pconst  = 1,
-  model   = "sir",
-  m       = 1000 * 365 / dt_days
+  dt_days = 7,              # observation interval                days
+  tlat    = 5 / 7,          # mean latent period                  units dt
+  tinf    = 1,              # mean infectious period              units dt
+  muconst = 0.04 * 7 / 365, # per capita natural mortality rate   per unit dt
+  Rnaught = 20,             # basic reproduction number
+  alpha   = 0.08,           # seasonal amplitude
+  epsilon = 0.8,            # s.d. of noise process
+  N0      = 1e06,           # initial population size
+  pconst  = 0.8,            # reporting probability
+  model   = "seir",         # model of disease dynamics
+  m       = 1000 * 365 / 7  # transient period                    units dt
 )
 unlist(pl) # display list as named vector
 @
 
 \noindent
-The above call to \fun{make_par_list} displays the default values of
-all arguments, with the exception of \code{model}, whose default value
-is \code{`2"sir"`2}.
-(As usual, this can be verified with \code{`9formals`9(make_par_list)}.)
-As desired, \fun{make_par_list} returns a list specifying the parameters
-listed under \code{par_list} in \cref{tab:make-data-args} and additional
-parameters $\muconst$, $\avg{\beta} \dt$, $\alpha$, $\epsilon$, and $\pconst$.
+A data frame containing simulated time series data is obtained with
+the following call to \fun{make_data}, in which default values are
+accepted for arguments \code{mu}, \code{nu}, \code{beta}, and \code{p}
+(see \cref{sec:make-data-usage-details} for these values).
+The reporting delay $D = S \dt$ is assumed to have a truncated
+negative binomial distribution:
+%
+\begin{linenomath}
+\begin{equation}
+S \sim \mathrm{NegativeBinomial}(\text{mean} = 2, \text{dispersion} = 4)\,,\quad S \leq 10\,.
+\end{equation}
+\end{linenomath}
 
-\subsection{Usage}
-\label{sec:make-data-example}
-
-\subsubsection{Example 1: SIR model without process or observation error}
-
-<<make-data-example-1>>=
-pl <- make_par_list(model = "sir")
-unlist(pl)
+<<make-data-example-2>>=
+set.seed(16091359)
+df <- make_data(
+  par_list   = pl,                    # list of parameter values
+  n          = 10 * 365 / pl$dt_days, # weekly reports spanning ten years
+  with_ds    = TRUE,                  # demographic stochasticity
+  model      = "seir",                # model of disease dynamics
+  delay_dist = dnbinom(0:10, mu = 2, size = 4) # truncated negative binomial
+)
+head(df)
 @
 
+\noindent
+The data frame output is summarized in \cref{tab:make-data-out}.
+Plotting the time series of reported incidence specified by
+columns \code{t} and \code{C} produces the figure below.
 
+<<make-data-example-3, fig.height=2, echo=-1>>=
+par(mar = c(4, 4, 1, 1))
+plot(C ~ t, data = df, type = "l",
+  xlab = "Time (units dt)",
+  ylab = "Reported incidence"
+)
+@
 
-\section{Estimating time-varying transmission rates}
+\begin{table}
+\renewcommand{\arraystretch}{1.5}
+\caption{Output of \protect\fun{make_data}.}
+\footnotesize
+\begin{tabular}{R{0.6in} C{0.7in} L{4.6in}}
+\toprule
+{\bfseries Column} & {\bfseries Notation} & {\bfseries Details} \\
+\midrule
+\code{t} & $t_i / \dt$ & Time in units $\dt$. Equal to \code{`10`1:(n-`11`1)}. \\
+\code{t_years} & $t_i$ & Time in years. Equal to \code{(`10`1:(n-`11`1)) * par_list$dt_days / `1365`1}. \\
+\code{beta} & $\beta(t_i) \dt$ & Transmission rate expressed per unit $\dt$ per susceptible individual per infectious individual. Equal to \code{`9beta`9(`10`1:(n-`11`1))} if argument \code{beta} is a function and \code{`9rep`9(beta, n)} if it is a numeric scalar. \\
+\code{mu} & $\mu(t_i) \dt$ & \textit{Per capita} natural mortality rate expressed per unit $\dt$. Equal to \code{`9mu`9(`10`1:(n-`11`1))} if argument \code{mu} is a function and \code{`9rep`9(mu, n)} if it is a numeric scalar. \\
+\code{nu} & $\nu(t_i) \dt$ & Birth rate expressed per unit $\dt$. Equal to \code{`9nu`9(`10`1:(n-`11`1))} if argument \code{nu} is a function and \code{`9rep`9(nu, n)} if it is a numeric scalar. \\
+\code{B} & $B(t_i)$ & Births. \code{B[i]} is the number of births between times \code{t[i-`11`1]} and \code{t[i]}. \\
+\code{N} & $N(t_i)$ & Population size. \\
+\code{S} & $S(t_i)$ & Number of susceptible individuals. \\
+\code{E} & $E(t_i)$ & Number of exposed (infected but not infectious) individuals. Included only if argument \code{model} is \code{`2"seir"`2}. \\
+\code{I} & $I(t_i)$ & Number of infectious individuals. \\
+\code{Z} & $Z(t_i)$ & Incidence. \code{Z[i]} is the number of infections between times \code{t[i-`11`1]} and \code{t[i]}. \\
+\code{Zrep} & $Z_\text{rep}(t_i)$ & Incidence conditional on reporting. \code{Zrep[i]} is the number of infections between times \code{t[i-`11`1]} and \code{t[i]} that are eventually reported. \\
+\code{C} & $C(t_i)$ & Reported incidence. \code{C[i]} is the number of infections reported between times \code{t[i-`11`1]} and \code{t[i]}. \\
+\bottomrule
+\end{tabular}
+\label{tab:make-data-out}
+\end{table}
+
+\section{\tops{\protect\fun{fastbeta}: }{}Estimating time-varying transmission rates}
 \label{sec:fastbeta}
 
-\section{Smoothing noisy transmission rate estimates}
+\section{\tops{\protect\fun{try_loess}: }{}Smoothing noisy transmission rate estimates}
 \label{sec:try-loess}
 
-\section{Constructing bootstrap confidence intervals}
+\section{\tops{\protect\fun{bootbeta}: }{}Constructing bootstrap confidence intervals}
 \label{sec:bootbeta}
 
-\section{Deconvolving reported incidence time series}
+\section{\tops{\protect\fun{deconvol}: }{}Deconvolving reported incidence time series}
 \label{sec:deconvol}
 
-\section{Estimating the initial susceptible population size}
+\section{\tops{\protect\fun{ptpi}: }{}Estimating the initial susceptible population size}
 \label{sec:ptpi}
 
+<<knit-theme>>=
+## This is a test of knit_theme.css
+f <- function(a = 0, b = 0) {
+  if (a < b) {
+    x <- mean(c(a, b), na.rm = FALSE)
+  } else if (a > b) {
+    x <- a + b
+  } else {
+    x <- "a = b"
+  }
+  x
+}
+f(a = 1, b = 2)
+
+warning("Warning color not controlled by knit_theme.css ...")
+stop("Error color not controlled by knit_theme.css ...")
+@
 
 \end{document}
 

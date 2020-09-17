@@ -22,31 +22,24 @@
 #'     at which to evaluate \mjseqn{f(s)}.
 #'   }
 #'   \item{`par_list`}{A list with numeric scalar elements
-#'     `dt_days`, `beta_mean`, and `alpha` listing  values for
-#'     \mjseqn{\Delta t}, \mjseqn{\langle\beta\rangle}, and
-#'     \mjseqn{\alpha}, respectively.
+#'     `dt_days`, `beta_mean`, and `alpha` listing values for
+#'     \mjseqn{\Delta t}, \mjseqn{\langle\beta\rangle \Delta t},
+#'     and \mjseqn{\alpha}, respectively.
 #'   }
 #' }
 #'
-#'
-#' `par_list` does not need an element `epsilon` (giving a value
-#' for \mjseqn{\epsilon}), because random number generation and
-#' linear interpolation are performed in the enclosing environment
-#' of `f()` (the execution environment of `make_beta()`) using the
-#' value of `epsilon` found there. That is, `f()` does not need to
-#' know `epsilon`, because it uses the definition of \mjseqn{a(s)}
-#' that it finds in `environment(f)`.
-#'
-#' The upshot is that the output of `make_beta()` (i.e., the function
-#' `f()`) is randomly generated and reproducible with [base::set.seed()],
-#' while the output of `f()` is determined and reproducible without
-#' [base::set.seed()].
+#' `par_list` does not need an element `epsilon` (defining \mjseqn{\epsilon}),
+#' because `f()` uses the definition of function `a()` (defining \mjseqn{a(s)})
+#' that it finds in `environment(f)`. The upshot is that the output of
+#' `make_beta()` (i.e., the function `f()`) is randomly generated and
+#' reproducible with [base::set.seed()], while the output of `f()` is
+#' determined and reproducible without [base::set.seed()].
 #'
 #' @param epsilon A numeric scalar. Standard deviation of the noise process.
 #' @param n An integer scalar. Number of observations in the noise process.
 #'
 #' @return
-#' A function with arguments `s` and `par_list` (see Details).
+#' A closure with arguments `s` and `par_list` (see Details).
 #'
 #' @examples
 #' epsilon <- 0.8

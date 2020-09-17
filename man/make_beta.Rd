@@ -13,7 +13,7 @@ make_beta(epsilon, n)
 \item{n}{An integer scalar. Number of observations in the noise process.}
 }
 \value{
-A function with arguments \code{s} and \code{par_list} (see Details).
+A closure with arguments \code{s} and \code{par_list} (see Details).
 }
 \description{
 Defines a seasonal forcing function with environmental noise
@@ -36,24 +36,18 @@ and returned as output. \code{f()} takes as arguments:
 at which to evaluate \mjseqn{f(s)}.
 }
 \item{\code{par_list}}{A list with numeric scalar elements
-\code{dt_days}, \code{beta_mean}, and \code{alpha} listing  values for
-\mjseqn{\Delta t}, \mjseqn{\langle\beta\rangle}, and
-\mjseqn{\alpha}, respectively.
+\code{dt_days}, \code{beta_mean}, and \code{alpha} listing values for
+\mjseqn{\Delta t}, \mjseqn{\langle\beta\rangle \Delta t},
+and \mjseqn{\alpha}, respectively.
 }
 }
 
-\code{par_list} does not need an element \code{epsilon} (giving a value
-for \mjseqn{\epsilon}), because random number generation and
-linear interpolation are performed in the enclosing environment
-of \code{f()} (the execution environment of \code{make_beta()}) using the
-value of \code{epsilon} found there. That is, \code{f()} does not need to
-know \code{epsilon}, because it uses the definition of \mjseqn{a(s)}
-that it finds in \code{environment(f)}.
-
-The upshot is that the output of \code{make_beta()} (i.e., the function
-\code{f()}) is randomly generated and reproducible with \code{\link[base:Random]{base::set.seed()}},
-while the output of \code{f()} is determined and reproducible without
-\code{\link[base:Random]{base::set.seed()}}.
+\code{par_list} does not need an element \code{epsilon} (defining \mjseqn{\epsilon}),
+because \code{f()} uses the definition of function \code{a()} (defining \mjseqn{a(s)})
+that it finds in \code{environment(f)}. The upshot is that the output of
+\code{make_beta()} (i.e., the function \code{f()}) is randomly generated and
+reproducible with \code{\link[base:Random]{base::set.seed()}}, while the output of \code{f()} is
+determined and reproducible without \code{\link[base:Random]{base::set.seed()}}.
 }
 \examples{
 epsilon <- 0.8

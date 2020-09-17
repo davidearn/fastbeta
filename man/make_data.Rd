@@ -104,14 +104,15 @@ Alternatively, a numeric scalar indicating a constant probability
 
 \item{delay_dist}{\mjseqn{\lbrace\,q_i\,\rbrace}
 A numeric vector listing the probability \mjseqn{q_i}
-(\mjseqn{i = 0,\ldots,b}) that an infection that is eventually reported
-replaced with \code{delay_dist / sum(delay_dist)} in the event that
-\code{sum(delay_dist) != 1}.}
+(\mjseqn{i = 0,\ldots,b}) that an infection that is eventually
+reported is reported after \mjseqn{i} observation intervals.
+\code{delay_dist} is replaced with \code{delay_dist / sum(delay_dist)}
+in the event that \code{sum(delay_dist) != 1}.}
 }
 \value{
 A data frame with \code{n} rows corresponding to equally spaced time points
-\mjseqn{t_i = i \Delta t} (\mjseqn{i = 0,\ldots,n-1}), and numeric
-columns:
+\mjseqn{t_i = i \Delta t} (\mjseqn{i = 0,\ldots,n-1}),
+and numeric columns:
 
 \describe{
 \item{\code{t}}{\mjseqn{\lbrace\,t_i / \Delta t\,\rbrace}
@@ -123,20 +124,23 @@ Time in years. Equal to \verb{(0:(n-1)) * par_list$dt_days * / 365}.
 \item{\code{beta}}{\mjseqn{\lbrace\,\beta(t_i) \Delta t\,\rbrace}
 Transmission rate expressed per unit \mjseqn{\Delta t}
 per susceptible individual per infectious individual.
-Equal to \code{beta(0:(n-1))}.
+Equal to \code{beta(0:(n-1))} if argument \code{beta} is a function
+and \code{rep(beta, n)} if it is a numeric scalar.
 }
 \item{\code{mu}}{\mjseqn{\lbrace\,\mu(t_i) \Delta t\,\rbrace}
 Per capita natural mortality rate expressed
-per unit \mjseqn{\Delta t}. Equal to \code{mu(0:(n-1))}.
+per unit \mjseqn{\Delta t}. Equal to \code{mu(0:(n-1))}
+if argument \code{mu} is a function and \code{rep(mu, n)}
+if it is a numeric scalar.
 }
 \item{\code{nu}}{\mjseqn{\lbrace\,\nu(t_i) \Delta t\,\rbrace}
 Birth rate expressed per unit \mjseqn{\Delta t}.
-Equal to \code{nu(0:(n-1))}.
+Equal to \code{nu(0:(n-1))} if argument \code{nu} is a function
+and \code{rep(nu, n)} if it is a numeric scalar.
 }
 \item{\code{B}}{\mjseqn{\lbrace\,B(t_i)\,\rbrace}
 Births. \code{B[i]} is the number of births
-between times \code{t[i-1]} and \code{t[i]}. For
-simplicity, \code{make_data()} assigns \code{B[1] <- B[2]}.
+between times \code{t[i-1]} and \code{t[i]}.
 }
 \item{\code{N}}{\mjseqn{\lbrace\,N(t_i)\,\rbrace}
 Population size.
@@ -153,8 +157,7 @@ Number of infectious individuals.
 }
 \item{\code{Z}}{\mjseqn{\lbrace\,Z(t_i)\,\rbrace}
 Incidence. \code{Z[i]} is the number of infections
-between times \code{t[i-1]} and \code{t[i]}. For
-simplicity, \code{make_data()} assigns \code{Z[1] <- Z[2]}.
+between times \code{t[i-1]} and \code{t[i]}.
 }
 \item{\code{p}}{\mjseqn{\lbrace\,p_i\,\rbrace}
 Reporting probability. \code{p[i]} is the probability
@@ -176,9 +179,9 @@ the correct scale (see Details 1).
 }
 }
 
-The data frame has attributes \code{call} and \code{arg_list}, making it
-reproducible with \code{eval(call)} or \code{do.call(make_data, arg_list)},
-preceded by a call to \code{\link[base:Random]{base::set.seed()}}.
+The data frame has attributes \code{call} and \code{arg_list} and
+is reproducible with \code{eval(call)} preceded by a call to
+\code{\link[base:Random]{base::set.seed()}}.
 }
 \description{
 Simulates epidemic time series data using a system of S(E)IR equations
@@ -209,9 +212,10 @@ where \mjseqn{\sigma = 1 / t_\text{lat}} and
 \mjseqn{\gamma = 1 / t_\text{inf}}.
 
 \code{make_data()} generates observations of the system at equally spaced
-times \mjseqn{t_i = i \Delta t} (\mjseqn{i = 0,\ldots,n-1}) by either
-(i) numerically integrating the ODE using \code{\link[deSolve:ode]{deSolve::ode()}}
-(\code{with_ds = FALSE}), or
+time points \mjseqn{t_i = i \Delta t} (\mjseqn{i = 0,\ldots,n-1}) by
+either
+(i) numerically integrating the system of ODE using \code{\link[deSolve:ode]{deSolve::ode()}}
+(\code{with_ds = FALSE}) or
 (ii) realizing a corresponding continuous-time stochastic process
 using \code{\link[adaptivetau:ssa.adaptivetau]{adaptivetau::ssa.adaptivetau()}} (\code{with_ds = TRUE}).
 Both methods use initial state
@@ -246,14 +250,14 @@ reported:
 
 \mjsdeqn{Z_\text{rep}(t_i) \sim \mathrm{Binomial}\big(\mathrm{nint}(Z(t_i)),p_i\big)\,.}
 
-Here, \mjseqn{\mathrm{nint}(Z(t_i))} \mjseqn{Z(t_i)} rounded to the nearest
-integer and \mjseqn{p_i} is the probability that an infection between times
-\mjseqn{t_{i-1}} and \mjseqn{t_i} (counted by \mjseqn{Z(t_i)}) is eventually
-reported. Finally, it generates reported incidence \mjseqn{C} by sampling
-from a supplied reporting delay distribution and binning infections counted
-by \mjseqn{Z_\text{rep}} forward in time. If the maximum possible delay is
-\mjseqn{b \Delta t} and \mjseqn{b > 0}, then, for simplicity, \code{make_data()}
-simulates
+Here, \mjseqn{\mathrm{nint}(Z(t_i))} is \mjseqn{Z(t_i)} rounded to the
+nearest integer and \mjseqn{p_i} is the probability that an infection
+between times \mjseqn{t_{i-1}} and \mjseqn{t_i} (counted by \mjseqn{Z(t_i)})
+is eventually reported. Finally, it generates reported incidence \mjseqn{C}
+by sampling from a supplied reporting delay distribution and binning
+infections counted by \mjseqn{Z_\text{rep}} forward in time. If the
+maximum possible delay is \mjseqn{b \Delta t} and \mjseqn{b > 0},
+then, for simplicity, \code{make_data()} simulates
 
 \mjsdeqn{Z_\text{rep}(t_i) \sim \mathrm{Binomial}\big(\mathrm{nint}(Z(t_0)),p_0\big)\,.}
 
@@ -279,9 +283,9 @@ where \mjseqn{\phi(t;\epsilon^2)} is the linear interpolant of noise
 
 Care is taken to ensure that random number generation occurs in the
 enclosing environment rather than the body of the function assigned
-by default to \code{make_data()} argument \code{beta}. This ensures that the
-function has noisy but non-random output, which is helpful for
-reproducibility. For details, see helper function\code{\link[=make_beta]{make_beta()}}.
+by default to argument \code{beta}. This ensures that the function has
+noisy but non-random output, which is helpful for reproducibility.
+For details, see helper function \code{\link[=make_beta]{make_beta()}}.
 
 By default, the reporting probability \mjseqn{p} is constant and equal
 to \mjseqn{p_\text{c}}, while the reporting delay is fixed equal to zero,
@@ -315,19 +319,19 @@ Probability that an infection is eventually reported.
 }
 }
 
-The helper function \code{\link[=make_par_list]{make_par_list()}} can be used to construct
-a list conforming to these default requirements.
+Helper function \code{\link[=make_par_list]{make_par_list()}} can be used to construct
+a list conforming to this requirement.
 }
 }
 
 \examples{
 ## Stochastic simulation of SEIR model
 pl <- make_par_list(
-  epsilon = pi / 4, # environmental stochasticity
-  pconst = 0.5, # random under-reporting of infections
+  epsilon = 0.8, # environmental stochasticity
+  pconst = 0.4, # random under-reporting of infections
   model = "seir"
 )
-set.seed(1422)
+set.seed(17090019)
 df <- make_data(pl,
   with_ds = TRUE, # demographic stochasticity
   model = "seir",
@@ -335,7 +339,7 @@ df <- make_data(pl,
 )
 head(df)
 
-## Deterministic simulation of SIR model
+## Deterministic simulation of SEIR model
 pl <- make_par_list(
   epsilon = 0,
   pconst = 1,
