@@ -15,7 +15,7 @@
 #'
 #' \mjsdeqn{f(s) = \langle\beta\rangle \left\lbrack 1 + \alpha \cos\left(\frac{2 \pi s \Delta t}{\text{365 days}} + a(s)\unicode{x1D7D9}_{\lbrack 0,n-1 \rbrack}\right) \right\rbrack \Delta t}
 #'
-#' and returned as output. `f()` takes as arguments:
+#' and returned as output. `f()` is a closure with arguments:
 #'
 #' \describe{
 #'   \item{`s`}{A numeric vector listing values of \mjseqn{s}
@@ -29,10 +29,10 @@
 #' }
 #'
 #' `par_list` does not need an element `epsilon` (defining \mjseqn{\epsilon}),
-#' because `f()` uses the definition of function `a()` (defining \mjseqn{a(s)})
-#' that it finds in `environment(f)`. The upshot is that the output of
-#' `make_beta()` (i.e., the function `f()`) is randomly generated and
-#' reproducible with [base::set.seed()], while the output of `f()` is
+#' because closure `f()` uses the definition of function `a()` (defining
+#' \mjseqn{a(s)}) that it finds in `environment(f)`. The upshot is that the
+#' output of `make_beta()` (i.e., the function `f()`) is randomly generated
+#' and reproducible with [base::set.seed()], while the output of `f()` is
 #' determined and reproducible without [base::set.seed()].
 #'
 #' @param epsilon A numeric scalar. Standard deviation of the noise process.

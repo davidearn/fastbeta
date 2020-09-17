@@ -29,7 +29,7 @@ forcing function \code{f()} is then defined according to
 
 \mjsdeqn{f(s) = \langle\beta\rangle \left\lbrack 1 + \alpha \cos\left(\frac{2 \pi s \Delta t}{\text{365 days}} + a(s)\unicode{x1D7D9}_{\lbrack 0,n-1 \rbrack}\right) \right\rbrack \Delta t}
 
-and returned as output. \code{f()} takes as arguments:
+and returned as output. \code{f()} is a closure with arguments:
 
 \describe{
 \item{\code{s}}{A numeric vector listing values of \mjseqn{s}
@@ -43,10 +43,10 @@ and \mjseqn{\alpha}, respectively.
 }
 
 \code{par_list} does not need an element \code{epsilon} (defining \mjseqn{\epsilon}),
-because \code{f()} uses the definition of function \code{a()} (defining \mjseqn{a(s)})
-that it finds in \code{environment(f)}. The upshot is that the output of
-\code{make_beta()} (i.e., the function \code{f()}) is randomly generated and
-reproducible with \code{\link[base:Random]{base::set.seed()}}, while the output of \code{f()} is
+because closure \code{f()} uses the definition of function \code{a()} (defining
+\mjseqn{a(s)}) that it finds in \code{environment(f)}. The upshot is that the
+output of \code{make_beta()} (i.e., the function \code{f()}) is randomly generated
+and reproducible with \code{\link[base:Random]{base::set.seed()}}, while the output of \code{f()} is
 determined and reproducible without \code{\link[base:Random]{base::set.seed()}}.
 }
 \examples{

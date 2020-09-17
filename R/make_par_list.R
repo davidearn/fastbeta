@@ -78,7 +78,7 @@
 #' (the default) is typically enough to ensure that \mjseqn{(S(0),I(0))}
 #' (`model = "sir"`) and \mjseqn{(S(0),I(0),E(0))} (`model = "seir"`)
 #' are near the attractor of the system of S(E)IR equations (specifically,
-#' the state of the attractor at time \mjseqn{t_0 = 0 \Delta}). This
+#' the state of the attractor at time \mjseqn{t_0 = 0 \Delta t}). This
 #' ensures that simulations by [make_data()] using these initial values
 #' do not display pronounced transient dynamics, which is often desirable.
 #'
@@ -136,7 +136,7 @@
 #'     Included only if `model = "seir"`.
 #'   }
 #'   \item{`I0`}{\mjseqn{\lbrace\,I_0\,\rbrace}
-#'     Number of infectious individuals at time \mjseqn{t_9 = 0 \Delta t}.
+#'     Number of infectious individuals at time \mjseqn{t_0 = 0 \Delta t}.
 #'   }
 #' }
 #'
