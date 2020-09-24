@@ -2,7 +2,7 @@
 
 ### Bugs
 
-* David's R session hangs at `makeCluster()`
+* plot.deconvol() allows lines to overlap
 
 ### Issues
 

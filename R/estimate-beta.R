@@ -106,7 +106,7 @@
 #' @inheritParams fastbeta
 #'
 #' @return
-#' A data frame with numeric columns:
+#' A data frame with `nrow(data)` rows and 8 or 10 numeric variables:
 #'
 #' \describe{
 #'   \item{`t`}{\mjseqn{\lbrace\,(t_i-t_0)/\Delta t\,\rbrace}

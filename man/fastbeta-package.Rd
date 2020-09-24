@@ -3,18 +3,17 @@
 \docType{package}
 \name{fastbeta-package}
 \alias{fastbeta-package}
-\alias{_PACKAGE}
 \title{\loadmathjax
 fastbeta: Fast Estimation of Time-Varying Transmission Rates}
 \description{
 Fast methods for estimating time-varying infectious disease
-    transmission rates from incidence and mortality time series.
+transmission rates from incidence and mortality time series.
 }
 \details{
-This package implements and extends the methods described in
-\insertCite{Jaga+20;textual}{fastbeta}. The package is modular,
-with the core machinery divided across different functions,
-each with its own purpose and convenient plotting methods.
+The \pkg{fastbeta} package implements and extends the methods described
+in \insertCite{Jaga+20;textual}{fastbeta}. The package is modular, with
+the core machinery divided across different functions, each with its own
+purpose and convenient plotting methods.
 
 \code{\link[=fastbeta]{fastbeta()}} is a wrapper giving access to the \strong{FC, S, SI, and
 SEI methods} of estimating time-varying transmission rates from
@@ -68,16 +67,5 @@ See \code{\link[=fastbeta]{fastbeta()}}, \code{\link[=bootbeta]{bootbeta()}}, an
 \insertRef{FineClar82}{fastbeta}
 
 \insertRef{Gold+09}{fastbeta}
-}
-\seealso{
-Useful links:
-\itemize{
-  \item \url{https://github.com/davidearn/fastbeta}
-}
-
-}
-\author{
-\strong{Maintainer}: Mikael Jagan \email{mjagan@uwaterloo.ca}
-
 }
 \keyword{internal}

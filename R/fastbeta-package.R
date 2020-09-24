@@ -1,11 +1,15 @@
 #' \loadmathjax
 #' fastbeta: Fast Estimation of Time-Varying Transmission Rates
 #'
+#' @description
+#' Fast methods for estimating time-varying infectious disease
+#' transmission rates from incidence and mortality time series.
+#'
 #' @details
-#' This package implements and extends the methods described in
-#' \insertCite{Jaga+20;textual}{fastbeta}. The package is modular,
-#' with the core machinery divided across different functions,
-#' each with its own purpose and convenient plotting methods.
+#' The \pkg{fastbeta} package implements and extends the methods described
+#' in \insertCite{Jaga+20;textual}{fastbeta}. The package is modular, with
+#' the core machinery divided across different functions, each with its own
+#' purpose and convenient plotting methods.
 #'
 #' [fastbeta()] is a wrapper giving access to the **FC, S, SI, and
 #' SEI methods** of estimating time-varying transmission rates from
@@ -62,10 +66,10 @@
 #'
 #' @docType package
 #' @keywords internal
-#' @aliases fastbeta-package
+#' @name fastbeta-package
 #' @importFrom Rdpack reprompt
 #' @importFrom mathjaxr preview_rd
-"_PACKAGE"
+NULL
 
 ## For `R CMD check`
 if (getRversion() >= "2.15.1") {

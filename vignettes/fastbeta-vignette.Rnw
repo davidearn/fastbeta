@@ -48,7 +48,7 @@
 % Match inline code highlighting to custom knitr theme
 % specified in `knit_theme.css`
 \definecolor{background}{HTML}{f4f4f4} % background
-\definecolor{num}{HTML}{aa4499} % numeric, logical
+\definecolor{num}{HTML}{aa4499} % numeric, logical, NA
 \definecolor{str}{HTML}{999933} % character
 \definecolor{com}{HTML}{999999} % comment
 \definecolor{opt}{HTML}{555555} % !?
@@ -72,7 +72,6 @@
   moredelim=[is][\color{kwd}]{`9}{`9}
 }
 \usepackage{realboxes} % \Colorbox
-\newcommand{\code}[1]{\Colorbox{background}{\lstinline|#1|}}
 
 % Float captions
 \usepackage{caption}
@@ -168,8 +167,9 @@
 \newcommand{\etc}{\textit{etc}.}
 \newcommand{\etal}{\textit{et al}.}
 % code
-\let\pkg\textbf
+\newcommand{\code}[1]{\Colorbox{background}{\lstinline|#1|}}
 \newcommand{\fun}[1]{\code{`9#1`9()}}
+\let\pkg\textbf
 
 
 
@@ -186,11 +186,12 @@
 library(knitr)
 ## Make some substitutions in the .tex output in order to:
 ## * Prevent lineno from messing up breaking of chunks over pages.
+## * Prevent automatic indentation after chunks.
 ## * Dispense with compile errors due to knitr-xcolor interaction.
 ##   See https://tex.stackexchange.com/questions/148188/.
 knit_hooks$set(document = function(x) {
   x <- sub("\\begin{knitrout}", "\\nolinenumbers\\begin{knitrout}", x, fixed = TRUE)
-  x <- sub("\\end{knitrout}", "\\end{knitrout}\\linenumbers", x, fixed = TRUE)
+  x <- sub("\\end{knitrout}", "\\end{knitrout}\\linenumbers\\noindent", x, fixed = TRUE)
   sub("\\usepackage[]{color}", "\\usepackage{xcolor}", x, fixed = TRUE)
 })
 ## Set number of digits printed in chunk output with chunk option "digits"
@@ -201,26 +202,26 @@ knit_hooks$set(digits = function(before, options, envir) {
 })
 ## Set character width of chunk with chunk option "width"
 ## (can be used to prevent intrusions into right margin)
-knit_hooks$set(width = function(before, options, envir) {
+knit_hooks$set(char.width = function(before, options, envir) {
   if (before) {
-    options(width = options$width)
+    options(width = options$char.width)
   }
 })
 ## Use custom palette for code highlighting
 knit_theme$set(knit_theme$get("knit_theme.css"))
 ## Set chunk defaults
 opts_chunk$set(
-  cache   = TRUE,  # if `FALSE`, chunk is evaluated from scratch with compile
-  echo    = TRUE,  # if `FALSE`, chunk is not displayed
-  eval    = TRUE,  # if `FALSE`, chunk is not evaluated
-  include = TRUE,  # if `FALSE`, chunk output is not displayed and `error = FALSE`
-  error   = TRUE,  # if `FALSE`, evaluation stops on errors
-  warning = TRUE,  # if `FALSE`, warnings printed in console, not document
+  cache = TRUE, # if `FALSE`, chunk is evaluated from scratch with compile
+  echo = TRUE, # if `FALSE`, chunk is not displayed
+  eval = TRUE, # if `FALSE`, chunk is not evaluated
+  include = TRUE, # if `FALSE`, chunk output is not displayed and `error = FALSE`
+  error = TRUE, # if `FALSE`, evaluation stops on errors
+  warning = TRUE, # if `FALSE`, warnings printed in console, not document
   message = FALSE, # if `FALSE`, messages printed in console, not document
-  digits  = 7,     # number of digits printed in chunk output
-  width   = 74,    # character width of chunks
-  fig.pos = "H",   # figure position in document
-  dev     = "pdf", # plotting device
+  digits = 7, # number of digits printed in chunk output
+  char.width = 74, # character width of chunks
+  fig.pos = "H", # figure position in document
+  dev = "pdf", # plotting device
   dev.args = list(pointsize = 10), # base point size in plots
   strip.white = TRUE # reduce white space around chunks (?)
 )
@@ -271,15 +272,13 @@ if (!require(remotes)) {
 remotes::install_github("davidearn/fastbeta", build_vignettes = TRUE)
 library(fastbeta)
 @
-
-\noindent
+%
 A list of exported functions can be retrieved with \fun{ls}.
 
 <<exported-functions>>=
 ls("package:fastbeta")
 @
-
-\noindent
+%
 Only S3 methods are not exported. However, these need not be called
 directly, as they are found by the corresponding generic functions.
 S3 methods implemented in \pkg{fastbeta} are listed here.
@@ -638,7 +637,7 @@ arguments are listed here.
 <<make-data-formals-names>>=
 names(formals(make_data))
 @
-
+%
 \begin{table}
 \renewcommand{\arraystretch}{1.5}
 \caption{Arguments of \protect\fun{make_data}.}
@@ -671,7 +670,7 @@ Additional elements must be included as necessary to ensure that arguments
 \end{tabular}
 \label{tab:make-data-args}
 \end{table}
-
+%
 \begin{table}
 \renewcommand{\arraystretch}{1.5}
 \caption*{{\bfseries Table \ref*{tab:make-data-args} (continued).}}
@@ -688,8 +687,7 @@ Additional elements must be included as necessary to ensure that arguments
 \bottomrule
 \end{tabular}
 \end{table}
-
-\noindent
+%
 Notably, users can specify
 %
 \begin{enumerate}[label=(\Roman*)]
@@ -769,8 +767,7 @@ they are implemented by the default values of arguments \code{mu},
 <<make-data-formals>>=
 formals(make_data)
 @
-
-\noindent
+%
 The default value of \code{beta} is a closure \fun{f} generated
 by helper function \fun{make_beta}. \fun{f} takes arguments \code{s}
 and \code{par_list} and evaluates $\beta(s \dt) \dt$ for all
@@ -796,8 +793,7 @@ except for $\avg{\beta} \dt$, $S_0$, $E_0$, and $I_0$.
 <<make-par-list-formals-names>>=
 names(formals(make_par_list))
 @
-
-\noindent
+%
 \fun{make_par_list} ``fills in the blanks'' by defining the missing
 parameters as functions of the specified parameters. It defines
 $\avg{\beta} \dt$ as a function of $\R_0$ by enforcing identity
@@ -852,8 +848,7 @@ pl <- make_par_list(
 )
 unlist(pl) # display list as named vector
 @
-
-\noindent
+%
 A data frame containing simulated time series data is obtained with
 the following call to \fun{make_data}, in which default values are
 accepted for arguments \code{mu}, \code{nu}, \code{beta}, and \code{p}
@@ -878,11 +873,10 @@ df <- make_data(
 )
 head(df)
 @
-
-\noindent
+%
 The data frame output is summarized in \cref{tab:make-data-out}.
-Plotting the time series of reported incidence specified by
-columns \code{t} and \code{C} produces the figure below.
+The simulated reported incidence time series is specified by
+columns \code{t} and \code{C} and plotted below.
 
 <<make-data-example-3, fig.height=2, echo=-1>>=
 par(mar = c(4, 4, 1, 1))
@@ -908,7 +902,7 @@ plot(C ~ t, data = df, type = "l",
 \code{B} & $B(t_i)$ & Births. \code{B[i]} is the number of births between times \code{t[i-`11`1]} and \code{t[i]}. \\
 \code{N} & $N(t_i)$ & Population size. \\
 \code{S} & $S(t_i)$ & Number of susceptible individuals. \\
-\code{E} & $E(t_i)$ & Number of exposed (infected but not infectious) individuals. Included only if argument \code{model} is \code{`2"seir"`2}. \\
+\code{E} & $E(t_i)$ & Number of exposed (infected but not infectious) individuals. Included only if argument \code{model = `2"seir"`2}. \\
 \code{I} & $I(t_i)$ & Number of infectious individuals. \\
 \code{Z} & $Z(t_i)$ & Incidence. \code{Z[i]} is the number of infections between times \code{t[i-`11`1]} and \code{t[i]}. \\
 \code{Zrep} & $Z_\text{rep}(t_i)$ & Incidence conditional on reporting. \code{Zrep[i]} is the number of infections between times \code{t[i-`11`1]} and \code{t[i]} that are eventually reported. \\

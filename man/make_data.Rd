@@ -111,8 +111,8 @@ in the event that \code{sum(delay_dist) != 1}.}
 }
 \value{
 A data frame with \code{n} rows corresponding to equally spaced time points
-\mjseqn{t_i = i \Delta t} (\mjseqn{i = 0,\ldots,n-1}),
-and numeric columns:
+\mjseqn{t_i = i \Delta t} (\mjseqn{i = 0,\ldots,n-1}) and 14 numeric
+variables:
 
 \describe{
 \item{\code{t}}{\mjseqn{\lbrace\,t_i / \Delta t\,\rbrace}

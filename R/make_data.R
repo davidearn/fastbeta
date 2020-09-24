@@ -226,8 +226,8 @@
 #'
 #' @return
 #' A data frame with `n` rows corresponding to equally spaced time points
-#' \mjseqn{t_i = i \Delta t} (\mjseqn{i = 0,\ldots,n-1}),
-#' and numeric columns:
+#' \mjseqn{t_i = i \Delta t} (\mjseqn{i = 0,\ldots,n-1}) and 14 numeric
+#' variables:
 #'
 #' \describe{
 #'   \item{`t`}{\mjseqn{\lbrace\,t_i / \Delta t\,\rbrace}
