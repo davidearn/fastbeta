@@ -1,143 +1,3 @@
-#' Measure sensitivity to data-generating parameters
-#'
-#' `test_s2dgpars()` measures the sensitivity of transmission rate
-#' estimation error to parameters used to simulate reported incidence
-#' data. It varies the data-generating parameters *one at a time*, and,
-#' using each parametrization, it
-#' (i) performs simulations,
-#' (ii) estimates the data-generating, seasonally forced transmission
-#' rate from the simulated data, without input error, and
-#' (iii) records the estimation error.
-#' Simulations are saved as `.RData` in the directory
-#' `"./RData/s2dgpars/"`.
-#'
-#' @details
-#' The space of data-generating parameters is sampled by assigning a
-#' parameter in `pars_to_vary` its reference value in `par_list_ref`
-#' multiplied by a scale factor in `scale_factors`, and assigning all
-#' other parameters their reference value in `par_list_ref`. The total
-#' number of parametrizations considered is thus given by
-#' `length(pars_to_vary) * length(scale_factors)`. For each
-#' parametrization
-#' \ifelse{latex}{\out{$\mathbf{\theta}$}}{\ifelse{html}{\out{<b><i>&theta;</i></b>}}{theta}}:
-#'
-#' 1. [make_data()] is called to simulate `nsim` reported incidence
-#'    time series, with arguments:
-#'
-#'    * `par_list = par_list_dg`, indicating the data-generating
-#'      parameter values
-#'      \ifelse{latex}{\out{$\mathbf{\theta}$}}{\ifelse{html}{\out{<b><i>&theta;</i></b>}}{theta}}.
-#'    * `n = 1042`, indicating the time series length.
-#'    * `with_dem_stoch = with_dem_stoch`, indicating whether the
-#'      simulation should account for demographic stochasticity.
-#'    * `seed = k`, where `k` is the simulation count out of `nsim`,
-#'      making the result of each simulation reproducible.
-#'
-#' 2. [estimate_beta_S()] and [estimate_beta_SI()] are called to
-#'    estimate the seasonally forced transmission rate from each
-#'    simulation, with arguments:
-#'
-#'    * `df = df`, where `df` is the output of [make_data()],
-#'      supplying the simulated reported incidence time series.
-#'    * `par_list = par_list_dg`, indicating the input parameter values
-#'      \ifelse{latex}{\out{$\mathbf{\xi}$}}{\ifelse{html}{\out{<b><i>&xi;</i></b>}}{xi}}.
-#'      There is no error in the input. In other words, the input
-#'      parameter values are identical to the data-generating
-#'      parameter values.
-#'
-#'    Mock (constant) birth and natural mortality time series are
-#'    created internally, with `B[i] = with(par_list, hatN0 * nu * 1)`
-#'    and `mu[i] = with(par_list, mu)` for all `i`.
-#' 3. [stats::loess()] is called to fit a loess curve to each
-#'    raw estimate of the seasonally forced transmission rate,
-#'    with arguments
-#'
-#'    * `formula = beta ~ t` and `data = df_est`, where `df_est` is
-#'      the output of [estimate_beta_S()] or [estimate_beta_SI()],
-#'      indicating the time series to which the loess curve should
-#'      be fit.
-#'    * `span = loess_par[i] / nrow(df_est)`, indicating (roughly)
-#'      the proportion of points to be weighted in local regression.
-#'    * `degree = 2`, indicating that a quadratic polynomial should
-#'      be fit locally.
-#'    * `na.action = "na.exclude"`, indicating that missing values
-#'      should be omitted in local regression but preserved in the
-#'      output of [stats::predict()].
-#'
-#' 4. [compute_rrmse()] is called to compute the error in each
-#'    loess estimate, with arguments
-#'
-#'    * `x = df$beta`, indicating the true value of the transmission
-#'      rate at each observation time.
-#'    * `y = predict(loess_fit)`, where `loess_fit` is the output
-#'      of [stats::loess()], indicating the estimated value of the
-#'      transmission rate at each observation time.
-#' 
-#' There is one caveat in the above description: as `nu`, `mu`, and
-#' `tgen` vary, values for `Rnaught`, `N0`, `S0` and `I0` are *not*
-#' not taken from `par_list_ref`. As
-#' \ifelse{latex}{\out{$\nu_\text{c}$}}{\ifelse{html}{\out{<i>&nu;<sub>c</sub></i>}}{nu_c}},
-#' \ifelse{latex}{\out{$\mu_\text{c}$}}{\ifelse{html}{\out{<i>&mu;</i><sub>c</sub>}}{mu_c}},
-#' and
-#' \ifelse{latex}{\out{$t_\text{gen}$}}{\ifelse{html}{\out{<i>t</i><sub>gen</sub>}}{t_gen}}
-#' vary,
-#' \ifelse{latex}{\out{$\mathcal{R}_0$}}{\ifelse{html}{\out{<i>&Rscr;</i><sub>0</sub>}}{calR_0}}
-#' varies concurrently in order to enforce the identity
-#'
-#' \ifelse{latex}{\out{$\mathcal{R}_0 = \frac{\nu_\text{c} \widehat{N}_0}{\mu_\text{c}} \cdot \frac{\langle\beta\rangle}{\gamma + \mu}\,.$}}{\ifelse{html}{\out{<i>&Rscr;</i><sub>0</sub> = (<i>&nu;</i><sub>c</sub> <i>&Ntilde;</i> / <i>&mu;</i><sub>c</sub>)(&langle;<i>&beta;</i>&rangle; / (<i>&gamma;</i> + <i>&mu;</i><sub>c</sub>)).}}{calR_0 = ((nu_c*hatN0)/mu_c)*(<beta>/(gamma + mu)).}}
-#'
-#' Similarly,
-#' \ifelse{latex}{\out{$N_0$}}{\ifelse{html}{\out{<i>N</i><sub>0</sub>}}{N_0}},
-#' \ifelse{latex}{\out{$S_0$}}{\ifelse{html}{\out{<i>S</i><sub>0</sub>}}{S_0}},
-#' and
-#' \ifelse{latex}{\out{$I_0$}}{\ifelse{html}{\out{<i>I</i><sub>0</sub>}}{I_0}}
-#' vary concurrently in order to ensure that they specify a point very
-#' near the attractor of the system of SIR equations. (The system and its
-#' attractor change as functions of
-#' \ifelse{latex}{\out{$\nu_\text{c}$}}{\ifelse{html}{\out{<i>&nu;<sub>c</sub></i>}}{nu_c}},
-#' \ifelse{latex}{\out{$\mu_\text{c}$}}{\ifelse{html}{\out{<i>&mu;</i><sub>c</sub>}}{mu_c}},
-#' and
-#' \ifelse{latex}{\out{$t_\text{gen}$}}{\ifelse{html}{\out{<i>t</i><sub>gen</sub>}}{t_gen}}.)
-#'
-#' @param pars_to_vary Character vector. Contains the names of all
-#'   data-generating parameters to be varied, chosen from `"S0"`,
-#'   `"I0"`, `"nu"`, `"mu"`, `"tgen"`, and `"prep"`.
-#' @param par_list_ref A list returned by
-#'   `make_par_list(..., beta_mean = NA, N0 = NA, S0 = NA, I0 = NA)`.
-#'   Contains reference values for all data-generating parameters.
-#'   The values listed for `Rnaught`, `N0`, `S0`, and `I0` are not
-#'   used when `nu`, `mu`, or `tgen` acts as the independent variable
-#'   in the analysis (see Details).
-#' @param scale_factors Numeric vector. The values of `pars_to_vary[j]`
-#'   considered in the analysis are
-#'   `par_list_ref[[pars_to_vary[j]]] * scale_factors`.
-#' @param with_dem_stoch Logical scalar, passed to [make_data()]. If
-#'   `TRUE`, then simulations account for demographic stochasticity.
-#' @param nsim Integer scalar. The number of simulations to perform
-#'   using each parametrization.
-#' @param loess_par Integer vector of length 2. Determines the degree
-#'   of smoothing when loess curves are fit to raw estimates of the
-#'   seasonally forced transmission rate (see Details). Estimates
-#'   generated by [estimate_beta_S()] use `loess_par[1]`, while those
-#'   generated by [estimate_beta_SI()] use `loess_par[2]`.
-#' @param only_make_data Logical scalar. If `TRUE`, then simulations
-#'   are performed and saved, as usual, but nothing more is done and
-#'   nothing is returned.
-#'
-#' @return
-#' Unless `only_make_data` is `TRUE`, a numeric array with dimensions
-#' `c(length(scale_factors), length(pars_to_vary), nsim, 2)`. Stores
-#' the relative root mean square error (RRMSE) in each estimate of the
-#' data-generating, seasonally forced transmission rate. The
-#' `[i, j, k, m]`th entry corresponds to simulation `k` of `nsim` using
-#' `par_vals_all[i, j]`, and estimate `m` of 2 from that simulation
-#' (S method for `m = 1`, SI method for `m = 2`).
-#'
-#' A list of the arguments of `test_s2dgpars()` is included as an
-#' attribute.
-#'
-#' @md
-#' @export
 test_s2dgpars <- function(pars_to_vary   = c("tgen"),
                           par_list_ref   = make_par_list(),
                           scale_factors  = c(1),
@@ -212,7 +72,7 @@ for (par in colnames(par_vals_all)) { # loop over parameters
       load("par_list_dg.RData")
     } else {
       # Construct a list of arguments to pass to `make_par_list()`
-      # by modifying `par_list_ref`  
+      # by modifying `par_list_ref`
       mpl_args <- par_list_ref
 
       # Update `par`
@@ -231,7 +91,7 @@ for (par in colnames(par_vals_all)) { # loop over parameters
         mpl_args[["Rnaught"]] <- NA
         mpl_args[c("N0", "S0", "I0")] <- NA
       }
-      
+
       # Finally, supply the arguments in a call to `make_par_list()`
       par_list_dg <- do.call(make_par_list, mpl_args)
 
