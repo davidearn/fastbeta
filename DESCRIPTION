@@ -1,18 +1,16 @@
 Package: fastbeta
-Version: 0.0.0.9000
-Title: Fast Estimation of Time-Varying Transmission Rates
-Authors@R: 
-    person("Mikael", "Jagan", email = "mjagan@uwaterloo.ca",
-           role = c("aut", "cre"))
+Version: 0.1.0
+Date: 2023-06-07
+Title: Fast Estimation of Time-Varying Infectious Disease Transmission Rates
+Description: Methods for estimating time-varying infectious disease
+    transmission rates from disease incidence time series, based on
+    discretizations of an SIR model.
+License: GPL (>= 2)
 URL: https://github.com/davidearn/fastbeta
-Description: This package implements methods for estimation of 
-    time-varying transmission rates from disease incidence time
-    series. These methods are described in the manuscript
-    "Fast estimation of time-varying transmission rates for 
-    infectious diseases".
-Imports:
-    stats,
-    adaptivetau (>= 2.2-3),
-    deSolve (>= 1.27.1)
-License: MIT + file LICENSE
-Encoding: UTF-8
+BugReports: https://github.com/davidearn/fastbeta/issues
+Authors@R:
+    c(person("Mikael", "Jagan",
+             email = "jaganmn@mcmaster.ca",
+             role = c("aut", "cre"),
+             comment = c(ORCID = "0000-0002-3542-2938")))
+Depends: R (>= 4.2.0)
