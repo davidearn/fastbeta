@@ -123,7 +123,7 @@ static void ptpi1(double *Z, double *B, double *mu,
 SEXP R_ptpi(SEXP Z, SEXP B, SEXP mu,
 	    SEXP start, SEXP a, SEXP b, SEXP tol, SEXP itermax,
 	    SEXP complete) {
-    int a_ = INTEGER(a)[0] - 1, b_ = INTEGER(b)[0] - 1,
+    int a_ = INTEGER(a)[0], b_ = INTEGER(b)[0],
 	itermax_ = INTEGER(itermax)[0];
     double start_ = REAL(start)[0], tol_=  REAL(tol)[0];
     SEXP res = PROTECT(allocVector(VECSXP, 4)),
