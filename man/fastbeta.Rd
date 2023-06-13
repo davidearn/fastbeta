@@ -2,8 +2,12 @@
 \alias{fastbeta}
 \title{Estimate a time-varying infectious disease transmission rate}
 \description{
-  Estimates the transmission rate \eqn{\beta(t)} by discretizing the
-  SIR model 
+  Generates a discrete time estimate of the transmission rate
+  \eqn{\beta(t)} from an equally spaced incidence time series
+  and other data.
+}
+\details{
+  \code{fastbeta} works by discretizing the SIR model
   \deqn{
     %% https://stat.ethz.ch/pipermail/r-devel/2023-June/082658.html
     \begin{aligned}
@@ -28,7 +32,7 @@
   }{
     S[k] = ((1 - 0.5 * mu[k-1]) * S[k-1] + B[k] - Z[k]) / (1 + 0.5 * mu[k])
     I[k] = ((1 - 0.5 * (gamma + mu[k-1])) * I[k-1] + Z[k]) / (1 + 0.5 * (gamma + mu[k]))
-    beta[k] = (Z[k] + Z[k+1]) / (2 * S[k] * I[k])    
+    beta[k] = (Z[k] + Z[k+1]) / (2 * S[k] * I[k])
   }
   where
   \deqn{
@@ -49,16 +53,27 @@
 fastbeta(Z, B, mu, gamma, S0, I0)
 }
 \arguments{
-  \item{Z}{a numeric vector specifying an incidence time series.}
-  \item{B}{a numeric vector specifying a births time series.}
+  \item{Z}{a numeric vector specifying an incidence time series
+    \eqn{(k, Z_{k})}{(k, Z[k])}.}
+  \item{B}{a numeric vector specifying a births time series
+    \eqn{(k, B_{k})}{(k, B[k])}.}
   \item{mu}{a numeric vector specifying a per capita natural mortality
-    rate time series.}
-  \item{gamma}{removal rate.}
-  \item{S0}{initial number of susceptible individuals.}
-  \item{I0}{initial number of infected individuals.}
+    rate time series \eqn{(k, \mu_{k})}{(k, mu[k])}.}
+  \item{gamma}{removal rate \eqn{\gamma}{gamma}.}
+  \item{S0}{initial number of susceptible individuals \eqn{S_{0}}{S[0]}.}
+  \item{I0}{initial number of infected individuals \eqn{I_{0}}{I[0]}.}
 }
 %\details{}
-%\value{}
-%\seealso{}
-%\references{}
+\value{
+  A data frame with variables \code{S}, \code{I}, and \code{beta}
+  corresponding elementwise to \code{Z}, \code{B}, and \code{mu}.
+}
+\seealso{\code{\link{ptpi}}.}
+\references{
+  Jagan, M., deJonge, M. S., Krylova, O., & Earn, D. J. D. (2020).
+  Fast estimation of time-varying infectious disease transmission rates.
+  \emph{PLoS Computational Biology},
+  \emph{16}(9), Article e1008124, 1-39.
+  \doi{10.1371/journal.pcbi.1008124}
+}
 %\examples{}

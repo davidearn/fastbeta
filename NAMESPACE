@@ -1,1 +1,2 @@
+useDynLib(fastbeta, .registration = TRUE)
 export(fastbeta, ptpi)

@@ -15,4 +15,6 @@ static const R_CallMethodDef CallMethods[] =
 void attribute_visible R_init_fastbeta(DllInfo *info)
 {
     R_registerRoutines(info, NULL, CallMethods, NULL, NULL);
+    R_useDynamicSymbols(info, FALSE);
+    R_forceSymbols(info, TRUE);
 }

@@ -26,7 +26,7 @@ function(Z, B, mu, gamma, S0, I0) {
 
 ptpi <-
 function(Z, B, mu,
-         start, a = 1L, b = length(cases),
+         start, a = 1L, b = length(Z),
          tol = 1e-06, iter.max = 20L, complete = FALSE) {
     stopifnot(exprs = {
         is.numeric(Z)

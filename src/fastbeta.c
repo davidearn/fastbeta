@@ -135,7 +135,7 @@ SEXP R_ptpi(SEXP Z, SEXP B, SEXP mu,
     SET_STRING_ELT(nms, 0, mkChar("value"));
     SET_STRING_ELT(nms, 1, mkChar("delta"));
     SET_STRING_ELT(nms, 2, mkChar("iter"));
-    SET_STRING_ELT(nms, 3, mkChar("S"));
+    SET_STRING_ELT(nms, 3, mkChar("X"));
     setAttrib(res, R_NamesSymbol, nms);
     
     SET_VECTOR_ELT(res, 0, value);
@@ -143,11 +143,11 @@ SEXP R_ptpi(SEXP Z, SEXP B, SEXP mu,
     SET_VECTOR_ELT(res, 2, iter);
     
     if (LOGICAL(complete)[0]) {
-	SEXP S = PROTECT(allocMatrix(REALSXP, b_ - a_ + 1, itermax_ + 1));
-	SET_VECTOR_ELT(res, 3, S);
+	SEXP X = PROTECT(allocMatrix(REALSXP, b_ - a_ + 1, itermax_ + 1));
+	SET_VECTOR_ELT(res, 3, X);
 	ptpi1(REAL(Z), REAL(B), REAL(mu),
 	      start_, a_, b_, tol_, itermax_,
-	      REAL(value), REAL(delta), INTEGER(iter), REAL(S) - a_);
+	      REAL(value), REAL(delta), INTEGER(iter), REAL(X) - a_);
 	UNPROTECT(1);
     } else {
 	ptpi0(REAL(Z), REAL(B), REAL(mu),
