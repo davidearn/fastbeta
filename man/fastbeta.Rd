@@ -63,7 +63,6 @@ fastbeta(Z, B, mu, gamma, S0, I0)
   \item{S0}{initial number of susceptible individuals \eqn{S_{0}}{S[0]}.}
   \item{I0}{initial number of infected individuals \eqn{I_{0}}{I[0]}.}
 }
-%\details{}
 \value{
   A data frame with variables \code{S}, \code{I}, and \code{beta}
   corresponding elementwise to \code{Z}, \code{B}, and \code{mu}.

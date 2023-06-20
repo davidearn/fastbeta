@@ -5,16 +5,46 @@
 SEXP R_fastbeta(SEXP, SEXP, SEXP, SEXP, SEXP, SEXP);
 SEXP R_ptpi(SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP);
 
+SEXP R_adsir_initialize(SEXP, SEXP, SEXP, SEXP);
+SEXP R_adsir_finalize(void);
+SEXP R_adsir_rate(SEXP, SEXP);
+SEXP R_adsir_jaco(SEXP, SEXP);
+
+SEXP R_desir_initialize(SEXP, SEXP, SEXP, SEXP);
+SEXP R_desir_finalize(void);
+void R_desir_rate(int *, double *, double *, double *, double *, int *);
+void R_desir_jaco(int *, double *, double *, int *, int *, double *, int *,
+		  double *, int *);
+
 static const R_CallMethodDef CallMethods[] =
 {
-    { "R_fastbeta", (DL_FUNC) &R_fastbeta, 6 },
-    { "R_ptpi", (DL_FUNC) &R_ptpi, 9 },
+    { "R_fastbeta",         (DL_FUNC) &R_fastbeta,         6 },
+    { "R_ptpi",             (DL_FUNC) &R_ptpi,             9 },
+
+    { "R_adsir_initialize", (DL_FUNC) &R_adsir_initialize, 4 },
+    { "R_adsir_finalize",   (DL_FUNC) &R_adsir_finalize,   0 },
+    { "R_adsir_rate",       (DL_FUNC) &R_adsir_rate,       2 },
+    { "R_adsir_jaco",       (DL_FUNC) &R_adsir_jaco,       2 },
+
+    { "R_desir_initialize", (DL_FUNC) &R_desir_initialize, 4 },
+    { "R_desir_finalize",   (DL_FUNC) &R_desir_finalize,   0 },
+    
     { NULL, NULL, 0 }
 };
 
+static const R_CMethodDef CMethods[] =
+{
+    { "R_desir_rate",       (DL_FUNC) &R_desir_rate,       6,
+      { INTSXP, REALSXP, REALSXP, REALSXP, REALSXP, INTSXP } },
+    { "R_desir_jaco",       (DL_FUNC) &R_desir_jaco,       9,
+      { INTSXP, REALSXP, REALSXP, INTSXP, INTSXP, REALSXP, INTSXP, REALSXP, INTSXP } },
+    
+    { NULL, NULL, 0, NULL }
+}
+
 void attribute_visible R_init_fastbeta(DllInfo *info)
 {
-    R_registerRoutines(info, NULL, CallMethods, NULL, NULL);
+    R_registerRoutines(info, CMethods, CallMethods, NULL, NULL);
     R_useDynamicSymbols(info, FALSE);
     R_forceSymbols(info, TRUE);
 }

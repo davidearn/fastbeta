@@ -1,0 +1,30 @@
+\name{sir}
+\alias{sir}
+\title{TODO}
+\description{
+  TODO
+}
+\details{
+  TODO
+}
+\usage{
+sir(n, par, beta, nu, mu, stochastic = TRUE, prob = 1, delay = 1,
+    useCompiled = TRUE)
+}
+\arguments{
+  \item{n}{TODO}
+  \item{par}{TODO}
+  \item{beta}{TODO}
+  \item{nu}{TODO}
+  \item{mu}{TODO}
+  \item{stochastic}{TODO}
+  \item{prob}{TODO}
+  \item{delay}{TODO}
+  \item{useCompiled}{TODO}
+}
+\value{
+  TODO
+}
+%\seealso{}
+%\references{}
+%\examples{}
