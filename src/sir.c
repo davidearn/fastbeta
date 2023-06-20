@@ -4,7 +4,7 @@
 
 static SEXP F, DF, betaCall, betaArg, nuCall, nuArg, muCall, muArg, s;
 static double *pF, *pDF, *pbetaArg, betaVal, *pnuArg, nuVal, *pmuArg, muVal,
-	gammaVal, lastTimeDot, lastTimeJac, tmp, *px;
+	gammaVal, lastTimeDot, lastTimeJac, tmp, *pt, *px;
 
 #define INIT_CALL(_V_)                        \
 do {                                          \
@@ -25,6 +25,8 @@ do {                                                                \
 	if (LENGTH(s) != 1)                                             \
 		error("'%s' did not evaluate to length 1", #_V_);           \
 	_V_ ## Val = *REAL(s);                                          \
+	if (!R_FINITE(_V_ ## Val) || _V_ ## Val < 0.0)                  \
+		error("'%s' returned a nonfinite or negative value");       \
 } while (0)
 
 #define MAYBE_EVAL_CALL(_T1_, _T0_)              \
@@ -74,8 +76,9 @@ SEXP R_adsir_finalize(void)
 
 SEXP R_adsir_dot(SEXP t, SEXP x)
 {
-	MAYBE_EVAL_CALL(*REAL(t), lastTimeDot);
+	pt = REAL(t);
 	px = REAL(x);
+	MAYBE_EVAL_CALL(*pt, lastTimeDot);
 	pF[0] = nuVal;
 	pF[1] = betaVal * px[0] * px[1];
 	pF[2] = (px[1] > 1.0) ? gammaVal * px[1] : 0.0;
@@ -87,8 +90,9 @@ SEXP R_adsir_dot(SEXP t, SEXP x)
 
 SEXP R_adsir_jac(SEXP t, SEXP x)
 {
-	MAYBE_EVAL_CALL(*REAL(t), lastTimeJac);
+	pt = REAL(t);
 	px = REAL(x);
+	MAYBE_EVAL_CALL(*pt, lastTimeJac);
 	pDF [0] = nuVal;
 	pDF [4] = betaVal * px[1];
 	pDF [5] = betaVal * px[0];

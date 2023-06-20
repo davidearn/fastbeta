@@ -1,7 +1,29 @@
 sir <- function (n, par, beta, nu, mu, stochastic = TRUE, prob = 1, delay = 1,
                  useCompiled = TRUE)
 {
-	## TODO: sanity checks on arguments
+	stopifnot(exprs = {
+		is.integer(n)
+		length(n) == 1L
+		n < .Machine$integer.max
+		is.double(par)
+		length(par) == 4L
+		!anyNA(match(c("S0", "I0", "N0", "gamma"), names(par)))
+		is.finite(par)
+		all(par >= 0)
+		par[["N0"]] >= par[["S0"]] + par[["I0"]]
+		is.function(beta)
+		!is.null(formals(beta))
+		is.function(nu)
+		!is.null(formals(nu))
+		is.function(mu)
+		!is.null(formals(mu))
+		is.double(prob)
+		any(length(prob) == c(1L, n))
+		min(prob) >= 0
+		max(prob) <= 1
+		is.double(delay)
+		length(delay) >= 1L
+	})
 
 	if (stochastic) {
 
@@ -18,20 +40,20 @@ sir <- function (n, par, beta, nu, mu, stochastic = TRUE, prob = 1, delay = 1,
 		if (useCompiled) {
 			.Call(R_adsir_initialize, beta, nu, mu, par[["gamma"]])
 			on.exit(.Call(R_adsir_finalize), add = TRUE)
-			FF <- function (x, theta, t) .Call(R_adsir_dot, t, x)
-			DF <- function (x, theta, t) .Call(R_adsir_jac, t, x)
+			ff <- function (x, theta, t) .Call(R_adsir_dot, t, x)
+			Df <- function (x, theta, t) .Call(R_adsir_jac, t, x)
 			X. <- ssa.adaptivetau(
 				init.values  = init,
 				transitions  = tran,
-				rateFunc     = FF,
+				rateFunc     = ff,
 				params       = NULL,
 				tf           = n,
-				jacobianFunc = DF,
+				jacobianFunc = Df,
 				tl.params    = list(maxtau = 0.999, extraChecks = FALSE))
 		} else {
-			D <- matrix(0, 4L, 6L)
+			Dm <- matrix(0, 4L, 6L)
 			Di <- c(1L, 5L, 6L, 10L, 13L, 18L, 23L)
-			FF <- function (x, theta, t) {
+			ff <- function (x, theta, t) {
 				xS <- x[[1L]]
 				xI <- x[[2L]]
 				xR <- x[[3L]]
@@ -46,7 +68,7 @@ sir <- function (n, par, beta, nu, mu, stochastic = TRUE, prob = 1, delay = 1,
 				  if (xI > 1) mu * xI else 0,
 				  mu * xR)
 			}
-			DF <- function (x, theta, t) {
+			Df <- function (x, theta, t) {
 				xS <- x[[1L]]
 				xI <- x[[2L]]
 				xR <- x[[3L]]
@@ -54,17 +76,17 @@ sir <- function (n, par, beta, nu, mu, stochastic = TRUE, prob = 1, delay = 1,
 				nu <- theta[[2L]](t)
 				mu <- theta[[3L]](t)
 				gamma <- theta[[4L]]
-				D[Di] <<- c(nu, beta * xI, beta * xS, gamma, mu, mu, mu)
-				D
+				Dm[Di] <<- c(nu, beta * xI, beta * xS, gamma, mu, mu, mu)
+				Dm
 			}
 			X. <- ssa.adaptivetau(
 				init.values  = init,
 				transitions  = tran,
-				rateFunc     = FF,
+				rateFunc     = ff,
 				params       = list(beta, nu, mu, par[["gamma"]]),
 				tf           = n,
-				jacobianFunc = DF,
-				tl.params    = list(maxtau = 0.999, extraChecks = FALSE))
+				jacobianFunc = Df,
+				tl.params    = list(maxtau = 0.999, extraChecks = TRUE))
 		}
 
 		N <- dim(X.)[1L]
@@ -93,9 +115,9 @@ sir <- function (n, par, beta, nu, mu, stochastic = TRUE, prob = 1, delay = 1,
 				initfunc = NULL,
 				initpar = NULL)
 		} else {
-			D <- matrix(0, 4L, 4L)
+			Dm <- matrix(0, 4L, 4L)
 			Di <- c(1L, 2L, 4L, 5L, 7L, 8L, 11L)
-			GG <- function(t, x, theta) {
+			gg <- function(t, x, theta) {
 				xS <- x[[1L]]
 				xI <- exp(x[[2L]])
 				xR <- x[[3L]]
@@ -108,7 +130,7 @@ sir <- function (n, par, beta, nu, mu, stochastic = TRUE, prob = 1, delay = 1,
 				       gamma * xI - mu * xR,
 				       beta * xS * xI))
 			}
-			DG <- function(t, x, theta) {
+			Dg <- function(t, x, theta) {
 				xS <- x[[1L]]
 				xI <- exp(x[[2L]])
 				xR <- x[[3L]]
@@ -118,16 +140,16 @@ sir <- function (n, par, beta, nu, mu, stochastic = TRUE, prob = 1, delay = 1,
 				gamma <- theta[[4L]]
 				beta.xI <- beta * xI
 				beta.xS.xI <- beta.xI * xS
-				D[Di] <<- c(-beta.xI - mu, beta, beta.xI, -beta.xS.xI,
-				            gamma * xI, beta.xS.xI, -mu)
-				D
+				Dm[Di] <<- c(-beta.xI - mu, beta, beta.xI, -beta.xS.xI,
+				             gamma * xI, beta.xS.xI, -mu)
+				Dm
 			}
 			X. <- ode(
 				y = init,
 				times = 0:n,
-				func = GG,
+				func = gg,
 				parms = list(beta, nu, mu, par[["gamma"]]),
-				jacfunc = DG,
+				jacfunc = Dg,
 				jactype = "fullusr",
 				hmax = 1,
 				ynames = FALSE)
