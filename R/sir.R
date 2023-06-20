@@ -17,21 +17,21 @@ sir <- function (n, par, beta, nu, mu, stochastic = TRUE, prob = 1, delay = 1,
                      c(R = -1))               # ""
         if (useCompiled) {
             .Call(R_adsir_initialize, beta, nu, mu, par[["gamma"]])
-            rate <- function (x, theta, t) .Call(R_adsir_rate, t, x)
-            jaco <- function (x, theta, t) .Call(R_adsir_jaco, t, x)
+            on.exit(.Call(R_adsir_finalize), add = TRUE)
+            FF <- function (x, theta, t) .Call(R_adsir_dot, t, x)
+            DF <- function (x, theta, t) .Call(R_adsir_jac, t, x)
             X. <- ssa.adaptivetau(
                 init.values  = init,
                 transitions  = tran,
-                rateFunc     = rate,
+                rateFunc     = FF,
                 params       = NULL,
                 tf           = n,
-                jacobianFunc = jaco,
+                jacobianFunc = DF,
                 tl.params    = list(maxtau = 0.999, extraChecks = FALSE))
-            .Call(R_adsir_finalize)
         } else {
-            J <- matrix(0, 4L, 6L)
-            Ji <- c(1L, 5L, 6L, 10L, 13L, 18L, 23L)
-            rate <- function (x, theta, t) {
+            D <- matrix(0, 4L, 6L)
+            Di <- c(1L, 5L, 6L, 10L, 13L, 18L, 23L)
+            FF <- function (x, theta, t) {
                 xS <- x[[1L]]
                 xI <- x[[2L]]
                 xR <- x[[3L]]
@@ -46,7 +46,7 @@ sir <- function (n, par, beta, nu, mu, stochastic = TRUE, prob = 1, delay = 1,
                   if (xI > 1) mu * xI else 0,
                   mu * xR)
             }
-            jaco <- function (x, theta, t) {
+            DF <- function (x, theta, t) {
                 xS <- x[[1L]]
                 xI <- x[[2L]]
                 xR <- x[[3L]]
@@ -54,16 +54,16 @@ sir <- function (n, par, beta, nu, mu, stochastic = TRUE, prob = 1, delay = 1,
                 nu <- theta[[2L]](t)
                 mu <- theta[[3L]](t)
                 gamma <- theta[[4L]]
-                J[Ji] <<- c(nu, beta * xI, beta * xS, gamma, mu, mu, mu)
-                J
+                D[Di] <<- c(nu, beta * xI, beta * xS, gamma, mu, mu, mu)
+                D
             }
             X. <- ssa.adaptivetau(
                 init.values  = init,
                 transitions  = tran,
-                rateFunc     = rate,
+                rateFunc     = FF,
                 params       = list(beta, nu, mu, par[["gamma"]]),
                 tf           = n,
-                jacobianFunc = jaco,
+                jacobianFunc = DF,
                 tl.params    = list(maxtau = 0.999, extraChecks = FALSE))
         }
 
@@ -79,23 +79,23 @@ sir <- function (n, par, beta, nu, mu, stochastic = TRUE, prob = 1, delay = 1,
                   Q = 0)
         if (useCompiled) {
             .Call(R_desir_initialize, beta, nu, mu, par[["gamma"]])
+            on.exit(.Call(R_desir_finalize), add = TRUE)
             X. <- ode(
                 y = init,
                 times = 0:n,
-                func = "R_desir_rate",
+                func = "R_desir_dot",
                 parms = NULL,
-                jacfunc = "R_desir_jaco",
+                jacfunc = "R_desir_jac",
                 jactype = "fullusr",
                 hmax = 1,
                 ynames = FALSE,
                 dllname = "fastbeta",
                 initfunc = NULL,
                 initpar = NULL)
-            .Call(R_desir_finalize)
         } else {
-            J <- matrix(0, 4L, 4L)
-            Ji <- c(1L, 2L, 4L, 5L, 7L, 8L, 11L)
-            rate <- function(t, x, theta) {
+            D <- matrix(0, 4L, 4L)
+            Di <- c(1L, 2L, 4L, 5L, 7L, 8L, 11L)
+            GG <- function(t, x, theta) {
                 xS <- x[[1L]]
                 xI <- exp(x[[2L]])
                 xR <- x[[3L]]
@@ -108,7 +108,7 @@ sir <- function (n, par, beta, nu, mu, stochastic = TRUE, prob = 1, delay = 1,
                        gamma * xI - mu * xR,
                        beta * xS * xI))
             }
-            jaco <- function(t, x, theta) {
+            DG <- function(t, x, theta) {
                 xS <- x[[1L]]
                 xI <- exp(x[[2L]])
                 xR <- x[[3L]]
@@ -118,16 +118,16 @@ sir <- function (n, par, beta, nu, mu, stochastic = TRUE, prob = 1, delay = 1,
                 gamma <- theta[[4L]]
                 beta.xI <- beta * xI
                 beta.xS.xI <- beta.xI * xS
-                J[Ji] <<- c(-beta.xI - mu, beta, beta.xI, -beta.xS.xI,
+                D[Di] <<- c(-beta.xI - mu, beta, beta.xI, -beta.xS.xI,
                             gamma * xI, beta.xS.xI, -mu)
-                J
+                D
             }
             X. <- ode(
                 y = init,
                 times = 0:n,
-                func = rate,
+                func = GG,
                 parms = list(beta, nu, mu, par[["gamma"]]),
-                jacfunc = jaco,
+                jacfunc = DG,
                 jactype = "fullusr",
                 hmax = 1,
                 ynames = FALSE)

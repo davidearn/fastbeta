@@ -7,14 +7,14 @@ SEXP R_ptpi(SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP);
 
 SEXP R_adsir_initialize(SEXP, SEXP, SEXP, SEXP);
 SEXP R_adsir_finalize(void);
-SEXP R_adsir_rate(SEXP, SEXP);
-SEXP R_adsir_jaco(SEXP, SEXP);
+SEXP R_adsir_dot(SEXP, SEXP);
+SEXP R_adsir_jac(SEXP, SEXP);
 
 SEXP R_desir_initialize(SEXP, SEXP, SEXP, SEXP);
 SEXP R_desir_finalize(void);
-void R_desir_rate(int *, double *, double *, double *, double *, int *);
-void R_desir_jaco(int *, double *, double *, int *, int *, double *, int *,
-		  double *, int *);
+void R_desir_dot(int *, double *, double *, double *, double *, int *);
+void R_desir_jac(int *, double *, double *, int *, int *, double *, int *,
+                 double *, int *);
 
 static const R_CallMethodDef CallMethods[] =
 {
@@ -23,24 +23,26 @@ static const R_CallMethodDef CallMethods[] =
 
     { "R_adsir_initialize", (DL_FUNC) &R_adsir_initialize, 4 },
     { "R_adsir_finalize",   (DL_FUNC) &R_adsir_finalize,   0 },
-    { "R_adsir_rate",       (DL_FUNC) &R_adsir_rate,       2 },
-    { "R_adsir_jaco",       (DL_FUNC) &R_adsir_jaco,       2 },
+    { "R_adsir_dot",        (DL_FUNC) &R_adsir_dot,        2 },
+    { "R_adsir_jac",        (DL_FUNC) &R_adsir_jac,        2 },
 
     { "R_desir_initialize", (DL_FUNC) &R_desir_initialize, 4 },
     { "R_desir_finalize",   (DL_FUNC) &R_desir_finalize,   0 },
-    
+
     { NULL, NULL, 0 }
 };
 
+static R_NativePrimitiveArgType
+    type0[] = { INTSXP, REALSXP, REALSXP, REALSXP, REALSXP, INTSXP },
+    type1[] = { INTSXP, REALSXP, REALSXP, INTSXP, INTSXP, REALSXP, INTSXP, REALSXP, INTSXP };
+
 static const R_CMethodDef CMethods[] =
 {
-    { "R_desir_rate",       (DL_FUNC) &R_desir_rate,       6,
-      { INTSXP, REALSXP, REALSXP, REALSXP, REALSXP, INTSXP } },
-    { "R_desir_jaco",       (DL_FUNC) &R_desir_jaco,       9,
-      { INTSXP, REALSXP, REALSXP, INTSXP, INTSXP, REALSXP, INTSXP, REALSXP, INTSXP } },
-    
+    { "R_desir_dot",        (DL_FUNC) &R_desir_dot,        6, type0 },
+    { "R_desir_jac",        (DL_FUNC) &R_desir_jac,        9, type1 },
+
     { NULL, NULL, 0, NULL }
-}
+};
 
 void attribute_visible R_init_fastbeta(DllInfo *info)
 {

@@ -1,40 +1,41 @@
-#include <math.h>
+#include <math.h> /* exp */
+#include <string.h> /* memset */
 #include <Rinternals.h>
 
-static SEXP F, D, betaCall, betaArg, nuCall, nuArg, muCall, muArg, s;
-static double *px, *pF, *pJ, *pbetaArg, betaVal, *pnuArg, nuVal, *pmuArg, muVal,
-    gammaVal, lastTimeRate, lastTimeJaco, tmp;
+static SEXP F, DF, betaCall, betaArg, nuCall, nuArg, muCall, muArg, s;
+static double *pF, *pDF, *pbetaArg, betaVal, *pnuArg, nuVal, *pmuArg, muVal,
+    gammaVal, lastTimeDot, lastTimeJac, tmp, *px;
 
-#define INIT_CALL(_V_)				\
-    do {					\
-	_V_ ## Call = allocVector(LANGSXP, 2);	\
-	R_PreserveObject(_V_ ## Call);		\
-	_V_ ## Arg = allocVector(REALSXP, 1);	\
-	R_PreserveObject(_V_ ## Arg);		\
-	SETCAR(_V_ ## Call, _V_);		\
-	SETCADR(_V_ ## Call, _V_ ## Arg);	\
-	p # _V_ ## Arg = REAL(_V_ ## Arg);	\
+#define INIT_CALL(_V_)                              \
+    do {                                            \
+        _V_ ## Call = allocVector(LANGSXP, 2);      \
+        R_PreserveObject(_V_ ## Call);              \
+        _V_ ## Arg = allocVector(REALSXP, 1);       \
+        R_PreserveObject(_V_ ## Arg);               \
+        SETCAR(_V_ ## Call, _V_);                   \
+        SETCADR(_V_ ## Call, _V_ ## Arg);           \
+        p ## _V_ ## Arg = REAL(_V_ ## Arg);         \
     } while (0)
 
-#define TRY_EVAL_CALL(_V_, _VALUE_)
-do {
-    s = eval(_V_ ## Call, R_GlobalEnv);
-    if (TYPEOF(s) != REALSXP)
-	error("'%s' did not evaluate to type \"double\"", #_V_);
-    if (LENGTH(s) != 1)
-	error("'%s' did not evaluate to length 1", #_V_);
-    _V_ ## Val = *REAL(s);
+#define TRY_EVAL_CALL(_V_)                                            \
+do {                                                                  \
+    s = eval(_V_ ## Call, R_GlobalEnv);                               \
+    if (TYPEOF(s) != REALSXP)                                         \
+        error("'%s' did not evaluate to type \"double\"", #_V_);      \
+    if (LENGTH(s) != 1)                                               \
+        error("'%s' did not evaluate to length 1", #_V_);             \
+    _V_ ## Val = *REAL(s);                                            \
 } while (0)
 
-#define MAYBE_EVAL_CALL(_T1_, _T0_)				\
-    do {							\
-	if (_T1_ != _T0_) {					\
-	    *pbetaArg = *pnuArg = *pmuArg = _T1_;		\
-	    TRY_EVAL_CALL(beta);				\
-	    TRY_EVAL_CALL(nu);					\
-	    TRY_EVAL_CALL(mu);					\
-	    _T0_ = _T1_;					\
-	}							\
+#define MAYBE_EVAL_CALL(_T1_, _T0_)                    \
+    do {                                               \
+        if (_T1_ != _T0_) {                            \
+            *pbetaArg = *pnuArg = *pmuArg = _T1_;      \
+            TRY_EVAL_CALL(beta);                       \
+            TRY_EVAL_CALL(nu);                         \
+            TRY_EVAL_CALL(mu);                         \
+            _T0_ = _T1_;                               \
+        }                                              \
     } while (0)
 
 SEXP R_adsir_initialize(SEXP beta, SEXP nu, SEXP mu, SEXP gamma)
@@ -43,25 +44,25 @@ SEXP R_adsir_initialize(SEXP beta, SEXP nu, SEXP mu, SEXP gamma)
     R_PreserveObject(F);
     pF = REAL(F);
     memset(pF, 0, 6 * sizeof(double));
-    
-    J = allocMatrix(REALSXP, 4, 6);
-    R_PreserveObject(J);
-    pJ = REAL(J);
-    memset(pJ, 0, 24 * sizeof(double));
+
+    DF = allocMatrix(REALSXP, 4, 6);
+    R_PreserveObject(DF);
+    pDF = REAL(DF);
+    memset(pDF, 0, 24 * sizeof(double));
 
     INIT_CALL(beta);
     INIT_CALL(nu);
     INIT_CALL(mu);
     gammaVal = *REAL(gamma);
-    
-    lastTimeRate = lastTimeJaco = -1.0;
+
+    lastTimeDot = lastTimeJac = -1.0;
     return R_NilValue;
 }
 
 SEXP R_adsir_finalize(void)
 {
     R_ReleaseObject(F);
-    R_ReleaseObject(J);
+    R_ReleaseObject(DF);
     R_ReleaseObject(betaCall);
     R_ReleaseObject(betaArg);
     R_ReleaseObject(nuCall);
@@ -71,9 +72,9 @@ SEXP R_adsir_finalize(void)
     return R_NilValue;
 }
 
-SEXP R_adsir_rate(SEXP t, SEXP x)
+SEXP R_adsir_dot(SEXP t, SEXP x)
 {
-    MAYBE_EVAL_CALL(*REAL(t), lastTimeRate);
+    MAYBE_EVAL_CALL(*REAL(t), lastTimeDot);
     px = REAL(x);
     pF[0] = nuVal;
     pF[1] = betaVal * px[0] * px[1];
@@ -84,16 +85,16 @@ SEXP R_adsir_rate(SEXP t, SEXP x)
     return F;
 }
 
-SEXP R_adsir_jaco(SEXP t, SEXP x)
+SEXP R_adsir_jac(SEXP t, SEXP x)
 {
-    MAYBE_EVAL_CALL(*REAL(t), lastTimeJaco);
+    MAYBE_EVAL_CALL(*REAL(t), lastTimeJac);
     px = REAL(x);
-    pJ[ 0] = nuVal;
-    pJ[ 4] = betaVal * px[1];
-    pJ[ 5] = betaVal * px[0];
-    pJ[ 9] = gammaVal;
-    pJ[12] = pJ[17] = pJ[22] = muVal;
-    return J;
+    pDF [0] = nuVal;
+    pDF [4] = betaVal * px[1];
+    pDF [5] = betaVal * px[0];
+    pDF [9] = gammaVal;
+    pDF[12] = pDF[17] = pDF[22] = muVal;
+    return DF;
 }
 
 SEXP R_desir_initialize(SEXP beta, SEXP nu, SEXP mu, SEXP gamma)
@@ -103,7 +104,7 @@ SEXP R_desir_initialize(SEXP beta, SEXP nu, SEXP mu, SEXP gamma)
     INIT_CALL(mu);
     gammaVal = REAL(gamma)[0];
 
-    lastTimeRate = lastTimeJaco = -1.0;
+    lastTimeDot = lastTimeJac = -1.0;
     return R_NilValue;
 }
 
@@ -119,10 +120,10 @@ SEXP R_desir_finalize(void)
 }
 
 /* vignette("compiledCode", package = "deSolve") */
-void R_desir_rate(int *neq, double *t, double *y, double *ydot,
-		  double *yout, int *ip)
+void R_desir_dot(int *neq, double *t, double *y, double *ydot,
+		 double *yout, int *ip)
 {
-    MAYBE_EVAL_CALL(*t, lastTimeRate);
+    MAYBE_EVAL_CALL(*t, lastTimeDot);
     tmp = y[1];
     y[1] = exp(tmp);
 #if 0
@@ -141,10 +142,10 @@ void R_desir_rate(int *neq, double *t, double *y, double *ydot,
 }
 
 /* vignette("compiledCode", package = "deSolve") */
-void R_desir_jaco(int *neq, double *t, double *y, int *ml,
-		  int *mu, double *pd, int *nrowpd, double *yout, int *ip)
+void R_desir_jac(int *neq, double *t, double *y, int *ml,
+		 int *mu, double *pd, int *nrowpd, double *yout, int *ip)
 {
-    MAYBE_EVAL_CALL(*t, lastTimeJaco);
+    MAYBE_EVAL_CALL(*t, lastTimeJac);
     tmp = y[1];
     y[1] = exp(tmp);
 #if 0
