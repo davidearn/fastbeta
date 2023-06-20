@@ -1,2 +1,2 @@
 # fastbeta
-fast estimation of time-varying transmission rates
+fast estimation of time-varying infectious disease transmission rates
