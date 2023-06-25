@@ -48,5 +48,9 @@ void attribute_visible R_init_fastbeta(DllInfo *info)
 {
 	R_registerRoutines(info, CMethods, CallMethods, NULL, NULL);
 	R_useDynamicSymbols(info, FALSE);
+#if 0
+	/* No, because deSolve tests is.loaded(<character string>) : */
 	R_forceSymbols(info, TRUE);
+#endif
+	return;
 }
