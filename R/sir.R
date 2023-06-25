@@ -1,16 +1,17 @@
-sir <- function (n, par, beta, nu, mu, stochastic = TRUE, prob = 1, delay = 1,
-                 useCompiled = TRUE)
+sir <-
+function (n, par, beta, nu, mu, stochastic = TRUE, prob = 1, delay = 1,
+          useCompiled = TRUE, ...)
 {
 	stopifnot(exprs = {
 		is.integer(n)
 		length(n) == 1L
+		n >= 1L
 		n < .Machine$integer.max
 		is.double(par)
 		length(par) == 4L
-		!anyNA(match(c("S0", "I0", "N0", "gamma"), names(par)))
+		!anyNA(match(c("S0", "I0", "R0", "gamma"), names(par)))
 		is.finite(par)
 		all(par >= 0)
-		par[["N0"]] >= par[["S0"]] + par[["I0"]]
 		is.function(beta)
 		!is.null(formals(beta))
 		is.function(nu)
@@ -29,7 +30,7 @@ sir <- function (n, par, beta, nu, mu, stochastic = TRUE, prob = 1, delay = 1,
 
 		init <- c(S = par[["S0"]],
 		          I = par[["I0"]],
-		          R = par[["N0"]] - par[["S0"]] - par[["I0"]],
+		          R = par[["R0"]],
 		          Q = 0)
 		tran <- list(c(S =  1),               # birth
 		             c(S = -1, I = 1, Q = 1), # infection
@@ -49,7 +50,7 @@ sir <- function (n, par, beta, nu, mu, stochastic = TRUE, prob = 1, delay = 1,
 				params       = NULL,
 				tf           = n,
 				jacobianFunc = Df,
-				tl.params    = list(maxtau = 0.999, extraChecks = FALSE))
+				tl.params    = list(maxtau = 0.999, ...))
 		} else {
 			Dm <- matrix(0, 4L, 6L)
 			Di <- c(1L, 5L, 6L, 10L, 13L, 18L, 23L)
@@ -86,7 +87,7 @@ sir <- function (n, par, beta, nu, mu, stochastic = TRUE, prob = 1, delay = 1,
 				params       = list(beta, nu, mu, par[["gamma"]]),
 				tf           = n,
 				jacobianFunc = Df,
-				tl.params    = list(maxtau = 0.999, extraChecks = TRUE))
+				tl.params    = list(maxtau = 0.999, ...))
 		}
 
 		N <- dim(X.)[1L]
@@ -97,7 +98,7 @@ sir <- function (n, par, beta, nu, mu, stochastic = TRUE, prob = 1, delay = 1,
 
 		init <- c(S = par["S0"],
 		          logI = log(par["I0"]),
-		          R = par[["N0"]] - par[["S0"]] - par[["I0"]],
+		          R = par[["R0"]],
 		          Q = 0)
 		if (useCompiled) {
 			.Call(R_desir_initialize, beta, nu, mu, par[["gamma"]])
@@ -113,7 +114,8 @@ sir <- function (n, par, beta, nu, mu, stochastic = TRUE, prob = 1, delay = 1,
 				ynames = FALSE,
 				dllname = "fastbeta",
 				initfunc = NULL,
-				initpar = NULL)
+				initpar = NULL,
+				...)
 		} else {
 			Dm <- matrix(0, 4L, 4L)
 			Di <- c(1L, 2L, 4L, 5L, 7L, 8L, 11L)
@@ -152,10 +154,14 @@ sir <- function (n, par, beta, nu, mu, stochastic = TRUE, prob = 1, delay = 1,
 				jacfunc = Dg,
 				jactype = "fullusr",
 				hmax = 1,
-				ynames = FALSE)
+				ynames = FALSE,
+				dllname = NULL,
+				initfunc = NULL,
+				initpar = NULL,
+				...)
 		}
 
-		X.[, 4L] <- exp(X.[, 4L])
+		X.[, 3L] <- exp(X.[, 3L])
 		N <- dim(X.)[1L]
 		X <-
 			if (N < n + 1L)
@@ -187,7 +193,5 @@ sir <- function (n, par, beta, nu, mu, stochastic = TRUE, prob = 1, delay = 1,
 		X[tail, 5L] <- Xt5
 		X[  1L, 5L] <- NA_real_
 	}
-	dimnames(X) <- list(time = NULL,
-	                    variable = c("S", "I", "R", "Z", if (doObs) "Zobs"))
-	X
+    ts(X, start = 0, names = c("S", "I", "R", "Z", if (doObs) "Z.obs"))
 }
