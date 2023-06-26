@@ -31,9 +31,9 @@ function (n, par, beta, nu, mu, stochastic = TRUE, prob = 1, delay = 1,
 		init <- c(S = par[["S0"]],
 		          I = par[["I0"]],
 		          R = par[["R0"]],
-		          Q = 0)
+		          c = 0)
 		tran <- list(c(S =  1),               # birth
-		             c(S = -1, I = 1, Q = 1), # infection
+		             c(S = -1, I = 1, c = 1), # infection
 		             c(I = -1, R = 1),        # removal
 		             c(S = -1),               # natural mortality
 		             c(I = -1),               # ""
@@ -99,7 +99,7 @@ function (n, par, beta, nu, mu, stochastic = TRUE, prob = 1, delay = 1,
 		init <- c(S = par["S0"],
 		          logI = log(par["I0"]),
 		          R = par[["R0"]],
-		          Q = 0)
+		          c = 0)
 		if (useCompiled) {
 			.Call(R_desir_initialize, beta, nu, mu, par[["gamma"]])
 			on.exit(.Call(R_desir_finalize), add = TRUE)
@@ -184,8 +184,7 @@ function (n, par, beta, nu, mu, stochastic = TRUE, prob = 1, delay = 1,
 			Xt5 <- rbinom(n, Xt5, prob)
 		if (!m.d)
 			Xt5 <- tabulate(rep.int(1L:n, Xt5) +
-			                sample(seq.int(to = 0L, by = -1L,
-			                               length.out = length(delay)),
+			                sample(seq.int(0L, length.out = length(delay)),
 			                       size = sum(Xt5),
 			                       replace = TRUE,
 			                       prob = delay),
@@ -193,5 +192,5 @@ function (n, par, beta, nu, mu, stochastic = TRUE, prob = 1, delay = 1,
 		X[tail, 5L] <- Xt5
 		X[  1L, 5L] <- NA_real_
 	}
-    ts(X, start = 0, names = c("S", "I", "R", "Z", if (doObs) "Z.obs"))
+	ts(X, start = 0, names = c("S", "I", "R", "Z", if (doObs) "Z.obs"))
 }
