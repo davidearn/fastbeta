@@ -1,0 +1,53 @@
+\documentclass[12pt]{article}
+
+% Margins
+\usepackage[top=1in,bottom=1.5in,left=1in,right=1in]{geometry}
+\hfuzz=1in % tolerate \hbox fullness
+\vbadness=\maxdimen % tolerate \vbox badness
+
+% Line numbering
+\usepackage{lineno}
+\renewcommand{\linenumberfont}{\normalfont\tiny\sffamily\color[gray]{0.5}}
+
+% Line spacing
+\usepackage{setspace}
+\setstretch{1.5}
+
+% Footnotes
+\usepackage[hang,flushmargin]{footmisc}
+
+% Title page setup
+\usepackage{titling}
+
+% Deferred execution
+% front matter
+\usepackage{etoolbox} % document hooks
+\AfterEndPreamble{%
+  \maketitle
+  \pagenumbering{roman}
+  \clearpage
+  \pagenumbering{arabic}
+  \linenumbers
+}
+% back matter
+\AtEndDocument{%
+  \clearpage
+  \nolinenumbers
+  \bibliographystyle{vancouver}
+  \bibliography{fastbeta}
+}
+
+% Sample text
+\usepackage{lipsum}
+
+% Math
+\usepackage{amsmath}
+\allowdisplaybreaks
+\usepackage{amssymb}
+\usepackage{mathtools}
+
+% Lists
+\usepackage{enumitem}
+
+% Hyperlinks
+\usepackage[colorlinks=true,allcolors=magenta]{hyperref}

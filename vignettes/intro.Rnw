@@ -1,0 +1,21 @@
+%% \VignetteIndexEntry{An introduction to R package fastbeta}
+%% \VignetteDepends{fastbeta}
+
+\input{preamble.tex}
+
+\title{\Large An introduction to R package \textbf{fastbeta}}
+\author{Mikael Jagan}
+\date{\today}
+
+\begin{document}
+\setlength{\parskip}{1mm}
+\setlength{\parindent}{5mm}
+
+\lipsum[1] \cite{2020JagadeJo}
+
+<<todo>>=
+library(fastbeta)
+sessionInfo()
+@
+
+\end{document}
