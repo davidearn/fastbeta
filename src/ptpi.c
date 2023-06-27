@@ -31,25 +31,25 @@ static void ptpi0(double *Z, double *B, double *mu,
 
 static void ptpi1(double *Z, double *B, double *mu,
                   double start, int a, int b, double tol, int itermax,
-                  double *value, double *delta, int *iter, double *S)
+                  double *value, double *delta, int *iter, double *X)
 {
 	int k;
 	double halfmu;
 	*iter = 0;
-	S[a] = start;
+	X[a] = start;
 	while (*iter < itermax) {
 		halfmu = 0.5 * mu[a];
 		for (k = a + 1; k <= b; ++k) {
-			S[k]  = (1.0 - halfmu) * S[k - 1] + B[k] - Z[k];
-			S[k] /= 1.0 + (halfmu = 0.5 * mu[k]);
+			X[k]  = (1.0 - halfmu) * X[k - 1] + B[k] - Z[k];
+			X[k] /= 1.0 + (halfmu = 0.5 * mu[k]);
 		}
 		++(*iter);
-		*delta = (S[b] - S[a]) / S[a];
+		*delta = (X[b] - X[a]) / X[a];
 		if (ISNAN(*delta) || fabs(*delta) < tol)
 			break;
-		S[a] = S[b];
+		X[a] = X[b];
 	}
-	start = S[a];
+	start = X[a];
 	halfmu = 0.5 * mu[a];
 	for (k = a; k > 0; --k) {
 		start  = (1.0 + halfmu) * start - B[k] + Z[k];
@@ -59,9 +59,12 @@ static void ptpi1(double *Z, double *B, double *mu,
 	return;
 }
 
-SEXP R_ptpi(SEXP Z, SEXP B, SEXP mu,
-            SEXP start, SEXP a, SEXP b, SEXP tol, SEXP itermax,
+SEXP R_ptpi(SEXP data, SEXP start, SEXP a, SEXP b, SEXP tol, SEXP itermax,
             SEXP complete) {
+	SEXP dim = PROTECT(getAttrib(data, R_DimSymbol));
+	int n = INTEGER(dim)[0] - 1;
+	UNPROTECT(1);
+
 	int a_ = INTEGER(a)[0], b_ = INTEGER(b)[0],
 		itermax_ = INTEGER(itermax)[0];
 	double start_ = REAL(start)[0], tol_=  REAL(tol)[0];
@@ -81,16 +84,15 @@ SEXP R_ptpi(SEXP Z, SEXP B, SEXP mu,
 	SET_VECTOR_ELT(res, 1, delta);
 	SET_VECTOR_ELT(res, 2, iter);
 
+	double *d0 = REAL(data), *d1 = d0 + n + 1, *d2 = d1 + n + 1;
 	if (LOGICAL(complete)[0]) {
 		SEXP X = PROTECT(allocMatrix(REALSXP, b_ - a_ + 1, itermax_ + 1));
 		SET_VECTOR_ELT(res, 3, X);
-		ptpi1(REAL(Z), REAL(B), REAL(mu),
-		      start_, a_, b_, tol_, itermax_,
+		ptpi1(d0, d1, d2, start_, a_, b_, tol_, itermax_,
 		      REAL(value), REAL(delta), INTEGER(iter), REAL(X) - a_);
 		UNPROTECT(1);
 	} else {
-		ptpi0(REAL(Z), REAL(B), REAL(mu),
-		      start_, a_, b_, tol_, itermax_,
+		ptpi0(d0, d1, d2, start_, a_, b_, tol_, itermax_,
 		      REAL(value), REAL(delta), INTEGER(iter));
 	}
 

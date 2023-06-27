@@ -5,16 +5,18 @@
 TODO
 }
 \usage{
-ptpi(Z, B, mu, start, a = 1L, b = length(Z),
+ptpi(data = ts(cbind(Z, B, mu), start = 0),
+     Z, B, mu, start, a = 0L, b = nrow(data) - 1L,
      tol = 1e-06, iter.max = 20L, complete = FALSE)
 }
 \arguments{
-\item{Z}{a numeric vector specifying an incidence time series
-  \eqn{(k, Z_{k})}{(k, Z[k])}.}
-\item{B}{a numeric vector specifying a births time series
-  \eqn{(k, B_{k})}{(k, B[k])}.}
-\item{mu}{a numeric vector specifying a per capita natural mortality
-  rate time series \eqn{(k, \mu_{k})}{(k, mu[k])}.}
+\item{data}{a \dQuote{multiple time series} object, inheriting
+  from class \code{\link[=ts]{mts}}.  The first three columns
+  should define (\dQuote{parallel}, equally spaced) time series
+  of incidence, births, and the per capita natural mortality
+  rate, respectively.}
+\item{Z, B, mu}{numeric vectors used to construct \code{data}
+  if it is missing and unused otherwise.}
 \item{start}{starting value for the number of susceptible individuals
   at index \code{a}.}
 \item{a}{0-index of the first peak in the incidence time series.}

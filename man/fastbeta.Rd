@@ -7,7 +7,8 @@ Generates a discrete time estimate of the transmission rate
 and other data.
 }
 \details{
-\code{fastbeta} works by discretizing the SIR model
+\code{fastbeta} works by discretizing the system of ordinary
+differential equations
 \deqn{
   \begin{aligned}
   \frac{\text{d} S}{\text{d} t} &= \nu(t) - \beta(t) S I - \mu(t) S \\
@@ -36,12 +37,12 @@ and computing the recursion
 where
 \deqn{
   \begin{aligned}
-  X_{k} &\sim X(k) \qquad [X = S, I, \beta, \mu] \\
+  X_{k} &\sim X(k) \quad [X = S, I, \beta, \mu] \\
   Z_{k} &\sim \int_{k - 1}^{k} \beta(s) S(s) I(s) \, \text{d} s \\
   B_{k} &\sim \int_{k - 1}^{k} \nu(s) \, \text{d} s
   \end{aligned}
 }{
-  X[k] ~ X(k)    [x = S, I, beta, mu]
+  X[k] ~ X(k)    [X = S, I, beta, mu]
   Z[k] ~ integrate(beta(s) S(s) I(s), k-1, k)
   B[k] ~ integrate(            nu(s), k-1, k)
 }
@@ -49,22 +50,26 @@ and it is understood that indexing starts at \eqn{k = 0}
 (contrary to the \R{} convention).
 }
 \usage{
-fastbeta(Z, B, mu, gamma, S0, I0)
+fastbeta(data = ts(cbind(Z, B, mu), start = 0),
+         Z, B, mu, gamma, S0, I0)
 }
 \arguments{
-\item{Z}{a numeric vector specifying an incidence time series
-  \eqn{(k, Z_{k})}{(k, Z[k])}.}
-\item{B}{a numeric vector specifying a births time series
-  \eqn{(k, B_{k})}{(k, B[k])}.}
-\item{mu}{a numeric vector specifying a per capita natural mortality
-  rate time series \eqn{(k, \mu_{k})}{(k, mu[k])}.}
-\item{gamma}{removal rate \eqn{\gamma}{gamma}.}
-\item{S0}{initial number of susceptible individuals \eqn{S_{0}}{S[0]}.}
-\item{I0}{initial number of infected individuals \eqn{I_{0}}{I[0]}.}
+\item{data}{a \dQuote{multiple time series} object, inheriting
+  from class \code{\link[=ts]{mts}}.  The first three columns
+  should define (\dQuote{parallel}, equally spaced) time series
+  of incidence, births, and the per capita natural mortality
+  rate, respectively.}
+\item{Z, B, mu}{numeric vectors used to construct \code{data}
+  if it is missing and unused otherwise.}
+\item{gamma}{removal rate.}
+\item{S0}{the initial number of susceptible individuals.}
+\item{I0}{the initial number of infected individuals.}
 }
 \value{
-A data frame with variables \code{S}, \code{I}, and \code{beta}
-corresponding elementwise to \code{Z}, \code{B}, and \code{mu}.
+A \dQuote{multiple time series} object, inheriting from class
+\code{\link[=ts]{mts}}, parallel to \code{data}.  It has three
+columns, \code{S}, \code{I}, and \code{beta}; these store the
+result of the recursion described in \sQuote{Details}.
 }
 %\seealso{}
 \references{
@@ -89,10 +94,8 @@ n <- 250L
 X <- sir(n, par, beta, nu, mu, stochastic = FALSE)
 plot(X)
 
-fb <- fastbeta(Z = X[, "Z"],
-               B = rep.int(nu(0), n + 1L),
-               mu = rep.int(mu(0), n + 1L),
-               gamma = par[["gamma"]],
-               S0 = par[["S0"]],
-               I0 = par[["I0"]])
+zzz <- fastbeta(data = ts(cbind(X[, "Z"], nu(0), mu(0)), start = 0),
+                gamma = par[["gamma"]],
+                S0 = par[["S0"]],
+                I0 = par[["I0"]])
 }

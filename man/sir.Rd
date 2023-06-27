@@ -86,8 +86,8 @@ sir(n, par, beta, nu, mu, stochastic = TRUE, prob = 1, delay = 1,
 }
 \value{
 A \dQuote{multiple time series} object, inheriting from class
-\code{\link[=ts]{mts}}.  Beneath the class, it is
-an \code{(n+1)}-by-\code{(4+r)} numeric matrix \code{X},
+\code{\link[=ts]{mts}}.  Beneath the class,
+it is an \code{(n+1)}-by-\code{(4+r)} numeric matrix \code{X},
 where \code{r} is 0 if both \code{prob} and \code{delay}
 are missing (indicating no observation error) and 1 otherwise.
 
