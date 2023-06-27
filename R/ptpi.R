@@ -1,13 +1,12 @@
 ptpi <-
-function (data = ts(cbind(Z, B, mu), start = 0),
-          Z, B, mu, start, a = 0L, b = nrow(data) - 1L,
+function (series, start, a = 0L, b = nrow(series) - 1L,
           tol = 1e-06, iter.max = 20L, complete = FALSE)
 {
 	stopifnot(exprs = {
-		is.mts(data)
-		is.double(data)
-		ncol(data) == 3L
-		min(0, data, na.rm = TRUE) >= 0
+		is.mts(series)
+		is.double(series)
+		ncol(series) == 3L
+		min(0, series, na.rm = TRUE) >= 0
 		is.numeric(start)
 		length(start) == 1L
 		start >= 0
@@ -16,7 +15,7 @@ function (data = ts(cbind(Z, B, mu), start = 0),
 		a >= 0L
 		is.integer(b)
 		length(b) == 1L
-		b < nrow(data)
+		b < nrow(series)
 		a < b
 		is.double(tol)
 		length(tol) == 1L
@@ -29,5 +28,5 @@ function (data = ts(cbind(Z, B, mu), start = 0),
 		!is.na(complete)
 	})
 	storage.mode(start) <- "double"
-	.Call(R_ptpi, data, start, a, b, tol, iter.max, complete)
+	.Call(R_ptpi, series, start, a, b, tol, iter.max, complete)
 }

@@ -30,21 +30,19 @@ static void fastbeta(double *Z, double *B, double *mu, double gamma,
 	return;
 }
 
-SEXP R_fastbeta(SEXP data, SEXP gamma, SEXP S0, SEXP I0)
+SEXP R_fastbeta(SEXP series, SEXP constants)
 {
-	SEXP dim = PROTECT(getAttrib(data, R_DimSymbol));
-	int n = INTEGER(dim)[0] - 1;
-	UNPROTECT(1);
-
+	int n = INTEGER(getAttrib(series, R_DimSymbol))[0] - 1;
 	SEXP res = PROTECT(allocMatrix(REALSXP, n + 1, 3));
 	if (n >= 0) {
-		double *r0 = REAL(res), *r1 = r0 + n + 1, *r2 = r1 + n + 1;
-		r0[0] = REAL(S0)[0];
-		r1[0] = REAL(I0)[0];
+		double *r0 = REAL(res), *r1 = r0 + n + 1, *r2 = r1 + n + 1,
+			*cc = REAL(constants);
+		r0[0] = cc[1];
+		r1[0] = cc[2];
 		r2[n] = NA_REAL;
 		if (n >= 1) {
-			double *d0 = REAL(data), *d1 = d0 + n + 1, *d2 = d1 + n + 1;
-			fastbeta(d0, d1, d2, REAL(gamma)[0], r0, r1, r2, n);
+			double *s0 = REAL(series), *s1 = s0 + n + 1, *s2 = s1 + n + 1;
+			fastbeta(s0, s1, s2, cc[0], r0, r1, r2, n);
 		}
 	}
 	UNPROTECT(1);

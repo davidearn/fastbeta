@@ -1,23 +1,22 @@
 sir <-
-function (n, par, beta, nu, mu, stochastic = TRUE, prob = 1, delay = 1,
-          useCompiled = TRUE, ...)
+function (n, beta, nu, mu, constants, stochastic = TRUE,
+          prob = 1, delay = 1, useCompiled = TRUE, ...)
 {
 	stopifnot(exprs = {
 		is.integer(n)
 		length(n) == 1L
 		n >= 1L
 		n < .Machine$integer.max
-		is.double(par)
-		length(par) == 4L
-		!anyNA(match(c("S0", "I0", "R0", "gamma"), names(par)))
-		is.finite(par)
-		all(par >= 0)
 		is.function(beta)
 		!is.null(formals(beta))
 		is.function(nu)
 		!is.null(formals(nu))
 		is.function(mu)
 		!is.null(formals(mu))
+		is.double(constants)
+		length(constants) == 4L
+		is.finite(constants)
+		all(constants >= 0)
 		is.double(prob)
 		any(length(prob) == c(1L, n))
 		min(prob) >= 0
@@ -28,9 +27,9 @@ function (n, par, beta, nu, mu, stochastic = TRUE, prob = 1, delay = 1,
 
 	if (stochastic) {
 
-		init <- c(S = par[["S0"]],
-		          I = par[["I0"]],
-		          R = par[["R0"]],
+		init <- c(S = constants[[2L]],
+		          I = constants[[3L]],
+		          R = constants[[4L]],
 		          c = 0)
 		tran <- list(c(S =  1),               # birth
 		             c(S = -1, I = 1, c = 1), # infection
@@ -39,7 +38,7 @@ function (n, par, beta, nu, mu, stochastic = TRUE, prob = 1, delay = 1,
 		             c(I = -1),               # ""
 		             c(R = -1))               # ""
 		if (useCompiled) {
-			.Call(R_adsir_initialize, beta, nu, mu, par[["gamma"]])
+			.Call(R_adsir_initialize, beta, nu, mu, constants[[1L]])
 			on.exit(.Call(R_adsir_finalize), add = TRUE)
 			ff <- function (x, theta, t) .Call(R_adsir_dot, t, x)
 			Df <- function (x, theta, t) .Call(R_adsir_jac, t, x)
@@ -84,7 +83,7 @@ function (n, par, beta, nu, mu, stochastic = TRUE, prob = 1, delay = 1,
 				init.values  = init,
 				transitions  = tran,
 				rateFunc     = ff,
-				params       = list(beta, nu, mu, par[["gamma"]]),
+				params       = list(beta, nu, mu, constants[[1L]]),
 				tf           = n,
 				jacobianFunc = Df,
 				tl.params    = list(maxtau = 0.999, ...))
@@ -96,12 +95,12 @@ function (n, par, beta, nu, mu, stochastic = TRUE, prob = 1, delay = 1,
 
 	} else {
 
-		init <- c(S = par["S0"],
-		          logI = log(par["I0"]),
-		          R = par[["R0"]],
+		init <- c(S = constants[[2L]],
+		          logI = log(constants[[3L]]),
+		          R = constants[[4L]],
 		          c = 0)
 		if (useCompiled) {
-			.Call(R_desir_initialize, beta, nu, mu, par[["gamma"]])
+			.Call(R_desir_initialize, beta, nu, mu, constants[[1L]])
 			on.exit(.Call(R_desir_finalize), add = TRUE)
 			X. <- ode(
 				y = init,
@@ -150,7 +149,7 @@ function (n, par, beta, nu, mu, stochastic = TRUE, prob = 1, delay = 1,
 				y = init,
 				times = 0:n,
 				func = gg,
-				parms = list(beta, nu, mu, par[["gamma"]]),
+				parms = list(beta, nu, mu, constants[[1L]]),
 				jacfunc = Dg,
 				jactype = "fullusr",
 				hmax = 1,
@@ -183,6 +182,7 @@ function (n, par, beta, nu, mu, stochastic = TRUE, prob = 1, delay = 1,
 		if (!m.p)
 			Xt5 <- rbinom(n, Xt5, prob)
 		if (!m.d)
+			## FIXME? 'rmultinom' is more efficient, but not vectorized ...
 			Xt5 <- tabulate(rep.int(1L:n, Xt5) +
 			                sample(seq.int(0L, length.out = length(delay)),
 			                       size = sum(Xt5),

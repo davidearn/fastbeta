@@ -59,15 +59,13 @@ static void ptpi1(double *Z, double *B, double *mu,
 	return;
 }
 
-SEXP R_ptpi(SEXP data, SEXP start, SEXP a, SEXP b, SEXP tol, SEXP itermax,
+SEXP R_ptpi(SEXP series, SEXP start, SEXP a, SEXP b, SEXP tol, SEXP itermax,
             SEXP complete) {
-	SEXP dim = PROTECT(getAttrib(data, R_DimSymbol));
-	int n = INTEGER(dim)[0] - 1;
-	UNPROTECT(1);
-
-	int a_ = INTEGER(a)[0], b_ = INTEGER(b)[0],
+	int n = INTEGER(getAttrib(series, R_DimSymbol))[0] - 1,
+		a_ = INTEGER(a)[0], b_ = INTEGER(b)[0],
 		itermax_ = INTEGER(itermax)[0];
-	double start_ = REAL(start)[0], tol_=  REAL(tol)[0];
+	double start_ = REAL(start)[0], tol_ = REAL(tol)[0],
+		*s0 = REAL(series), *s1 = s0 + n + 1, *s2 = s1 + n + 1;
 	SEXP res = PROTECT(allocVector(VECSXP, 4)),
 		nms = PROTECT(allocVector(STRSXP, 4)),
 		value = PROTECT(allocVector(REALSXP, 1)),
@@ -84,15 +82,14 @@ SEXP R_ptpi(SEXP data, SEXP start, SEXP a, SEXP b, SEXP tol, SEXP itermax,
 	SET_VECTOR_ELT(res, 1, delta);
 	SET_VECTOR_ELT(res, 2, iter);
 
-	double *d0 = REAL(data), *d1 = d0 + n + 1, *d2 = d1 + n + 1;
 	if (LOGICAL(complete)[0]) {
 		SEXP X = PROTECT(allocMatrix(REALSXP, b_ - a_ + 1, itermax_ + 1));
 		SET_VECTOR_ELT(res, 3, X);
-		ptpi1(d0, d1, d2, start_, a_, b_, tol_, itermax_,
+		ptpi1(s0, s1, s2, start_, a_, b_, tol_, itermax_,
 		      REAL(value), REAL(delta), INTEGER(iter), REAL(X) - a_);
 		UNPROTECT(1);
 	} else {
-		ptpi0(d0, d1, d2, start_, a_, b_, tol_, itermax_,
+		ptpi0(s0, s1, s2, start_, a_, b_, tol_, itermax_,
 		      REAL(value), REAL(delta), INTEGER(iter));
 	}
 

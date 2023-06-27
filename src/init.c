@@ -2,7 +2,7 @@
 #include <R_ext/Rdynload.h>
 #include <R_ext/Visibility.h>
 
-SEXP R_fastbeta(SEXP, SEXP, SEXP, SEXP);
+SEXP R_fastbeta(SEXP, SEXP);
 SEXP R_ptpi(SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP);
 
 SEXP R_adsir_initialize(SEXP, SEXP, SEXP, SEXP);

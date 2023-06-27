@@ -46,30 +46,25 @@ where
   Z[k] ~ integrate(beta(s) S(s) I(s), k-1, k)
   B[k] ~ integrate(            nu(s), k-1, k)
 }
-and it is understood that indexing starts at \eqn{k = 0}
-(contrary to the \R{} convention).
+and it is understood that indexing starts at \eqn{k = 0}.
 }
 \usage{
-fastbeta(data = ts(cbind(Z, B, mu), start = 0),
-         Z, B, mu, gamma, S0, I0)
+fastbeta(series, constants)
 }
 \arguments{
-\item{data}{a \dQuote{multiple time series} object, inheriting
-  from class \code{\link[=ts]{mts}}.  The first three columns
-  should define (\dQuote{parallel}, equally spaced) time series
-  of incidence, births, and the per capita natural mortality
-  rate, respectively.}
-\item{Z, B, mu}{numeric vectors used to construct \code{data}
-  if it is missing and unused otherwise.}
-\item{gamma}{removal rate.}
-\item{S0}{the initial number of susceptible individuals.}
-\item{I0}{the initial number of infected individuals.}
+\item{series}{a \dQuote{multiple time series} object, inheriting from
+  class \code{\link[=ts]{mts}}, with three columns storing
+  (\dQuote{parallel}, equally spaced) time series of incidence, births,
+  and the per capita natural mortality rate, in that order.}
+\item{constants}{a numeric vector of the form \code{c(gamma, S0, I0)},
+  specifying a removal rate and an initial state, in that order.}
 }
 \value{
 A \dQuote{multiple time series} object, inheriting from class
-\code{\link[=ts]{mts}}, parallel to \code{data}.  It has three
-columns, \code{S}, \code{I}, and \code{beta}; these store the
-result of the recursion described in \sQuote{Details}.
+\code{\link[=ts]{mts}}, with three columns (named \code{S}, \code{I},
+and \code{beta}) storing the result of the recursion described in
+\sQuote{Details}.  It is completely parallel to argument \code{series},
+having the same \code{\link{tsp}} attribute.
 }
 %\seealso{}
 \references{
@@ -87,15 +82,14 @@ mu <- function(t) 1e-03
 
 S0 <- 5e+04
 I0 <- 1e+03
-par <- c(S0 = S0, I0 = I0, R0 = 1e+06 - S0 - I0, gamma = 0.5)
+constants <- c(gamma = 0.5, S0 = S0, I0 = I0, R0 = 1e+06 - S0 - I0)
 
 set.seed(0)
 n <- 250L
-X <- sir(n, par, beta, nu, mu, stochastic = FALSE)
+X <- sir(n, beta, nu, mu, constants, stochastic = FALSE)
 plot(X)
 
-zzz <- fastbeta(data = ts(cbind(X[, "Z"], nu(0), mu(0)), start = 0),
-                gamma = par[["gamma"]],
-                S0 = par[["S0"]],
-                I0 = par[["I0"]])
+series <- ts(cbind(X[, "Z"], nu(0), mu(0)), start = 0)
+Y <- fastbeta(series, constants[1:3])
+plot(Y)
 }

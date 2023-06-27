@@ -5,30 +5,26 @@
 TODO
 }
 \usage{
-ptpi(data = ts(cbind(Z, B, mu), start = 0),
-     Z, B, mu, start, a = 0L, b = nrow(data) - 1L,
+ptpi(series, start, a = 0L, b = nrow(series) - 1L,
      tol = 1e-06, iter.max = 20L, complete = FALSE)
 }
 \arguments{
-\item{data}{a \dQuote{multiple time series} object, inheriting
-  from class \code{\link[=ts]{mts}}.  The first three columns
-  should define (\dQuote{parallel}, equally spaced) time series
-  of incidence, births, and the per capita natural mortality
-  rate, respectively.}
-\item{Z, B, mu}{numeric vectors used to construct \code{data}
-  if it is missing and unused otherwise.}
-\item{start}{starting value for the number of susceptible individuals
-  at index \code{a}.}
+\item{series}{a \dQuote{multiple time series} object, inheriting from
+  class \code{\link[=ts]{mts}}, with three columns storing
+  (\dQuote{parallel}, equally spaced) time series of incidence, births,
+  and the per capita natural mortality rate, in that order.}
+\item{start}{starting value for the number of susceptible individuals at
+  index \code{a}.}
 \item{a}{0-index of the first peak in the incidence time series.}
-\item{b}{0-index of the last peak in the incidence time series
-  that is in phase with the first.}
+\item{b}{0-index of the last peak in the incidence time series that is
+  in phase with the first.}
 \item{tol}{a tolerance indicating a stopping condition, namely
   \eqn{\left|\frac{S_{b} - S_{a}}{S_{a}}\right| < \mathtt{tol}}{
     abs((S[b] - S[a]) / S[a]) < tol}.}
 \item{iter.max}{maximum number of iterations.}
-\item{complete}{a logical flag indicating if the result should
-  preserve the number of susceptible individuals from index \code{a}
-  to index \code{b} in each iteration.}
+\item{complete}{a logical flag indicating if the result should preserve
+  the number of susceptible individuals from index \code{a} to index
+  \code{b} in each iteration.}
 }
 %\details{}
 \value{
