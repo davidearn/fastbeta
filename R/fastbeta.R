@@ -14,6 +14,6 @@ function (series, constants)
 	X <- .Call(R_fastbeta, series, constants)
 	oldClass(X) <- oldClass(series)
 	tsp(X) <- tsp(series)
-	dimnames(X) <- list(NULL, c("S", "I", "beta"))
+	dimnames(X) <- list(NULL, c("beta", "S", "I"))
 	X
 }

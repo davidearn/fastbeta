@@ -61,10 +61,10 @@ fastbeta(series, constants)
 }
 \value{
 A \dQuote{multiple time series} object, inheriting from class
-\code{\link[=ts]{mts}}, with three columns (named \code{S}, \code{I},
-and \code{beta}) storing the result of the recursion described in
-\sQuote{Details}.  It is completely parallel to argument \code{series},
-having the same \code{\link{tsp}} attribute.
+\code{\link[=ts]{mts}}, with three columns (named \code{beta},
+\code{S}, and \code{I}) storing the result of the recursion
+described in \sQuote{Details}.  It is completely parallel to
+argument \code{series}, having the same \code{\link{tsp}} attribute.
 }
 %\seealso{}
 \references{
