@@ -1,4 +1,4 @@
 \name{bootstrap}
 \alias{bootstrap}
-\title{TODO}
+\title{Parametric bootstrapping}
 \description{TODO}
