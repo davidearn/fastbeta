@@ -30,9 +30,10 @@ function (n, beta, nu, mu, constants, stochastic = TRUE,
 		init <- c(S = constants[[2L]],
 		          I = constants[[3L]],
 		          R = constants[[4L]],
-		          c = 0)
-		tran <- list(c(S =  1),               # birth
-		             c(S = -1, I = 1, c = 1), # infection
+		          B = 0,
+		          Z = 0)
+		tran <- list(c(S =  1, B = 1),        # birth
+		             c(S = -1, I = 1, Z = 1), # infection
 		             c(I = -1, R = 1),        # removal
 		             c(S = -1),               # natural mortality
 		             c(I = -1),               # ""
@@ -52,7 +53,7 @@ function (n, beta, nu, mu, constants, stochastic = TRUE,
 				tl.params    = list(maxtau = 0.999, ...))
 		} else {
 			Dm <- matrix(0, 4L, 6L)
-			Di <- c(1L, 5L, 6L, 10L, 13L, 18L, 23L)
+			Di <- c(1L, 6L, 7L, 12L, 16L, 22L, 28L)
 			ff <- function (x, theta, t) {
 				xS <- x[[1L]]
 				xI <- x[[2L]]
@@ -98,7 +99,8 @@ function (n, beta, nu, mu, constants, stochastic = TRUE,
 		init <- c(S = constants[[2L]],
 		          logI = log(constants[[3L]]),
 		          R = constants[[4L]],
-		          c = 0)
+		          B = 0,
+		          Z = 0)
 		if (useCompiled) {
 			.Call(R_desir_initialize, beta, nu, mu, constants[[1L]])
 			on.exit(.Call(R_desir_finalize), add = TRUE)
@@ -116,8 +118,8 @@ function (n, beta, nu, mu, constants, stochastic = TRUE,
 				initpar = NULL,
 				...)
 		} else {
-			Dm <- matrix(0, 4L, 4L)
-			Di <- c(1L, 2L, 4L, 5L, 7L, 8L, 11L)
+			Dm <- matrix(0, 5L, 5L)
+			Di <- c(1L, 2L, 5L, 6L, 8L, 10L, 13L)
 			gg <- function(t, x, theta) {
 				xS <- x[[1L]]
 				xI <- exp(x[[2L]])
@@ -126,10 +128,13 @@ function (n, beta, nu, mu, constants, stochastic = TRUE,
 				nu <- theta[[2L]](t)
 				mu <- theta[[3L]](t)
 				gamma <- theta[[4L]]
-				list(c(nu - beta * xS * xI - mu * xS,
-				       beta * xS - gamma - mu,
+				beta.xS <- beta * xS
+				beta.xS.xI <- beta.xS * xI
+				list(c(nu - beta.xS.xI - mu * xS,
+				       beta.xS - gamma - mu,
 				       gamma * xI - mu * xR,
-				       beta * xS * xI))
+				       nu,
+				       beta.xS.xI))
 			}
 			Dg <- function(t, x, theta) {
 				xS <- x[[1L]]
@@ -141,8 +146,13 @@ function (n, beta, nu, mu, constants, stochastic = TRUE,
 				gamma <- theta[[4L]]
 				beta.xI <- beta * xI
 				beta.xS.xI <- beta.xI * xS
-				Dm[Di] <<- c(-beta.xI - mu, beta, beta.xI, -beta.xS.xI,
-				             gamma * xI, beta.xS.xI, -mu)
+				Dm[Di] <<- c(-beta.xI - mu,
+				             beta,
+				             beta.xI,
+				             -beta.xS.xI,
+				             gamma * xI,
+				             beta.xS.xI,
+				             -mu)
 				Dm
 			}
 			X. <- ode(
@@ -164,33 +174,33 @@ function (n, beta, nu, mu, constants, stochastic = TRUE,
 		N <- dim(X.)[1L]
 		X <-
 			if (N < n + 1L)
-				rbind(X.[, 2L:5L, drop = FALSE],
-				      matrix(NA_real_, n + 1L - N, 4L))
-			else X.[, 2L:5L, drop = FALSE]
+				rbind(X.[, 2L:6L, drop = FALSE],
+				      matrix(NA_real_, n + 1L - N, 5L))
+			else X.[, 2L:6L, drop = FALSE]
 
 	}
 	head <- 1L:n
 	tail <- 2L:(n + 1L)
-	X[tail, 4L] <- Xt4 <- X[tail, 4L] - X[head, 4L]
-	X[  1L, 4L] <- NA_real_
+	X[tail, 4L:5L] <- X[tail, 4L:5L] - X[head, 4L:5L]
+	X[  1L, 4L:5L] <- NA_real_
 
 	m.p <- missing(prob)
 	m.d <- missing(delay)
 	if (doObs <- !(m.p && m.d)) {
 		X <- cbind(X, 0, deparse.level = 0L)
-		Xt5 <- as.integer(Xt4)
+		Xt6 <- as.integer(X[tail, 5L])
 		if (!m.p)
-			Xt5 <- rbinom(n, Xt5, prob)
+			Xt6 <- rbinom(n, Xt6, prob)
 		if (!m.d)
 			## FIXME? 'rmultinom' is more efficient, but not vectorized ...
-			Xt5 <- tabulate(rep.int(1L:n, Xt5) +
+			Xt6 <- tabulate(rep.int(1L:n, Xt6) +
 			                sample(seq.int(0L, length.out = length(delay)),
-			                       size = sum(Xt5),
+			                       size = sum(Xt6),
 			                       replace = TRUE,
 			                       prob = delay),
 			                n)
-		X[tail, 5L] <- Xt5
-		X[  1L, 5L] <- NA_real_
+		X[tail, 6L] <- Xt6
+		X[  1L, 6L] <- NA_real_
 	}
-	ts(X, start = 0, names = c("S", "I", "R", "Z", if (doObs) "Z.obs"))
+	ts(X, start = 0, names = c("S", "I", "R", "B", "Z", if (doObs) "Z.obs"))
 }

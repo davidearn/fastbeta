@@ -94,10 +94,10 @@ SEXP R_adsir_jac(SEXP t, SEXP x)
 	px = REAL(x);
 	MAYBE_EVAL_CALL(*pt, lastTimeJac);
 	pDF [0] = nuVal;
-	pDF [4] = betaVal * px[1];
-	pDF [5] = betaVal * px[0];
-	pDF [9] = gammaVal;
-	pDF[12] = pDF[17] = pDF[22] = muVal;
+	pDF [5] = betaVal * px[1];
+	pDF [6] = betaVal * px[0];
+	pDF[11] = gammaVal;
+	pDF[15] = pDF[21] = pDF[27] = muVal;
 	return DF;
 }
 
@@ -134,12 +134,14 @@ void R_desir_dot(int *neq, double *t, double *y, double *ydot,
 	ydot[0] = nuVal - betaVal * y[0] * y[1] - muVal * y[0];
 	ydot[1] = betaVal * y[0] - gammaVal - muVal;
 	ydot[2] = gammaVal * y[1] - muVal * y[2];
-	ydot[3] = betaVal * y[0] * y[1];
+	ydot[3] = nuVal;
+	ydot[4] = betaVal * y[0] * y[1];
 #else
-	ydot[3] = betaVal * y[0] * y[1];
-	ydot[0] = nuVal - ydot[3] - muVal * y[0];
+	ydot[4] = betaVal * y[0] * y[1];
+	ydot[0] = nuVal - ydot[4] - muVal * y[0];
 	ydot[1] = betaVal * y[0] - gammaVal - muVal;
 	ydot[2] = gammaVal * y[1] - muVal * y[2];
+	ydot[3] = nuVal;
 #endif
 	y[1] = tmp;
 	return;
@@ -155,19 +157,19 @@ void R_desir_jac(int *neq, double *t, double *y, int *ml,
 #if 0
 	pd [0] = -betaVal * y[1] - muVal;
 	pd [1] = betaVal;
-	pd [3] = betaVal * y[1];
-	pd [4] = -betaVal * y[0] * y[1];
-	pd [6] = gammaVal * y[1];
-	pd [7] = betaVal * y[0] * y[1];
-	pd[10] = -muVal;
+	pd [4] = betaVal * y[1];
+	pd [5] = -betaVal * y[0] * y[1];
+	pd [7] = gammaVal * y[1];
+	pd [9] = betaVal * y[0] * y[1];
+	pd[12] = -muVal;
 #else
 	pd [1] = betaVal;
-	pd [3] = betaVal * y[1];
-	pd [0] = -pd[3] - muVal;
-	pd [7] = pd[3] * y[0];
-	pd [4] = -pd[7];
-	pd [6] = gammaVal * y[1];
-	pd[10] = -muVal;
+	pd [4] = betaVal * y[1];
+	pd [0] = -pd[4] - muVal;
+	pd [9] = pd[4] * y[0];
+	pd [5] = -pd[9];
+	pd [7] = gammaVal * y[1];
+	pd[12] = -muVal;
 #endif
 	y[1] = tmp;
 	return;

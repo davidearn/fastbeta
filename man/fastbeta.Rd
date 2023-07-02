@@ -20,33 +20,35 @@ differential equations
   dI/dt = beta(t) S I - gamma I - mu(t) I
   dR/dt = gamma I - mu(t) R
 }
-and computing the recursion
+where \eqn{t} is understood to be a unitless measure of time
+relative to the duration of an observation interval, then computing
+the recursion
 \deqn{
   \begin{aligned}
-  S_{k} &= \frac{(1 - \frac{1}{2} \mu_{k - 1}) S_{k - 1} + B_{k} - Z_{k}}{
-    1 + \frac{1}{2} \mu_{k}} \\
-  I_{k} &= \frac{(1 - \frac{1}{2} (\gamma + \mu_{k - 1})) I_{k - 1} + Z_{k}}{
-    1 + \frac{1}{2} (\gamma + \mu_{k})} \\
-  \beta_{k} &= \frac{Z_{k} + Z_{k + 1}}{2 S_{k} I_{k}}
+  \beta_{t} &= \frac{Z_{t} + Z_{t + 1}}{2 S_{t} I_{t}}
+  S_{t} &= \frac{(1 - \frac{1}{2} \mu_{t - 1}) S_{t - 1} + B_{t} - Z_{t}}{
+    1 + \frac{1}{2} \mu_{t}} \\
+  I_{t} &= \frac{(1 - \frac{1}{2} (\gamma + \mu_{t - 1})) I_{t - 1} + Z_{t}}{
+    1 + \frac{1}{2} (\gamma + \mu_{t})} \\
   \end{aligned}
 }{
-  S[k] = ((1 - 0.5 * mu[k-1]) * S[k-1] + B[k] - Z[k]) / (1 + 0.5 * mu[k])
-  I[k] = ((1 - 0.5 * (gamma + mu[k-1])) * I[k-1] + Z[k]) / (1 + 0.5 * (gamma + mu[k]))
-  beta[k] = (Z[k] + Z[k+1]) / (2 * S[k] * I[k])
+  beta[t] = (Z[t] + Z[t+1]) / (2 * S[t] * I[t])
+  S[t] = ((1 - 0.5 * mu[t-1]) * S[t-1] + B[t] - Z[t]) / (1 + 0.5 * mu[t])
+  I[t] = ((1 - 0.5 * (gamma + mu[t-1])) * I[t-1] + Z[t]) / (1 + 0.5 * (gamma + mu[t]))
 }
 where
 \deqn{
   \begin{aligned}
-  X_{k} &\sim X(k) \quad [X = S, I, \beta, \mu] \\
-  Z_{k} &\sim \int_{k - 1}^{k} \beta(s) S(s) I(s) \, \text{d} s \\
-  B_{k} &\sim \int_{k - 1}^{k} \nu(s) \, \text{d} s
+  X_{t} &\sim X(t) \quad [X = \beta, S, I, \mu] \\
+  Z_{t} &\sim \int_{t - 1}^{t} \beta(s) S(s) I(s) \, \text{d} s \\
+  B_{t} &\sim \int_{t - 1}^{t} \nu(s) \, \text{d} s
   \end{aligned}
 }{
-  X[k] ~ X(k)    [X = S, I, beta, mu]
-  Z[k] ~ integrate(beta(s) S(s) I(s), k-1, k)
-  B[k] ~ integrate(            nu(s), k-1, k)
+  X[t] ~ X(t)    [X = beta, S, I, mu]
+  Z[t] ~ integrate(beta(s) S(s) I(s), t - 1, t)
+  B[t] ~ integrate(            nu(s), t - 1, t)
 }
-and it is understood that indexing starts at \eqn{k = 0}.
+and it is understood that indexing starts at \eqn{t = 0}.
 }
 \usage{
 fastbeta(series, constants)
@@ -86,10 +88,11 @@ constants <- c(gamma = 0.5, S0 = S0, I0 = I0, R0 = 1e+06 - S0 - I0)
 
 set.seed(0)
 n <- 250L
-X <- sir(n, beta, nu, mu, constants, stochastic = FALSE)
+X <- sir(n, beta, nu, mu, constants)
 plot(X)
 
-series <- ts(cbind(X[, "Z"], nu(0), mu(0)), start = 0)
-Y <- fastbeta(series, constants[1:3])
+series. <- ts(cbind(X[, c("Z", "B")], mu(0)), start = 0)
+constants. <- constants[1:3]
+Y <- fastbeta(series., constants.)
 plot(Y)
 }

@@ -1,15 +1,15 @@
 \name{sir}
 \alias{sir}
-\title{Simulate Case Reports Under Forced SIR Model}
+\title{Simulate case reports under a forced SIR model}
 \description{
 Simulates time series of the susceptible, infected, and removed
-population sizes and corresponding time series of incidence and
-\emph{reported} incidence.  Simulations are based on an SIR model
+population sizes and corresponding time series of births, incidence,
+and \emph{reported} incidence.  Simulations are based on an SIR model
 with user-defined forcing and a simple model for observation error.
 }
 \details{
-\code{sir(stochastic = FALSE)} works by numerically integrating
-the system of ordinary differential equations
+\code{sir(stochastic = FALSE)} works by numerically integrating the
+system of ordinary differential equations
 \deqn{
   \begin{aligned}
   \frac{\text{d} S}{\text{d} t} &= \nu(t) - \beta(t) S I - \mu(t) S \\
@@ -23,28 +23,33 @@ the system of ordinary differential equations
 }
 between times \eqn{t = 0, \ldots, n}, where \eqn{t} is understood
 to be a unitless measure of time relative to the duration of an
-observation interval.  Incidence is defined as
-\deqn{Z(t) = \int_{t - 1}^{t} \beta(s) S(s) I(s)\,\text{d}s}{
-  Z(t) = integrate(beta(s) S(s) I(s); s = [t - 1, t])}
-To compute it, the system is augmented with a fourth equation
-describing \emph{cumulative} incidence
-%% MJ: Why do I need \displaystyle inside of \deqn{} ... ??
-\deqn{\displaystyle\frac{\text{d} c}{\text{d} t} = \beta(t) S I}{
-  dc/dt = beta(t) S I}
-and the \emph{augmented} system with four equations is integrated.
+observation interval.  To generate time series of births and incidence
+\deqn{
+  \begin{aligned}
+  B(t) &= \int_{t - 1}^{t} \nu(s)\,\text{d}s \\
+  Z(t) &= \int_{t - 1}^{t} \beta(s) S(s) I(s)\,\text{d}s
+  \end{aligned}
+}{
+  B(t) = integrate(            nu(s), t - 1, t)
+  Z(t) = integrate(beta(s) S(s) I(s), t - 1, t)
+}
+the system is augmented with two additional equations describing
+\emph{cumulative} incidence and \emph{cumulative} births (with right
+hand sides given by the integrands above), and the \emph{augmented}
+system with five equations is integrated.
 \code{sir(stochastic = TRUE)} works by simulating a Markov process
 corresponding to the augmented system, as described in the reference.
 
-Case reports are simulated by partitioning binomial samples
-according to multinomial delays:
-\deqn{Z_\text{obs}(t) = \sum\limits_{i = 0}^{d} M_{i}(t - i)}{
-  Z.obs(t) = sum(M(t - i)[i]; i = 0, \ldots, d)}
+Case reports are simulated from incidence by partitioning binomial
+samples over observation intervals according to multinomial delays:
+\deqn{Z_\text{obs}(t) = \sum\limits_{i = 0}^{d} m_{i}(t - i)}{
+  Z.obs(t) = sum(m(t - i)[i]; i = 0, \ldots, d)}
 where
-\deqn{M(t) \sim \mathrm{Multinomial}(B(t), (q_{0}, \ldots, q_{d}))}{
-  M(t) ~ Multinomial(B(t), (q[0], \ldots, q[d]))}
+\deqn{m(t) \sim \mathrm{Multinomial}(b(t), (q_{0}, \ldots, q_{d}))}{
+  m(t) ~ Multinomial(b(t), (q[0], \ldots, q[d]))}
 and
-\deqn{B(t) \sim \mathrm{Binomial}(Z(t), p(t))}{
-  B(t) ~ Binomial(Z(t), p(t))}
+\deqn{b(t) \sim \mathrm{Binomial}(Z(t), p(t))}{
+  b(t) ~ Binomial(Z(t), p(t))}
 }
 \usage{
 sir(n, beta, nu, mu, constants, stochastic = TRUE,
@@ -87,18 +92,18 @@ sir(n, beta, nu, mu, constants, stochastic = TRUE,
 \value{
 A \dQuote{multiple time series} object, inheriting from class
 \code{\link[=ts]{mts}}.  Beneath the class,
-it is an \code{(n+1)}-by-\code{(4+r)} numeric matrix \code{X},
+it is an \code{(n+1)}-by-\code{(5+r)} numeric matrix \code{X},
 where \code{r} is 0 if both \code{prob} and \code{delay}
 are missing (indicating no observation error) and 1 otherwise.
 
 Rows correspond to time points \code{0:n}.  Columns are named
-\code{S}, \code{I}, \code{R}, \code{Z}, and (if \code{r} is 1)
-\code{Z.obs}.  \code{X[, 1:3]} give the state at each time, and
-\code{X[, 4:5]} give the number of infections and infections
-\emph{reported} during the observation interval ending at each
-time.
+\code{S}, \code{I}, \code{R}, \code{B}, \code{Z}, and (if \code{r}
+is 1) \code{Z.obs}.  \code{X[, 1:3]} give the state at each time,
+and \code{X[, 4:6]} give the number of births, infections, and
+infections \emph{reported} during the observation interval ending
+at each time.
 
-\code{X[1, 4:5]} is \code{NA}, and \code{X[2:length(delay), 5]}
+\code{X[1, 4:6]} is \code{NA}, and \code{X[2:length(delay), 6]}
 can contain incomplete information if \code{length(delay) >= 2}.
 }
 %\seealso{}

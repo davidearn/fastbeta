@@ -2,12 +2,14 @@
 \alias{ptpi}
 \title{Peak to peak iteration}
 \description{
-TODO
+Estimates the initial susceptible population size from a periodic,
+equally spaced incidence time series and other data.
 }
 \usage{
 ptpi(series, start, a = 0L, b = nrow(series) - 1L,
      tol = 1e-06, iter.max = 20L, complete = FALSE)
 }
+%\details{}
 \arguments{
 \item{series}{a \dQuote{multiple time series} object, inheriting from
   class \code{\link[=ts]{mts}}, with three columns storing
@@ -26,7 +28,6 @@ ptpi(series, start, a = 0L, b = nrow(series) - 1L,
   the number of susceptible individuals from index \code{a} to index
   \code{b} in each iteration.}
 }
-%\details{}
 \value{
 A list with elements:
 \item{value}{the value of \eqn{S_{0}}{S[0]} back-calculated from
@@ -36,8 +37,8 @@ A list with elements:
 \item{iter}{the number of iterations performed.}
 \item{X}{if \code{complete = TRUE}, then a matrix with
   \code{b-a+1} rows and \code{iter} columns storing the
-  value of \eqn{S_{k}}{S[k]} obtained in each iteration,
-  for \eqn{k = a,\ldots,b}.  Otherwise, \code{NULL}.}
+  value of \eqn{S_{t}}{S[t]} obtained in each iteration,
+  for \eqn{t = a,\ldots,b}.  Otherwise, \code{NULL}.}
 }
 %\seealso{}
 \references{
