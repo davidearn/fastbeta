@@ -86,9 +86,8 @@ S0 <- 5e+04
 I0 <- 1e+03
 constants <- c(gamma = 0.5, S0 = S0, I0 = I0, R0 = 1e+06 - S0 - I0)
 
-set.seed(0)
 n <- 250L
-X <- sir(n, beta, nu, mu, constants)
+X <- sir(n, beta, nu, mu, constants, stochastic = FALSE)
 plot(X)
 
 series. <- ts(cbind(X[, c("Z", "B")], mu(0)), start = 0)
