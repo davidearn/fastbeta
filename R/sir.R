@@ -92,7 +92,7 @@ function (n, beta, nu, mu, constants, stochastic = TRUE,
 
 		N <- dim(X.)[1L]
 		i <- N - match(0L:n, as.integer(ceiling(X.[N:1L, 1L]))) + 1L
-		X <- X.[i, 2L:5L, drop = FALSE]
+		X <- X.[i, 2L:6L, drop = FALSE]
 
 	} else {
 
