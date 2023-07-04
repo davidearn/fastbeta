@@ -72,7 +72,7 @@ argument \code{series}, having the same \code{\link{tsp}} attribute.
 \references{
 Jagan, M., deJonge, M. S., Krylova, O., & Earn, D. J. D. (2020).
 Fast estimation of time-varying infectious disease transmission rates.
-\emph{PLoS Computational Biology},
+\emph{PLOS Computational Biology},
 \emph{16}(9), Article e1008124, 1-39.
 \doi{10.1371/journal.pcbi.1008124}
 }
