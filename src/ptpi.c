@@ -33,11 +33,12 @@ static void ptpi1(double *Z, double *B, double *mu,
                   double start, int a, int b, double tol, int itermax,
                   double *value, double *delta, int *iter, double *X)
 {
-	int k;
+	X -= a;
+	int k, ldX = b - a + 1;
 	double halfmu;
 	*iter = 0;
-	X[a] = start;
 	while (*iter < itermax) {
+		X[a] = start;
 		halfmu = 0.5 * mu[a];
 		for (k = a + 1; k <= b; ++k) {
 			X[k]  = (1.0 - halfmu) * X[k - 1] + B[k] - Z[k];
@@ -47,9 +48,9 @@ static void ptpi1(double *Z, double *B, double *mu,
 		*delta = (X[b] - X[a]) / X[a];
 		if (ISNAN(*delta) || fabs(*delta) < tol)
 			break;
-		X[a] = X[b];
+		start = X[b];
+		X += ldX;
 	}
-	start = X[a];
 	halfmu = 0.5 * mu[a];
 	for (k = a; k > 0; --k) {
 		start  = (1.0 + halfmu) * start - B[k] + Z[k];
@@ -83,10 +84,10 @@ SEXP R_ptpi(SEXP series, SEXP start, SEXP a, SEXP b, SEXP tol, SEXP itermax,
 	SET_VECTOR_ELT(res, 2, iter);
 
 	if (LOGICAL(complete)[0]) {
-		SEXP X = PROTECT(allocMatrix(REALSXP, b_ - a_ + 1, itermax_ + 1));
+		SEXP X = PROTECT(allocMatrix(REALSXP, b_ - a_ + 1, itermax_));
 		SET_VECTOR_ELT(res, 3, X);
 		ptpi1(s0, s1, s2, start_, a_, b_, tol_, itermax_,
-		      REAL(value), REAL(delta), INTEGER(iter), REAL(X) - a_);
+		      REAL(value), REAL(delta), INTEGER(iter), REAL(X));
 		UNPROTECT(1);
 	} else {
 		ptpi0(s0, s1, s2, start_, a_, b_, tol_, itermax_,
