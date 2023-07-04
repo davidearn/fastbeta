@@ -1,5 +1,5 @@
 useDynLib(fastbeta, .registration = TRUE)
-export(bootstrap, fastbeta, ptpi, sir)
+export(bootstrap, deconvolve, fastbeta, ptpi, sir)
 importFrom(adaptivetau, ssa.adaptivetau)
 importFrom(deSolve, ode)
 importFrom(stats, approxfun, filter, is.mts, rbinom, ts, tsp, "tsp<-")

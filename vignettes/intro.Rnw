@@ -11,7 +11,7 @@
 \setlength{\parskip}{1mm}
 \setlength{\parindent}{5mm}
 
-\lipsum[1] \cite{2020JagadeJo}
+\lipsum[1] \cite{2020JagaDejo}
 
 <<todo>>=
 library(fastbeta)
