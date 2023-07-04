@@ -1,4 +1,5 @@
 #include <math.h> /* fabs */
+#include <string.h> /* memcpy */
 #include <Rinternals.h>
 
 static void ptpi0(double *Z, double *B, double *mu,
@@ -44,11 +45,11 @@ static void ptpi1(double *Z, double *B, double *mu,
 			X[k]  = (1.0 - halfmu) * X[k - 1] + B[k] - Z[k];
 			X[k] /= 1.0 + (halfmu = 0.5 * mu[k]);
 		}
+		*delta = (X[b] - start) / start;
+		start = X[b];
 		++(*iter);
-		*delta = (X[b] - X[a]) / X[a];
 		if (ISNAN(*delta) || fabs(*delta) < tol)
 			break;
-		start = X[b];
 		X += ldX;
 	}
 	halfmu = 0.5 * mu[a];
@@ -84,10 +85,19 @@ SEXP R_ptpi(SEXP series, SEXP a, SEXP b, SEXP start, SEXP tol, SEXP itermax,
 	SET_VECTOR_ELT(res, 2, iter);
 
 	if (LOGICAL(complete)[0]) {
-		SEXP X = PROTECT(allocMatrix(REALSXP, b_ - a_ + 1, itermax_));
-		SET_VECTOR_ELT(res, 3, X);
+		int nrX = b_ - a_ + 1, ncX = itermax_;
+		SEXP X = PROTECT(allocMatrix(REALSXP, nrX, ncX));
 		ptpi1(s0, s1, s2, a_, b_, start_, tol_, itermax_,
 		      REAL(value), REAL(delta), INTEGER(iter), REAL(X));
+		ncX = INTEGER(iter)[0];
+		if (ncX == itermax_)
+			SET_VECTOR_ELT(res, 3, X);
+		else {
+			SEXP X1 = PROTECT(allocMatrix(REALSXP, nrX, ncX));
+			memcpy(REAL(X1), REAL(X), (size_t) nrX * ncX * sizeof(double));
+			SET_VECTOR_ELT(res, 3, X1);
+			UNPROTECT(1);
+		}
 		UNPROTECT(1);
 	} else {
 		ptpi0(s0, s1, s2, a_, b_, start_, tol_, itermax_,
