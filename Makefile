@@ -1,5 +1,5 @@
-package := $(shell grep DESCRIPTION -e Package: | sed 's/Package: //')
-version := $(shell grep DESCRIPTION -e Version: | sed 's/Version: //')
+package := $(shell sed -n 's/Package: //p' DESCRIPTION)
+version := $(shell sed -n 's/Version: //p' DESCRIPTION)
 tarball := $(package)_$(version).tar.gz
 rchkdir := $(package)_$(version).Rcheck
 
