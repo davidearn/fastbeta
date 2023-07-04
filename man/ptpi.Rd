@@ -29,19 +29,19 @@ The estimated value of the initial susceptible population size is
 \eqn{S_{a}{(i + 1)}}{S[a, i + 1]} by reversing the recursion.
 }
 \usage{
-ptpi(series, start, a = 0L, b = nrow(series) - 1L,
-     tol = 1e-03, iter.max = 20L, complete = FALSE)
+ptpi(series, a = 0L, b = nrow(series) - 1L,
+     start, tol = 1e-03, iter.max = 20L, complete = FALSE)
 }
 \arguments{
 \item{series}{a \dQuote{multiple time series} object, inheriting from
   class \code{\link[=ts]{mts}}, with three columns storing
   (\dQuote{parallel}, equally spaced) time series of incidence, births,
   and the per capita natural mortality rate, in that order.}
-\item{start}{a starting value for the number of susceptible individuals
-  at index \code{a}.}
 \item{a}{the 0-index of the first peak in the incidence time series.}
 \item{b}{the 0-index of the last peak in the incidence time series
   that is in phase with the first.}
+\item{start}{a starting value for the number of susceptible individuals
+  at index \code{a}.}
 \item{tol}{a tolerance indicating a stopping condition;
   see \sQuote{Details}.}
 \item{iter.max}{the maximum number of iterations.}

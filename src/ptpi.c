@@ -2,7 +2,7 @@
 #include <Rinternals.h>
 
 static void ptpi0(double *Z, double *B, double *mu,
-                  double start, int a, int b, double tol, int itermax,
+                  int a, int b, double start, double tol, int itermax,
                   double *value, double *delta, int *iter)
 {
 	int k;
@@ -30,7 +30,7 @@ static void ptpi0(double *Z, double *B, double *mu,
 }
 
 static void ptpi1(double *Z, double *B, double *mu,
-                  double start, int a, int b, double tol, int itermax,
+                  int a, int b, double start, double tol, int itermax,
                   double *value, double *delta, int *iter, double *X)
 {
 	X -= a;
@@ -60,7 +60,7 @@ static void ptpi1(double *Z, double *B, double *mu,
 	return;
 }
 
-SEXP R_ptpi(SEXP series, SEXP start, SEXP a, SEXP b, SEXP tol, SEXP itermax,
+SEXP R_ptpi(SEXP series, SEXP a, SEXP b, SEXP start, SEXP tol, SEXP itermax,
             SEXP complete) {
 	int n = INTEGER(getAttrib(series, R_DimSymbol))[0] - 1,
 		a_ = INTEGER(a)[0], b_ = INTEGER(b)[0],
@@ -86,11 +86,11 @@ SEXP R_ptpi(SEXP series, SEXP start, SEXP a, SEXP b, SEXP tol, SEXP itermax,
 	if (LOGICAL(complete)[0]) {
 		SEXP X = PROTECT(allocMatrix(REALSXP, b_ - a_ + 1, itermax_));
 		SET_VECTOR_ELT(res, 3, X);
-		ptpi1(s0, s1, s2, start_, a_, b_, tol_, itermax_,
+		ptpi1(s0, s1, s2, a_, b_, start_, tol_, itermax_,
 		      REAL(value), REAL(delta), INTEGER(iter), REAL(X));
 		UNPROTECT(1);
 	} else {
-		ptpi0(s0, s1, s2, start_, a_, b_, tol_, itermax_,
+		ptpi0(s0, s1, s2, a_, b_, start_, tol_, itermax_,
 		      REAL(value), REAL(delta), INTEGER(iter));
 	}
 
