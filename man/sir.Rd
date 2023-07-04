@@ -36,20 +36,15 @@ observation interval.  To generate time series of births and incidence
 the system is augmented with two additional equations describing
 \emph{cumulative} incidence and \emph{cumulative} births (with right
 hand sides given by the integrands above), and the \emph{augmented}
-system with five equations is integrated.
+system with five equations is integrated.  Case reports are simulated
+by scaling incidence by \code{prob} and convolving the result with
+\code{delay}.
+
 \code{sir(stochastic = TRUE)} works by simulating a Markov process
 corresponding to the augmented system, as described in the reference.
-
-Case reports are simulated from incidence by partitioning binomial
-samples over observation intervals according to multinomial delays:
-\deqn{Z_\text{obs}(t) = \sum\limits_{i = 0}^{d} m_{i}(t - i)}{
-  Z.obs(t) = sum(m(t - i)[i]; i = 0, \ldots, d)}
-where
-\deqn{m(t) \sim \mathrm{Multinomial}(b(t), (q_{0}, \ldots, q_{d}))}{
-  m(t) ~ Multinomial(b(t), (q[0], \ldots, q[d]))}
-and
-\deqn{b(t) \sim \mathrm{Binomial}(Z(t), p(t))}{
-  b(t) ~ Binomial(Z(t), p(t))}
+Case reports are simulated from incidence by binning binomial samples
+taken with probabilities \code{prob} over future observation intervals
+according to multinomial samples taken with probabilities \code{delay}.
 }
 \usage{
 sir(n, beta, nu, mu, constants, stochastic = TRUE,
@@ -75,8 +70,8 @@ sir(n, beta, nu, mu, constants, stochastic = TRUE,
 \item{delay}{a numeric vector of positive length such that
   \code{delay[i]} is the probability that an infection is reported
   after a delay of \code{i-1} time units, given that it is
-  eventually reported.  \code{delay} is passed \code{\link{sample}},
-  hence it need not sum to 1 but it must not sum to 0.}
+  eventually reported.  \code{delay} need not sum to 1 but
+  it must not sum to 0.}
 \item{useCompiled}{a logical indicating if derivatives should be
   computed by compiled \proglang{C} functions rather than by \R{}
   functions (which \emph{may} be \emph{byte}-compiled).  Set to
@@ -128,15 +123,16 @@ S0 <- 5e+04
 I0 <- 1e+03
 constants <- c(gamma = 0.5, S0 = S0, I0 = I0, R0 = 1e+06 - S0 - I0)
 
+set.seed(0)
 n <- 250L
-X <- sir(n, beta, nu, mu, constants, stochastic = FALSE)
+X <- sir(n, beta, nu, mu, constants,
+         prob = 0.1, delay = diff(pgamma(0:8, 2.5)))
 plot(X)
 
-set.seed(0)
 r <- 10L
 Y <- replicate(r,
 	sir(n, beta, nu, mu, constants,
-	    prob = 0.5, delay = diff(pgamma(0:8, 1)))[, "Z.obs"])
+	    prob = 0.1, delay = diff(pgamma(0:8, 2.5)))[, "Z.obs"])
 Y <- ts(Y, start = 0)
 plot(Y, plot.type = "single", col = seq_len(r), ylab = "Case reports")
 }

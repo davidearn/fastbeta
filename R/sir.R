@@ -23,6 +23,7 @@ function (n, beta, nu, mu, constants, stochastic = TRUE,
 		max(prob) <= 1
 		is.double(delay)
 		length(delay) >= 1L
+		min(delay) >= 0
 	})
 
 	if (stochastic) {
@@ -188,17 +189,28 @@ function (n, beta, nu, mu, constants, stochastic = TRUE,
 	m.d <- missing(delay)
 	if (doObs <- !(m.p && m.d)) {
 		X <- cbind(X, 0, deparse.level = 0L)
-		Xt6 <- as.integer(X[tail, 5L])
-		if (!m.p)
-			Xt6 <- rbinom(n, Xt6, prob)
-		if (!m.d)
-			## FIXME? 'rmultinom' is more efficient, but not vectorized ...
-			Xt6 <- tabulate(rep.int(1L:n, Xt6) +
-			                sample(seq.int(0L, length.out = length(delay)),
-			                       size = sum(Xt6),
-			                       replace = TRUE,
-			                       prob = delay),
-			                n)
+		Xt6 <- X[tail, 5L]
+		if (stochastic) {
+			Xt6 <- as.integer(Xt6)
+			if (!m.p)
+				Xt6 <- rbinom(n, Xt6, prob)
+			if (!m.d)
+				## FIXME? 'rmultinom' is more efficient, but not vectorized ...
+				Xt6 <- tabulate(rep.int(1L:n, Xt6) +
+				                sample(seq.int(0L, length.out = length(delay)),
+				                       size = sum(Xt6),
+				                       replace = TRUE,
+				                       prob = delay),
+				                n)
+		} else {
+			if (!m.p)
+				Xt6 <- Xt6 * prob
+			if (!m.d) {
+				d <- length(delay) - 1L
+				Xt6 <- filter(c(double(d), Xt6), delay / sum(delay),
+				              sides = 1)[(d+1L):(d+n)]
+			}
+		}
 		X[tail, 6L] <- Xt6
 		X[  1L, 6L] <- NA_real_
 	}
