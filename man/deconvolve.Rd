@@ -28,5 +28,16 @@ time series.
 \doi{10.1073/pnas.0902958106}
 }
 \examples{
-## TODO
+beta <- function(t) 1e-05
+nu   <- function(t) 0
+mu   <- function(t) 0
+
+S0 <- 5e+04
+I0 <- 1e+03
+constants <- c(gamma = 0.5, S0 = S0, I0 = I0, R0 = 1e+06 - S0 - I0)
+
+set.seed(0)
+n <- 250L
+X <- sir(n, beta, nu, mu, constants, useCompiled = FALSE)
+X # FIXME: many NA, apparently because adaptivetau ignores maxtau ... ??
 }
