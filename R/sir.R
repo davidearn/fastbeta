@@ -24,6 +24,7 @@ function (n, beta, nu, mu, constants, stochastic = TRUE,
 		is.double(delay)
 		length(delay) >= 1L
 		min(delay) >= 0
+		sum(delay) >  0
 	})
 
 	if (stochastic) {
