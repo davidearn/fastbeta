@@ -26,15 +26,15 @@ the recursion
 \deqn{
   \begin{aligned}
   \beta_{t} &= \frac{Z_{t} + Z_{t + 1}}{2 S_{t} I_{t}}
-  S_{t} &= \frac{(1 - \frac{1}{2} \mu_{t - 1}) S_{t - 1} + B_{t} - Z_{t}}{
-    1 + \frac{1}{2} \mu_{t}} \\
-  I_{t} &= \frac{(1 - \frac{1}{2} (\gamma + \mu_{t - 1})) I_{t - 1} + Z_{t}}{
-    1 + \frac{1}{2} (\gamma + \mu_{t})} \\
+  S_{t + 1} &= \frac{(1 - \frac{1}{2} \mu_{t}) S_{t} + B_{t + 1} - Z_{t + 1}}{
+    1 + \frac{1}{2} \mu_{t + 1}} \\
+  I_{t + 1} &= \frac{(1 - \frac{1}{2} (\gamma + \mu_{t})) I_{t} + Z_{t + 1}}{
+    1 + \frac{1}{2} (\gamma + \mu_{t + 1})} \\
   \end{aligned}
 }{
-  beta[t] = (Z[t] + Z[t+1]) / (2 * S[t] * I[t])
-  S[t] = ((1 - 0.5 * mu[t-1]) * S[t-1] + B[t] - Z[t]) / (1 + 0.5 * mu[t])
-  I[t] = ((1 - 0.5 * (gamma + mu[t-1])) * I[t-1] + Z[t]) / (1 + 0.5 * (gamma + mu[t]))
+  beta[t] = (Z[t] + Z[t + 1]) / (2 * S[t] * I[t])
+  S[t + 1] = ((1 - 0.5 * mu[t]) * S[t] + B[t + 1] - Z[t + 1]) / (1 + 0.5 * mu[t + 1])
+  I[t + 1] = ((1 - 0.5 * (gamma + mu[t])) * I[t] + Z[t + 1]) / (1 + 0.5 * (gamma + mu[t + 1]))
 }
 where
 \deqn{
@@ -77,6 +77,9 @@ Fast estimation of time-varying infectious disease transmission rates.
 \doi{10.1371/journal.pcbi.1008124}
 }
 \examples{
+\dontshow{ % for R_DEFAULT_PACKAGES=NULL
+library(stats, pos = "package:base", verbose = FALSE)
+}
 beta <- function(t, a = 1e-01, b = 1e-05)
 	b * (1 + a * cospi(t / 26))
 nu <- function(t) 1e+03
@@ -86,8 +89,10 @@ S0 <- 5e+04
 I0 <- 1e+03
 constants <- c(gamma = 0.5, S0 = S0, I0 = I0, R0 = 1e+06 - S0 - I0)
 
+set.seed(0)
 n <- 250L
-X <- sir(n, beta, nu, mu, constants, stochastic = FALSE)
+X <- sir(n, beta, nu, mu, constants,
+         prob = 0.1, delay = diff(pgamma(0:8, 2.5)))
 plot(X)
 
 series. <- ts(cbind(X[, c("Z", "B")], mu(0)), start = 0)
