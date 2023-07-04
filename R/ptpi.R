@@ -1,6 +1,6 @@
 ptpi <-
 function (series, start, a = 0L, b = nrow(series) - 1L,
-          tol = 1e-06, iter.max = 20L, complete = FALSE)
+          tol = 1e-03, iter.max = 20L, complete = FALSE)
 {
 	stopifnot(exprs = {
 		is.mts(series)
