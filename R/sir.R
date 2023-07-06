@@ -29,6 +29,9 @@ function (n, beta, nu, mu, constants, stochastic = TRUE,
 
 	if (stochastic) {
 
+        tl.params <-
+            (function (maxtau = 1, ...) list(maxtau = maxtau, ...))(...)
+
 		init <- c(S = constants[[2L]],
 		          I = constants[[3L]],
 		          R = constants[[4L]],
@@ -52,7 +55,7 @@ function (n, beta, nu, mu, constants, stochastic = TRUE,
 				params       = NULL,
 				tf           = n,
 				jacobianFunc = Df,
-				tl.params    = list(maxtau = 0.999, ...))
+				tl.params    = tl.params)
 		} else {
 			Dm <- matrix(0, 4L, 6L)
 			Di <- c(1L, 6L, 7L, 12L, 16L, 22L, 28L)
@@ -89,11 +92,20 @@ function (n, beta, nu, mu, constants, stochastic = TRUE,
 				params       = list(beta, nu, mu, constants[[1L]]),
 				tf           = n,
 				jacobianFunc = Df,
-				tl.params    = list(maxtau = 0.999, ...))
+				tl.params    = tl.params)
 		}
 
 		N <- dim(X.)[1L]
 		i <- N - match(0L:n, as.integer(ceiling(X.[N:1L, 1L]))) + 1L
+		if (anyNA(i)) {
+			## MJ: maxtau constrains leaps but not steps => LOCF
+			i[is.na(i)] <- 0L
+			k <- c(which(i[-1L] != i[-length(i)]), length(i)) # run stops
+			ik <- i[k]
+			w <- which(ik == 0L)
+			ik[w] <- ik[w - 1L]
+			i <- rep.int(ik, k - c(0L, k[-length(k)]))
+		}
 		X <- X.[i, 2L:6L, drop = FALSE]
 
 	} else {
@@ -122,7 +134,7 @@ function (n, beta, nu, mu, constants, stochastic = TRUE,
 		} else {
 			Dm <- matrix(0, 5L, 5L)
 			Di <- c(1L, 2L, 5L, 6L, 8L, 10L, 13L)
-			gg <- function(t, x, theta) {
+			gg <- function (t, x, theta) {
 				xS <- x[[1L]]
 				xI <- exp(x[[2L]])
 				xR <- x[[3L]]
@@ -138,7 +150,7 @@ function (n, beta, nu, mu, constants, stochastic = TRUE,
 				       nu,
 				       beta.xS.xI))
 			}
-			Dg <- function(t, x, theta) {
+			Dg <- function (t, x, theta) {
 				xS <- x[[1L]]
 				xI <- exp(x[[2L]])
 				xR <- x[[3L]]
