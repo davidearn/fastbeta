@@ -5,7 +5,8 @@
 %\details{}
 \usage{
 deconvolve(x, prob = 1, delay = 1,
-           start, tol = 1, iter.max = 20L, complete = FALSE)
+           start = 0.125 + c(double(length(delay) - 1L), x),
+           tol = 1, iter.max = 20L, complete = FALSE)
 }
 \arguments{
 \item{x}{.}
@@ -28,16 +29,19 @@ time series.
 \doi{10.1073/pnas.0902958106}
 }
 \examples{
-beta <- function(t) 1e-05
-nu   <- function(t) 0
-mu   <- function(t) 0
-
-S0 <- 5e+04
-I0 <- 1e+03
-constants <- c(gamma = 0.5, S0 = S0, I0 = I0, R0 = 1e+06 - S0 - I0)
+\dontshow{ % for R_DEFAULT_PACKAGES=NULL
+library(stats, pos = "package:base", verbose = FALSE)
+}
+h <- function(x, a = 1, b = 1, c = 0) a * exp(-b * (x - c)^2)
 
 set.seed(0)
 n <- 250L
-X <- sir(n, beta, nu, mu, constants, useCompiled = FALSE)
-X # FIXME: many NA, apparently because adaptivetau ignores maxtau ... ??
+d <- 100L
+delay <- diff(pgamma(0L:(d + 1L), 50))
+x <- rpois(n, h(seq(0, 30, length.out = n), 100, 0.1, 10))
+y <- tabulate(rep.int(1L:n, x) +
+              sample(0L:d, size = sum(x), replace = TRUE, prob = delay),
+              n)
+z <- deconvolve(as.double(y), delay = delay)$dx[-(1L:d)]
+matplot(cbind(x, y, z))
 }
