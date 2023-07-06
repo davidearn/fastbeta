@@ -35,8 +35,6 @@ function(x, prob = 1, delay = 1,
 	q <- filter(u, delay.rev, sides = 1)[i23]
 
 	dx <- start
-	if (min(q) <= 0)
-		dx[q <= 0] <- NaN
 	iter <- 0L
 	stol <- tol * n + 2 * sum(x)
 
