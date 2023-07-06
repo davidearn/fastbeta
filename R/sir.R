@@ -29,8 +29,8 @@ function (n, beta, nu, mu, constants, stochastic = TRUE,
 
 	if (stochastic) {
 
-        tl.params <-
-            (function (maxtau = 1, ...) list(maxtau = maxtau, ...))(...)
+		tl.params <-
+			(function (maxtau = 1, ...) list(maxtau = maxtau, ...))(...)
 
 		init <- c(S = constants[[2L]],
 		          I = constants[[3L]],
