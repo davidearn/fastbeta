@@ -5,7 +5,7 @@
 %\details{}
 \usage{
 deconvolve(x, prob = 1, delay = 1,
-           start = 0.125 + c(double(length(delay) - 1L), x),
+           start = c(rep.int(1, length(delay) - 1L), x),
            tol = 1, iter.max = 20L, complete = FALSE)
 }
 \arguments{
