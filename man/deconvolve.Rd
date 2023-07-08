@@ -37,11 +37,18 @@ h <- function(x, a = 1, b = 1, c = 0) a * exp(-b * (x - c)^2)
 set.seed(0)
 n <- 250L
 d <- 100L
-delay <- diff(pgamma(0L:(d + 1L), 50))
+delay <- diff(pgamma(0L:(d + 1L), 100, 2))
 x <- rpois(n, h(seq(0, 30, length.out = n), 100, 0.1, 10))
 y <- tabulate(rep.int(1L:n, x) +
               sample(0L:d, size = sum(x), replace = TRUE, prob = delay),
               n)
-z <- deconvolve(as.double(y), delay = delay)$dx[-(1L:d)]
-matplot(cbind(x, y, z))
+a <- which.max(delay) - 1L
+start <- c(double(d - a), y, double(a))
+
+## FIXME: want example with more than _zero_ iterations ...
+str(D0 <- deconvolve(y, delay = delay, start = start, complete = FALSE))
+str(D1 <- deconvolve(y, delay = delay, start = start, complete =  TRUE))
+
+matplot(cbind(x, y, D0$dx[-(1L:d)]), ann = FALSE)
+matplot(D1$dx[-(1L:d), ], ann = FALSE)
 }
