@@ -18,7 +18,8 @@ install: $(tarball)
 	R CMD INSTALL --preclean --clean $<
 
 check: $(tarball)
-	R CMD check -o $(rchkdir) $<
+	R CMD check $<
+	mv $(package).Rcheck $(rchkdir)
 
 clean:
 	rm -rf $(tarball) $(rchkdir)
