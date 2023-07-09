@@ -5,8 +5,7 @@
 %\details{}
 \usage{
 deconvolve(x, prob = 1, delay = 1,
-           start = c(rep.int(1, length(delay) - 1L), x),
-           tol = 1, iter.max = 20L, complete = FALSE)
+           start, tol = 1, iter.max = 20L, complete = FALSE)
 }
 \arguments{
 \item{x}{.}
@@ -30,7 +29,8 @@ time series.
 }
 \examples{
 \dontshow{ % for R_DEFAULT_PACKAGES=NULL
-library(stats, pos = "package:base", verbose = FALSE)
+library(   stats, pos = "package:base", verbose = FALSE)
+library(graphics, pos = "package:base", verbose = FALSE)
 }
 h <- function(x, a = 1, b = 1, c = 0) a * exp(-b * (x - c)^2)
 

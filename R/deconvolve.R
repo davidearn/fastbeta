@@ -1,7 +1,6 @@
 deconvolve <-
 function(x, prob = 1, delay = 1,
-         start = c(rep.int(1, length(delay) - 1L), x),
-         tol = 1, iter.max = 20L, complete = FALSE)
+         start, tol = 1, iter.max = 20L, complete = FALSE)
 {
 	stopifnot(exprs = {
 		is.numeric(x)
@@ -16,16 +15,26 @@ function(x, prob = 1, delay = 1,
 		any(length(prob) == c(1L, length(x) + length(delay) - 1L))
 		min(prob) >= 0
 		max(prob) <= 1
-		is.numeric(start)
-		length(start) == length(x) + length(delay) - 1L
-		min(start) >= 0
-		sum(start) >  0
 	})
-
-	storage.mode(x) <- storage.mode(start) <- "double"
+	storage.mode(x) <- "double"
 
 	n <- n. <- length(x)
 	d <- length(delay) - 1L
+
+	if ((delay.sum <- sum(delay)) != 1)
+		delay <- delay / delay.sum
+	if (missing(start)) {
+		d. <- as.integer(sum(0:d * delay))
+		start <- c(double(d - d.), x, double(m))
+	} else {
+		stopifnot(exprs = {
+			is.numeric(start)
+			length(start) == length(x) + length(delay) - 1L
+			min(start) >= 0
+			sum(start) >  0
+		})
+		storage.mode(start) <- "double"
+	}
 
 	if (min(x) == 0) {
 		i <- range(which(x > 0))
@@ -36,16 +45,13 @@ function(x, prob = 1, delay = 1,
 	}
 
 	if (min(prob) == 0)
-		prob[prob == 0] <- NaN
-
-	if ((delay.sum <- sum(delay)) != 1)
-		delay <- delay / delay.sum
-	delay.rev <- delay[(d + 1L):1L]
+		prob[prob == 0] <- NaN # want divide-by-0 to give NaN, not Inf
 
 	u <- rep.int(c(0, 1, 0), c(d, n, d))
 	i2  <- (d + 1L):(d + n)
 	i23 <- (d + 1L):(d + n + d)
 
+	delay.rev <- delay[(d + 1L):1L]
 	q <- filter(u, delay.rev, sides = 1)[i23]
 	q0 <- if (min(q) == 0) which(q == 0) else integer(0L)
 
