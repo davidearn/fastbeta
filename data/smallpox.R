@@ -17,15 +17,6 @@ dd3 <- with(dd2,
                        nday = .difftime(as.integer(to - from), "days"),
                        smallpox = smpx, allcauses = acm, births = birth,
                        row.names = NULL)) # guarantees automatic row names
-if (FALSE) {
-## For a smaller image:
-attr(dd3, "nday") <- local({
-    nday <- dd3[["nday"]]
-    i <- which(nday != 7L)
-    cbind(i, nday[i], deparse.level = 0L)
-})
-dd3[["nday"]] <- NULL
-}
 
 smallpox <- dd3
 save(smallpox, file = "smallpox.rda", version = 3L, compress = "xz")
