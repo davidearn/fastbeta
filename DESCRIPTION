@@ -17,3 +17,5 @@ Authors@R:
 Depends: R (>= 4.2.0)
 Imports: adaptivetau, deSolve, stats
 Suggests: graphics
+LazyData: yes
+BuildResaveData: best

@@ -4,7 +4,8 @@ tarball := $(package)_$(version).tar.gz
 rchkdir := $(package)_$(version).Rcheck
 
 sources := .Rbuildignore DESCRIPTION NAMESPACE \
-	R/*.R man/*.Rd tests/*.R vignettes/*.Rnw vignettes/*.bib vignettes/*.tex
+	R/*.R data/*.rda man/*.Rd tests/*.R \
+	vignettes/*.Rnw vignettes/*.bib vignettes/*.tex
 
 all: build
 
