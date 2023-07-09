@@ -12,7 +12,7 @@ all: build
 build: $(tarball)
 
 $(tarball): $(sources)
-	R CMD build --compact-vignettes=gs+qpdf .
+	R CMD build --resave-data=best --compact-vignettes=gs+qpdf .
 
 install: $(tarball)
 	R CMD INSTALL --preclean --clean $<
