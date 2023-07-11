@@ -24,8 +24,8 @@ function(x, prob = 1, delay = 1,
 	if ((delay.sum <- sum(delay)) != 1)
 		delay <- delay / delay.sum
 	if (missing(start)) {
-		d. <- as.integer(sum(0:d * delay))
-		start <- c(double(d - d.), x, double(m))
+		d. <- which.max(delay) - 1L
+		start <- c(double(d - d.), x, double(d.))
 	} else {
 		stopifnot(exprs = {
 			is.numeric(start)
