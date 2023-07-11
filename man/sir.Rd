@@ -65,13 +65,13 @@ sir(n, beta, nu, mu, constants, stochastic = TRUE,
   be stochastic; see \sQuote{Details}.}
 \item{prob}{a numeric vector of length \code{n} such that
   \code{prob[i]} is the probability that an infection during
-  observation interval \code{i} of \code{n} is eventually reported.
-  \code{prob} of length 1 is recycled.}
+  interval \code{i} is eventually reported.  \code{prob} of
+  length 1 is recycled.}
 \item{delay}{a numeric vector of positive length such that
-  \code{delay[i]} is the probability that an infection is reported
-  after a delay of \code{i-1} time units, given that it is
-  eventually reported.  \code{delay} need not sum to 1 but
-  it must not sum to 0.}
+  \code{delay[i]} is the probability that an infection during
+  interval \code{j} is reported during interval \code{j+i-1},
+  given that it is eventually reported.  \code{delay} need
+  not sum to 1 but must not sum to 0.}
 \item{useCompiled}{a logical indicating if derivatives should be
   computed by compiled \proglang{C} functions rather than by \R{}
   functions (which \emph{may} be \emph{byte}-compiled).  Set to
