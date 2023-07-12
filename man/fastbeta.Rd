@@ -51,7 +51,7 @@ where
 and it is understood that indexing starts at \eqn{t = 0}.
 }
 \usage{
-fastbeta(series, constants)
+fastbeta(series, constants, \dots)
 }
 \arguments{
 \item{series}{a \dQuote{multiple time series} object, inheriting from
@@ -60,6 +60,9 @@ fastbeta(series, constants)
   and the per capita natural mortality rate, in that order.}
 \item{constants}{a numeric vector of the form \code{c(gamma, S0, I0)},
   specifying a removal rate and an initial state, in that order.}
+\item{\dots}{optional arguments passed to \code{\link{deconvolve}},
+  if the first column of \code{series} represents \emph{reported}
+  incidence or mortality rather than incidence.}
 }
 \value{
 A \dQuote{multiple time series} object, inheriting from class
