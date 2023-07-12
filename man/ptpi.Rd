@@ -30,7 +30,7 @@ The estimated value of the initial susceptible population size is
 }
 \usage{
 ptpi(series, a = 0L, b = nrow(series) - 1L,
-     start, tol = 1e-03, iter.max = 20L, complete = FALSE)
+     start, tol = 1e-03, iter.max = 32L, complete = FALSE)
 }
 \arguments{
 \item{series}{a \dQuote{multiple time series} object, inheriting from

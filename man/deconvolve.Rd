@@ -10,7 +10,7 @@ of the time to reporting.
 %\details{}
 \usage{
 deconvolve(x, prob = 1, delay = 1,
-           start, tol = 1, iter.max = 20L, complete = FALSE)
+           start, tol = 1, iter.max = 32L, complete = FALSE)
 }
 \arguments{
 \item{x}{a numeric vector of length \code{n} giving the number of
@@ -62,23 +62,28 @@ time series.
 library(   stats, pos = "package:base", verbose = FALSE)
 library(graphics, pos = "package:base", verbose = FALSE)
 }
-h <- function(x, a = 1, b = 1, c = 0) a * exp(-b * (x - c)^2)
 
 set.seed(0)
-n <- 250L
-d <- 100L
-delay <- diff(pgamma(0L:(d + 1L), 100, 2))
-x <- rpois(n, h(seq(0, 30, length.out = n), 100, 0.1, 10))
-y <- tabulate(rep.int(1L:n, x) +
-              sample(0L:d, size = sum(x), replace = TRUE, prob = delay),
-              n)
-a <- which.max(delay) - 1L
-start <- c(double(d - a), y, double(a))
+n <- 200L
+d <- 50L
+q <- 0.025
+prob <- runif(d + n, q - 0.005, q + 0.005)
+delay <- diff(pgamma(0L:(d + 1L), 5, 0.2))
 
-## FIXME: want example with more than _zero_ iterations ...
-str(D0 <- deconvolve(y, delay = delay, start = start, complete = FALSE))
-str(D1 <- deconvolve(y, delay = delay, start = start, complete =  TRUE))
+h <- function(x, a = 1, b = 1, c = 0) a * exp(-b * (x - c)^2)
+ans <- floor(h(seq(-60, 60, length.out = d + n), 1000, 0.001))
 
-matplot(cbind(x, y, D0$dx[-(1L:d)]), ann = FALSE)
-matplot(D1$dx[-(1L:d), ], ann = FALSE)
+x0 <- rbinom(d + n, ans, prob)
+x <- tabulate(rep.int(1L:(d + n), x0) +
+              sample(0L:d, size = sum(x0), replace = TRUE, prob = delay),
+              d + n)[-(1:d)]
+
+str(D0 <- deconvolve(x, prob, delay, complete = FALSE))
+str(D1 <- deconvolve(x, prob, delay, complete =  TRUE))
+
+matplot(cbind(x0, c(rep.int(NA, d), x), D0$value * prob, ans * q),
+        type = c("p", "p", "p", "l"), pch = c(16L, 1L, 16L, NA),
+        lwd = c(NA, NA, NA, 3L), col = c(1L, 1L, 2L, 4L))
+plot(0L:D1$iter, D1$chisq, xlab = "iterations", ylab = quote(chi^2))
+abline(h = 1, lty = 2L)
 }

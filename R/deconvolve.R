@@ -1,6 +1,6 @@
 deconvolve <-
 function(x, prob = 1, delay = 1,
-         start, tol = 1, iter.max = 20L, complete = FALSE)
+         start, tol = 1, iter.max = 32L, complete = FALSE)
 {
 	stopifnot(exprs = {
 		is.numeric(x)
@@ -84,7 +84,7 @@ function(x, prob = 1, delay = 1,
 			r. <- `[<-`(matrix(NaN, d + n., iter + 1L), i[1L]:i[2L], , r.)
 		if (!missing(prob))
 			r. <- r. / prob
-		list(dx = r., chisq = (s. - 2 * sum(x)) / n, iter = iter)
+		list(value = r., chisq = (s. - 2 * sum(x)) / n, iter = iter)
 	} else {
 		repeat {
 			if (length(q0))
@@ -102,6 +102,6 @@ function(x, prob = 1, delay = 1,
 			r <- `[<-`(rep.int(NaN, d + n.), i[1L]:i[2L], r)
 		if (!missing(prob))
 			r <- r / prob
-		list(dx = r, chisq = (s - 2 * sum(x)) / n, iter = iter)
+		list(value = r, chisq = (s - 2 * sum(x)) / n, iter = iter)
 	}
 }
