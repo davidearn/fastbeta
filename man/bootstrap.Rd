@@ -7,10 +7,10 @@
 bootstrap(r, series, constants, ...)
 }
 \arguments{
-\item{r}{.}
-\item{series}{.}
-\item{constants}{.}
-\item{\dots}{.}
+\item{r}{the number of replications.}
+\item{series, constants}{.}
+\item{\dots}{optional arguments passed to \code{\link{sir}},
+  used to simulate new time series data.}
 }
 %\value{}
 %\seealso{}
