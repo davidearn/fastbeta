@@ -37,7 +37,7 @@ SEXP R_fastbeta(SEXP series, SEXP constants)
 	if (n >= 0) {
 		double *r0 = REAL(res), *r1 = r0 + n + 1, *r2 = r1 + n + 1,
 			*cc = REAL(constants);
-		r0[0] = NA_REAL;
+		r0[n] = NA_REAL;
 		r1[0] = cc[1];
 		r2[0] = cc[2];
 		if (n >= 1) {
