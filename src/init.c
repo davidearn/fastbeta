@@ -18,8 +18,8 @@ void R_desir_jac(int *, double *, double *, int *, int *, double *, int *,
 
 static const R_CallMethodDef CallMethods[] =
 {
-	{ "R_fastbeta",         (DL_FUNC) &R_fastbeta,         6 },
-	{ "R_ptpi",             (DL_FUNC) &R_ptpi,             9 },
+	{ "R_fastbeta",         (DL_FUNC) &R_fastbeta,         2 },
+	{ "R_ptpi",             (DL_FUNC) &R_ptpi,             7 },
 
 	{ "R_adsir_initialize", (DL_FUNC) &R_adsir_initialize, 4 },
 	{ "R_adsir_finalize",   (DL_FUNC) &R_adsir_finalize,   0 },
