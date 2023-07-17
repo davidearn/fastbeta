@@ -27,7 +27,7 @@ function (series, a = 0L, b = nrow(series) - 1L,
 		length(complete) == 1L
 		!is.na(complete)
 	})
-    if (...length() > 0L) {
+	if (...length() > 0L) {
 		x <- series[, 1L]
 		y <- deconvolve(x = x, ...)[["value"]]
 		series[, 1L] <- y[seq.int(to = length(y), length.out = length(x))]
