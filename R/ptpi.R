@@ -7,13 +7,13 @@ function (series, a = 0L, b = nrow(series) - 1L,
 		is.double(series)
 		ncol(series) == 3L
 		min(0, series, na.rm = TRUE) >= 0
-		is.integer(a)
+		is.numeric(a)
 		length(a) == 1L
-		a >= 0L
-		is.integer(b)
+		a >= tsp(series)[1L]
+		is.numeric(b)
 		length(b) == 1L
-		b < nrow(series)
-		a < b
+		b <= tsp(series)[2L]
+		b - a >= 1 / tsp(series)[3L]
 		is.numeric(start)
 		length(start) == 1L
 		start >= 0
@@ -27,11 +27,21 @@ function (series, a = 0L, b = nrow(series) - 1L,
 		length(complete) == 1L
 		!is.na(complete)
 	})
+	tsp <- tsp(series)
+	a <- as.integer(round((a - tsp[1L]) * tsp[3L]))
+	b <- as.integer(round((b - tsp[1L]) * tsp[3L]))
+	if (a > b)
+		stop("'a' is greater than 'b' after rounding; should never happen ...")
 	if (...length() > 0L) {
 		x <- series[, 1L]
 		y <- deconvolve(x = x, ...)[["value"]]
 		series[, 1L] <- y[seq.int(to = length(y), length.out = length(x))]
 	}
 	storage.mode(start) <- "double"
-	.Call(R_ptpi, series, a, b, start, tol, iter.max, complete)
+	r <- .Call(R_ptpi, series, a, b, start, tol, iter.max, complete)
+	if (complete) {
+		oldClass(r[["X"]]) <- oldClass(series)
+		tsp(r[["X"]]) <- c(tsp[1L] + c(a, b) / tsp[3L], tsp[3L])
+	}
+	r
 }

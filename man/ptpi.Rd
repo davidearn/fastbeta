@@ -37,9 +37,11 @@ ptpi(series, a = 0L, b = nrow(series) - 1L,
   class \code{\link[=ts]{mts}}, with three columns storing
   (\dQuote{parallel}, equally spaced) time series of incidence, births,
   and the per capita natural mortality rate, in that order.}
-\item{a}{the 0-index of the first peak in the incidence time series.}
-\item{b}{the 0-index of the last peak in the incidence time series
-  that is in phase with the first.}
+\item{a}{the time of the first peak in the incidence time series.
+  It is rounded internally to generate a 0-index of rows of \code{series}.}
+\item{b}{the time of the last peak in the incidence time series
+  that is in phase with the first.
+  It is rounded internally to generate a 0-index of rows of \code{series}.}
 \item{start}{a starting value for the number of susceptible individuals
   at index \code{a}.}
 \item{tol}{a tolerance indicating a stopping condition;
@@ -57,7 +59,8 @@ A list with elements:
 \item{value}{the estimated value of the initial susceptible population size.}
 \item{delta}{the relative difference computed in the last iteration.}
 \item{iter}{the number of iterations performed.}
-\item{X}{if \code{complete = TRUE}, then a matrix with \code{b-a+1} rows
+\item{X}{if \code{complete = TRUE}, then a \dQuote{multiple time series}
+  object, inheriting from class \code{\link[=ts]{mts}}, with \code{b-a+1} rows
   and \code{iter} columns storing the value of \eqn{S_{t}^{(i)}}{S[t, i]}
   for \eqn{t = a, \ldots, b}
   and \eqn{i = 0, \ldots, \mathtt{iter} - 1}{i = 0, \ldots, iter - 1}.}
@@ -84,12 +87,21 @@ I0 <- 1e+03
 constants <- c(gamma = 0.5, S0 = S0, I0 = I0, R0 = 1e+06 - S0 - I0)
 
 set.seed(0)
-n <- 250L
+n <- 2500L
 X <- sir(n, beta, nu, mu, constants)
 plot(X)
 
-series. <- ts(cbind(X[, c("Z", "B")], mu(0)), start = 0)
-str(L0 <- ptpi(series., start = 4e+04, complete = FALSE))
-str(L1 <- ptpi(series., start = 4e+04, complete =  TRUE))
-matplot(L1$X, type = "l")
+## Discard transient
+X <- window(X, start = 2250)
+plot(X)
+
+series. <- ts(cbind(unclass(X[, c("Z", "B")]), mu = mu(0)),
+              start = tsp(X)[1L])
+plot(series.[, "Z"])
+a <- 2295; b <- 2455
+abline(v = c(a, b), lty = 2)
+
+str(L0 <- ptpi(series., a = a, b = b, start = 4e+04, complete = FALSE))
+str(L1 <- ptpi(series., a = a, b = b, start = 4e+04, complete =  TRUE))
+plot(L1$X, plot.type = "single")
 }
