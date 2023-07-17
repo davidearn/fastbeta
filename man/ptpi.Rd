@@ -30,7 +30,7 @@ The estimated value of the initial susceptible population size is
 }
 \usage{
 ptpi(series, a = 0L, b = nrow(series) - 1L,
-     start, tol = 1e-03, iter.max = 32L, complete = FALSE)
+     start, tol = 1e-03, iter.max = 32L, complete = FALSE, \dots)
 }
 \arguments{
 \item{series}{a \dQuote{multiple time series} object, inheriting from
@@ -48,6 +48,9 @@ ptpi(series, a = 0L, b = nrow(series) - 1L,
 \item{complete}{a logical flag indicating if the result should
   preserve the number of susceptible individuals from index \code{a}
   to index \code{b} in each iteration.}
+\item{\dots}{optional arguments passed to \code{\link{deconvolve}},
+  if the first column of \code{series} represents \emph{reported}
+  incidence or mortality rather than incidence.}
 }
 \value{
 A list with elements:

@@ -1,6 +1,6 @@
 ptpi <-
 function (series, a = 0L, b = nrow(series) - 1L,
-          start, tol = 1e-03, iter.max = 32L, complete = FALSE)
+          start, tol = 1e-03, iter.max = 32L, complete = FALSE, ...)
 {
 	stopifnot(exprs = {
 		is.mts(series)
@@ -27,6 +27,11 @@ function (series, a = 0L, b = nrow(series) - 1L,
 		length(complete) == 1L
 		!is.na(complete)
 	})
+    if (...length() > 0L) {
+		x <- series[, 1L]
+		y <- deconvolve(x = x, ...)[["value"]]
+		series[, 1L] <- y[seq.int(to = length(y), length.out = length(x))]
+	}
 	storage.mode(start) <- "double"
 	.Call(R_ptpi, series, a, b, start, tol, iter.max, complete)
 }
