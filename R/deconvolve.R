@@ -1,7 +1,7 @@
 ## FIXME: return fast if (missing(delay) || length(delay) == 1L)?
 deconvolve <-
-function(x, prob = 1, delay = 1,
-         start, tol = 1, iter.max = 32L, complete = FALSE)
+function (x, prob = 1, delay = 1,
+          start, tol = 1, iter.max = 32L, complete = FALSE)
 {
 	stopifnot(exprs = {
 		is.numeric(x)
