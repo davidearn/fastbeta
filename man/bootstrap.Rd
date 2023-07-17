@@ -57,6 +57,6 @@ series. <- ts(cbind(unclass(X[, c("Z", "B")]), mu = mu(0)), start = 0)
 series.[1L, 1L:2L] <- series.[2L, 1L:2L]
 constants. <- constants[1:3]
 R <- bootstrap(10L, series., constants.)
-plot(R[, 1L], ylim = c(0, 5e-05), lwd = 2)
-matlines(R[, -1L], lty = 1, col = "#00000010")
+matplot(R[, -1L], ylim = c(0, 4e-05), type = "l", lty = 1, col = "#00000010")
+lines(R[, 1L], lwd = 2)
 }

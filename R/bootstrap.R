@@ -44,9 +44,9 @@ function (r, series, constants, ...)
 
 	n <- nrow(series) - 1L
 	s <- as.double(0L:n)
-	beta <- approxfun(s, beta., method = "linear", rule = 2:1, ties = "ordered")
-	nu   <- approxfun(s,   nu., method = "constant", rule = 2:1, ties = "ordered")
-	mu   <- approxfun(s,   mu., method = "linear", rule = 2:1, ties = "ordered")
+	beta <- approxfun(s, beta., method =   "linear", rule = 2L, ties = "ordered")
+	nu   <- approxfun(s,   nu., method = "constant", rule = 2L, ties = "ordered")
+	mu   <- approxfun(s,   mu., method =   "linear", rule = 2L, ties = "ordered")
 	constants0 <- c(constants, 0) # as removed population size is irrelevant
 
 	R <- simplify2array(c(list(beta.), replicate(r, simplify = FALSE, {
