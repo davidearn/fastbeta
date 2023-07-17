@@ -2,7 +2,7 @@
 \alias{fastbeta}
 \title{Estimate a time-varying infectious disease transmission rate}
 \description{
-Generates a discrete time estimate of the transmission rate
+Generates a discrete time estimate of a transmission rate
 \eqn{\beta(t)} from an equally spaced incidence time series
 and other data.
 }
@@ -25,7 +25,7 @@ relative to the duration of an observation interval, then computing
 the recursion
 \deqn{
   \begin{aligned}
-  \beta_{t} &= \frac{Z_{t} + Z_{t + 1}}{2 S_{t} I_{t}}
+  \beta_{t} &= \frac{Z_{t} + Z_{t + 1}}{2 S_{t} I_{t}} \\
   S_{t + 1} &= \frac{(1 - \frac{1}{2} \mu_{t}) S_{t} + B_{t + 1} - Z_{t + 1}}{
     1 + \frac{1}{2} \mu_{t + 1}} \\
   I_{t + 1} &= \frac{(1 - \frac{1}{2} (\gamma + \mu_{t})) I_{t} + Z_{t + 1}}{
@@ -67,9 +67,10 @@ fastbeta(series, constants, \dots)
 \value{
 A \dQuote{multiple time series} object, inheriting from class
 \code{\link[=ts]{mts}}, with three columns (named \code{beta},
-\code{S}, and \code{I}) storing the result of the recursion
-described in \sQuote{Details}.  It is completely parallel to
-argument \code{series}, having the same \code{\link{tsp}} attribute.
+\code{S}, and \code{I}) storing the result of the recursion described
+in \sQuote{Details}.
+It is completely parallel to argument \code{series}, having the same
+\code{\link{tsp}} attribute.
 }
 %\seealso{}
 \references{
@@ -92,14 +93,26 @@ S0 <- 5e+04
 I0 <- 1e+03
 constants <- c(gamma = 0.5, S0 = S0, I0 = I0, R0 = 1e+06 - S0 - I0)
 
-set.seed(0)
+set.seed(1)
 n <- 250L
-X <- sir(n, beta, nu, mu, constants,
-         prob = 0.1, delay = diff(pgamma(0:8, 2.5)))
+prob <- 0.1
+delay <- diff(pgamma(0:8, 2.5))
+X <- sir(n, beta, nu, mu, constants, prob = prob, delay = delay)
+
+## Do discard "incomplete" rows from simulation; see help("sir")
+X <- window(X, start = length(delay))
 plot(X)
 
-series. <- ts(cbind(X[, c("Z", "B")], mu(0)), start = 0)
-constants. <- constants[1:3]
-Y <- fastbeta(series., constants.)
+## Now suppose that you have perfect knowledge except for incidence,
+## which you observe imperfectly
+series. <- ts(cbind(unclass(X[, c("Z.obs", "B")]), mu = mu(0)),
+              start = tsp(X)[1L])
+constants. <- replace(constants[1:3], 2:3, X[1L, c("S", "I")])
+cbind(original = constants[1:3], updated = constants.)
+
+Y <- fastbeta(series., constants., prob = prob, delay = delay)
 plot(Y)
+
+plot(Y[, "beta"], ylab = "Transmission rate")
+lines(beta(time(Y)), col = "red") # the "truth"
 }
