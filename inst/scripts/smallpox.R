@@ -18,5 +18,22 @@ dd3 <- with(dd2,
                        smallpox = smpx, allcauses = acm, births = birth,
                        row.names = NULL)) # guarantees automatic row names
 
-smallpox <- dd3
+## One discrepancy that we don't ignore:
+table(dd3[["nday"]])
+r <- 11366L
+f3 <- .Date(as.integer(as.Date(c("1881-12-17", "1882-12-24", "1882-01-01"))))
+with(dd3, {
+stopifnot(exprs = {
+	identical(sum(nday <= 0L),1L)
+	identical(which(nday <= 0L), r)
+	identical(from[r + (-1L:1L)], f3)
+})
+})
+
+dd4 <- dd3
+dd4[r, "from"] <- dd4[r - 1L, "from"] + 7L
+dd4[r, "nday"] <- 8L
+table(dd4[["nday"]])
+
+smallpox <- dd4
 save(smallpox, file = "smallpox.rda", version = 3L, compress = "xz")
