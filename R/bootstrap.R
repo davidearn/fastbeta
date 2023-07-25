@@ -52,7 +52,7 @@ function (r, series, constants, ...)
 	R <- simplify2array(c(list(beta.), replicate(r, simplify = FALSE, {
 		X <- sir.(n = n, beta = beta, nu = nu, mu = mu,
 		          constants = constants0, ...)
-		series[, 1L:2L] <<- X[, c(4L, ncol(X))]
+		series[, 1L:2L] <<- X[, c(ncol(X), 4L)]
 		fastbeta.(series = series, constants = constants, ...)[, 1L]
 	})))
 	oldClass(R) <- oldClass(series)

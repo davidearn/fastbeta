@@ -59,6 +59,7 @@ plot(X)
 series. <- ts(cbind(unclass(X[, c("Z", "B")]), mu = mu(0)), start = 0)
 series.[1L, 1L:2L] <- series.[2L, 1L:2L]
 constants. <- constants[1:3]
+constants.[2:3] <- floor(X[1L, c("S", "I")])
 R <- bootstrap(10L, series., constants.)
 plot(R[, -1L], plot.type = "single", ylim = c(0, 4e-05), col = "#00000010")
 lines(R[, 1L], lwd = 2)
