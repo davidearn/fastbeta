@@ -86,22 +86,26 @@ S0 <- 5e+04
 I0 <- 1e+03
 constants <- c(gamma = 0.5, S0 = S0, I0 = I0, R0 = 1e+06 - S0 - I0)
 
-set.seed(0)
 n <- 2500L
-X <- sir(n, beta, nu, mu, constants)
+X <- sir(n, beta, nu, mu, constants, stochastic = FALSE)
 plot(X)
 
-## Discard transient
+## Discard the transient
 X <- window(X, start = 2250)
 plot(X)
 
 series. <- ts(cbind(unclass(X[, c("Z", "B")]), mu = mu(0)),
               start = tsp(X)[1L])
 plot(series.[, "Z"])
-a <- 2295; b <- 2455
+a <- 2296; b <- 2452
 abline(v = c(a, b), lty = 2)
 
 str(L0 <- ptpi(series., a = a, b = b, start = 4e+04, complete = FALSE))
 str(L1 <- ptpi(series., a = a, b = b, start = 4e+04, complete =  TRUE))
-plot(L1$X, plot.type = "single")
+plot(L1$X, plot.type = "single", xlim = tsp(X)[1L:2L])
+lines(X[, "S"], col = "red", lwd = 4)
+abline(h = L1$value, col = "blue", lwd = 4)
+
+## The relative error:
+(L1$value - X[1L, "S"]) / X[1L, "S"]
 }
