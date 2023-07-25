@@ -37,5 +37,6 @@ Patterns of smallpox mortality in London, England, over three centuries.
 }
 \examples{
 str(smallpox)
+table(smallpox[["nday"]]) # not all 7 days, hence:
 plot(7 * smallpox / as.double(nday) ~ from, smallpox, type = "l")
 }
