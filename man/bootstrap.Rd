@@ -48,15 +48,18 @@ S0 <- 5e+04
 I0 <- 1e+03
 constants <- c(gamma = 0.5, S0 = S0, I0 = I0, R0 = 1e+06 - S0 - I0)
 
-set.seed(0)
-n <- 250L
-X <- sir(n, beta, nu, mu, constants)
+n <- 2500L
+X <- sir(n, beta, nu, mu, constants, stochastic = FALSE)
+plot(X)
+
+## Discard the transient
+X <- window(X, start = 2250)
 plot(X)
 
 series. <- ts(cbind(unclass(X[, c("Z", "B")]), mu = mu(0)), start = 0)
 series.[1L, 1L:2L] <- series.[2L, 1L:2L]
 constants. <- constants[1:3]
 R <- bootstrap(10L, series., constants.)
-matplot(R[, -1L], ylim = c(0, 4e-05), type = "l", lty = 1, col = "#00000010")
+plot(R[, -1L], plot.type = "single", ylim = c(0, 4e-05), col = "#00000010")
 lines(R[, 1L], lwd = 2)
 }
