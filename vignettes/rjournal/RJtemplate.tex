@@ -1,0 +1,61 @@
+% !TeX root = RJwrapper.tex
+\title{Capitalized Title Here}
+\author{by Mikael Jagan, David J. D. Earn and Author Three}
+
+\maketitle
+
+\abstract{
+An abstract of less than 150 words.
+}
+
+\section{Section title in sentence case}
+
+Introductory section which may include references in parentheses
+\citep{R}, or cite a reference such as \citet{R} in the text.
+
+\section{Another section}
+
+This section may contain a figure such as Figure~\ref{figure:rlogo}.
+
+\begin{figure}[htbp]
+  \centering
+  \includegraphics{Rlogo-5}
+  \caption{The logo of R.}
+  \label{figure:rlogo}
+\end{figure}
+
+\section{Another section}
+
+There will likely be several sections, perhaps including code snippets, such as:
+
+\begin{example}
+  x <- 1:10
+  result <- myFunction(x)
+\end{example}
+
+\section{Summary}
+
+This file is only a basic article template. For full details of \emph{The R Journal} style and information on how to prepare your article for submission, see the \href{https://journal.r-project.org/share/author-guide.pdf}{Instructions for Authors}.
+
+\bibliography{RJreferences}
+
+\address{Mikael Jagan\\
+  McMaster University\\
+  1280 Main St. W., Hamilton, ON  L8S 4K1\\
+  Canada\\
+  (0000-0002-3542-2938)\\
+  \email{jaganmn@mcmaster.ca}}
+
+\address{David J. D. Earn\\
+  McMaster University\\
+  1280 Main St. W., Hamilton, ON  L8S 4K1\\
+  Canada\\
+  (0000-0002-7562-1341)\\
+  \email{earn@math.mcmaster.ca}}
+
+\address{Author Three\\
+  Affiliation\\
+  Address\\
+  Country\\
+  (ORCiD if desired)\\
+  \email{author3@work}}
