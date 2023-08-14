@@ -77,10 +77,10 @@ Fast estimation of time-varying infectious disease transmission rates.
 \dontshow{ % for R_DEFAULT_PACKAGES=NULL
 library(graphics, pos = "package:base", verbose = FALSE)
 }
-beta <- function(t, a = 1e-01, b = 1e-05)
+beta <- function (t, a = 1e-01, b = 1e-05)
 	b * (1 + a * cospi(t / 26))
-nu <- function(t) 1e+03
-mu <- function(t) 1e-03
+nu <- function (t) 1e+03
+mu <- function (t) 1e-03
 
 S0 <- 5e+04
 I0 <- 1e+03

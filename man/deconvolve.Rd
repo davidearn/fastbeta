@@ -69,7 +69,7 @@ p <- 0.1
 prob <- plogis(rlogis(d + n, location = qlogis(p), scale = 0.1))
 delay <- diff(pgamma(0L:(d + 1L), 12, 0.4))
 
-h <- function(x, a = 1, b = 1, c = 0) a * exp(-b * (x - c)^2)
+h <- function (x, a = 1, b = 1, c = 0) a * exp(-b * (x - c)^2)
 ans <- floor(h(seq(-60, 60, length.out = d + n), a = 1000, b = 0.001))
 
 x0 <- rbinom(d + n, ans, prob)
