@@ -18,11 +18,11 @@ delay <- diff(pgamma(0:8, 2.5))
 n <- 2500L
 
 set.seed(0)
-X <- window(sir(n, beta, nu, mu, constants, prob = prob, delay = delay),
-            start = 2250)
+X1 <- window(sir(n, beta, nu, mu, constants, prob = prob, delay = delay),
+             start = 2250)
 
-series. <- ts(cbind(unclass(X[, c("Z", "B")]), mu = mu(0)),
-              start = tsp(X)[1L])
+series. <- ts(cbind(unclass(X1[, c("Z", "B")]), mu = mu(0)),
+              start = tsp(X1)[1L])
 
 a <- 2296; b <- 2452
 str(L0 <- ptpi(series., a = a, b = b, start = 4e+04, complete = FALSE))
