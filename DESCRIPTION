@@ -5,7 +5,8 @@ Title: Fast Estimation of Time-Varying Infectious Disease
 	Transmission Rates
 Description: Methods for estimating time-varying infectious disease
 	transmission rates from disease incidence time series, based on
-	discretizations of an SIR model.
+	discretizations of an SIR model, as analyzed in Jagan et al. (2020)
+	<doi:10.1371/journal.pcbi.1008124>.
 License: GPL (>= 2)
 URL: https://github.com/davidearn/fastbeta
 BugReports: https://github.com/davidearn/fastbeta/issues
