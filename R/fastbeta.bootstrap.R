@@ -1,4 +1,4 @@
-bootstrap <-
+fastbeta.bootstrap <-
 function (r, series, constants, ...)
 {
 	stopifnot(exprs = {
@@ -55,9 +55,32 @@ function (r, series, constants, ...)
 		series[, 1L:2L] <<- X[, c(ncol(X), 4L)]
 		fastbeta.(series = series, constants = constants, ...)[, 1L]
 	})))
-	oldClass(R) <- oldClass(series)
+	oldClass(R) <- c("fastbeta.bootstrap", oldClass(series))
 	tsp(R) <- tsp(series)
 	R
+}
+
+## FIXME: don't hard code graphical parameters
+plot.fastbeta.bootstrap <-
+function (x, y, level = NULL, ...)
+{
+	cl <- oldClass(x)
+	oldClass(x) <- cl[cl != "fastbeta.bootstrap"]
+	if (is.null(level)) {
+		plot(x, plot.type = "single", col = "#00000010", lwd = 1, ...)
+		lines(x[, 1L], col = "#000000FF", lwd = 2)
+	} else {
+		stopifnot(is.double(level), length(level) == 1L, level >= 0, level <= 1)
+        alpha <- 1 - level
+		qq <- t.default(apply(x[, -1L], 1L, quantile,
+		                      probs = c(0.5 * alpha, 1 - 0.5 * alpha),
+		                      names = FALSE, na.rm = TRUE))
+		tsp. <- tsp(x)
+		x <- cbind(x[, 1L], qq, deparse.level = 0L)
+		tsp(x) <- tsp.
+		plot(x, plot.type = "single", col = "#000000FF", lty = c(1, 2, 2), ...)
+	}
+	invisible(NULL)
 }
 
 if (FALSE) {

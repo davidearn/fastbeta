@@ -1,5 +1,5 @@
-\name{bootstrap}
-\alias{bootstrap}
+\name{fastbeta.bootstrap}
+\alias{fastbeta.bootstrap}
 \title{Parametric bootstrapping}
 \description{
 A simple wrapper around \code{\link{fastbeta}}, using it to generate
@@ -11,7 +11,7 @@ estimate.
 }
 %\details{}
 \usage{
-bootstrap(r, series, constants, \dots)
+fastbeta.bootstrap(r, series, constants, \dots)
 }
 \arguments{
 \item{r}{the number of replications.}
@@ -36,8 +36,7 @@ It is completely parallel to argument \code{series}, having the same
 %\references{}
 \examples{
 \dontshow{ % for R_DEFAULT_PACKAGES=NULL
-library(   stats, pos = "package:base", verbose = FALSE)
-library(graphics, pos = "package:base", verbose = FALSE)
+library(stats, pos = "package:base", verbose = FALSE)
 }
 beta <- function (t, a = 1e-01, b = 1e-05)
 	b * (1 + a * cospi(t / 26))
@@ -60,7 +59,7 @@ series. <- ts(cbind(unclass(X[, c("Z", "B")]), mu = mu(0)), start = 0)
 series.[1L, 1L:2L] <- series.[2L, 1L:2L]
 constants. <- constants[1:3]
 constants.[2:3] <- floor(X[1L, c("S", "I")])
-R <- bootstrap(10L, series., constants.)
-plot(R[, -1L], plot.type = "single", ylim = c(0, 4e-05), col = "#00000010")
-lines(R[, 1L], lwd = 2)
+R <- fastbeta.bootstrap(10L, series., constants.)
+plot(R)
+plot(R, level = 0.95)
 }

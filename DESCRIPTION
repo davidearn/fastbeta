@@ -16,6 +16,6 @@ Authors@R:
 	         role = c("aut", "cre"),
 	         comment = c(ORCID = "0000-0002-3542-2938")))
 Depends: R (>= 4.2.0)
-Imports: adaptivetau, deSolve, stats
-Suggests: graphics, tools
+Imports: adaptivetau, deSolve, graphics, stats
+Suggests: tools
 LazyData: yes
