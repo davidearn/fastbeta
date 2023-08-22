@@ -3,5 +3,6 @@ export(deconvolve, fastbeta, fastbeta.bootstrap, ptpi, sir)
 S3method(plot, fastbeta.bootstrap)
 importFrom(adaptivetau, ssa.adaptivetau)
 importFrom(deSolve, ode)
-importFrom(graphics, lines)
-importFrom(stats, approxfun, filter, is.mts, quantile, rbinom, ts, tsp, "tsp<-")
+importFrom(graphics, lines, par, polygon)
+importFrom(stats, approxfun, filter, is.mts, quantile, rbinom,
+           time, ts, tsp, "tsp<-")

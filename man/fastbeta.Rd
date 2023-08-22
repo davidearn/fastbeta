@@ -98,7 +98,8 @@ constants <- c(gamma = a[["gamma"]],
                S0 = sir.e01[[1L, "S"]],
                I0 = sir.e01[[1L, "I"]])
 
-X <- fastbeta(series, constants, prob = a[["prob"]], delay = a[["delay"]])
+X <- fastbeta(series, constants,
+              prob = a[["prob"]], delay = a[["delay"]])
 str(X)
 plot(X)
 

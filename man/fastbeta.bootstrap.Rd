@@ -52,7 +52,8 @@ constants <- c(gamma = a[["gamma"]],
                S0 = sir.e01[[1L, "S"]],
                I0 = sir.e01[[1L, "I"]])
 
-R <- fastbeta.bootstrap(10L, series, constants)
+R <- fastbeta.bootstrap(10L, series, constants,
+                        prob = a[["prob"]], delay = a[["delay"]])
 str(R)
 plot(R)
 plot(R, level = 0.95)
