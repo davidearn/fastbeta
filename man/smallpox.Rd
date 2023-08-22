@@ -26,7 +26,7 @@ to the original source documents is provided in the reference.
 
 A script generating the \code{smallpox} data frame from a CSV
 file accompanying the reference is available as
-\code{\link{system.file}("data", "smallpox.R", package = "fastbeta")}.
+\code{\link{system.file}("scripts", "smallpox.R", package = "fastbeta")}.
 }
 \references{
 Krylova, O. & Earn, D. J. D. (2020).
