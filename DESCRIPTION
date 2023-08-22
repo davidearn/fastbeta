@@ -18,4 +18,3 @@ Authors@R:
 Depends: R (>= 4.2.0)
 Imports: adaptivetau, deSolve, graphics, stats
 Suggests: tools
-LazyData: yes
