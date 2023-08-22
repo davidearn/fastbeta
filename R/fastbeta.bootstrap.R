@@ -61,7 +61,8 @@ function (r, series, constants, ...)
 }
 
 plot.fastbeta.bootstrap <-
-function (x, y, level = NULL, col = NULL, lwd = NULL, ...)
+function (x, y, level = NULL,
+          col = c("#FF0000FF", "#7F7F7F40"), lwd = c(2, 1), ...)
 {
 	cl <- oldClass(x)
 	oldClass(x) <- cl[cl != "fastbeta.bootstrap"]
@@ -79,37 +80,33 @@ function (x, y, level = NULL, col = NULL, lwd = NULL, ...)
 	}
 	col <- rep_len(if (is.null(col)) par("col") else col, 2L)
 	lwd <- rep_len(if (is.null(lwd)) par("lwd") else lwd, 2L)
-	n <- length(s <- as.vector(time(x)))
+	s <- as.vector(time(x))
 	if (is.null(level))
 		for (i in seq.int(2L, length.out = ncol(x) - 1L))
 			lines(s, x[, i], col = col[2L], lwd = lwd[2L])
 	else {
 		doPolygon <- TRUE
-		s. <- s
-		y. <- y
-		if (anyNA(y.)) {
-			y.na <- { tmp <- is.na(y.); tmp[, 1L] | tmp[, 2L] }
+		n <- length(t <- s)
+		if (anyNA(y)) {
+			y.na <- { tmp <- is.na(y); tmp[, 1L] | tmp[, 2L] }
 			if (all(y.na)) {
-				warning("found zero finite vertices; suppressing polygon")
+				warning("suppressing polygon due to NA vertices")
 				doPolygon <- FALSE
 			} else {
 				i1 <-           which.min(y.na      )
 				i2 <- n + 1L -  which.min(y.na[n:1L])
 				i <- i1:i2
 				if (any(y.na[i])) {
-					warning("found non-terminal, non-finite vertices; suppressing polygon")
+					warning("suppressing polygon due to NA vertices")
 					doPolygon <- FALSE
 				} else {
-					s. <- s.[i]
-					y. <- y.[i, , drop = FALSE]
+					n <- length(t <- t[i])
+					y <- y[i, , drop = FALSE]
 				}
 			}
 		}
-		if (doPolygon) {
-			n. <- length(s.)
-			polygon(s.[c(1L:n., n.:1L)], y.[c(1L:n., (n. + n.):(n. + 1L))],
-			        col = col[2L])
-		}
+		if (doPolygon)
+			polygon(t[c(1L:n, n:1L)], y[c(1L:n, (n+n):(n+1L))], col = col[2L])
 	}
 	lines(s, x[, 1L], col = col[1L], lwd = lwd[1L])
 	invisible(NULL)
