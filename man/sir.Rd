@@ -1,6 +1,6 @@
 \name{sir}
 \alias{sir}
-\title{Simulate case reports under a forced SIR model}
+\title{Simulate infectious disease time series}
 \description{
 Simulates time series of the susceptible, infected, and removed
 population sizes and corresponding time series of births, incidence,
