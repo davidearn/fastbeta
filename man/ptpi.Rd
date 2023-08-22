@@ -74,38 +74,29 @@ Fast estimation of time-varying infectious disease transmission rates.
 \doi{10.1371/journal.pcbi.1008124}
 }
 \examples{
-\dontshow{ % for R_DEFAULT_PACKAGES=NULL
+\dontshow{
+## for R_DEFAULT_PACKAGES=NULL
 library(graphics, pos = "package:base", verbose = FALSE)
+library(   utils, pos = "package:base", verbose = FALSE)
 }
-beta <- function (t, a = 1e-01, b = 1e-05)
-	b * (1 + a * cospi(t / 26))
-nu <- function (t) 1e+03
-mu <- function (t) 1e-03
+data(sir.e01, package = "fastbeta")
+a <- attributes(sir.e01)
+str(sir.e01)
+plot(sir.e01)
 
-S0 <- 5e+04
-I0 <- 1e+03
-constants <- c(gamma = 0.5, S0 = S0, I0 = I0, R0 = 1e+06 - S0 - I0)
+series <- cbind(sir.e01[, c("Z", "B")], mu = a[["mu"]](0))
+colnames(series) <- c("Z", "B", "mu") # FIXME: stats:::cbind.ts mangles dimnames
 
-n <- 2500L
-X <- sir(n, beta, nu, mu, constants, stochastic = FALSE)
-plot(X)
-
-## Discard the transient
-X <- window(X, start = 2250)
-plot(X)
-
-series. <- ts(cbind(unclass(X[, c("Z", "B")]), mu = mu(0)),
-              start = tsp(X)[1L])
-plot(series.[, "Z"])
-a <- 2296; b <- 2452
+plot(series[, "Z"])
+a <- 9; b <- 218
 abline(v = c(a, b), lty = 2)
 
-str(L0 <- ptpi(series., a = a, b = b, start = 4e+04, complete = FALSE))
-str(L1 <- ptpi(series., a = a, b = b, start = 4e+04, complete =  TRUE))
-plot(L1$X, plot.type = "single", xlim = tsp(X)[1L:2L])
-lines(X[, "S"], col = "red", lwd = 4)
-abline(h = L1$value, col = "blue", lwd = 4)
+L <- ptpi(series, a = a, b = b, start = 4e+04, complete = TRUE)
+str(L)
+plot(L$X, plot.type = "single")
+lines(sir.e01[, "S"], col = "red", lwd = 4)
+abline(h = L$value, col = "blue", lwd = 4)
 
 ## The relative error:
-(L1$value - X[1L, "S"]) / X[1L, "S"]
+L$value / sir.e01[[1L, "S"]] - 1
 }

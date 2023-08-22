@@ -36,7 +36,12 @@ Patterns of smallpox mortality in London, England, over three centuries.
 \doi{10.1371/journal.pbio.3000506}
 }
 \examples{
+\dontshow{
+## for R_DEFAULT_PACKAGES=NULL
+library(utils, pos = "package:base", verbose = FALSE)
+}
+data(smallpox, package = "fastbeta")
 str(smallpox)
 table(smallpox[["nday"]]) # not all 7 days, hence:
-plot(7 * smallpox / nday ~ from, smallpox, type = "l")
+plot(7 * smallpox / as.double(nday) ~ from, smallpox, type = "l")
 }

@@ -35,31 +35,25 @@ It is completely parallel to argument \code{series}, having the same
 %\seealso{}
 %\references{}
 \examples{
-\dontshow{ % for R_DEFAULT_PACKAGES=NULL
-library(stats, pos = "package:base", verbose = FALSE)
+\dontshow{
+## for R_DEFAULT_PACKAGES=NULL
+library(graphics, pos = "package:base", verbose = FALSE)
+library(   utils, pos = "package:base", verbose = FALSE)
 }
-beta <- function (t, a = 1e-01, b = 1e-05)
-	b * (1 + a * cospi(t / 26))
-nu <- function (t) 1e+03
-mu <- function (t) 1e-03
+data(sir.e01, package = "fastbeta")
+a <- attributes(sir.e01)
+str(sir.e01)
+plot(sir.e01)
 
-S0 <- 5e+04
-I0 <- 1e+03
-constants <- c(gamma = 0.5, S0 = S0, I0 = I0, R0 = 1e+06 - S0 - I0)
+## Now suppose that you have perfect knowledge except for incidence,
+## which you observe imperfectly
+series <- cbind(sir.e01[, c("Z.obs", "B")], mu = a[["mu"]](0))
+constants <- c(gamma = a[["gamma"]],
+               S0 = sir.e01[[1L, "S"]],
+               I0 = sir.e01[[1L, "I"]])
 
-n <- 2500L
-X <- sir(n, beta, nu, mu, constants, stochastic = FALSE)
-plot(X)
-
-## Discard the transient
-X <- window(X, start = 2250)
-plot(X)
-
-series. <- ts(cbind(unclass(X[, c("Z", "B")]), mu = mu(0)), start = 0)
-series.[1L, 1L:2L] <- series.[2L, 1L:2L]
-constants. <- constants[1:3]
-constants.[2:3] <- floor(X[1L, c("S", "I")])
-R <- fastbeta.bootstrap(10L, series., constants.)
+R <- fastbeta.bootstrap(10L, series, constants)
+str(R)
 plot(R)
 plot(R, level = 0.95)
 }

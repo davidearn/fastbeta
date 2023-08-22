@@ -81,38 +81,27 @@ Fast estimation of time-varying infectious disease transmission rates.
 \doi{10.1371/journal.pcbi.1008124}
 }
 \examples{
-\dontshow{ % for R_DEFAULT_PACKAGES=NULL
-library(stats, pos = "package:base", verbose = FALSE)
+\dontshow{
+## for R_DEFAULT_PACKAGES=NULL
+library(graphics, pos = "package:base", verbose = FALSE)
+library(   utils, pos = "package:base", verbose = FALSE)
 }
-beta <- function (t, a = 1e-01, b = 1e-05)
-	b * (1 + a * cospi(t / 26))
-nu <- function (t) 1e+03
-mu <- function (t) 1e-03
-
-S0 <- 5e+04
-I0 <- 1e+03
-constants <- c(gamma = 0.5, S0 = S0, I0 = I0, R0 = 1e+06 - S0 - I0)
-
-set.seed(1)
-n <- 250L
-prob <- 0.1
-delay <- diff(pgamma(0:8, 2.5))
-X <- sir(n, beta, nu, mu, constants, prob = prob, delay = delay)
-
-## Do discard "incomplete" rows from simulation; see help("sir")
-X <- window(X, start = length(delay))
-plot(X)
+data(sir.e01, package = "fastbeta")
+a <- attributes(sir.e01)
+str(sir.e01)
+plot(sir.e01)
 
 ## Now suppose that you have perfect knowledge except for incidence,
 ## which you observe imperfectly
-series. <- ts(cbind(unclass(X[, c("Z.obs", "B")]), mu = mu(0)),
-              start = tsp(X)[1L])
-constants. <- replace(constants[1:3], 2:3, X[1L, c("S", "I")])
-cbind(original = constants[1:3], updated = constants.)
+series <- cbind(sir.e01[, c("Z.obs", "B")], mu = a[["mu"]](0))
+constants <- c(gamma = a[["gamma"]],
+               S0 = sir.e01[[1L, "S"]],
+               I0 = sir.e01[[1L, "I"]])
 
-Y <- fastbeta(series., constants., prob = prob, delay = delay)
-plot(Y)
+X <- fastbeta(series, constants, prob = a[["prob"]], delay = a[["delay"]])
+str(X)
+plot(X)
 
-plot(Y[, "beta"], ylab = "Transmission rate")
-lines(beta(time(Y)), col = "red") # the "truth"
+plot(X[, "beta"], ylab = "Transmission rate")
+lines(a[["beta"]](time(X)), col = "red") # the "truth"
 }

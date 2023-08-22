@@ -111,8 +111,10 @@ automatic tau selection.
 \doi{10.1063/1.2745299}
 }
 \examples{
-\dontshow{ % for R_DEFAULT_PACKAGES=NULL
+\dontshow{
+## for R_DEFAULT_PACKAGES=NULL
 library(stats, pos = "package:base", verbose = FALSE)
+library(utils, pos = "package:base", verbose = FALSE)
 }
 beta <- function (t, a = 1e-01, b = 1e-05)
 	b * (1 + a * cospi(t / 26))
@@ -121,18 +123,21 @@ mu <- function (t) 1e-03
 
 S0 <- 5e+04
 I0 <- 1e+03
-constants <- c(gamma = 0.5, S0 = S0, I0 = I0, R0 = 1e+06 - S0 - I0)
+R0 <- 1e+06 - S0 - I0
+constants <- c(gamma = 0.5, S0 = S0, I0 = I0, R0 = R0)
 
-set.seed(0)
 n <- 250L
-X <- sir(n, beta, nu, mu, constants,
-         prob = 0.1, delay = diff(pgamma(0:8, 2.5)))
+prob <- 0.1
+delay <- diff(pgamma(0:8, 2.5))
+
+set.seed(0L)
+X <- sir(n, beta, nu, mu, constants, prob = prob, delay = delay)
+str(X)
 plot(X)
 
 r <- 10L
-Y <- replicate(r,
-	sir(n, beta, nu, mu, constants,
-	    prob = 0.1, delay = diff(pgamma(0:8, 2.5)))[, "Z.obs"])
-Y <- ts(Y, start = 0)
+Y <- do.call(cbind, replicate(r, simplify = FALSE,
+	sir(n, beta, nu, mu, constants, prob = prob, delay = delay)[, "Z.obs"]))
+str(Y) # FIXME: stats:::cbind.ts mangles dimnames
 plot(Y, plot.type = "single", col = seq_len(r), ylab = "Case reports")
 }

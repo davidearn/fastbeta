@@ -1,8 +1,10 @@
-library(stats, pos = "package:base", verbose = FALSE)
+library(grDevices, pos = "package:base", verbose = FALSE)
+library(    stats, pos = "package:base", verbose = FALSE)
+library(    utils, pos = "package:base", verbose = FALSE)
+
 library(fastbeta)
 options(warn = 2L, error = recover)
 
-## FIXME: use data/*.R
 beta <- function (t, a = 1e-01, b = 1e-05)
 	b * (1 + a * cospi(t / 26))
 nu <- function (t) 1e+03
@@ -10,12 +12,12 @@ mu <- function (t) 1e-03
 
 S0 <- 5e+04
 I0 <- 1e+03
-constants <- c(gamma = 0.5, S0 = S0, I0 = I0, R0 = 1e+06 - S0 - I0)
-
-prob <- 0.1
-delay <- diff(pgamma(0:8, 2.5))
+R0 <- 1e+06 - S0 - I0
+constants <- c(gamma = 0.5, S0 = S0, I0 = I0, R0 = R0)
 
 n <- 250L
+prob <- 0.1
+delay <- diff(pgamma(0:8, 2.5))
 
 ## At the very least, these should not signal warnings or
 ## errors unexpectedly, and the compiled and uncompiled
@@ -27,11 +29,11 @@ X00 <- sir(n, beta, nu, mu, constants, stochastic = FALSE,
 X01 <- sir(n, beta, nu, mu, constants, stochastic = FALSE,
            prob, delay, useCompiled =  TRUE)
 
-set.seed(0)
+set.seed(0L)
 X10 <- sir(n, beta, nu, mu, constants, stochastic =  TRUE,
            prob, delay, useCompiled = FALSE)
 
-set.seed(0)
+set.seed(0L)
 X11 <- sir(n, beta, nu, mu, constants, stochastic =  TRUE,
            prob, delay, useCompiled =  TRUE)
 
