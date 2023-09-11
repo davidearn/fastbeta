@@ -4,7 +4,7 @@
 
 \input{preamble.tex}
 
-\title{\Large An introduction to R package \textbf{fastbeta}}
+\title{\Large An introduction to R package \pkg{fastbeta}}
 \author{Mikael Jagan and David J. D. Earn}
 \date{\today}
 
@@ -14,11 +14,55 @@
 
 \section{Introduction}
 
+\mj{Distinguish between $\beta(t)$ and $\mathcal{R}(t)$ estimation.
+  Do they serve different purposes?  Interpretability, etc.}
+
+\mj{What makes estimation so hard?  Why does so much competing methodology
+  exist in the literature (apart from maybe pandemic opportunism) ?}
+
+\mj{Summarize existing methodology and available software.}
+
 \mj{Take some stuff from \cite{2020JagaDejo}, but focus a bit more
   on implementation details, as well as related R packages (scope?), here.}
 
+\paragraph{\cite{2000FinkGren}} i.e., the discrete time TSIR model using
+local linear regression.  Estimates transmission rates.  It relies on
+assumptions that the duration of infection is equal to the time step,
+that natural death of susceptible individuals can be ignored, and that
+cumulative incidence approximates cumulative births.
+
+\paragraph{\cite{2004WallTeun}} uses date of symptom onset for all cases
+to estimate effective R conditional on a serial interval distribution
+
+\paragraph{\cite{2005MortFink}} MCMC to estimate posterior distributions
+of parameters of a stochastic model, a probabilistic generalization
+of the TSIR model
+
+\paragraph{\cite{2008BettRibe}} (compares itself with \cite{2004WallTeun})
+iteratively updates prior on effective R with posterior from last time step
+\ldots doesn't describe computational procedure.
+
+\paragraph{\cite{2008CaucFerg}} formally discretize a diffusion process
+and estimate joint posterior distribution of data and parameters with MCMC
+
+\paragraph{\cite{2010HeIoni}} plug-and-play, i.e., based on pomp.  Formally
+adds white noise to transmission process.  Still frequentist likelihood
+estimation.  School term forcing.
+
+\paragraph{\cite{2013CoriFerg}} i.e., EpiEstim.  Based on assumed infectivity
+profile.  Estimate effective R by weighting past infections by infectivity.
+
+\paragraph{\cite{2017BeckGren}} just the software accompaniment of 
+\cite{2000FinkGren}.
+
+\paragraph{\cite{2020JagaDejo}} our work.
+
+\paragraph{\cite{2022GresWall}}, i.e., EpiLPS.  Laplacian-P-splines fit to
+case reports ... should read more carefully.
+
+
 \section{The SIR model}
-			 
+
 \begin{align}
 \frac{\text{d} S}{\text{d} t} &= \nu(t) - \beta(t) S I - \mu(t) S \\
 \frac{\text{d} I}{\text{d} t} &= \beta(t) S I - \gamma I - \mu(t) I \\
@@ -39,7 +83,7 @@ I_{t + 1} &= \frac{(1 - \frac{1}{2} (\gamma + \mu_{t})) I_{t} + Z_{t + 1}}{
 
 \mj{Here, we'll focus on \texttt{sir} and \texttt{fastbeta} usage.}
 
-<<ex-1, fig=TRUE>>=
+<<ex-1, fig=TRUE, eval=FALSE>>=
 library(fastbeta)
 
 beta <- function(t, a = 1e-01, b = 1e-05)
@@ -80,7 +124,7 @@ lines(beta(time(Y)), col = "red") # the "truth"
 \mj{Here, we'll focus on \texttt{fastbeta.bootstrap} usage,
   though the function deserves a much less generic name \ldots}
 
-<<ex-2, fig=TRUE>>=
+<<ex-2, fig=TRUE, eval=FALSE>>=
 n <- 2500L
 X <- sir(n, beta, nu, mu, constants, stochastic = FALSE)
 plot(X)
@@ -96,19 +140,32 @@ constants.[2:3] <- floor(X[1L, c("S", "I")])
 R <- fastbeta.bootstrap(10L, series., constants.)
 @
 
-<<ex-3, fig=TRUE>>=
+<<ex-3, fig=TRUE, eval=FALSE>>=
 plot(R)
 @
 
-<<ex-4, fig=TRUE>>=
+<<ex-4, fig=TRUE, eval=FALSE>>=
 plot(R, level = 0.95)
 @
 
 \section{Example: initialization of likelihood-based machinery}
 
-\mj{Probably \emph{not} using \textbf{macpan2}, here we can present
+\mj{Probably \emph{not} using \pkg{macpan2}, here we can present
   a simple example of likelihood-based estimation of a time-varying
-  transmission rate, aided by a \textbf{fastbeta}-generated estimate.}
+  transmission rate, aided by a \pkg{fastbeta}-generated estimate.}
+
+Presented with an infectious disease time series, one often tries
+to estimate the parameters of a hypothesized data-generating model,
+with the aim of gleaning information about the unobserved process.
+Where the data-generating model assumes some expression for the
+transmission rate as a function of time and some number of parameters,
+the modeler may use \pkg{fastbeta} to obtain initial estimates of
+those parameters informed by available data.
+
+<<ex-4>>=
+## to be sourced from ex-4.R
+@
+
 
 \section{Case study: smallpox in London, England (yyyy--YYYY)}
 
