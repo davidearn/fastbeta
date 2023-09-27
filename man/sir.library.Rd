@@ -21,6 +21,7 @@ Simulation parameters may be preserved as attributes.
 To reproduce these objects, run the corresponding scripts, e.g.,
 \code{\link{system.file}("scripts", "sir.e01.R", package = "fastbeta")}.
 }
+\seealso{\code{\link{sir}}.}
 \examples{
 \dontshow{
 ## for R_DEFAULT_PACKAGES=NULL

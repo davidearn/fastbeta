@@ -7,7 +7,7 @@ function (series, constants, ...)
 		ncol(series) == 3L
 		min(0, series, na.rm = TRUE) >= 0
 		is.double(constants)
-		length(constants) == 3L
+		length(constants) == 5L
 		is.finite(constants)
 		all(constants >= 0)
 	})

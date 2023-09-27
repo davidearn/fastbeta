@@ -49,8 +49,10 @@ plot(sir.e01)
 ## which you observe imperfectly
 series <- cbind(sir.e01[, c("Z.obs", "B")], mu = a[["mu"]](0))
 constants <- c(gamma = a[["gamma"]],
+               delta = a[["delta"]],
                S0 = sir.e01[[1L, "S"]],
-               I0 = sir.e01[[1L, "I"]])
+               I0 = sir.e01[[1L, "I"]],
+               R0 = sir.e01[[1L, "R"]])
 
 R <- fastbeta.bootstrap(10L, series, constants,
                         prob = a[["prob"]], delay = a[["delay"]])

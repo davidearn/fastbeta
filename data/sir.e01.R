@@ -6,10 +6,11 @@ mu <- function (t) 1e-03
 environment(beta) <- environment(nu) <- environment(mu) <- .GlobalEnv
 
 gamma <- 0.5
+delta <- 0
 S0 <- 5e+04
 I0 <- 1e+03
 R0 <- 1e+06 - S0 - I0
-constants <- c(gamma = gamma, S0 = S0, I0 = I0, R0 = R0)
+constants <- c(gamma = gamma, delta = delta, S0 = S0, I0 = I0, R0 = R0)
 
 n <- 52L * 55L
 prob <- 0.1
@@ -22,6 +23,6 @@ X <- stats::window(X, start = n - 52L * 5L)
 stats::tsp(X)[1L:2L] <- stats::tsp(X)[1L:2L] - stats::tsp(X)[1L]
 
 structure(X,
-          beta = beta, nu = nu, mu = mu, gamma = gamma,
+          beta = beta, nu = nu, mu = mu, gamma = gamma, delta = delta,
           prob = prob, delay = delay)
 })

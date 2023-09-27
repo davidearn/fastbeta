@@ -29,21 +29,23 @@ The estimated value of the initial susceptible population size is
 \eqn{S_{a}{(i + 1)}}{S[a, i + 1]} by reversing the recursion.
 }
 \usage{
-ptpi(series, a = 0L, b = nrow(series) - 1L,
-     start, tol = 1e-03, iter.max = 32L, complete = FALSE, \dots)
+ptpi(series, constants, a = 0L, b = nrow(series) - 1L,
+     tol = 1e-03, iter.max = 32L, complete = FALSE, \dots)
 }
 \arguments{
 \item{series}{a \dQuote{multiple time series} object, inheriting from
   class \code{\link[=ts]{mts}}, with three columns storing
   (\dQuote{parallel}, equally spaced) time series of incidence, births,
   and the per capita natural mortality rate, in that order.}
+\item{constants}{a numeric vector of the form
+  \code{c(gamma, delta, Sa, Ia, Ra)}, specifying rates of removal
+  and loss of immunity and a starting value for the state at time
+  \code{a}, in that order.}
 \item{a}{the time of the first peak in the incidence time series.
   It is rounded internally to generate a 0-index of rows of \code{series}.}
 \item{b}{the time of the last peak in the incidence time series
   that is in phase with the first.
   It is rounded internally to generate a 0-index of rows of \code{series}.}
-\item{start}{a starting value for the number of susceptible individuals
-  at index \code{a}.}
 \item{tol}{a tolerance indicating a stopping condition;
   see \sQuote{Details}.}
 \item{iter.max}{the maximum number of iterations.}
@@ -56,12 +58,13 @@ ptpi(series, a = 0L, b = nrow(series) - 1L,
 }
 \value{
 A list with elements:
-\item{value}{the estimated value of the initial susceptible population size.}
+\item{value}{the estimated value of the initial state.}
 \item{delta}{the relative difference computed in the last iteration.}
 \item{iter}{the number of iterations performed.}
-\item{X}{if \code{complete = TRUE}, then a \dQuote{multiple time series}
-  object, inheriting from class \code{\link[=ts]{mts}}, with \code{b-a+1} rows
-  and \code{iter} columns storing the value of \eqn{S_{t}^{(i)}}{S[t, i]}
+\item{S, I, R}{if \code{complete = TRUE},
+  then these are \dQuote{multiple time series} objects, inheriting from
+  class \code{\link[=ts]{mts}}, with \code{b-a+1} rows and \code{iter}
+  columns storing the value of \eqn{X_{t}^{(i)}}{X[t, i]}
   for \eqn{t = a, \ldots, b}
   and \eqn{i = 0, \ldots, \mathtt{iter} - 1}{i = 0, \ldots, iter - 1}.}
 }
@@ -84,19 +87,25 @@ a <- attributes(sir.e01)
 str(sir.e01)
 plot(sir.e01)
 
+## Now suppose that you have perfect knowledge except for the initial state,
+## which you "guess"
 series <- cbind(sir.e01[, c("Z", "B")], mu = a[["mu"]](0))
-colnames(series) <- c("Z", "B", "mu") # FIXME: stats:::cbind.ts mangles dimnames
+colnames(series) <- c("Z", "B", "mu") # FIXME: stats:::cbind.ts mangles dimnamesconstants <- c(gamma = a[["gamma"]],
+               delta = a[["delta"]],
+               S0 = sir.e01[[1L, "S"]],
+               I0 = sir.e01[[1L, "I"]],
+               R0 = sir.e01[[1L, "R"]])
 
 plot(series[, "Z"])
 a <- 9; b <- 218
 abline(v = c(a, b), lty = 2)
 
-L <- ptpi(series, a = a, b = b, start = 4e+04, complete = TRUE)
+L <- ptpi(series, constants, a = a, b = b, complete = TRUE)
 str(L)
-plot(L$X, plot.type = "single")
+plot(L[["S"]], plot.type = "single")
 lines(sir.e01[, "S"], col = "red", lwd = 4)
-abline(h = L$value, col = "blue", lwd = 4)
+abline(h = L$value[["S"]], col = "blue", lwd = 4)
 
 ## The relative error:
-L$value / sir.e01[[1L, "S"]] - 1
+L$value[["S"]] / sir.e01[[1L, "S"]] - 1
 }

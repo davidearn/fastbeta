@@ -12,14 +12,14 @@ with user-defined forcing and a simple model for observation error.
 system of ordinary differential equations
 \deqn{
   \begin{aligned}
-  \frac{\text{d} S}{\text{d} t} &= \nu(t) - \beta(t) S I - \mu(t) S \\
+  \frac{\text{d} S}{\text{d} t} &= \nu(t) - \beta(t) S I + \delta R - \mu(t) S \\
   \frac{\text{d} I}{\text{d} t} &= \beta(t) S I - \gamma I - \mu(t) I \\
-  \frac{\text{d} R}{\text{d} t} &= \gamma I - \mu(t) R
+  \frac{\text{d} R}{\text{d} t} &= \gamma I - \delta R - \mu(t) R
   \end{aligned}
 }{
-  dS/dt = nu(t) - beta(t) S I - mu(t) S
+  dS/dt = nu(t) - beta(t) S I + delta R - mu(t) S
   dI/dt = beta(t) S I - gamma I - mu(t) I
-  dR/dt = gamma I - mu(t) R
+  dR/dt = gamma I - delta R - mu(t) R
 }
 between times \eqn{t = 0, \ldots, n}, where \eqn{t} is understood
 to be a unitless measure of time relative to the duration of an
@@ -59,8 +59,9 @@ sir(n, beta, nu, mu, constants, stochastic = TRUE,
   at the time point indicated by the first argument.  Arguments
   after the first must be strictly optional.  The functions need
   not be vectorized.}
-\item{constants}{a numeric vector of the form \code{c(gamma, S0, I0, R0)},
-  specifying a removal rate and an initial state, in that order.}
+\item{constants}{a numeric vector of the form
+  \code{c(gamma, delta, S0, I0, R0)}, specifying rates of removal
+  and loss of immunity and an initial state, in that order.}
 \item{stochastic}{a logical indicating if the simulation should
   be stochastic; see \sQuote{Details}.}
 \item{prob}{a numeric vector of length \code{n} such that
@@ -101,7 +102,7 @@ at each time.
 \code{X[1, 4:6]} is \code{NA}, and \code{X[2:length(delay), 6]}
 can contain incomplete information if \code{length(delay) >= 2}.
 }
-%\seealso{}
+\seealso{\code{\link{sir.library}}.}
 \references{
 Cao, Y., Gillespie, D. T., & Petzold, L. R. (2007).
 Adaptive explicit-implicit tau-leaping method with
@@ -124,7 +125,7 @@ mu <- function (t) 1e-03
 S0 <- 5e+04
 I0 <- 1e+03
 R0 <- 1e+06 - S0 - I0
-constants <- c(gamma = 0.5, S0 = S0, I0 = I0, R0 = R0)
+constants <- c(gamma = 0.5, delta = 0, S0 = S0, I0 = I0, R0 = R0)
 
 n <- 250L
 prob <- 0.1

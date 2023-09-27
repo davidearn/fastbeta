@@ -7,7 +7,7 @@ function (r, series, constants, ...)
 		ncol(series) == 3L
 		min(0, series, na.rm = TRUE) >= 0
 		is.double(constants)
-		length(constants) == 3L
+		length(constants) == 5L
 		is.finite(constants)
 		all(constants >= 0)
 	})
@@ -47,11 +47,10 @@ function (r, series, constants, ...)
 	beta <- approxfun(s, beta., method =   "linear", rule = 2L, ties = "ordered")
 	nu   <- approxfun(s,   nu., method = "constant", rule = 2L, ties = "ordered")
 	mu   <- approxfun(s,   mu., method =   "linear", rule = 2L, ties = "ordered")
-	constants0 <- c(constants, 0) # as removed population size is irrelevant
 
 	R <- simplify2array(c(list(beta.), replicate(r, simplify = FALSE, {
 		X <- sir.(n = n, beta = beta, nu = nu, mu = mu,
-		          constants = constants0, ...)
+		          constants = constants, ...)
 		series[, 1L:2L] <<- X[, c(ncol(X), 4L)]
 		fastbeta.(series = series, constants = constants, ...)[, 1L]
 	})))

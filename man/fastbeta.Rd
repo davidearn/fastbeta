@@ -11,14 +11,14 @@ and other data.
 differential equations
 \deqn{
   \begin{aligned}
-  \frac{\text{d} S}{\text{d} t} &= \nu(t) - \beta(t) S I - \mu(t) S \\
+  \frac{\text{d} S}{\text{d} t} &= \nu(t) - \beta(t) S I + \delta R - \mu(t) S \\
   \frac{\text{d} I}{\text{d} t} &= \beta(t) S I - \gamma I - \mu(t) I \\
-  \frac{\text{d} R}{\text{d} t} &= \gamma I - \mu(t) R
+  \frac{\text{d} R}{\text{d} t} &= \gamma I - \delta R - \mu(t) R
   \end{aligned}
 }{
-  dS/dt = nu(t) - beta(t) S I - mu(t) S
+  dS/dt = nu(t) - beta(t) S I + delta R - mu(t) S
   dI/dt = beta(t) S I - gamma I - mu(t) I
-  dR/dt = gamma I - mu(t) R
+  dR/dt = gamma I - delta R - mu(t) R
 }
 where \eqn{t} is understood to be a unitless measure of time
 relative to the duration of an observation interval, then computing
@@ -58,8 +58,9 @@ fastbeta(series, constants, \dots)
   class \code{\link[=ts]{mts}}, with three columns storing
   (\dQuote{parallel}, equally spaced) time series of incidence, births,
   and the per capita natural mortality rate, in that order.}
-\item{constants}{a numeric vector of the form \code{c(gamma, S0, I0)},
-  specifying a removal rate and an initial state, in that order.}
+\item{constants}{a numeric vector of the form
+  \code{c(gamma, delta, S0, I0, R0)}, specifying rates of removal
+  and loss of immunity and an initial state, in that order.}
 \item{\dots}{optional arguments passed to \code{\link{deconvolve}},
   if the first column of \code{series} represents \emph{reported}
   incidence or mortality rather than incidence.}
@@ -95,8 +96,10 @@ plot(sir.e01)
 ## which you observe imperfectly
 series <- cbind(sir.e01[, c("Z.obs", "B")], mu = a[["mu"]](0))
 constants <- c(gamma = a[["gamma"]],
+               delta = a[["delta"]],
                S0 = sir.e01[[1L, "S"]],
-               I0 = sir.e01[[1L, "I"]])
+               I0 = sir.e01[[1L, "I"]],
+               R0 = sir.e01[[1L, "R"]])
 
 X <- fastbeta(series, constants,
               prob = a[["prob"]], delay = a[["delay"]])
