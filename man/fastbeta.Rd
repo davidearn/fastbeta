@@ -42,7 +42,7 @@ the recursion
 where
 \deqn{
   \begin{aligned}
-  X_{t} &\sim X(t) \quad [X = S, I, R, \beta \mu] \\
+  X_{t} &\sim X(t) \quad [X = S, I, R, \beta, \mu] \\
   Z_{t} &\sim \int_{t - 1}^{t} \beta(s) S(s) I(s) \, \text{d} s \\
   B_{t} &\sim \int_{t - 1}^{t} \nu(s) \, \text{d} s
   \end{aligned}
