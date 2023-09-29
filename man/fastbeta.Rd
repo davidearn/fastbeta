@@ -29,7 +29,7 @@ the recursion
     1 + \frac{1}{2} (\gamma + \mu_{t + 1})} \\
   R_{t + 1} &= \frac{(1 - \frac{1}{2} (\delta + \mu_{t})) R_{t} + \frac{1}{2} \gamma (I_{t} + I_{t + 1})}{
     1 + \frac{1}{2} (\delta + \mu_{t + 1})} \\
-  S_{t + 1} &= \frac{(1 - \frac{1}{2} \mu_{t}) S_{t} + B_{t + 1} - Z_{t + 1} + \frac{1}{2} \delta (R_{t} + R_{r + 1})}{
+  S_{t + 1} &= \frac{(1 - \frac{1}{2} \mu_{t}) S_{t} + B_{t + 1} - Z_{t + 1} + \frac{1}{2} \delta (R_{t} + R_{t + 1})}{
     1 + \frac{1}{2} \mu_{t + 1}} \\
   \beta_{t} &= \frac{Z_{t} + Z_{t + 1}}{2 S_{t} I_{t}} \\
   \end{aligned}
