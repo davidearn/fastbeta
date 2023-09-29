@@ -163,9 +163,9 @@ function (n, beta, nu, mu, constants, stochastic = TRUE,
 				beta.xS <- beta * xS
 				beta.xS.xI <- beta.xS * xI
 				delta.xR <- delta * xR
-				list(c(nu - beta.xS.xI - mu * xS + delta.xR,
+				list(c(nu - beta.xS.xI + delta.xR - mu * xS,
 				       beta.xS - gamma - mu,
-				       gamma * xI - mu * xR - delta.xR,
+				       gamma * xI - delta.xR - mu * xR,
 				       nu,
 				       beta.xS.xI))
 			}

@@ -5,12 +5,12 @@
 SEXP R_fastbeta(SEXP, SEXP);
 SEXP R_ptpi(SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP);
 
-SEXP R_adsir_initialize(SEXP, SEXP, SEXP, SEXP);
+SEXP R_adsir_initialize(SEXP, SEXP, SEXP, SEXP, SEXP);
 SEXP R_adsir_finalize(void);
 SEXP R_adsir_dot(SEXP, SEXP);
 SEXP R_adsir_jac(SEXP, SEXP);
 
-SEXP R_desir_initialize(SEXP, SEXP, SEXP, SEXP);
+SEXP R_desir_initialize(SEXP, SEXP, SEXP, SEXP, SEXP);
 SEXP R_desir_finalize(void);
 void R_desir_dot(int *, double *, double *, double *, double *, int *);
 void R_desir_jac(int *, double *, double *, int *, int *, double *, int *,
@@ -21,12 +21,12 @@ static const R_CallMethodDef CallMethods[] =
 	{ "R_fastbeta",         (DL_FUNC) &R_fastbeta,         2 },
 	{ "R_ptpi",             (DL_FUNC) &R_ptpi,             7 },
 
-	{ "R_adsir_initialize", (DL_FUNC) &R_adsir_initialize, 4 },
+	{ "R_adsir_initialize", (DL_FUNC) &R_adsir_initialize, 5 },
 	{ "R_adsir_finalize",   (DL_FUNC) &R_adsir_finalize,   0 },
 	{ "R_adsir_dot",        (DL_FUNC) &R_adsir_dot,        2 },
 	{ "R_adsir_jac",        (DL_FUNC) &R_adsir_jac,        2 },
 
-	{ "R_desir_initialize", (DL_FUNC) &R_desir_initialize, 4 },
+	{ "R_desir_initialize", (DL_FUNC) &R_desir_initialize, 5 },
 	{ "R_desir_finalize",   (DL_FUNC) &R_desir_finalize,   0 },
 
 	{ NULL, NULL, 0 }

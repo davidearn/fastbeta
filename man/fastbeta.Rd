@@ -25,26 +25,29 @@ relative to the duration of an observation interval, then computing
 the recursion
 \deqn{
   \begin{aligned}
-  \beta_{t} &= \frac{Z_{t} + Z_{t + 1}}{2 S_{t} I_{t}} \\
-  S_{t + 1} &= \frac{(1 - \frac{1}{2} \mu_{t}) S_{t} + B_{t + 1} - Z_{t + 1}}{
-    1 + \frac{1}{2} \mu_{t + 1}} \\
   I_{t + 1} &= \frac{(1 - \frac{1}{2} (\gamma + \mu_{t})) I_{t} + Z_{t + 1}}{
     1 + \frac{1}{2} (\gamma + \mu_{t + 1})} \\
+  R_{t + 1} &= \frac{(1 - \frac{1}{2} (\delta + \mu_{t})) R_{t} + \frac{1}{2} \gamma (I_{t} + I_{t + 1})}{
+    1 + \frac{1}{2} (\delta + \mu_{t + 1})} \\
+  S_{t + 1} &= \frac{(1 - \frac{1}{2} \mu_{t}) S_{t} + B_{t + 1} - Z_{t + 1} + \frac{1}{2} \delta (R_{t} + R_{r + 1})}{
+    1 + \frac{1}{2} \mu_{t + 1}} \\
+  \beta_{t} &= \frac{Z_{t} + Z_{t + 1}}{2 S_{t} I_{t}} \\
   \end{aligned}
 }{
-  beta[t] = (Z[t] + Z[t + 1]) / (2 * S[t] * I[t])
-  S[t + 1] = ((1 - 0.5 * mu[t]) * S[t] + B[t + 1] - Z[t + 1]) / (1 + 0.5 * mu[t + 1])
   I[t + 1] = ((1 - 0.5 * (gamma + mu[t])) * I[t] + Z[t + 1]) / (1 + 0.5 * (gamma + mu[t + 1]))
+  R[t + 1] = ((1 - 0.5 * (delta + mu[t])) * R[t] + 0.5 * gamma * (I[t] + I[t + 1])) / (1 + 0.5 * (delta + mu[t + 1]))
+  S[t + 1] = ((1 - 0.5 * mu[t]) * S[t] + B[t + 1] - Z[t + 1] + 0.5 * delta * (R[t] + R[t + 1])) / (1 + 0.5 * mu[t + 1])
+  beta[t] = (Z[t] + Z[t + 1]) / (2 * S[t] * I[t])
 }
 where
 \deqn{
   \begin{aligned}
-  X_{t} &\sim X(t) \quad [X = \beta, S, I, \mu] \\
+  X_{t} &\sim X(t) \quad [X = S, I, R, \beta \mu] \\
   Z_{t} &\sim \int_{t - 1}^{t} \beta(s) S(s) I(s) \, \text{d} s \\
   B_{t} &\sim \int_{t - 1}^{t} \nu(s) \, \text{d} s
   \end{aligned}
 }{
-  X[t] ~ X(t)    [X = beta, S, I, mu]
+  X[t] ~ X(t)    [X = S, I, R, beta, mu]
   Z[t] ~ integrate(beta(s) S(s) I(s), t - 1, t)
   B[t] ~ integrate(            nu(s), t - 1, t)
 }
@@ -67,9 +70,9 @@ fastbeta(series, constants, \dots)
 }
 \value{
 A \dQuote{multiple time series} object, inheriting from class
-\code{\link[=ts]{mts}}, with three columns (named \code{beta},
-\code{S}, and \code{I}) storing the result of the recursion described
-in \sQuote{Details}.
+\code{\link[=ts]{mts}}, with four columns (named \code{S}, \code{I},
+\code{R}, and \code{beta}) storing the result of the recursion
+described in \sQuote{Details}.
 It is completely parallel to argument \code{series}, having the same
 \code{\link{tsp}} attribute.
 }

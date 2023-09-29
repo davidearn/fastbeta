@@ -38,7 +38,7 @@ function (r, series, constants, ...)
 	                  x, start, tol, iter.max, complete, ...)
 		sir(n, beta, nu, mu, constants, ...)
 
-	beta. <- fastbeta.(series = series, constants = constants, ...)[, 1L]
+	beta. <- fastbeta.(series = series, constants = constants, ...)[, 4L]
 	nu. <- series[, 2L] # FIXME? see below
 	mu. <- series[, 3L]
 
@@ -52,7 +52,7 @@ function (r, series, constants, ...)
 		X <- sir.(n = n, beta = beta, nu = nu, mu = mu,
 		          constants = constants, ...)
 		series[, 1L:2L] <<- X[, c(ncol(X), 4L)]
-		fastbeta.(series = series, constants = constants, ...)[, 1L]
+		fastbeta.(series = series, constants = constants, ...)[, 4L]
 	})))
 	oldClass(R) <- c("fastbeta.bootstrap", oldClass(series))
 	tsp(R) <- tsp(series)
