@@ -6,38 +6,38 @@ static SEXP F, DF, betaCall, betaArg, nuCall, nuArg, muCall, muArg, s;
 static double *pF, *pDF, *pbetaArg, betaVal, *pnuArg, nuVal, *pmuArg, muVal,
 	gammaVal, deltaVal, lastTimeDot, lastTimeJac, tmp, *pt, *px;
 
-#define INIT_CALL(_V_)                        \
-do {                                          \
-	_V_ ## Call = allocVector(LANGSXP, 2);    \
-	R_PreserveObject(_V_ ## Call);            \
-	_V_ ## Arg = allocVector(REALSXP, 1);     \
-	R_PreserveObject(_V_ ## Arg);             \
-	SETCAR(_V_ ## Call, _V_);                 \
-	SETCADR(_V_ ## Call, _V_ ## Arg);         \
-	p ## _V_ ## Arg = REAL(_V_ ## Arg);       \
+#define INIT_CALL(_V_) \
+do { \
+	_V_ ## Call = allocVector(LANGSXP, 2); \
+	R_PreserveObject(_V_ ## Call); \
+	_V_ ## Arg = allocVector(REALSXP, 1); \
+	R_PreserveObject(_V_ ## Arg); \
+	SETCAR(_V_ ## Call, _V_); \
+	SETCADR(_V_ ## Call, _V_ ## Arg); \
+	p ## _V_ ## Arg = REAL(_V_ ## Arg); \
 } while (0)
 
-#define TRY_EVAL_CALL(_V_)                                                \
-do {                                                                      \
-	s = eval(_V_ ## Call, R_GlobalEnv);                                   \
-	if (TYPEOF(s) != REALSXP)                                             \
-		error("'%s' did not evaluate to type \"%s\"", #_V_, "double");    \
-	if (LENGTH(s) != 1)                                                   \
-		error("'%s' did not evaluate to length %d", #_V_, 1)              \
-	_V_ ## Val = REAL(s)[0];                                              \
-	if (!R_FINITE(_V_ ## Val) || _V_ ## Val < 0.0)                        \
-		error("'%s' returned a nonfinite or negative value", #_V_);       \
+#define TRY_EVAL_CALL(_V_) \
+do { \
+	s = eval(_V_ ## Call, R_GlobalEnv); \
+	if (TYPEOF(s) != REALSXP) \
+		error("'%s' did not evaluate to type \"%s\"", #_V_, "double"); \
+	if (LENGTH(s) != 1) \
+		error("'%s' did not evaluate to length %d", #_V_, 1); \
+	_V_ ## Val = REAL(s)[0]; \
+	if (!R_FINITE(_V_ ## Val) || _V_ ## Val < 0.0) \
+		error("'%s' returned a nonfinite or negative value", #_V_); \
 } while (0)
 
-#define MAYBE_EVAL_CALL(_T1_, _T0_)              \
-do {                                             \
-	if (_T1_ != _T0_) {                          \
-		*pbetaArg = *pnuArg = *pmuArg = _T1_;    \
-		TRY_EVAL_CALL(beta);                     \
-		TRY_EVAL_CALL(nu);                       \
-		TRY_EVAL_CALL(mu);                       \
-		 _T0_ = _T1_;                            \
-	}                                            \
+#define MAYBE_EVAL_CALL(_T1_, _T0_) \
+do { \
+	if (_T1_ != _T0_) { \
+		*pbetaArg = *pnuArg = *pmuArg = _T1_; \
+		TRY_EVAL_CALL(beta); \
+		TRY_EVAL_CALL(nu); \
+		TRY_EVAL_CALL(mu); \
+		 _T0_ = _T1_; \
+	} \
 } while (0)
 
 SEXP R_adsir_initialize(SEXP beta, SEXP nu, SEXP mu, SEXP gamma, SEXP delta)
