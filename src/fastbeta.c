@@ -1,31 +1,40 @@
 #include <Rinternals.h>
 
-static void fastbeta(double *Z, double *B, double *mu, double gamma,
-                     double *beta, double *S, double *I, int n)
+static
+void fastbeta(double *s, double *c, int n, double *r)
 {
-	int k, Sw = 1, Iw = 1;
-	double tmp, Z_ = Z[0], S_ = S[0], I_ = I[0],
-		halfmu = 0.5 * mu[0], halfgamma = 0.5 * gamma;
-	++Z; ++B; ++mu; ++S; ++I;
-	for (k = 0; k < n; ++k) {
+	double
+		*Z = s, *B = Z + n + 1, *mu = B + n + 1,
+		*S = r, *I = S + n + 1, * R = I + n + 1, *beta = R + n + 1;
+	S[0] = c[2]; I[0] = c[3]; R[0] = c[4]; beta[n] = NA_REAL;
+
+	if (n == 0)
+		return;
+
+	int i, j, k;
+	char name[] = { 'S', 'I', 'R' }, warn[] = { 1, 1, 1 };
+	double halfmu = 0.5 * mu[0], halfgamma = 0.5 * c[0], halfdelta = 0.5 * c[1],
+		tmp, *r_;
+
+	for (i = 0, j = 1; i < n; ++i, ++j) {
 		tmp = 1.0 - halfmu;
-		S[k] = tmp * S_ + B[k] - Z[k];
-		I[k] = (tmp - halfgamma) * I_ + Z[k];
-		if (Sw && (ISNAN(S[k]) || S[k] < 0.0)) {
-			warning("S[k] is NA or negative, k=%d", k + 1);
-			Sw = 0;
+		I[j] = (tmp - halfgamma) * I[i]                             + Z[j];
+		R[j] = (tmp - halfdelta) * R[i] + halfgamma * (I[i] + I[j]);
+		S[j] =  tmp              * S[i] + halfdelta * (R[i] + R[j]) - Z[j] + B[j];
+		r_ = r;
+		for (k = 0; k < 2; ++k) {
+			if (warn[k] && (ISNAN(*r) || *r < 0.0)) {
+				warning("%c[%d] is NA or negative", name[k], k);
+				warn[k] = 0;
+			}
+			r += n + 1;
 		}
-		if (Iw && (ISNAN(I[k]) && I[k] < 0.0)) {
-			warning("I[k] is NA or negative, k=%d", k + 1);
-			Iw = 0;
-		}
-		tmp = 1.0 + (halfmu = 0.5 * mu[k]);
-		S[k] /= tmp;
-		I[k] /= tmp + halfgamma;
-		beta[k] = 0.5 * (Z_ + Z[k]) / (S_ * I_);
-		Z_ = Z[k];
-		S_ = S[k];
-		I_ = I[k];
+		r = r_ + 1;
+		tmp = 1.0 + (halfmu = 0.5 * mu[j]);
+		S[j] /= tmp;
+		I[j] /= tmp + halfgamma;
+		R[j] /= tmp + halfdelta;
+		beta[j] = 0.5 * (Z[i] + Z[j]) / (S[i] * I[i]);
 	}
 	return;
 }
@@ -33,19 +42,8 @@ static void fastbeta(double *Z, double *B, double *mu, double gamma,
 SEXP R_fastbeta(SEXP series, SEXP constants)
 {
 	int n = INTEGER(getAttrib(series, R_DimSymbol))[0] - 1;
-	SEXP res = PROTECT(allocMatrix(REALSXP, n + 1, 3));
-	if (n >= 0) {
-		double *r0 = REAL(res), *r1 = r0 + n + 1, *r2 = r1 + n + 1,
-			*cc = REAL(constants);
-		r0[n] = NA_REAL;
-		r1[0] = cc[1];
-		r2[0] = cc[2];
-		if (n >= 1) {
-			double *s0 = REAL(series), *s1 = s0 + n + 1, *s2 = s1 + n + 1;
-			fastbeta(s0, s1, s2, cc[0], r0, r1, r2, n);
-		}
-	}
-	UNPROTECT(1);
-
+	SEXP res = allocMatrix(REALSXP, n + 1, 4);
+	if (n >= 0)
+		fastbeta(REAL(series), REAL(constants), n, REAL(res));
 	return res;
 }
