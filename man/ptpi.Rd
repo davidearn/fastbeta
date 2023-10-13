@@ -90,7 +90,8 @@ plot(sir.e01)
 ## Now suppose that you have perfect knowledge except for the initial state,
 ## which you "guess"
 series <- cbind(sir.e01[, c("Z", "B")], mu = a[["mu"]](0))
-colnames(series) <- c("Z", "B", "mu") # FIXME: stats:::cbind.ts mangles dimnamesconstants <- c(gamma = a[["gamma"]],
+colnames(series) <- c("Z", "B", "mu") # FIXME: stats:::cbind.ts mangles dimnames
+constants <- c(gamma = a[["gamma"]],
                delta = a[["delta"]],
                S0 = sir.e01[[1L, "S"]],
                I0 = sir.e01[[1L, "I"]],
