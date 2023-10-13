@@ -24,7 +24,7 @@ clean:
 	find . -name '*~' -type f -exec rm {} \+
 
 $(tarball): $(sources)
-	R CMD build --resave-data=best --compact-vignettes=gs+qpdf .
+	R CMD build --no-resave-data --compact-vignettes=gs+qpdf .
 
 $(rchklog): $(tarball)
 	R CMD check --as-cran $<
