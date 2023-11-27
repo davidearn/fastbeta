@@ -52,7 +52,7 @@ estimation.  School term forcing.
 \paragraph{\cite{2013CoriFerg}} i.e., EpiEstim.  Based on assumed infectivity
 profile.  Estimate effective R by weighting past infections by infectivity.
 
-\paragraph{\cite{2017BeckGren}} just the software accompaniment of 
+\paragraph{\cite{2017BeckGren}} just the software accompaniment of
 \cite{2000FinkGren}.
 
 \paragraph{\cite{2020JagaDejo}} our work.
@@ -63,11 +63,20 @@ case reports ... should read more carefully.
 
 \section{The SIR model}
 
+The transmission rate estimation method implemented in \pkg{fastbeta}
+assumes that infectious disease dynamics in the population of interest
+can be approximated by a susceptible-infected-removed (SIR) compartmental
+model with time-varying rates of birth, death, and transmission.
+The model, formulated as a system of ordinary differential equations,
+is given by
+
 \begin{align}
-\frac{\text{d} S}{\text{d} t} &= \nu(t) - \beta(t) S I - \mu(t) S \\
-\frac{\text{d} I}{\text{d} t} &= \beta(t) S I - \gamma I - \mu(t) I \\
-\frac{\text{d} R}{\text{d} t} &= \gamma I - \mu(t) R
+\frac{\text{d} S}{\text{d} t} &= \nu(t) - \beta(t) S I - \mu(t) S \, , \\
+\frac{\text{d} I}{\text{d} t} &= \beta(t) S I - \gamma I - \mu(t) I \, , \\
+\frac{\text{d} R}{\text{d} t} &= \gamma I - \mu(t) R \, .
 \end{align}
+
+where $S$, $I$, and $R$ denote the number of
 
 \section{The estimation method}
 
