@@ -1,6 +1,6 @@
 Package: fastbeta
-Version: 0.1.0
-Date: 2023-08-22
+Version: 0.1.1
+Date: 2023-11-28
 Title: Fast Estimation of Time-Varying Infectious Disease
 	Transmission Rates
 Description: Methods for estimating time-varying infectious disease
@@ -18,3 +18,4 @@ Authors@R:
 Depends: R (>= 4.2.0)
 Imports: adaptivetau, deSolve, graphics, stats
 Suggests: grDevices, tools, utils
+BuildResaveData: no

@@ -26,7 +26,7 @@ do {                                                                \
 		error("'%s' did not evaluate to length 1", #_V_);           \
 	_V_ ## Val = *REAL(s);                                          \
 	if (!R_FINITE(_V_ ## Val) || _V_ ## Val < 0.0)                  \
-		error("'%s' returned a nonfinite or negative value");       \
+		error("'%s' returned a nonfinite or negative value", #_V_); \
 } while (0)
 
 #define MAYBE_EVAL_CALL(_T1_, _T0_)              \
