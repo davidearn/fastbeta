@@ -24,7 +24,7 @@ r <- 11366L
 f3 <- .Date(as.integer(as.Date(c("1881-12-17", "1882-12-24", "1882-01-01"))))
 with(dd3, {
 stopifnot(exprs = {
-	identical(sum(nday <= 0L),1L)
+	identical(sum(nday <= 0L), 1L)
 	identical(which(nday <= 0L), r)
 	identical(from[r + (-1L:1L)], f3)
 })

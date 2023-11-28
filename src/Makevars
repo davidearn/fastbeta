@@ -1,0 +1,4 @@
+$(SHLIB): copy_scripts
+
+copy_scripts:
+	cp ../data/*.R ../inst/scripts
