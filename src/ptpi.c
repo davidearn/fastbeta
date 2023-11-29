@@ -51,7 +51,7 @@ void ptpi0(double *s, double *c, int n, int a, int b, double tol, int itermax,
 		R_i_ = (tmp + halfdelta) * R_j_ - halfgamma * (I_i_ + I_j_);
 		S_i_ =  tmp              * S_j_ - halfdelta * (R_i_ + R_j_) + Z[j] - B[j];
 		tmp = 1.0 - (halfmu = 0.5 * mu[i]);
-	    S_i_ /= tmp;
+		S_i_ /= tmp;
 		I_i_ /= tmp - halfgamma;
 		R_i_ /= tmp - halfdelta;
 		S_j_ = S_i_;
@@ -117,7 +117,7 @@ void ptpi1(double *s, double *c, int n, int a, int b, double tol, int itermax,
 		R_i_ = (tmp + halfdelta) * R_j_ - halfgamma * (I_i_ + I_j_);
 		S_i_ =  tmp              * S_j_ - halfdelta * (R_i_ + R_j_) + Z[j] - B[j];
 		tmp = 1.0 - (halfmu = 0.5 * mu[i]);
-	    S_i_ /= tmp;
+		S_i_ /= tmp;
 		I_i_ /= tmp - halfgamma;
 		R_i_ /= tmp - halfdelta;
 		S_j_ = S_i_;
@@ -170,7 +170,8 @@ SEXP R_ptpi(SEXP series, SEXP constants, SEXP a, SEXP b,
 		setAttrib(x, R_DimSymbol, dim);
 		SET_VECTOR_ELT(res, 3, x);
 		UNPROTECT(2);
-	} else {
+	}
+	else {
 		ptpi0(REAL(series), REAL(constants), n_, a_, b_, tol_, itermax_,
 		      REAL(value), REAL(delta), INTEGER(iter));
 	}

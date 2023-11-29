@@ -58,7 +58,8 @@ function (n, beta, nu, mu, constants, stochastic = TRUE,
 				tf           = n,
 				jacobianFunc = Df,
 				tl.params    = tl.params)
-		} else {
+		}
+		else {
 			## S:  0  beta * I      0  mu   0   0      0
 			## I:  0  beta * S  gamma   0  mu   0      0
 			## R:  0         0      0   0   0  mu  delta
@@ -119,7 +120,8 @@ function (n, beta, nu, mu, constants, stochastic = TRUE,
 		}
 		X <- X.[i, 2L:6L, drop = FALSE]
 
-	} else {
+	}
+	else {
 
 		init <- c(S = constants[[3L]],
 		          logI = log(constants[[4L]]),
@@ -143,7 +145,8 @@ function (n, beta, nu, mu, constants, stochastic = TRUE,
 				initfunc = NULL,
 				initpar  = NULL,
 				...)
-		} else {
+		}
+		else {
 			##      S:  -beta * I - mu  -beta * S * I        delta  0  0
 			## log(I):            beta              0            0  0  0
 			##      R:               0      gamma * I  -delta - mu  0  0
@@ -237,7 +240,8 @@ function (n, beta, nu, mu, constants, stochastic = TRUE,
 				                       replace = TRUE,
 				                       prob = delay),
 				                n)
-		} else {
+		}
+		else {
 			if (!m.p)
 				Xt6 <- Xt6 * prob
 			if (!m.d) {

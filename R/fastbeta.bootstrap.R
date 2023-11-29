@@ -91,14 +91,16 @@ function (x, y, level = NULL,
 			if (all(y.na)) {
 				warning("suppressing polygon due to NA vertices")
 				doPolygon <- FALSE
-			} else {
+			}
+			else {
 				i1 <-           which.min(y.na      )
 				i2 <- n + 1L -  which.min(y.na[n:1L])
 				i <- i1:i2
 				if (any(y.na[i])) {
 					warning("suppressing polygon due to NA vertices")
 					doPolygon <- FALSE
-				} else {
+				}
+				else {
 					n <- length(t <- t[i])
 					y <- y[i, , drop = FALSE]
 				}

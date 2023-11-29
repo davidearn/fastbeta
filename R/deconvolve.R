@@ -27,7 +27,8 @@ function (x, prob = 1, delay = 1,
 	if (missing(start)) {
 		d. <- which.max(delay) - 1L
 		start <- c(double(d - d.), x, double(d.))
-	} else {
+	}
+	else {
 		stopifnot(exprs = {
 			is.numeric(start)
 			length(start) == length(x) + length(delay) - 1L
@@ -86,7 +87,8 @@ function (x, prob = 1, delay = 1,
 		if (!missing(prob))
 			r. <- r. / prob
 		list(value = r., chisq = (s. - 2 * sum(x)) / n, iter = iter)
-	} else {
+	}
+	else {
 		repeat {
 			if (length(q0))
 				r[q0] <- 0
