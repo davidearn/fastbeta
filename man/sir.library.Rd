@@ -19,7 +19,7 @@ Simulation parameters may be preserved as attributes.
 }
 \source{
 To reproduce these objects, run the corresponding scripts, e.g.,
-\code{\link{system.file}("scripts", "sir.e01.R", package = "fastbeta")}.
+\code{\link{system.file}("data", "sir.e01.R", package = "fastbeta")}.
 }
 \seealso{\code{\link{sir}}.}
 \examples{
