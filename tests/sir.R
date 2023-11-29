@@ -54,4 +54,4 @@ if (dev.interactive(TRUE))
 
 tools::assertError(sir(0L, beta, nu, mu, constants))
 
-proc.time()
+unclass(proc.time())

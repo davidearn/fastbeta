@@ -23,7 +23,7 @@ stopifnot(exprs = {
 	identical(dimnames(X), list(NULL, c("beta", "S", "I")))
 	identical(tsp(X), tsp(sir.e01))
 	!anyNA(X[-nrow(X), ])
-	min(X, na.rm = TRUE) >= 0
+	min(X, 0, na.rm = TRUE) >= 0
 })
 
 if (dev.interactive(TRUE))
