@@ -4,27 +4,43 @@ tarball := $(package)_$(version).tar.gz
 rchkdir := $(package).Rcheck
 rchklog := $(rchkdir)/00check.log
 
-sources := .Rbuildignore DESCRIPTION NAMESPACE \
-	R/*.R data/*.rda man/*.Rd tests/*.R \
-	vignettes/*.Rnw vignettes/*.bib vignettes/*.tex
+sources := \
+	.Rbuildignore \
+	DESCRIPTION \
+	NAMESPACE \
+	R/*.R \
+	data/*.R \
+	data/*.rda \
+	data/datalist \
+	inst/NEWS.Rd \
+	inst/scripts/*.R \
+	man/*.Rd \
+	src/*.c \
+	src/*.h \
+	tests/*.R \
+	vignettes/*.Rnw \
+	vignettes/*.bib
 
-.PHONY: all build check install clean
-
+.PHONY: all
 all: build
 
+.PHONY: build
 build: $(tarball)
 
+.PHONY: check
 check: $(rchklog)
 
+.PHONY: install
 install: $(tarball)
 	R CMD INSTALL $<
 
+.PHONY: clean
 clean:
 	rm -rf $(tarball) $(rchkdir)
-	find . -name '*~' -type f -exec rm {} \+
+	find . -name *~ -type f -exec rm {} \+
 
 $(tarball): $(sources)
-	R CMD build --no-resave-data --compact-vignettes=gs+qpdf .
+	R CMD build --compact-vignettes=gs+qpdf .
 
 $(rchklog): $(tarball)
 	R CMD check --as-cran $<
