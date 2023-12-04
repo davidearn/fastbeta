@@ -16,7 +16,6 @@ sources := \
 	inst/scripts/*.R \
 	man/*.Rd \
 	src/*.c \
-	src/*.h \
 	tests/*.R \
 	vignettes/*.Rnw \
 	vignettes/*.bib
@@ -40,7 +39,7 @@ clean:
 	find . -name *~ -type f -exec rm {} \+
 
 $(tarball): $(sources)
-	R CMD build --compact-vignettes=gs+qpdf .
+	R CMD build --no-build-vignettes .
 
 $(rchklog): $(tarball)
 	R CMD check --as-cran $<
