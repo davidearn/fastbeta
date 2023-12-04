@@ -1,11 +1,11 @@
 Package: fastbeta
 Version: 0.1.2
-Date: 2023-11-29
+Date: 2023-12-04
 Title: Fast Estimation of Time-Varying Infectious Disease
 	Transmission Rates
 Description: Methods for estimating time-varying infectious disease
 	transmission rates from disease incidence time series, based
-	on discretizations of an SIRS model, as analyzed in Jagan et al.
+	on discretizations of an SIR model, as analyzed in Jagan et al.
 	(2020) <doi:10.1371/journal.pcbi.1008124>.
 License: GPL (>= 2)
 URL: https://github.com/davidearn/fastbeta
