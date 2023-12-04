@@ -34,7 +34,7 @@ void fastbeta(double *s, double *c, int n, double *r)
 		S[j] /= tmp;
 		I[j] /= tmp + halfgamma;
 		R[j] /= tmp + halfdelta;
-		beta[j] = 0.5 * (Z[i] + Z[j]) / (S[i] * I[i]);
+		beta[i] = 0.5 * (Z[i] + Z[j]) / (S[i] * I[i]);
 	}
 	return;
 }
