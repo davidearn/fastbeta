@@ -25,19 +25,22 @@ relative to the duration of an observation interval, then computing
 the recursion
 \deqn{
   \begin{aligned}
-  \beta_{t} &= \frac{Z_{t} + Z_{t + 1}}{2 S_{t} I_{t}} \\
   I_{t + 1} &= \frac{(1 - \frac{1}{2} (\gamma + \mu_{t})) I_{t} + Z_{t + 1}}{
     1 + \frac{1}{2} (\gamma + \mu_{t + 1})} \\
   R_{t + 1} &= \frac{(1 - \frac{1}{2} (\delta + \mu_{t})) R_{t} + \frac{1}{2} \gamma (I_{t} + I_{t + 1})}{
     1 + \frac{1}{2} (\delta + \mu_{t + 1})} \\
-  S_{t + 1} &= \frac{(1 - \frac{1}{2} \mu_{t}) S_{t} + B_{t + 1} - Z_{t + 1} + \frac{1}{2} \delta (R_{t} + R_{t + 1})}{
-    1 + \frac{1}{2} \mu_{t + 1}}
+  S_{t + 1} &= \frac{(1 - \frac{1}{2} \mu_{t}) S_{t} - Z_{t + 1} + B_{t + 1} + \frac{1}{2} \delta (R_{t} + R_{t + 1})}{
+    1 + \frac{1}{2} \mu_{t + 1}} \\
+  \beta_{t} &= \frac{Z_{t} + Z_{t + 1}}{2 S_{t} I_{t}}
   \end{aligned}
 }{
+  I[t + 1] = ((1 - 0.5 * (gamma + mu[t])) * I[t] + Z[t + 1]) /
+      (1 + 0.5 * (gamma + mu[t + 1]))
+  R[t + 1] = ((1 - 0.5 * (delta + mu[t])) * R[t] + 0.5 * gamma * (I[t] + I[t + 1]))/
+      (1 + 0.5 * (delta + mu[t + 1]))
+  S[t + 1] = ((1 - 0.5 *          mu[t] ) * S[t] - Z[t + 1] + B[t + 1] + 0.5 * delta * (R[t] + R[t + 1])) /
+      (1 + 0.5 *          mu[t + 1] )
   beta[t] = (Z[t] + Z[t + 1]) / (2 * S[t] * I[t])
-  I[t + 1] = ((1 - 0.5 * (gamma + mu[t])) * I[t] + Z[t + 1]) / (1 + 0.5 * (gamma + mu[t + 1]))
-  R[t + 1] = ((1 - 0.5 * (delta + mu[t])) * R[t] + 0.5 * gamma * (I[t] + I[t + 1])) / (1 + 0.5 * (delta + mu[t + 1]))
-  S[t + 1] = ((1 - 0.5 * mu[t]) * S[t] + B[t + 1] - Z[t + 1] + 0.5 * delta * (R[t] + R[t + 1])) / (1 + 0.5 * mu[t + 1])
 }
 where
 \deqn{
@@ -52,6 +55,10 @@ where
   B[t] ~ integrate(            nu(s), t - 1, t)
 }
 and it is understood that indexing starts at \eqn{t = 0}.
+\eqn{Z_{t}}{Z[t]}, \eqn{B_{t}}{B[t]}, and \eqn{\mu_{t}}{mu[t]} denote
+incidence and births between times \eqn{t - 1} and \eqn{t} and the
+per capita natural mortality rate at time \eqn{t}; they are supplied
+together as argument \code{series}.
 }
 \usage{
 fastbeta(series, constants, \dots)
