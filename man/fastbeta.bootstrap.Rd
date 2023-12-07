@@ -16,14 +16,13 @@ fastbeta.bootstrap(r, series, constants, \dots)
 \arguments{
 \item{r}{the number of replications.}
 \item{series, constants}{see \code{\link{fastbeta}}.}
-\item{\dots}{optional arguments passed to \code{\link{sir}}
-  and/or \code{\link{deconvolve}}.  Both take optional arguments
-  \code{prob} and \code{delay}.  When \code{prob} is supplied
-  but not \code{delay}, \code{sir} and \code{deconvolve} receive
-  \code{prob} as is.  When both are supplied, \code{\link{sir}}
-  receives \code{prob} as is, whereas \code{\link{deconvolve}}
-  receives \code{prob} augmented with \code{length(delay)-1}
-  ones.}
+\item{\dots}{optional arguments passed to \code{\link{sir}} and/or
+  \code{\link{deconvolve}}.  Both take optional arguments \code{prob}
+  and \code{delay}.  When \code{prob} is supplied but not \code{delay},
+  \code{sir} and \code{deconvolve} receive \code{prob} as is.
+  When both are supplied, \code{\link{sir}} receives \code{prob} as is,
+  whereas \code{\link{deconvolve}} receives \code{prob} augmented with
+  \code{length(delay)-1} ones.}
 }
 \value{
 A \dQuote{multiple time series} object, inheriting from class
@@ -54,7 +53,7 @@ constants <- c(gamma = a[["gamma"]],
                I0 = sir.e01[[1L, "I"]],
                R0 = sir.e01[[1L, "R"]])
 
-R <- fastbeta.bootstrap(10L, series, constants,
+R <- fastbeta.bootstrap(100L, series, constants,
                         prob = a[["prob"]], delay = a[["delay"]])
 str(R)
 plot(R)
