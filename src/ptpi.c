@@ -11,7 +11,8 @@ void ptpi0(double *s, double *c, int n, int a, int b, double tol, int itermax,
 		*Z = s, *B = Z + n + 1, *mu = B + n + 1,
 		S_a_ = c[2], I_a_ = c[3], R_a_ = c[4],
 		S_i_, S_j_, I_i_, I_j_, R_i_, R_j_,
-		halfmu, halfgamma = 0.5 * c[0], halfdelta = 0.5 * c[1], tmp;
+		halfmu, halfgamma = 0.5 * c[0], halfdelta = 0.5 * c[1],
+		tmp0, tmp1;
 
 	*iter = 0;
 	while (*iter < itermax) {
@@ -20,17 +21,17 @@ void ptpi0(double *s, double *c, int n, int a, int b, double tol, int itermax,
 	R_i_ = R_a_;
 	halfmu = 0.5 * mu[a];
 	for (j = a + 1; j <= b; ++j) {
-		tmp = 1.0 - halfmu;
-		I_j_ = (tmp - halfgamma) * I_i_                             + Z[j];
-		R_j_ = (tmp - halfdelta) * R_i_ + halfgamma * (I_i_ + I_j_);
-		S_j_ =  tmp              * S_i_ + halfdelta * (R_i_ + R_j_) - Z[j] + B[j];
-		tmp = 1.0 + (halfmu = 0.5 * mu[j]);
-		S_j_ /= tmp;
-		I_j_ /= tmp + halfgamma;
-		R_j_ /= tmp + halfdelta;
-		S_i_ = S_j_;
-		I_i_ = I_j_;
-		R_i_ = R_j_;
+		tmp0 = 1.0 -  halfmu;
+		tmp1 = 1.0 + (halfmu = 0.5 * mu[j]);
+
+		I_j_  = (tmp0 - halfgamma) * I_i_                             + Z[j];
+		I_j_ /= tmp1 + halfgamma;
+
+		R_j_  = (tmp0 - halfdelta) * R_i_ + halfgamma * (I_i_ + I_j_);
+		R_j_ /= tmp1 + halfdelta;
+
+		S_j_  =  tmp0              * S_i_ + halfdelta * (R_i_ + R_j_) - Z[j] + B[j];
+		S_j_ /= tmp1;
 	}
 	*delta = sqrt(
 		((S_i_ - S_a_) * (S_i_ - S_a_) +
@@ -46,14 +47,18 @@ void ptpi0(double *s, double *c, int n, int a, int b, double tol, int itermax,
 	}
 	halfmu = 0.5 * mu[a];
 	for (i = a - 1, j = a; i >= 0; --i, --j) {
-		tmp = 1.0 + halfmu;
-		I_i_ = (tmp + halfgamma) * I_j_                             - Z[j];
-		R_i_ = (tmp + halfdelta) * R_j_ - halfgamma * (I_i_ + I_j_);
-		S_i_ =  tmp              * S_j_ - halfdelta * (R_i_ + R_j_) + Z[j] - B[j];
-		tmp = 1.0 - (halfmu = 0.5 * mu[i]);
-		S_i_ /= tmp;
-		I_i_ /= tmp - halfgamma;
-		R_i_ /= tmp - halfdelta;
+		tmp0 = 1.0 +  halfmu;
+		tmp1 = 1.0 - (halfmu = 0.5 * mu[i]);
+
+		I_i_  = (tmp0 + halfgamma) * I_j_                             - Z[j];
+		I_i_ /= tmp1 - halfgamma;
+
+		R_i_  = (tmp0 + halfdelta) * R_j_ - halfgamma * (I_i_ + I_j_);
+		R_i_ /= tmp1 - halfdelta;
+
+		S_i_  =  tmp0              * S_j_ - halfdelta * (R_i_ + R_j_) + Z[j] - B[j];
+		S_i_ /= tmp1;
+
 		S_j_ = S_i_;
 		I_j_ = I_i_;
 		R_j_ = R_i_;
@@ -76,7 +81,8 @@ void ptpi1(double *s, double *c, int n, int a, int b, double tol, int itermax,
 		*Z = s, *B = Z + n + 1, *mu = B + n + 1,
 		*S = x, *I = S + n + 1, * R = I + n + 1,
 		S_a_ = c[2], I_a_ = c[3], R_a_ = c[4],
-		halfmu, halfgamma = 0.5 * c[0], halfdelta = 0.5 * c[1], tmp;
+		halfmu, halfgamma = 0.5 * c[0], halfdelta = 0.5 * c[1],
+		tmp0, tmp1;
 
 	*iter = 0;
 	while (*iter < itermax) {
@@ -85,14 +91,17 @@ void ptpi1(double *s, double *c, int n, int a, int b, double tol, int itermax,
 	R[a] = R_a_;
 	halfmu = 0.5 * mu[a];
 	for (i = a, j = a + 1; i < b; ++i, ++j) {
-		tmp = 1.0 - halfmu;
-		I[j] = (tmp - halfgamma) * I[i]                             + Z[j];
-		R[j] = (tmp - halfdelta) * R[i] + halfgamma * (I[i] + I[j]);
-		S[j] =  tmp              * S[i] + halfdelta * (R[i] + R[j]) - Z[j] + B[j];
-		tmp = 1.0 + (halfmu = 0.5 * mu[j]);
-		S[j] /= tmp;
-		I[j] /= tmp + halfgamma;
-		R[j] /= tmp + halfdelta;
+		tmp0 = 1.0 -  halfmu;
+		tmp1 = 1.0 + (halfmu = 0.5 * mu[j]);
+
+		I[j]  = (tmp0 - halfgamma) * I[i]                             + Z[j];
+		I[j] /= tmp1 + halfgamma;
+
+		R[j]  = (tmp0 - halfdelta) * R[i] + halfgamma * (I[i] + I[j]);
+		R[j] /= tmp1 + halfdelta;
+
+		S[j]  =  tmp0              * S[i] + halfdelta * (R[i] + R[j]) - Z[j] + B[j];
+		S[j] /= tmp1;
 	}
 	*delta = sqrt(
 		((S[b] - S_a_) * (S[b] - S_a_) +
@@ -112,14 +121,18 @@ void ptpi1(double *s, double *c, int n, int a, int b, double tol, int itermax,
 	double S_i_, S_j_ = S_a_, I_i_, I_j_ = I_a_, R_i_, R_j_ = R_a_;
 	halfmu = 0.5 * mu[a];
 	for (i = a - 1, j = a; i >= 0; --i, --j) {
-		tmp = 1.0 + halfmu;
-		I_i_ = (tmp + halfgamma) * I_j_                             - Z[j];
-		R_i_ = (tmp + halfdelta) * R_j_ - halfgamma * (I_i_ + I_j_);
-		S_i_ =  tmp              * S_j_ - halfdelta * (R_i_ + R_j_) + Z[j] - B[j];
-		tmp = 1.0 - (halfmu = 0.5 * mu[i]);
-		S_i_ /= tmp;
-		I_i_ /= tmp - halfgamma;
-		R_i_ /= tmp - halfdelta;
+		tmp0 = 1.0 +  halfmu;
+		tmp1 = 1.0 - (halfmu = 0.5 * mu[i]);
+
+		I_i_  = (tmp0 + halfgamma) * I_j_                             - Z[j];
+		I_i_ /= tmp1 - halfgamma;
+
+		R_i_  = (tmp0 + halfdelta) * R_j_ - halfgamma * (I_i_ + I_j_);
+		R_i_ /= tmp1 - halfdelta;
+
+		S_i_  =  tmp0              * S_j_ - halfdelta * (R_i_ + R_j_) + Z[j] - B[j];
+		S_i_ /= tmp1;
+
 		S_j_ = S_i_;
 		I_j_ = I_i_;
 		R_j_ = R_i_;

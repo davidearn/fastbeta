@@ -14,13 +14,21 @@ void fastbeta(double *s, double *c, int n, double *r)
 	int i, j, k;
 	char name[] = { 'S', 'I', 'R' }, warn[] = { 1, 1, 1 };
 	double halfmu = 0.5 * mu[0], halfgamma = 0.5 * c[0], halfdelta = 0.5 * c[1],
-		tmp, *r_;
+		tmp0, tmp1, *r_;
 
 	for (i = 0, j = 1; i < n; ++i, ++j) {
-		tmp = 1.0 - halfmu;
-		I[j] = (tmp - halfgamma) * I[i]                             + Z[j];
-		R[j] = (tmp - halfdelta) * R[i] + halfgamma * (I[i] + I[j]);
-		S[j] =  tmp              * S[i] + halfdelta * (R[i] + R[j]) - Z[j] + B[j];
+		tmp0 = 1.0 -  halfmu;
+		tmp1 = 1.0 + (halfmu = 0.5 * mu[j]);
+
+		I[j]  = (tmp0 - halfgamma) * I[i]                             + Z[j];
+		I[j] /= tmp1 + halfgamma;
+
+		R[j]  = (tmp0 - halfdelta) * R[i] + halfgamma * (I[i] + I[j]);
+		R[j] /= tmp1 + halfdelta;
+
+		S[j]  =  tmp0              * S[i] + halfdelta * (R[i] + R[j]) - Z[j] + B[j];
+		S[j] /= tmp1;
+
 		r_ = r;
 		for (k = 0; k < 2; ++k) {
 			if (warn[k] && (ISNAN(*r) || *r < 0.0)) {
@@ -30,10 +38,7 @@ void fastbeta(double *s, double *c, int n, double *r)
 			r += n + 1;
 		}
 		r = r_ + 1;
-		tmp = 1.0 + (halfmu = 0.5 * mu[j]);
-		S[j] /= tmp;
-		I[j] /= tmp + halfgamma;
-		R[j] /= tmp + halfdelta;
+
 		beta[i] = 0.5 * (Z[i] + Z[j]) / (S[i] * I[i]);
 	}
 	return;
