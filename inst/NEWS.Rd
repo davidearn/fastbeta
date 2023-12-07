@@ -1,8 +1,24 @@
 \name{NEWS}
 \title{News for \R{} Package \pkg{fastbeta}}
 
-\section{Changes in version 0.1.1 (2023-11-28)}{
+\section{Changes in version 0.2.0 (2023-12-07)}{
   \itemize{
+    \item Three backwards incompatible changes to the API
+    due to generalization allowing for loss of immunity:
+    \itemize{
+      \item \code{fastbeta} and \code{fastbeta.bootstrap}
+      expect \code{constants = \code{c(gamma, delta, S0, I0, R0)}},
+      no longer \code{constants = \code{c(gamma, S0, I0)}}.
+
+      \item \code{ptpi} gains argument \code{constants} and loses
+      argument \code{start}.
+      It expects \code{constants = c(gamma, delta, Sa, Ia, Ra)}
+      instead of \code{start = Sa}.
+
+      \item \code{fastbeta} returns (modulo attributes)
+      \code{cbind(S, I, R, beta)}, no longer \code{cbind(beta, S, I)}.
+    }
+
     \item \file{data/*.R} are no longer copied into \file{inst/scripts}
     at install time by a \command{make} rule in \file{src/Makevars}.
     There is no need: the scripts are preserved due to the setting of

@@ -1,6 +1,6 @@
 Package: fastbeta
-Version: 0.1.2
-Date: 2023-12-04
+Version: 0.2.0
+Date: 2023-12-07
 Title: Fast Estimation of Time-Varying Infectious Disease
 	Transmission Rates
 Description: Methods for estimating time-varying infectious disease
