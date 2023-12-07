@@ -116,6 +116,10 @@ X <- fastbeta(series, constants,
 str(X)
 plot(X)
 
+## NB: edge effects are due to deconvolution; situation is improved
+##     with non-default initialization of 'deconvolve', e.g., using
+##     fastbeta(..., start=); see help("deconvolve")
+
 plot(X[, "beta"], ylab = "Transmission rate")
 lines(a[["beta"]](time(X)), col = "red") # the "truth"
 }
