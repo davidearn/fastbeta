@@ -18,7 +18,9 @@ to \code{\link{sir}}, discarding transient behaviour.
 Simulation parameters may be preserved as attributes.
 }
 \source{
-To reproduce these objects, run the corresponding scripts, e.g.,
+Scripts used to reproduce the simulations are located in the
+\file{data} subdirectory of the \pkg{fastbeta} installation;
+see, e.g.
 \code{\link{system.file}("data", "sir.e01.R", package = "fastbeta")}.
 }
 \seealso{\code{\link{sir}}.}
