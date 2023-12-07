@@ -9,7 +9,7 @@ S0 <- 5e+04
 I0 <- 1e+03
 R0 <- 1e+06 - S0 - I0
 gamma <- 0.5
-delta <- 0.05
+delta <- 0
 constants <- c(S0 = S0, I0 = I0, R0 = R0, gamma = gamma, delta = delta)
 
 n <- 52L * 55L
