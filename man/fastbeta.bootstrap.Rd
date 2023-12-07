@@ -44,18 +44,17 @@ a <- attributes(sir.e01)
 str(sir.e01)
 plot(sir.e01)
 
-## Now suppose that you have perfect knowledge except for incidence,
-## which you observe imperfectly
-series <- cbind(sir.e01[, c("Z.obs", "B")], mu = a[["mu"]](0))
-colnames(series) <- c("Z.obs", "B", "mu") # FIXME: stats:::cbind.ts mangles dimnames
+## We suppose that we have perfect knowledge of incidence,
+## births, and the data-generating parameters
+series <- cbind(sir.e01[, c("Z", "B")], mu = a[["mu"]](0))
+colnames(series) <- c("Z", "B", "mu") # FIXME: stats:::cbind.ts mangles dimnames
 constants <- c(S0 = sir.e01[[1L, "S"]],
                I0 = sir.e01[[1L, "I"]],
                R0 = sir.e01[[1L, "R"]],
                gamma = a[["gamma"]],
                delta = a[["delta"]])
 
-R <- fastbeta.bootstrap(100L, series, constants,
-                        prob = a[["prob"]], delay = a[["delay"]])
+R <- fastbeta.bootstrap(100L, series, constants)
 str(R)
 plot(R)
 plot(R, level = 0.95)

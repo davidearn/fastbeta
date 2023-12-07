@@ -87,8 +87,9 @@ a <- attributes(sir.e01)
 str(sir.e01)
 plot(sir.e01)
 
-## Now suppose that you have perfect knowledge except for the initial state,
-## which you "guess"
+## We suppose that we have perfect knowledge of incidence,
+## births, and the data-generating parameters, except for
+## the initial state, which we "guess"
 series <- cbind(sir.e01[, c("Z", "B")], mu = a[["mu"]](0))
 colnames(series) <- c("Z", "B", "mu") # FIXME: stats:::cbind.ts mangles dimnames
 constants <- c(Sa = sir.e01[[1L, "S"]],

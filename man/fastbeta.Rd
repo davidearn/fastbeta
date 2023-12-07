@@ -102,24 +102,19 @@ a <- attributes(sir.e01)
 str(sir.e01)
 plot(sir.e01)
 
-## Now suppose that you have perfect knowledge except for incidence,
-## which you observe imperfectly
-series <- cbind(sir.e01[, c("Z.obs", "B")], mu = a[["mu"]](0))
-colnames(series) <- c("Z.obs", "B", "mu") # FIXME: stats:::cbind.ts mangles dimnames
+## We suppose that we have perfect knowledge of incidence,
+## births, and the data-generating parameters
+series <- cbind(sir.e01[, c("Z", "B")], mu = a[["mu"]](0))
+colnames(series) <- c("Z", "B", "mu") # FIXME: stats:::cbind.ts mangles dimnames
 constants <- c(S0 = sir.e01[[1L, "S"]],
                I0 = sir.e01[[1L, "I"]],
                R0 = sir.e01[[1L, "R"]],
                gamma = a[["gamma"]],
                delta = a[["delta"]])
 
-X <- fastbeta(series, constants,
-              prob = a[["prob"]], delay = a[["delay"]])
+X <- fastbeta(series, constants)
 str(X)
 plot(X)
-
-## NB: edge effects are due to deconvolution; situation is improved
-##     with non-default initialization of 'deconvolve', e.g., using
-##     fastbeta(..., start=); see help("deconvolve")
 
 plot(X[, "beta"], ylab = "Transmission rate")
 lines(a[["beta"]](time(X)), col = "red") # the "truth"
