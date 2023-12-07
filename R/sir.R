@@ -101,7 +101,7 @@ function (n, beta, nu, mu, constants, stochastic = TRUE,
 				transitions  = tran,
 				rateFunc     = ff,
 				params       =
-					list(beta, nu, mu, constants[[1L]], constants[[2L]]),
+					list(beta, nu, mu, constants[[4L]], constants[[5L]]),
 				tf           = n,
 				jacobianFunc = Df,
 				tl.params    = tl.params)
@@ -198,7 +198,7 @@ function (n, beta, nu, mu, constants, stochastic = TRUE,
 				times    = 0L:n,
 				func     = gg,
 				parms    =
-					list(beta, nu, mu, constants[[1L]], constants[[2L]]),
+					list(beta, nu, mu, constants[[4L]], constants[[5L]]),
 				jacfunc  = Dg,
 				jactype  = "fullusr",
 				hmax     = 1,
