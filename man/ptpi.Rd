@@ -38,9 +38,9 @@ ptpi(series, constants, a = 0L, b = nrow(series) - 1L,
   (\dQuote{parallel}, equally spaced) time series of incidence, births,
   and the per capita natural mortality rate, in that order.}
 \item{constants}{a numeric vector of the form
-  \code{c(gamma, delta, Sa, Ia, Ra)}, specifying rates of removal
-  and loss of immunity and a starting value for the state at time
-  \code{a}, in that order.}
+  \code{c(Sa, Ia, Ra, gamma, delta)}, specifying a starting value for
+  the state at time \code{a} and rates of removal and loss of immunity,
+  in that order.}
 \item{a}{the time of the first peak in the incidence time series.
   It is rounded internally to generate a 0-index of rows of \code{series}.}
 \item{b}{the time of the last peak in the incidence time series
@@ -91,11 +91,11 @@ plot(sir.e01)
 ## which you "guess"
 series <- cbind(sir.e01[, c("Z", "B")], mu = a[["mu"]](0))
 colnames(series) <- c("Z", "B", "mu") # FIXME: stats:::cbind.ts mangles dimnames
-constants <- c(gamma = a[["gamma"]],
-               delta = a[["delta"]],
-               S0 = sir.e01[[1L, "S"]],
-               I0 = sir.e01[[1L, "I"]],
-               R0 = sir.e01[[1L, "R"]])
+constants <- c(Sa = sir.e01[[1L, "S"]],
+               Ia = sir.e01[[1L, "I"]],
+               Ra = sir.e01[[1L, "R"]],
+               gamma = a[["gamma"]],
+               delta = a[["delta"]])
 
 plot(series[, "Z"])
 a <- 9; b <- 218

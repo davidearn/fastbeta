@@ -7,13 +7,17 @@
     due to generalization allowing for loss of immunity:
     \itemize{
       \item \code{fastbeta} and \code{fastbeta.bootstrap}
-      expect \code{constants = \code{c(gamma, delta, S0, I0, R0)}},
+      expect  \code{constants = \code{c(S0, I0, R0, gamma, delta)}},
       no longer \code{constants = \code{c(gamma, S0, I0)}}.
+
+      \item \code{sir}
+      expects \code{constants = \code{c(S0, I0, R0, gamma, delta)}},
+      no longer \code{constants = \code{c(gamma, S0, I0, R0)}}.
 
       \item \code{ptpi} gains argument \code{constants} and loses
       argument \code{start}.
-      It expects \code{constants = c(gamma, delta, Sa, Ia, Ra)}
-      instead of \code{start = Sa}.
+      It expects \code{constants = c(Sa, Ia, Ra, gamma, delta)},
+      no longer \code{start = Sa}.
 
       \item \code{fastbeta} returns (modulo attributes)
       \code{cbind(S, I, R, beta)}, no longer \code{cbind(beta, S, I)}.

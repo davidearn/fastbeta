@@ -48,11 +48,11 @@ plot(sir.e01)
 ## which you observe imperfectly
 series <- cbind(sir.e01[, c("Z.obs", "B")], mu = a[["mu"]](0))
 colnames(series) <- c("Z.obs", "B", "mu") # FIXME: stats:::cbind.ts mangles dimnames
-constants <- c(gamma = a[["gamma"]],
-               delta = a[["delta"]],
-               S0 = sir.e01[[1L, "S"]],
+constants <- c(S0 = sir.e01[[1L, "S"]],
                I0 = sir.e01[[1L, "I"]],
-               R0 = sir.e01[[1L, "R"]])
+               R0 = sir.e01[[1L, "R"]],
+               gamma = a[["gamma"]],
+               delta = a[["delta"]])
 
 R <- fastbeta.bootstrap(100L, series, constants,
                         prob = a[["prob"]], delay = a[["delay"]])

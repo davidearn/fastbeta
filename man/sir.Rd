@@ -60,8 +60,8 @@ sir(n, beta, nu, mu, constants, stochastic = TRUE,
   after the first must be strictly optional.  The functions need
   not be vectorized.}
 \item{constants}{a numeric vector of the form
-  \code{c(gamma, delta, S0, I0, R0)}, specifying rates of removal
-  and loss of immunity and an initial state, in that order.}
+  \code{c(S0, I0, R0, gamma, delta)}, specifying an initial state
+  and rates of removal and loss of immunity, in that order.}
 \item{stochastic}{a logical indicating if the simulation should
   be stochastic; see \sQuote{Details}.}
 \item{prob}{a numeric vector of length \code{n} such that
@@ -125,7 +125,7 @@ mu <- function (t) 1e-03
 S0 <- 5e+04
 I0 <- 1e+03
 R0 <- 1e+06 - S0 - I0
-constants <- c(gamma = 0.5, delta = 0.05, S0 = S0, I0 = I0, R0 = R0)
+constants <- c(S0 = S0, I0 = I0, R0 = R0, gamma = 0.5, delta = 0.05)
 
 n <- 250L
 prob <- 0.1

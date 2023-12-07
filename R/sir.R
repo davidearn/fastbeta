@@ -32,9 +32,9 @@ function (n, beta, nu, mu, constants, stochastic = TRUE,
 		tl.params <-
 			(function (maxtau = 1, ...) list(maxtau = maxtau, ...))(...)
 
-		init <- c(S = constants[[3L]],
-		          I = constants[[4L]],
-		          R = constants[[5L]],
+		init <- c(S = constants[[1L]],
+		          I = constants[[2L]],
+		          R = constants[[3L]],
 		          B = 0,
 		          Z = 0)
 		tran <- list(c(S =  1, B = 1),        # birth
@@ -46,7 +46,7 @@ function (n, beta, nu, mu, constants, stochastic = TRUE,
 		             c(S =  1, R = -1))       # loss of immunity
 		if (useCompiled) {
 			.Call(R_adsir_initialize, beta, nu, mu,
-			      constants[[1L]], constants[[2L]])
+			      constants[[4L]], constants[[5L]])
 			on.exit(.Call(R_adsir_finalize), add = TRUE)
 			ff <- function (x, theta, t) .Call(R_adsir_dot, t, x)
 			Df <- function (x, theta, t) .Call(R_adsir_jac, t, x)
@@ -123,14 +123,14 @@ function (n, beta, nu, mu, constants, stochastic = TRUE,
 	}
 	else {
 
-		init <- c(S = constants[[3L]],
-		          logI = log(constants[[4L]]),
-		          R = constants[[5L]],
+		init <- c(S = constants[[1L]],
+		          logI = log(constants[[2L]]),
+		          R = constants[[3L]],
 		          B = 0,
 		          Z = 0)
 		if (useCompiled) {
 			.Call(R_desir_initialize, beta, nu, mu,
-			      constants[[1L]], constants[[2L]])
+			      constants[[4L]], constants[[5L]])
 			on.exit(.Call(R_desir_finalize), add = TRUE)
 			X. <- ode(
 				y        = init,

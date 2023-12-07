@@ -69,8 +69,8 @@ fastbeta(series, constants, \dots)
   (\dQuote{parallel}, equally spaced) time series of incidence, births,
   and the per capita natural mortality rate, in that order.}
 \item{constants}{a numeric vector of the form
-  \code{c(gamma, delta, S0, I0, R0)}, specifying rates of removal
-  and loss of immunity and an initial state, in that order.}
+  \code{c(S0, I0, R0, gamma, delta)}, specifying an initial state
+  and rates of removal and loss of immunity, in that order.}
 \item{\dots}{optional arguments passed to \code{\link{deconvolve}},
   if the first column of \code{series} represents \emph{reported}
   incidence or mortality rather than incidence.}
@@ -106,11 +106,11 @@ plot(sir.e01)
 ## which you observe imperfectly
 series <- cbind(sir.e01[, c("Z.obs", "B")], mu = a[["mu"]](0))
 colnames(series) <- c("Z.obs", "B", "mu") # FIXME: stats:::cbind.ts mangles dimnames
-constants <- c(gamma = a[["gamma"]],
-               delta = a[["delta"]],
-               S0 = sir.e01[[1L, "S"]],
+constants <- c(S0 = sir.e01[[1L, "S"]],
                I0 = sir.e01[[1L, "I"]],
-               R0 = sir.e01[[1L, "R"]])
+               R0 = sir.e01[[1L, "R"]],
+               gamma = a[["gamma"]],
+               delta = a[["delta"]])
 
 X <- fastbeta(series, constants,
               prob = a[["prob"]], delay = a[["delay"]])

@@ -9,9 +9,9 @@ void ptpi0(double *s, double *c, int n, int a, int b, double tol, int itermax,
 	int i, j;
 	double
 		*Z = s, *B = Z + n + 1, *mu = B + n + 1,
-		S_a_ = c[2], I_a_ = c[3], R_a_ = c[4],
+		S_a_ = c[0], I_a_ = c[1], R_a_ = c[2],
 		S_i_, S_j_, I_i_, I_j_, R_i_, R_j_,
-		halfmu, halfgamma = 0.5 * c[0], halfdelta = 0.5 * c[1],
+		halfmu, halfgamma = 0.5 * c[3], halfdelta = 0.5 * c[4],
 		tmp0, tmp1;
 
 	*iter = 0;
@@ -80,8 +80,8 @@ void ptpi1(double *s, double *c, int n, int a, int b, double tol, int itermax,
 	double
 		*Z = s, *B = Z + n + 1, *mu = B + n + 1,
 		*S = x, *I = S + n + 1, * R = I + n + 1,
-		S_a_ = c[2], I_a_ = c[3], R_a_ = c[4],
-		halfmu, halfgamma = 0.5 * c[0], halfdelta = 0.5 * c[1],
+		S_a_ = c[0], I_a_ = c[1], R_a_ = c[2],
+		halfmu, halfgamma = 0.5 * c[3], halfdelta = 0.5 * c[4],
 		tmp0, tmp1;
 
 	*iter = 0;

@@ -6,14 +6,14 @@ void fastbeta(double *s, double *c, int n, double *r)
 	double
 		*Z = s, *B = Z + n + 1, *mu = B + n + 1,
 		*S = r, *I = S + n + 1, * R = I + n + 1, *beta = R + n + 1;
-	S[0] = c[2]; I[0] = c[3]; R[0] = c[4]; beta[n] = NA_REAL;
+	S[0] = c[0]; I[0] = c[1]; R[0] = c[2]; beta[n] = NA_REAL;
 
 	if (n == 0)
 		return;
 
 	int i, j, k;
 	char name[] = { 'S', 'I', 'R' }, warn[] = { 1, 1, 1 };
-	double halfmu = 0.5 * mu[0], halfgamma = 0.5 * c[0], halfdelta = 0.5 * c[1],
+	double halfmu = 0.5 * mu[0], halfgamma = 0.5 * c[3], halfdelta = 0.5 * c[4],
 		tmp0, tmp1, *r_;
 
 	for (i = 0, j = 1; i < n; ++i, ++j) {
