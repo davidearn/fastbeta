@@ -6,7 +6,7 @@ mu <- function (t) 1e-03
 environment(beta) <- environment(nu) <- environment(mu) <- .GlobalEnv
 
 gamma <- 0.5
-delta <- 0
+delta <- 0.05
 S0 <- 5e+04
 I0 <- 1e+03
 R0 <- 1e+06 - S0 - I0
