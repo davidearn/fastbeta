@@ -1,6 +1,6 @@
-## NB: sir.e02 uses the same parameters but sets stochastic=TRUE
+## NB: sir.e01 uses the same parameters but sets stochastic=FALSE
 
-sir.e01 <- local({
+sir.e02 <- local({
 beta <- function (t, a = 1e-01, b = 1e-05)
 	b * (1 + a * cospi(t / 26))
 nu <- function (t) 1e+03
@@ -18,10 +18,10 @@ n <- 52L * 55L
 prob <- 0.1
 delay <- diff(stats::pgamma(0L:8L, 2.5))
 
-
+set.seed(0L)
 X <- fastbeta::sir(n, beta, nu, mu, constants,
                    prob = prob, delay = delay,
-                   stochastic = FALSE)
+                   stochastic = TRUE, epsilon = 0.0025)
 X <- stats::window(X, start = n - 52L * 5L)
 stats::tsp(X)[1L:2L] <- stats::tsp(X)[1L:2L] - stats::tsp(X)[1L]
 
