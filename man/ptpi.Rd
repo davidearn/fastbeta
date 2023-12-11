@@ -2,35 +2,35 @@
 \alias{ptpi}
 \title{Peak to peak iteration}
 \description{
-Estimates the initial susceptible population size from a periodic,
-equally spaced incidence time series and other data.
+Estimates the initial sizes of the susceptible, infected, and
+removed populations from a periodic, equally spaced incidence
+time series and other data.  Interpret with care, notably when
+supplying time series that are only \dQuote{roughly} periodic.
 }
 \details{
-\code{ptpi} works by computing the recursion
-\deqn{
-  \begin{aligned}
-  S_{t + 1}^{(i)} &= \frac{(1 - \frac{1}{2} \mu_{t}) S_{t}^{(i)} + B_{t + 1} - Z_{t + 1}}{1 + \frac{1}{2} \mu_{t + 1}} \quad [t = a, \ldots, b - 1] \\
-  S_{a}^{(i + 1)} &= S_{b}^{(i)}
-  \end{aligned}
-}{
-  S[t + 1, i] = ((1 - 0.5 * mu[t]) * S[t, i] + B[t + 1] - Z[t + 1]) / (1 + 0.5 * mu[t + 1])    [t = a, \ldots, b - 1]
-  S[a, i + 1] = S[b, i]
-}
-starting with \eqn{S_{a}^{(0)}}{S[a, i]} equal to \code{start} and
-ending when
-\deqn{
-  \left|\frac{S_{b}^{(i)} - S_{a}^{(i)}}{S_{a}^{(i)}}\right| < \mathtt{tol}
-}{
-  abs((S[b, i] - S[a, i]) / S[a, i]) < tol
-}
-or when \eqn{i} reaches \code{iter.max}.
-The estimated value of the initial susceptible population size is
-\eqn{S_{0}^{(i + 1)}}{S[0, i + 1]}, which is back-calculated from
-\eqn{S_{a}{(i + 1)}}{S[a, i + 1]} by reversing the recursion.
+\code{ptpi} works by computing the iteration described in
+\code{\link{fastbeta}} from time \eqn{t = a} to time \eqn{t = b},
+iteratively, until the relative difference between the states
+at times \eqn{a} and \eqn{b} descends below a tolerance.
+The state at time \eqn{a} in the first iteration is specified
+by the user.  In subsequent iterations, it is the value of
+the state at time \eqn{b} calculated in the previous iteration.
+
+If \code{backcalc = FALSE}, then \code{ptpi} returns a list
+with component \code{value} equal to the state at time \eqn{b}
+in the last iteration.  By periodicity, this value estimates
+the \dQuote{true} state at time \eqn{a}.
+
+If \code{backcalc = TRUE}, then \code{value} is back-calculated
+so that it estimates the \dQuote{true} state at time \eqn{0}.
+This works by inverting the transformation defining one step of
+the iteration, hence the back-calculated result can be nonsense
+if the inverse problem is ill-conditioned.
 }
 \usage{
 ptpi(series, constants, a = 0L, b = nrow(series) - 1L,
-     tol = 1e-03, iter.max = 32L, complete = FALSE, \dots)
+     tol = 1e-03, iter.max = 32L,
+     complete = FALSE, backcalc = FALSE, \dots)
 }
 \arguments{
 \item{series}{a \dQuote{multiple time series} object, inheriting from
@@ -49,24 +49,26 @@ ptpi(series, constants, a = 0L, b = nrow(series) - 1L,
 \item{tol}{a tolerance indicating a stopping condition;
   see \sQuote{Details}.}
 \item{iter.max}{the maximum number of iterations.}
-\item{complete}{a logical flag indicating if the result should
-  preserve the number of susceptible individuals from index \code{a}
-  to index \code{b} in each iteration.}
+\item{complete}{a logical indicating if the result should preserve
+  the state at times \code{a, \ldots, b} in each iteration.}
+\item{backcalc}{a logical indicating if the state at time \code{0}
+  should be back-calculated.}
 \item{\dots}{optional arguments passed to \code{\link{deconvolve}},
   if the first column of \code{series} represents \emph{reported}
   incidence or mortality rather than incidence.}
 }
 \value{
 A list with elements:
-\item{value}{the estimated value of the initial state.}
+\item{value}{the estimated value of the initial state, which is the
+  state at time \code{a} if \code{backcalc = FALSE} and the state at
+  time \code{0} if \code{backcalc = TRUE}.}
 \item{delta}{the relative difference computed in the last iteration.}
 \item{iter}{the number of iterations performed.}
-\item{S, I, R}{if \code{complete = TRUE},
-  then these are \dQuote{multiple time series} objects, inheriting from
-  class \code{\link[=ts]{mts}}, with \code{b-a+1} rows and \code{iter}
-  columns storing the value of \eqn{X_{t}^{(i)}}{X[t, i]}
-  for \eqn{t = a, \ldots, b}
-  and \eqn{i = 0, \ldots, \mathtt{iter} - 1}{i = 0, \ldots, iter - 1}.}
+\item{x}{if \code{complete = TRUE},
+  then a \dQuote{multiple time series} object, inheriting from class
+  \code{\link[=ts]{mts}}, with dimensions \code{c(b-a+1, 3, iter)}.
+  \code{x[, , i]} gives the state at times \code{a, \ldots, b} in
+  iteration \code{i}.}
 }
 %\seealso{}
 \references{
