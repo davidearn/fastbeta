@@ -33,7 +33,7 @@ installation; see, e.g.
 library(utils, pos = "package:base", verbose = FALSE)
 }
 data(sir.e01, package = "fastbeta")
-str(sir.e02)
+str(sir.e01)
 plot(sir.e01)
 
 data(sir.e02, package = "fastbeta")
