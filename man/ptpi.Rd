@@ -24,8 +24,8 @@ the \dQuote{true} state at time \eqn{a}.
 If \code{backcalc = TRUE}, then \code{value} is back-calculated
 so that it estimates the \dQuote{true} state at time \eqn{0}.
 This works by inverting the transformation defining one step of
-the iteration, hence the back-calculated result can be nonsense
-if the inverse problem is ill-conditioned.
+the iteration, hence (components of) the back-calculated result
+can be nonsense if the inverse problem is ill-conditioned.
 }
 \usage{
 ptpi(series, constants, a = 0L, b = nrow(series) - 1L,
@@ -101,15 +101,17 @@ constants <- c(Sa = sir.e01[[1L, "S"]],
                delta = a[["delta"]])
 
 plot(series[, "Z"])
-a <- 9; b <- 218
+a <- 8; b <- 216
 abline(v = c(a, b), lty = 2)
 
-L <- ptpi(series, constants, a = a, b = b, complete = TRUE)
+L <- ptpi(series, constants, a = a, b = b, complete = TRUE, tol = 1e-06)
 str(L)
-plot(L[["S"]], plot.type = "single")
-lines(sir.e01[, "S"], col = "red", lwd = 4)
-abline(h = L$value[["S"]], col = "blue", lwd = 4)
 
-## The relative error:
-L$value[["S"]] / sir.e01[[1L, "S"]] - 1
+S <- L[["X"]][, "S", ]
+plot(S, plot.type = "single")
+lines(sir.e01[, "S"], col = "red", lwd = 4) # the "truth"
+abline(h = L[["value"]]["S"], v = a, col = "blue", lwd = 4, lty = 2)
+
+## The relative error
+L[["value"]]["S"] / sir.e01[1L + a, "S"] - 1
 }
