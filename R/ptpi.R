@@ -1,6 +1,7 @@
 ptpi <-
 function (series, constants, a = 0L, b = nrow(series) - 1L,
-          tol = 1e-03, iter.max = 32L, complete = FALSE, ...)
+          tol = 1e-03, iter.max = 32L,
+          complete = FALSE, backcalc = FALSE, ...)
 {
 	stopifnot(exprs = {
 		is.mts(series)
@@ -27,6 +28,9 @@ function (series, constants, a = 0L, b = nrow(series) - 1L,
 		is.logical(complete)
 		length(complete) == 1L
 		!is.na(complete)
+		is.logical(backcalc)
+		length(backcalc) == 1L
+		!is.na(backcalc)
 	})
 	tsp <- tsp(series)
 	a <- as.integer(round((a - tsp[1L]) * tsp[3L]))
@@ -38,7 +42,8 @@ function (series, constants, a = 0L, b = nrow(series) - 1L,
 		y <- deconvolve(x = x, ...)[["value"]]
 		series[, 1L] <- y[seq.int(to = length(y), length.out = length(x))]
 	}
-	r <- .Call(R_ptpi, series, constants, a, b, tol, iter.max, complete)
+	r <- .Call(R_ptpi, series, constants, a, b, tol, iter.max,
+               complete, backcalc)
 	if (complete) {
 		oldClass(r[["X"]]) <- oldClass(series)
 		tsp(r[["X"]]) <- c(tsp[1L] + c(a, b) / tsp[3L], tsp[3L])

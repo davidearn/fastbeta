@@ -3,7 +3,8 @@
 #include <Rinternals.h>
 
 static
-void ptpi0(double *s, double *c, int n, int a, int b, double tol, int itermax,
+void ptpi0(double *s, double *c,
+           int n, int a, int b, double tol, int itermax, int backcalc,
            double *value, double *delta, int *iter)
 {
 	int i, j;
@@ -49,6 +50,7 @@ void ptpi0(double *s, double *c, int n, int a, int b, double tol, int itermax,
 	if (ISNAN(*delta) || *delta < tol)
 		break;
 	}
+	if (backcalc) {
 	halfmu = 0.5 * mu[a];
 	for (i = a - 1, j = a; i >= 0; --i, --j) {
 		tmp0 = 1.0 +  halfmu;
@@ -67,6 +69,7 @@ void ptpi0(double *s, double *c, int n, int a, int b, double tol, int itermax,
 		I_j_ = I_i_;
 		R_j_ = R_i_;
 	}
+	}
 	value[0] = S_j_;
 	value[1] = I_j_;
 	value[2] = R_j_;
@@ -74,7 +77,8 @@ void ptpi0(double *s, double *c, int n, int a, int b, double tol, int itermax,
 }
 
 static
-void ptpi1(double *s, double *c, int n, int a, int b, double tol, int itermax,
+void ptpi1(double *s, double *c,
+           int n, int a, int b, double tol, int itermax, int backcalc,
            double *value, double *delta, int *iter, double *x)
 {
 	x -= a;
@@ -122,7 +126,9 @@ void ptpi1(double *s, double *c, int n, int a, int b, double tol, int itermax,
 	I += ldx;
 	R += ldx;
 	}
-	double S_i_, S_j_ = S_a_, I_i_, I_j_ = I_a_, R_i_, R_j_ = R_a_;
+	double S_j_ = S_a_, I_j_ = I_a_, R_j_ = R_a_;
+	if (backcalc) {
+	double S_i_, I_i_, R_i_;
 	halfmu = 0.5 * mu[a];
 	for (i = a - 1, j = a; i >= 0; --i, --j) {
 		tmp0 = 1.0 +  halfmu;
@@ -141,18 +147,22 @@ void ptpi1(double *s, double *c, int n, int a, int b, double tol, int itermax,
 		I_j_ = I_i_;
 		R_j_ = R_i_;
 	}
+	}
 	value[0] = S_j_;
 	value[1] = I_j_;
 	value[2] = R_j_;
 	return;
 }
 
-SEXP R_ptpi(SEXP series, SEXP constants, SEXP a, SEXP b,
-            SEXP tol, SEXP itermax, SEXP complete)
+SEXP R_ptpi(SEXP series, SEXP constants,
+            SEXP a, SEXP b, SEXP tol, SEXP itermax,
+            SEXP complete, SEXP backcalc)
 {
 	int n_ = INTEGER(getAttrib(series, R_DimSymbol))[0] - 1,
 		a_ = INTEGER(a)[0], b_ = INTEGER(b)[0],
-		itermax_ = INTEGER(itermax)[0];
+		itermax_ = INTEGER(itermax)[0],
+		complete_ = LOGICAL(complete)[0],
+		backcalc_ = LOGICAL(backcalc)[0];
 	double tol_ = REAL(tol)[0];
 	SEXP res = PROTECT(allocVector(VECSXP, 4)),
 		nms = PROTECT(allocVector(STRSXP, 4)),
@@ -170,11 +180,12 @@ SEXP R_ptpi(SEXP series, SEXP constants, SEXP a, SEXP b,
 	SET_VECTOR_ELT(res, 1, delta);
 	SET_VECTOR_ELT(res, 2, iter);
 
-	if (LOGICAL(complete)[0]) {
+	if (complete_) {
 		int d[3]; d[0] = b_ - a_ + 1; d[1] = 3; d[2] = itermax_;
 		SEXP x = PROTECT(allocVector(REALSXP, (R_xlen_t) d[0] * d[1] * d[2])),
 			dim = PROTECT(allocVector(INTSXP, 3));
-		ptpi1(REAL(series), REAL(constants), n_, a_, b_, tol_, itermax_,
+		ptpi1(REAL(series), REAL(constants),
+		      n_, a_, b_, tol_, itermax_, backcalc_,
 		      REAL(value), REAL(delta), INTEGER(iter), REAL(x));
 		d[2] = INTEGER(iter)[0];
 		memcpy(INTEGER(dim), &d, 3 * sizeof(int));
@@ -188,10 +199,10 @@ SEXP R_ptpi(SEXP series, SEXP constants, SEXP a, SEXP b,
 		SET_VECTOR_ELT(res, 3, x);
 		UNPROTECT(2);
 	}
-	else {
-		ptpi0(REAL(series), REAL(constants), n_, a_, b_, tol_, itermax_,
+	else
+		ptpi0(REAL(series), REAL(constants),
+		      n_, a_, b_, tol_, itermax_, backcalc_,
 		      REAL(value), REAL(delta), INTEGER(iter));
-	}
 	UNPROTECT(5);
 	return res;
 }
