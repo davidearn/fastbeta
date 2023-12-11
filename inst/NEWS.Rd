@@ -1,26 +1,33 @@
 \name{NEWS}
 \title{News for \R{} Package \pkg{fastbeta}}
 
-\section{Changes in version 0.2.0 (2023-12-07)}{
+\section{Changes in version 0.2.0 (2023-12-11)}{
   \itemize{
-    \item Three backwards incompatible changes to the API
-    due to generalization allowing for loss of immunity:
+    \item Backwards incompatible changes to the API partly due to
+    generalization allowing for loss of immunity:
     \itemize{
-      \item \code{fastbeta} and \code{fastbeta.bootstrap}
-      expect  \code{constants = \code{c(S0, I0, R0, gamma, delta)}},
-      no longer \code{constants = \code{c(gamma, S0, I0)}}.
-
       \item \code{sir}
       expects \code{constants = \code{c(S0, I0, R0, gamma, delta)}},
       no longer \code{constants = \code{c(gamma, S0, I0, R0)}}.
+
+      \item \code{fastbeta} and \code{fastbeta.bootstrap}
+      expect \code{constants = \code{c(S0, I0, R0, gamma, delta)}},
+      no longer \code{constants = \code{c(gamma, S0, I0)}}.
+
+      \item \code{fastbeta} returns (modulo attributes)
+      \code{cbind(S, I, R, beta)}, no longer \code{cbind(beta, S, I)}.
 
       \item \code{ptpi} gains argument \code{constants} and loses
       argument \code{start}.
       It expects \code{constants = c(Sa, Ia, Ra, gamma, delta)},
       no longer \code{start = Sa}.
 
-      \item \code{fastbeta} returns (modulo attributes)
-      \code{cbind(S, I, R, beta)}, no longer \code{cbind(beta, S, I)}.
+      \item \code{ptpi}(\dots)[[1L]] gives the state at time \code{0}
+      or at time \code{a} conditional on new argument \code{backcalc}.
+      The default is \code{a}, no longer (implicitly) \code{0}.
+
+      \item \code{ptpi}(\dots)[[4L]] has dimensions
+      \code{c(b-a+1, 3, iter)}, no longer \code{c(b-a+1, iter)}.
     }
 
     \item \file{data/*.R} are no longer copied into \file{inst/scripts}
