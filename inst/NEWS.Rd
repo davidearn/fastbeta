@@ -7,12 +7,12 @@
     generalization allowing for loss of immunity:
     \itemize{
       \item \code{sir}
-      expects \code{constants = \code{c(S0, I0, R0, gamma, delta)}},
-      no longer \code{constants = \code{c(gamma, S0, I0, R0)}}.
+      expects \code{constants = c(S0, I0, R0, gamma, delta)},
+      no longer \code{constants = c(gamma, S0, I0, R0)}.
 
       \item \code{fastbeta} and \code{fastbeta.bootstrap}
-      expect \code{constants = \code{c(S0, I0, R0, gamma, delta)}},
-      no longer \code{constants = \code{c(gamma, S0, I0)}}.
+      expect \code{constants = c(S0, I0, R0, gamma, delta)},
+      no longer \code{constants = c(gamma, S0, I0)}.
 
       \item \code{fastbeta} returns (modulo attributes)
       \code{cbind(S, I, R, beta)}, no longer \code{cbind(beta, S, I)}.
@@ -22,11 +22,11 @@
       It expects \code{constants = c(Sa, Ia, Ra, gamma, delta)},
       no longer \code{start = Sa}.
 
-      \item \code{ptpi}(\dots)[[1L]] gives the state at time \code{0}
+      \item \code{ptpi(\dots)[[1L]]} gives the state at time \code{0}
       or at time \code{a} conditional on new argument \code{backcalc}.
       The default is \code{a}, no longer (implicitly) \code{0}.
 
-      \item \code{ptpi}(\dots)[[4L]] has dimensions
+      \item \code{ptpi(\dots)[[4L]]} has dimensions
       \code{c(b-a+1, 3, iter)}, no longer \code{c(b-a+1, iter)}.
     }
 
