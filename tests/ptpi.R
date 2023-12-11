@@ -9,10 +9,16 @@ data(sir.e01, package = "fastbeta")
 a <- attributes(sir.e01)
 
 series <- cbind(sir.e01[, c("Z", "B")], mu = a[["mu"]](0))
+colnames(series) <- c("Z", "B", "mu")
+constants <- c(S0 = sir.e01[1L, "S"],
+               I0 = sir.e01[1L, "I"],
+               R0 = sir.e01[1L, "R"],
+               gamma = a[["gamma"]],
+               delta = a[["delta"]])
 
-a <- 2296; b <- 2452
-str(L0 <- ptpi(series, a = a, b = b, start = 4e+04, complete = FALSE))
-str(L1 <- ptpi(series, a = a, b = b, start = 4e+04, complete =  TRUE))
+a <- 8; b <- 216
+str(L0 <- ptpi(series, constants, a = a, b = b, complete = FALSE))
+str(L1 <- ptpi(series, constants, a = a, b = b, complete =  TRUE))
 
 stopifnot(exprs = {
 	is.list(L0)
@@ -28,7 +34,8 @@ stopifnot(exprs = {
 value <- L1[["value"]]
 stopifnot(exprs = {
 	is.double(value)
-	length(value) == 1L
+	length(value) == 3L
+	identical(names(value), c("S", "I", "R"))
 	is.finite(value)
 	value >= 0
 })
@@ -51,14 +58,14 @@ stopifnot(exprs = {
 X <- L1[["X"]]
 stopifnot(exprs = {
 	is.double(X)
-	is.mts(X)
-	dim(X)[2L] == iter
-	is.null(dimnames(X))
+	is.ts(X) && inherits(X, "mts") # is.mts checks is.matrix
+	identical(dim(X), c(as.integer(b - a + 1), 3L, iter))
+	identical(dimnames(X), list(NULL, c("S", "I", "R"), NULL))
 	is.finite(X)
 	X >= 0
 })
 
 if (dev.interactive(TRUE))
-	plot(X)
+	plot(X[, "S", ])
 
-unclass(proc.time())
+proc.time()
