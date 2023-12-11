@@ -43,10 +43,12 @@ function (series, constants, a = 0L, b = nrow(series) - 1L,
 		series[, 1L] <- y[seq.int(to = length(y), length.out = length(x))]
 	}
 	r <- .Call(R_ptpi, series, constants, a, b, tol, iter.max,
-               complete, backcalc)
+	           complete, backcalc)
+	names(r[["value"]]) <- c("S", "I", "R")
 	if (complete) {
 		oldClass(r[["X"]]) <- oldClass(series)
 		tsp(r[["X"]]) <- c(tsp[1L] + c(a, b) / tsp[3L], tsp[3L])
+		dimnames(r[["X"]]) <- list(NULL, c("S", "I", "R"), NULL)
 	}
 	r
 }
