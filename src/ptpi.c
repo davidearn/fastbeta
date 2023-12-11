@@ -32,6 +32,10 @@ void ptpi0(double *s, double *c, int n, int a, int b, double tol, int itermax,
 
 		S_j_  =  tmp0              * S_i_ + halfdelta * (R_i_ + R_j_) - Z[j] + B[j];
 		S_j_ /= tmp1;
+
+		S_i_ = S_j_;
+		I_i_ = I_j_;
+		R_i_ = R_j_;
 	}
 	*delta = sqrt(
 		((S_i_ - S_a_) * (S_i_ - S_a_) +
@@ -79,7 +83,7 @@ void ptpi1(double *s, double *c, int n, int a, int b, double tol, int itermax,
 	R_xlen_t ldx = (b - a + 1) * 3;
 	double
 		*Z = s, *B = Z + n + 1, *mu = B + n + 1,
-		*S = x, *I = S + n + 1, * R = I + n + 1,
+		*S = x, *I = S + b - a + 1, * R = I + b - a + 1,
 		S_a_ = c[0], I_a_ = c[1], R_a_ = c[2],
 		halfmu, halfgamma = 0.5 * c[3], halfdelta = 0.5 * c[4],
 		tmp0, tmp1;
@@ -152,14 +156,14 @@ SEXP R_ptpi(SEXP series, SEXP constants, SEXP a, SEXP b,
 	double tol_ = REAL(tol)[0];
 	SEXP res = PROTECT(allocVector(VECSXP, 4)),
 		nms = PROTECT(allocVector(STRSXP, 4)),
-		value = PROTECT(allocVector(REALSXP, 1)),
+		value = PROTECT(allocVector(REALSXP, 3)),
 		delta = PROTECT(allocVector(REALSXP, 1)),
 		iter = PROTECT(allocVector(INTSXP, 1));
 
 	SET_STRING_ELT(nms, 0, mkChar("value"));
 	SET_STRING_ELT(nms, 1, mkChar("delta"));
 	SET_STRING_ELT(nms, 2, mkChar("iter"));
-	SET_STRING_ELT(nms, 3, mkChar("x"));
+	SET_STRING_ELT(nms, 3, mkChar("X"));
 	setAttrib(res, R_NamesSymbol, nms);
 
 	SET_VECTOR_ELT(res, 0, value);
@@ -188,7 +192,6 @@ SEXP R_ptpi(SEXP series, SEXP constants, SEXP a, SEXP b,
 		ptpi0(REAL(series), REAL(constants), n_, a_, b_, tol_, itermax_,
 		      REAL(value), REAL(delta), INTEGER(iter));
 	}
-
 	UNPROTECT(5);
 	return res;
 }

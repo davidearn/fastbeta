@@ -64,10 +64,10 @@ A list with elements:
   time \code{0} if \code{backcalc = TRUE}.}
 \item{delta}{the relative difference computed in the last iteration.}
 \item{iter}{the number of iterations performed.}
-\item{x}{if \code{complete = TRUE},
+\item{X}{if \code{complete = TRUE},
   then a \dQuote{multiple time series} object, inheriting from class
   \code{\link[=ts]{mts}}, with dimensions \code{c(b-a+1, 3, iter)}.
-  \code{x[, , i]} gives the state at times \code{a, \ldots, b} in
+  \code{X[, , i]} gives the state at times \code{a, \ldots, b} in
   iteration \code{i}.}
 }
 %\seealso{}
