@@ -22,7 +22,7 @@ differential equations
 }
 where \eqn{t} is understood to be a unitless measure of time
 relative to the duration of an observation interval, then computing
-the recursion
+the iteration
 \deqn{
   \begin{aligned}
   I_{t + 1} &= \frac{(1 - \frac{1}{2} (\gamma + \mu_{t})) I_{t} + Z_{t + 1}}{
@@ -78,7 +78,7 @@ fastbeta(series, constants, \dots)
 \value{
 A \dQuote{multiple time series} object, inheriting from class
 \code{\link[=ts]{mts}}, with four columns (named \code{S}, \code{I},
-\code{R}, and \code{beta}) storing the result of the recursion
+\code{R}, and \code{beta}) storing the result of the iteration
 described in \sQuote{Details}.
 It is completely parallel to argument \code{series}, having the same
 \code{\link{tsp}} attribute.
