@@ -1,6 +1,6 @@
 \name{sir}
 \alias{sir}
-\title{Simulate infectious disease time series}
+\title{Simulate Infectious Disease Time Series}
 \description{
 Simulates time series of the susceptible, infected, and removed
 population sizes and corresponding time series of births, incidence,

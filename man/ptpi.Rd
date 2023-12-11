@@ -1,6 +1,6 @@
 \name{ptpi}
 \alias{ptpi}
-\title{Peak to peak iteration}
+\title{Peak to Peak Iteration}
 \description{
 Estimates the initial sizes of the susceptible, infected, and
 removed populations from a periodic, equally spaced incidence

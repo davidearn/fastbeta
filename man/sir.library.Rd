@@ -3,7 +3,7 @@
 \alias{sir.e01}
 \alias{sir.e02}
 \docType{data}
-\title{Often used simulations}
+\title{Often Used Simulations}
 \description{
 Infectious disease time series simulated using \code{\link{sir}},
 for use primarily in examples, tests, and vignettes.  Users should

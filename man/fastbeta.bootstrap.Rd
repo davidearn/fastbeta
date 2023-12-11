@@ -1,6 +1,6 @@
 \name{fastbeta.bootstrap}
 \alias{fastbeta.bootstrap}
-\title{Parametric bootstrapping}
+\title{Parametric Bootstrapping}
 \description{
 A simple wrapper around \code{\link{fastbeta}}, using it to generate
 a \dQuote{primary} estimate of a transmission rate \eqn{\beta(t)}

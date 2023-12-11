@@ -1,6 +1,6 @@
 \name{deconvolve}
 \alias{deconvolve}
-\title{Richardson-Lucy deconvolution}
+\title{Richardson-Lucy Deconvolution}
 \description{
 Performs a modified Richardson-Lucy iteration for the purpose
 of estimating incidence from reported incidence or mortality,

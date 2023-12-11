@@ -1,6 +1,6 @@
 \name{fastbeta}
 \alias{fastbeta}
-\title{Estimate a time-varying infectious disease transmission rate}
+\title{Estimate a Time-Varying Infectious Disease Transmission Rate}
 \description{
 Generates a discrete time estimate of a transmission rate
 \eqn{\beta(t)} from an equally spaced incidence time series
