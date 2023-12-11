@@ -3,7 +3,7 @@ library(    stats, pos = "package:base", verbose = FALSE)
 library(    utils, pos = "package:base", verbose = FALSE)
 
 library(fastbeta)
-options(warn = 2L, error = recover)
+options(warn = 2L, error = if (interactive()) recover)
 
 data(sir.e02, package = "fastbeta")
 a <- attributes(sir.e02)

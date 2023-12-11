@@ -3,7 +3,7 @@ library(    stats, pos = "package:base", verbose = FALSE)
 library(    utils, pos = "package:base", verbose = FALSE)
 
 library(fastbeta)
-options(warn = 2L, error = recover)
+options(warn = 2L, error = if (interactive()) recover)
 
 beta <- function (t, a = 1e-01, b = 1e-05)
 	b * (1 + a * cospi(t / 26))
