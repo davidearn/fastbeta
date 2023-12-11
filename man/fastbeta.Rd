@@ -94,6 +94,7 @@ Fast estimation of time-varying infectious disease transmission rates.
 \examples{
 \dontshow{
 ## for R_DEFAULT_PACKAGES=NULL
+library(   stats, pos = "package:base", verbose = FALSE)
 library(graphics, pos = "package:base", verbose = FALSE)
 library(   utils, pos = "package:base", verbose = FALSE)
 }
