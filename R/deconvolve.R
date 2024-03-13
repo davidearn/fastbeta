@@ -3,20 +3,18 @@ deconvolve <-
 function (x, prob = 1, delay = 1,
           start, tol = 1, iter.max = 32L, complete = FALSE)
 {
-	stopifnot(exprs = {
-		is.numeric(x)
-		length(x) >= 1L
-		min(x) >= 0
-		sum(x) >  0
-		is.double(delay)
-		length(delay) >= 1L
-		min(delay) >= 0
-		sum(delay) >  0
-		is.double(prob)
-		any(length(prob) == c(1L, length(x) + length(delay) - 1L))
-		min(prob) >= 0
-		max(prob) <= 1
-	})
+	stopifnot(is.numeric(x)
+	          length(x) >= 1L
+	          min(x) >= 0
+	          sum(x) >  0
+	          is.double(delay)
+	          length(delay) >= 1L
+	          min(delay) >= 0
+	          sum(delay) >  0
+	          is.double(prob)
+	          any(length(prob) == c(1L, length(x) + length(delay) - 1L))
+	          min(prob) >= 0
+	          max(prob) <= 1)
 	storage.mode(x) <- "double"
 
 	n <- n. <- length(x)
@@ -29,12 +27,10 @@ function (x, prob = 1, delay = 1,
 		start <- c(double(d - d.), x, double(d.))
 	}
 	else {
-		stopifnot(exprs = {
-			is.numeric(start)
-			length(start) == length(x) + length(delay) - 1L
-			min(start) >= 0
-			sum(start) >  0
-		})
+		stopifnot(is.numeric(start)
+		          length(start) == length(x) + length(delay) - 1L
+		          min(start) >= 0
+		          sum(start) >  0)
 		storage.mode(start) <- "double"
 	}
 

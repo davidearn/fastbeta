@@ -2,30 +2,28 @@ sir <-
 function (n, beta, nu, mu, constants, stochastic = TRUE,
           prob = 1, delay = 1, useCompiled = TRUE, ...)
 {
-	stopifnot(exprs = {
-		is.integer(n)
-		length(n) == 1L
-		n >= 1L
-		n < .Machine$integer.max
-		is.function(beta)
-		!is.null(formals(beta))
-		is.function(nu)
-		!is.null(formals(nu))
-		is.function(mu)
-		!is.null(formals(mu))
-		is.double(constants)
-		length(constants) == 5L
-		is.finite(constants)
-		all(constants >= 0)
-		is.double(prob)
-		any(length(prob) == c(1L, n))
-		min(prob) >= 0
-		max(prob) <= 1
-		is.double(delay)
-		length(delay) >= 1L
-		min(delay) >= 0
-		sum(delay) >  0
-	})
+	stopifnot(is.integer(n),
+	          length(n) == 1L,
+	          n >= 1L,
+	          n < .Machine$integer.max,
+	          is.function(beta),
+	          !is.null(formals(beta)),
+	          is.function(nu),
+	          !is.null(formals(nu)),
+	          is.function(mu),
+	          !is.null(formals(mu)),
+	          is.double(constants),
+	          length(constants) == 5L,
+	          is.finite(constants),
+	          all(constants >= 0),
+	          is.double(prob),
+	          any(length(prob) == c(1L, n)),
+	          min(prob) >= 0,
+	          max(prob) <= 1,
+	          is.double(delay),
+	          length(delay) >= 1L,
+	          min(delay) >= 0,
+	          sum(delay) > 0)
 
 	if (stochastic) {
 
