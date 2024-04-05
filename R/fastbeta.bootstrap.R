@@ -1,13 +1,13 @@
 fastbeta.bootstrap <-
 function (r, series, constants, ...)
 {
-	stopifnot(is.mts(series)
-	          is.double(series)
-	          ncol(series) == 3L
-	          min(0, series, na.rm = TRUE) >= 0
-	          is.double(constants)
-	          length(constants) == 5L
-	          is.finite(constants)
+	stopifnot(is.mts(series),
+	          is.double(series),
+	          ncol(series) == 3L,
+	          min(0, series, na.rm = TRUE) >= 0,
+	          is.double(constants),
+	          length(constants) == 5L,
+	          is.finite(constants),
 	          all(constants >= 0))
 
 	## Filtering out arguments to 'sir'
