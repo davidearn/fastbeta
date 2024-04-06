@@ -61,10 +61,8 @@ plot.fastbeta.bootstrap <-
 function (x, y, level = NULL,
           col = c("#FF0000FF", "#7F7F7F40"), lwd = c(2, 1), ...)
 {
-	cl <- oldClass(x)
-	oldClass(x) <- cl[cl != "fastbeta.bootstrap"]
 	if (is.null(level))
-		plot(x, plot.type = "single", col = 0, lwd = 0, ...)
+		plot.ts(x, plot.type = "single", col = 0, lwd = 0, ...)
 	else {
 		stopifnot(is.double(level), length(level) == 1L, level >= 0, level <= 1)
 		alpha <- 1 - level
@@ -73,7 +71,7 @@ function (x, y, level = NULL,
 		                     names = FALSE, na.rm = TRUE))
 		oldClass(y) <- oldClass(x)
 		tsp(y) <- tsp(x)
-		plot(y, plot.type = "single", col = 0, lwd = 0, ...)
+		plot.ts(y, plot.type = "single", col = 0, lwd = 0, ...)
 	}
 	col <- rep_len(if (is.null(col)) par("col") else col, 2L)
 	lwd <- rep_len(if (is.null(lwd)) par("lwd") else lwd, 2L)

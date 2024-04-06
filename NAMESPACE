@@ -4,5 +4,5 @@ S3method(plot, fastbeta.bootstrap)
 importFrom(adaptivetau, ssa.adaptivetau)
 importFrom(deSolve, ode)
 importFrom(graphics, lines, par, polygon)
-importFrom(stats, approxfun, filter, is.mts, quantile, rbinom,
+importFrom(stats, approxfun, filter, is.mts, plot.ts, quantile, rbinom,
            time, ts, tsp, "tsp<-")
