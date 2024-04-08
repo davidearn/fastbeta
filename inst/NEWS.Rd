@@ -1,6 +1,16 @@
 \name{NEWS}
 \title{News for \R{} Package \pkg{fastbeta}}
 
+\section{Changes in version 0.3.0 (2024-04-08, in development)}{
+  \itemize{
+    \item Backwards incompatible changes to the API partly due to
+    generalization to \eqn{S E^{m} I^{n} R}:
+    \itemize{
+      \item TODO.
+    }
+  }
+}
+
 \section{Changes in version 0.2.0 (2023-12-11)}{
   \itemize{
     \item Backwards incompatible changes to the API partly due to
