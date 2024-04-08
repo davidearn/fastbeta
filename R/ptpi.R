@@ -1,16 +1,22 @@
 ptpi <-
-function (series, constants, a = 0L, b = nrow(series) - 1L,
+function (series, constants, m = 0L, n = 1L, a = 0L, b = nrow(series) - 1L,
           tol = 1e-03, iter.max = 32L,
           complete = FALSE, backcalc = FALSE, ...)
 {
-	stopifnot(is.mts(series),
+	stopifnot(is.integer(m),
+	          length(m) == 1L,
+	          m >= 0L,
+	          is.integer(n),
+	          length(n) == 1L,
+	          n >= 1L,
+	          is.mts(series),
 	          is.double(series),
 	          ncol(series) == 3L,
 	          min(0, series, na.rm = TRUE) >= 0,
 	          is.double(constants),
-	          length(constants) == 5L,
-	          is.finite(constants),
-	          all(constants >= 0),
+	          length(constants) == m + n + 5L,
+	          all(is.finite(constants)),
+	          min(constants) >= 0,
 	          is.numeric(a),
 	          length(a) == 1L,
 	          a >= tsp(series)[1L],
@@ -34,19 +40,21 @@ function (series, constants, a = 0L, b = nrow(series) - 1L,
 	a <- as.integer(round((a - tsp[1L]) * tsp[3L]))
 	b <- as.integer(round((b - tsp[1L]) * tsp[3L]))
 	if (a > b)
-		stop("'a' is greater than 'b' after rounding; should never happen ...")
+		stop(gettextf("'%s' is greater than '%s' after rounding; should never happen ...",
+		              "a", "b"),
+		     domain = NA)
 	if (...length() > 0L) {
 		x <- series[, 1L]
 		y <- deconvolve(x = x, ...)[["value"]]
 		series[, 1L] <- y[seq.int(to = length(y), length.out = length(x))]
 	}
-	r <- .Call(R_ptpi, series, constants, a, b, tol, iter.max,
+	r <- .Call(R_ptpi, series, constants, m, n, a, b, tol, iter.max,
 	           complete, backcalc)
-	names(r[["value"]]) <- c("S", "I", "R")
+	names(r[["value"]]) <- rep.int(c("S", "E", "I", "R"), c(1L, m, n, 1L))
 	if (complete) {
 		oldClass(r[["X"]]) <- oldClass(series)
 		tsp(r[["X"]]) <- c(tsp[1L] + c(a, b) / tsp[3L], tsp[3L])
-		dimnames(r[["X"]]) <- list(NULL, c("S", "I", "R"), NULL)
+		dimnames(r[["X"]]) <- list(NULL, names(r[["value"]]), NULL)
 	}
 	r
 }
