@@ -68,7 +68,7 @@ function (length.out = 1L, beta, nu, mu, constants, m = 0L, n = 1L,
 
 		if (useCompiled) {
 			.Call(R_adseir_initialize, beta, nu, mu, constants, m, n)
-			on.exit(.Call(R_adseir_finalize), add = TRUE)
+			on.exit(.Call(R_adseir_finalize))
 			ff <- function (x, theta, t) .Call(R_adseir_dot, t, x)
 			Df <- function (x, theta, t) .Call(R_adseir_jac, t, x)
 		}
@@ -159,7 +159,7 @@ function (length.out = 1L, beta, nu, mu, constants, m = 0L, n = 1L,
 
 		if (useCompiled) {
 			.Call(R_deseir_initialize, beta, nu, mu, constants, m, n)
-			on.exit(.Call(R_deseir_finalize), add = TRUE)
+			on.exit(.Call(R_deseir_finalize))
 			gg <- "R_deseir_dot"
 			Dg <- "R_deseir_jac"
 		}
