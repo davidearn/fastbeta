@@ -234,10 +234,10 @@ function (length.out = 1L, beta, nu, mu, constants, m = 0L, n = 1L,
 				s.0 <- sum(u.0 <- exp(x.I        ))
 				s.1 <- sum(u.1 <- exp(x.I - x[2L]))
 				D[i.S, i.S] <<- -(D[p + 1L, i.S] <<- beta * s.0) - mu
-				D[i.S, i.I] <<- -(D[p + 1L, i.I] <<- beta * u.0)
+				D[i.S, i.I] <<- -(D[p + 1L, i.I] <<- beta * x.S * u.0)
 				D[i.S, i.R] <<- delta * exp(x.R)
 				D[ 2L, i.S] <<- beta * s.1
-				D[ 2L, i.I] <<- beta * u.1
+				D[ 2L, i.I] <<- beta * x.S * u.1
 				D[ 2L,  2L] <<- if (m) -beta * s.1 else 0
 				D[k.0] <<- -(D[k.1] <<- a.1 * exp(x[i.1] - x[i.0]))
 				D
