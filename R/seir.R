@@ -1,18 +1,18 @@
 seir <-
-function (length.out = 1L,
-          beta, nu, mu, sigma = gamma, gamma = 1, delta = 0,
-          init, m = 0L, n = 1L,
+function (length.out = 1L, beta, nu, mu,
+          sigma = gamma, gamma = 1, delta = 0,
+          init, m = length(init) - n - 2L, n = 1L,
           stochastic = TRUE, prob = 1, delay = 1, useCompiled = TRUE, ...)
 {
 	stopifnot(is.integer(length.out) && length(length.out) == 1L && length.out >= 1L,
-	          is.integer(m) && length(m) == 1L && m >= 0L && m < 4096L,
-	          is.integer(n) && length(n) == 1L && n >= 1L && n < 4096L,
 	          is.function(beta) && !is.null(formals(beta)),
 	          is.function(nu  ) && !is.null(formals(nu  )),
 	          is.function(mu  ) && !is.null(formals(mu  )),
 	          is.double(sigma) && length(sigma) == 1L && sigma >= 0,
 	          is.double(gamma) && length(gamma) == 1L && gamma >= 0,
 	          is.double(delta) && length(delta) == 1L && sigma >= 0,
+	          is.integer(m) && length(m) == 1L && m >= 0L && m < 4096L,
+	          is.integer(n) && length(n) == 1L && n >= 1L && n < 4096L,
 	          is.double(init),
 	          length(init) == m + n + 2L,
 	          all(is.finite(init)),
