@@ -72,7 +72,7 @@ SEXP R_adseir_initialize(SEXP s_beta, SEXP s_nu, SEXP s_mu,
 	gammaVal = REAL(s_gamma)[0] * (double) n;
 	deltaVal = REAL(s_delta)[0] * (double) 1;
 
-	pDF += nrow * (2 + p) + 1;
+	pDF += (R_xlen_t) nrow * (2 + p) + 1;
 	for (int i = 0; i < m; ++i) {
 		*(pDF++) = sigmaVal;
 		pDF += nrow;
@@ -188,9 +188,9 @@ SEXP R_deseir_initialize(SEXP s_beta, SEXP s_nu, SEXP s_mu,
 	gammaVal = REAL(s_gamma)[0] * (double) n;
 	deltaVal = REAL(s_delta)[0] * (double) 1;
 
-	work0 = R_Calloc(m + 3 * n, double);
+	work0 = R_Calloc((size_t) m + n + n + n, double);
 	work1 = work0 + m + n;
-	work2 = work1 +     n;
+	work2 = work1     + n;
 
 	lastTimeDot = lastTimeJac = -1.0;
 	return R_NilValue;
@@ -271,13 +271,13 @@ void R_deseir_jac(int *neq, double *t, double *y, int *ml,
 	}
 	pd -= p;
 	pd[0] = deltaVal * exp(y[p - 1]);
-	pd -= n * nrow;
+	pd -= (size_t) nrow * n;
 	for (int i = 0; i < n; ++i) {
 		pd[0] = -(pd[p] = betaVal * y[0] * work1[i]);
 		pd[1] =           betaVal * y[0] * work2[i] ;
 		pd += nrow;
 	}
-	pd -= (m + n) * nrow;
+	pd -= (size_t) nrow * (m + n);
 	pd[1] = (m == 0) ? 0.0 : -betaVal * swork2;
 
 	return;
