@@ -1,20 +1,38 @@
 #include <Rinternals.h>
 
 static
-void fastbeta(double *s, double *c, int n, double *r)
+void fastbeta(double *series,
+              double sigma, double gamma, double delta,
+              double *init, int m, int n, int lengthOut,
+              double *x)
 {
-	double
-		*Z = s, *B = Z + n + 1, *mu = B + n + 1,
-		*S = r, *I = S + n + 1, * R = I + n + 1, *beta = R + n + 1;
-	S[0] = c[0]; I[0] = c[1]; R[0] = c[2]; beta[n] = NA_REAL;
-
-	if (n == 0)
+	if (lengthOut <= 0)
 		return;
 
-	int i, j, k;
-	char name[] = { 'S', 'I', 'R' }, warn[] = { 1, 1, 1 };
-	double halfmu = 0.5 * mu[0], halfgamma = 0.5 * c[3], halfdelta = 0.5 * c[4],
-		tmp0, tmp1, *r_;
+	double *x_ = x;
+	for (int i = 0; i < m + n + 2) {
+		*x_ = *(x++);
+		x_ += lengthOut;
+	}
+	x_[lengthOut - 1] = NA_REAL;
+
+	if (lengthOut <= 1)
+		return;
+
+	double tmp0, tmp1,
+		*Z    = series,
+		*B    = Z + lengthOut,
+		*mu   = B + lengthOut,
+		*S    = x,
+		*E    = S + lengthOut,
+		*I    = E + lengthOut * m,
+		*R    = I + lengthOut * n,
+		*beta = R + lengthOut,
+		hmu    = 0.5 * mu[0] * (double) 1,
+		hsigma = 0.5 * sigma * (double) m,
+		hgamma = 0.5 * gamma * (double) n,
+		hdelta = 0.5 * delta * (double) 1;
+	char name[] = { 'S', 'E', 'I', 'R' }, warn[] = { 1, 1, 1, 1 };
 
 	for (i = 0, j = 1; i < n; ++i, ++j) {
 		tmp0 = 1.0 -  halfmu;
@@ -44,11 +62,16 @@ void fastbeta(double *s, double *c, int n, double *r)
 	return;
 }
 
-SEXP R_fastbeta(SEXP series, SEXP constants)
+SEXP R_fastbeta(SEXP s_series,
+                SEXP s_sigma, SEXP s_gamma, SEXP s_delta,
+                SEXP s_init, SEXP s_m, SEXP s_n)
 {
-	int n = INTEGER(getAttrib(series, R_DimSymbol))[0] - 1;
-	SEXP res = allocMatrix(REALSXP, n + 1, 4);
-	if (n >= 0)
-		fastbeta(REAL(series), REAL(constants), n, REAL(res));
-	return res;
+	int m = INTEGER(s_m)[0], n = INTEGER(s_n)[0],
+		lengthOut = INTEGER(getAttrib(s_series, R_DimSymbol))[0];
+	SEXP x = allocMatrix(REALSXP, lengthOut, m + n + 3);
+	fastbeta(REAL(s_series),
+	         REAL(s_sigma)[0], REAL(s_gamma)[0], REAL(s_delta)[0],
+	         REAL(s_init), m, n, lengthOut,
+	         REAL(x));
+	return x;
 }

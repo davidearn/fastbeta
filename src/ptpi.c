@@ -3,6 +3,16 @@
 #include <Rinternals.h>
 
 static
+void ptpi(double *series,
+          double sigma, double gamma, double delta,
+          double *init, int m, int n, int lengthOut,
+          int a, int b, double tol, int iterMax, int backcalc,
+          double *value, double *diff, int *iter, double *x)
+{
+
+}
+
+static
 void ptpi0(double *s, double *c,
            int n, int a, int b, double tol, int itermax, int backcalc,
            double *value, double *delta, int *iter)
@@ -154,55 +164,69 @@ void ptpi1(double *s, double *c,
 	return;
 }
 
-SEXP R_ptpi(SEXP series, SEXP constants,
-            SEXP a, SEXP b, SEXP tol, SEXP itermax,
-            SEXP complete, SEXP backcalc)
+SEXP R_ptpi(SEXP s_series, SEXP s_sigma, SEXP s_gamma, SEXP s_delta,
+            SEXP s_init, SEXP s_m, SEXP s_n,
+            SEXP s_a, SEXP s_b, SEXP s_tol, SEXP s_iterMax,
+            SEXP s_backcalc, SEXP s_complete)
 {
-	int n_ = INTEGER(getAttrib(series, R_DimSymbol))[0] - 1,
-		a_ = INTEGER(a)[0], b_ = INTEGER(b)[0],
-		itermax_ = INTEGER(itermax)[0],
-		complete_ = LOGICAL(complete)[0],
-		backcalc_ = LOGICAL(backcalc)[0];
-	double tol_ = REAL(tol)[0];
-	SEXP res = PROTECT(allocVector(VECSXP, 4)),
+	int m = INTEGER(s_m)[0], n = INTEGER(s_n)[0],
+		lengthOut = INTEGER(getAttrib(s_series, R_DimSymbol))[0],
+		a = INTEGER(s_a)[0], b = INTEGER(s_b)[0],
+		iterMax = INTEGER(s_iterMax)[0],
+		complete = LOGICAL(s_complete)[0];
+
+	SEXP ans = PROTECT(allocVector(VECSXP, 4)),
 		nms = PROTECT(allocVector(STRSXP, 4)),
 		value = PROTECT(allocVector(REALSXP, 3)),
-		delta = PROTECT(allocVector(REALSXP, 1)),
-		iter = PROTECT(allocVector(INTSXP, 1));
+		diff = PROTECT(allocVector(REALSXP, 1)),
+		iter = PROTECT(allocVector(INTSXP, 1)),
+		x = NULL;
 
 	SET_STRING_ELT(nms, 0, mkChar("value"));
-	SET_STRING_ELT(nms, 1, mkChar("delta"));
+	SET_STRING_ELT(nms, 1, mkChar("diff"));
 	SET_STRING_ELT(nms, 2, mkChar("iter"));
-	SET_STRING_ELT(nms, 3, mkChar("X"));
-	setAttrib(res, R_NamesSymbol, nms);
+	SET_STRING_ELT(nms, 3, mkChar("x"));
+	setAttrib(ans, R_NamesSymbol, nms);
 
-	SET_VECTOR_ELT(res, 0, value);
-	SET_VECTOR_ELT(res, 1, delta);
-	SET_VECTOR_ELT(res, 2, iter);
+	SET_VECTOR_ELT(ans, 0, value);
+	SET_VECTOR_ELT(ans, 1, diff);
+	SET_VECTOR_ELT(ans, 2, iter);
 
-	if (complete_) {
-		int d[3]; d[0] = b_ - a_ + 1; d[1] = 3; d[2] = itermax_;
-		SEXP x = PROTECT(allocVector(REALSXP, (R_xlen_t) d[0] * d[1] * d[2])),
-			dim = PROTECT(allocVector(INTSXP, 3));
-		ptpi1(REAL(series), REAL(constants),
-		      n_, a_, b_, tol_, itermax_, backcalc_,
-		      REAL(value), REAL(delta), INTEGER(iter), REAL(x));
-		d[2] = INTEGER(iter)[0];
-		memcpy(INTEGER(dim), &d, 3 * sizeof(int));
-		if (d[2] < itermax_) {
-			SEXP y = allocVector(REALSXP, (R_xlen_t) d[0] * d[1] * d[2]);
-			memcpy(REAL(y), REAL(x), (size_t) d[0] * d[1] * d[2] * sizeof(double));
-			UNPROTECT(1);
-			PROTECT(x = y);
-		}
-		setAttrib(x, R_DimSymbol, dim);
-		SET_VECTOR_ELT(res, 3, x);
-		UNPROTECT(2);
+	int d[3];
+	if (complete) {
+		d[0] = b - a + 1;
+		d[1] = m + n + 2;
+		d[2] = iterMax;
+		x = allocVector(REALSXP, (R_xlen_t) d[0] * d[1] * d[2]);
 	}
-	else
-		ptpi0(REAL(series), REAL(constants),
-		      n_, a_, b_, tol_, itermax_, backcalc_,
-		      REAL(value), REAL(delta), INTEGER(iter));
+
+	ptpi(REAL(s_series),
+	     REAL(s_sigma)[0], REAL(s_gamma)[0], REAL(s_delta)[0],
+	     REAL(s_init), m, n, lengthOut,
+	     a, b, REAL(s_tol)[0], iterMax, LOGICAL(s_backcalc)[0],
+	     REAL(value), REAL(diff), INTEGER(iter), (complete) ? REAL(x) : NULL);
+
+	if (complete) {
+		d[2] = INTEGER(iter)[0];
+		PROTECT(x);
+
+		SEXP dim = PROTECT(allocVector(INTSXP, 3));
+		memcpy(INTEGER(dim), &d, 3 * sizeof(int));
+		setAttrib(x, R_DimSymbol, dim);
+		UNPROTECT(1);
+
+		if (d[2] >= iterMax)
+		SET_VECTOR_ELT(ans, 3, x);
+		else {
+		SEXP y = PROTECT(allocVector(REALSXP, (R_xlen_t) d[0] * d[1] * d[2]));
+		memcpy(REAL(y), REAL(x), (size_t) d[0] * d[1] * d[2] * sizeof(double));
+		SET_VECTOR_ELT(ans, 3, y);
+		UNPROTECT(1);
+		}
+
+		UNPROTECT(1);
+	}
+
 	UNPROTECT(5);
-	return res;
+	return ans;
 }
