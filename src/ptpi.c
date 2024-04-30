@@ -9,9 +9,10 @@ void ptpi(double *series,
           int a, int b, double tol, int iterMax, int backcalc,
           double *value, double *diff, int *iter, double *x)
 {
-
+	return;
 }
 
+#if 0
 static
 void ptpi0(double *s, double *c,
            int n, int a, int b, double tol, int itermax, int backcalc,
@@ -163,6 +164,7 @@ void ptpi1(double *s, double *c,
 	value[2] = R_j_;
 	return;
 }
+#endif
 
 SEXP R_ptpi(SEXP s_series, SEXP s_sigma, SEXP s_gamma, SEXP s_delta,
             SEXP s_init, SEXP s_m, SEXP s_n,

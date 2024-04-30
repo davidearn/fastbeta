@@ -10,7 +10,7 @@ void fastbeta(double *series,
 		return;
 
 	double *x_ = x;
-	for (int i = 0; i < m + n + 2) {
+	for (int i = 0; i < m + n + 2; ++i) {
 		*x_ = *(x++);
 		x_ += lengthOut;
 	}
@@ -33,6 +33,26 @@ void fastbeta(double *series,
 		hgamma = 0.5 * gamma * (double) n,
 		hdelta = 0.5 * delta * (double) 1;
 	char name[] = { 'S', 'E', 'I', 'R' }, warn[] = { 1, 1, 1, 1 };
+
+	return;
+}
+
+#if 0
+static
+void fastbeta(double *s, double *c, int n, double *r)
+{
+	double
+		*Z = s, *B = Z + n + 1, *mu = B + n + 1,
+		*S = r, *I = S + n + 1, * R = I + n + 1, *beta = R + n + 1;
+	S[0] = c[0]; I[0] = c[1]; R[0] = c[2]; beta[n] = NA_REAL;
+
+	if (n == 0)
+		return;
+
+	int i, j, k;
+	char name[] = { 'S', 'I', 'R' }, warn[] = { 1, 1, 1 };
+	double halfmu = 0.5 * mu[0], halfgamma = 0.5 * c[3], halfdelta = 0.5 * c[4],
+		tmp0, tmp1, *r_;
 
 	for (i = 0, j = 1; i < n; ++i, ++j) {
 		tmp0 = 1.0 -  halfmu;
@@ -61,6 +81,7 @@ void fastbeta(double *series,
 	}
 	return;
 }
+#endif
 
 SEXP R_fastbeta(SEXP s_series,
                 SEXP s_sigma, SEXP s_gamma, SEXP s_delta,
