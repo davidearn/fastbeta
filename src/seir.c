@@ -44,7 +44,8 @@ do { \
 	} \
 } while (0)
 
-SEXP R_adseir_initialize(SEXP beta, SEXP nu, SEXP mu, SEXP constants,
+SEXP R_adseir_initialize(SEXP beta, SEXP nu, SEXP mu,
+                         SEXP sigma, SEXP gamma, SEXP delta,
                          SEXP sm, SEXP sn)
 {
 	m = INTEGER(sm)[0];
@@ -67,9 +68,9 @@ SEXP R_adseir_initialize(SEXP beta, SEXP nu, SEXP mu, SEXP constants,
 	INIT_CALL(beta);
 	INIT_CALL(nu);
 	INIT_CALL(mu);
-	sigmaVal = REAL(constants)[p + 0] * (double) m;
-	gammaVal = REAL(constants)[p + 1] * (double) n;
-	deltaVal = REAL(constants)[p + 2] * (double) 1;
+	sigmaVal = REAL(sigma)[0] * (double) m;
+	gammaVal = REAL(gamma)[0] * (double) n;
+	deltaVal = REAL(delta)[0] * (double) 1;
 
 	pDF += nrow * (2 + p) + 1;
 	for (int i = 0; i < m; ++i)
@@ -190,7 +191,8 @@ SEXP R_adseir_jac(SEXP t, SEXP x)
 	return DF;
 }
 
-SEXP R_deseir_initialize(SEXP beta, SEXP nu, SEXP mu, SEXP constants,
+SEXP R_deseir_initialize(SEXP beta, SEXP nu, SEXP mu,
+                         SEXP sigma, SEXP gamma, SEXP delta,
                          SEXP sm, SEXP sn)
 {
 	m = INTEGER(sm)[0];
@@ -203,9 +205,9 @@ SEXP R_deseir_initialize(SEXP beta, SEXP nu, SEXP mu, SEXP constants,
 	INIT_CALL(beta);
 	INIT_CALL(nu);
 	INIT_CALL(mu);
-	sigmaVal = REAL(constants)[p + 0] * (double) m;
-	gammaVal = REAL(constants)[p + 1] * (double) n;
-	deltaVal = REAL(constants)[p + 2] * (double) 1;
+	sigmaVal = REAL(sigma)[0] * (double) m;
+	gammaVal = REAL(gamma)[0] * (double) n;
+	deltaVal = REAL(delta)[0] * (double) 1;
 
 	work0 = R_Calloc(m + 3 * n, double);
 	work1 = work0 + m + n;

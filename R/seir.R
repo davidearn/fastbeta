@@ -1,26 +1,22 @@
 seir <-
-function (length.out = 1L, beta, nu, mu, constants, m = 0L, n = 1L,
+function (length.out = 1L,
+          beta, nu, mu, sigma = gamma, gamma = 1, delta = 0,
+          init, m = 0L, n = 1L,
           stochastic = TRUE, prob = 1, delay = 1, useCompiled = TRUE, ...)
 {
-	stopifnot(is.integer(m),
-	          length(m) == 1L,
-	          m >= 0L && m < 4096L,
-	          is.integer(n),
-	          length(n) == 1L,
-	          n >= 1L && n < 4096L,
-	          is.integer(length.out),
-	          length(length.out) == 1L,
-	          length.out >= 1L,
-	          is.function(beta),
-	          !is.null(formals(beta)),
-	          is.function(nu),
-	          !is.null(formals(nu)),
-	          is.function(mu),
-	          !is.null(formals(mu)),
-	          is.double(constants),
-	          length(constants) == m + n + 5L,
-	          all(is.finite(constants)),
-	          min(constants) >= 0,
+	stopifnot(is.integer(length.out) && length(length.out) == 1L && length.out >= 1L,
+	          is.integer(m) && length(m) == 1L && m >= 0L && m < 4096L,
+	          is.integer(n) && length(n) == 1L && n >= 1L && n < 4096L,
+	          is.function(beta) && !is.null(formals(beta)),
+	          is.function(nu  ) && !is.null(formals(nu  )),
+	          is.function(mu  ) && !is.null(formals(mu  )),
+	          is.double(sigma) && length(sigma) == 1L && sigma >= 0,
+	          is.double(gamma) && length(gamma) == 1L && gamma >= 0,
+	          is.double(delta) && length(delta) == 1L && sigma >= 0,
+	          is.double(init),
+	          length(init) == m + n + 2L,
+	          all(is.finite(init)),
+	          min(init) >= 0,
 	          is.double(prob),
 	          any(length(prob) == c(1L, length.out - 1L)),
 	          min(prob) >= 0,
@@ -32,8 +28,8 @@ function (length.out = 1L, beta, nu, mu, constants, m = 0L, n = 1L,
 
 	p <- m + n + 2L
 
-	init <- c(constants[seq_len(p)], 0, 0)
-	names(init) <- nms <-
+	init. <- c(init, 0, 0)
+	names(init.) <- nms <-
 		c("S",
 		  sprintf("E.%03x", seq_len(m)),
 		  sprintf("I.%03x", seq_len(n)),
@@ -42,9 +38,9 @@ function (length.out = 1L, beta, nu, mu, constants, m = 0L, n = 1L,
 		  "B") # births
 
 	if (!useCompiled) {
-		sigma <- constants[[p + 1L]] * m
-		gamma <- constants[[p + 2L]] * n
-		delta <- constants[[p + 3L]] * 1
+		sigma <- sigma * m
+		gamma <- gamma * n
+		delta <- delta * 1
 		i.S <- 1L
 		i.E <- seq.int(    2L, length.out = m)
 		i.I <- seq.int(m + 2L, length.out = n)
@@ -67,7 +63,7 @@ function (length.out = 1L, beta, nu, mu, constants, m = 0L, n = 1L,
 		## infection, birth, natural mortality, removal, loss of immunity
 
 		if (useCompiled) {
-			.Call(R_adseir_initialize, beta, nu, mu, constants, m, n)
+			.Call(R_adseir_initialize, beta, nu, mu, sigma, gamma, delta, m, n)
 			on.exit(.Call(R_adseir_finalize))
 			ff <- function (x, theta, t) .Call(R_adseir_dot, t, x)
 			Df <- function (x, theta, t) .Call(R_adseir_jac, t, x)
@@ -128,7 +124,7 @@ function (length.out = 1L, beta, nu, mu, constants, m = 0L, n = 1L,
 		}
 
 		X. <- ssa.adaptivetau(
-			init.values  = init,
+			init.values  = init.,
 			transitions  = tran,
 			rateFunc     = ff,
 			params       = NULL,
@@ -154,11 +150,11 @@ function (length.out = 1L, beta, nu, mu, constants, m = 0L, n = 1L,
 	else {
 
 		## E[i], I[j], R: logarithmic scale
-		stopifnot(min(constants[2L:(m + n + 2L)]) > 0)
-		init[2L:p] <- log(init[2L:p])
+		stopifnot(min(init[-1L]) > 0)
+		init.[2L:p] <- log(init.[2L:p])
 
 		if (useCompiled) {
-			.Call(R_deseir_initialize, beta, nu, mu, constants, m, n)
+			.Call(R_deseir_initialize, beta, nu, mu, sigma, gamma, delta, m, n)
 			on.exit(.Call(R_deseir_finalize))
 			gg <- "R_deseir_dot"
 			Dg <- "R_deseir_jac"
@@ -245,7 +241,7 @@ function (length.out = 1L, beta, nu, mu, constants, m = 0L, n = 1L,
 		}
 
 		X. <- lsoda(
-			y        = init,
+			y        = init.,
 			times    = seq.int(0, length.out = length.out),
 			func     = gg,
 			parms    = NULL,
