@@ -49,13 +49,13 @@ function (series,
 		y <- deconvolve(x = x, ...)[["value"]]
 		series[, 1L] <- y[seq.int(to = length(y), length.out = length(x))]
 	}
-	r <- .Call(R_ptpi, series, sigma, gamma, delta, init,
-	           m, n, a, b, tol, iter.max, backcalc, complete)
-	names(r[["value"]]) <- rep.int(c("S", "E", "I", "R"), c(1L, m, n, 1L))
+	ans <- .Call(R_ptpi, series, sigma, gamma, delta, init,
+	             m, n, a, b, tol, iter.max, backcalc, complete)
+	names(ans[["value"]]) <- rep.int(c("S", "E", "I", "R"), c(1L, m, n, 1L))
 	if (complete) {
-		oldClass(r[["x"]]) <- oldClass(series)
-		tsp(r[["x"]]) <- c(tsp[1L] + c(a, b) / tsp[3L], tsp[3L])
-		dimnames(r[["x"]]) <- list(NULL, names(r[["value"]]), NULL)
+		oldClass(ans[["x"]]) <- oldClass(series)
+		tsp(ans[["x"]]) <- c(tsp[1L] + c(a, b) / tsp[3L], tsp[3L])
+		dimnames(ans[["x"]]) <- list(NULL, names(ans[["value"]]), NULL)
 	}
-	r
+	ans
 }
