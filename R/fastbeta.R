@@ -21,10 +21,10 @@ function (series,
 		y <- deconvolve(x = x, ...)[["value"]]
 		series[, 1L] <- y[seq.int(to = length(y), length.out = length(x))]
 	}
-	X <- .Call(R_fastbeta, series, sigma, gamma, delta, init, m, n)
-	oldClass(X) <- oldClass(series)
-	tsp(X) <- tsp(series)
-	dimnames(X) <-
+	x <- .Call(R_fastbeta, series, sigma, gamma, delta, init, m, n)
+	oldClass(x) <- oldClass(series)
+	tsp(x) <- tsp(series)
+	dimnames(x) <-
 		list(NULL, rep.int(c("S", "E", "I", "R", "beta"), c(1L, m, n, 1L, 1L)))
-	X
+	x
 }
