@@ -11,77 +11,55 @@ void fastbeta(double *series,
 
 	double *x_ = x;
 	for (int i = 0; i < m + n + 2; ++i) {
-		*x_ = *(x++);
-		x_ += lengthOut;
+		*x = *(init++);
+		x += lengthOut;
 	}
-	x_[lengthOut - 1] = NA_REAL;
+	x[lengthOut - 1] = NA_REAL;
+	x = x_;
 
 	if (lengthOut <= 1)
 		return;
 
-	double tmp0, tmp1,
+	double work[4],
 		*Z    = series,
 		*B    = Z + lengthOut,
 		*mu   = B + lengthOut,
 		*S    = x,
-		*E    = S + lengthOut,
-		*I    = E + lengthOut * (R_xlen_t) m,
-		*R    = I + lengthOut * (R_xlen_t) n,
-		*beta = R + lengthOut,
-		hmu    = 0.5 * mu[0] * (double) 1,
-		hsigma = 0.5 * sigma * (double) m,
-		hgamma = 0.5 * gamma * (double) n,
-		hdelta = 0.5 * delta * (double) 1;
-	char name[] = { 'S', 'E', 'I', 'R' }, warn[] = { 1, 1, 1, 1 };
+		halfmu    = 0.5 * mu[0] * (double) 1,
+		halfsigma = 0.5 * sigma * (double) m,
+		halfgamma = 0.5 * gamma * (double) n,
+		halfdelta = 0.5 * delta * (double) 1;
 
-	return;
-}
+	x = x_ = x_ + lengthOut;
 
-#if 0
-static
-void fastbeta(double *s, double *c, int n, double *r)
-{
-	double
-		*Z = s, *B = Z + n + 1, *mu = B + n + 1,
-		*S = r, *I = S + n + 1, * R = I + n + 1, *beta = R + n + 1;
-	S[0] = c[0]; I[0] = c[1]; R[0] = c[2]; beta[n] = NA_REAL;
+	for (int i = 0, j = 1; j < lengthOut; ++i, ++j) {
+		work[0] = 1.0 -  halfmu;
+		work[1] = 1.0 + (halfmu = 0.5 * mu[j]);
+		work[2] = Z[j];
+		work[3] = 0.0;
 
-	if (n == 0)
-		return;
-
-	int i, j, k;
-	char name[] = { 'S', 'I', 'R' }, warn[] = { 1, 1, 1 };
-	double halfmu = 0.5 * mu[0], halfgamma = 0.5 * c[3], halfdelta = 0.5 * c[4],
-		tmp0, tmp1, *r_;
-
-	for (i = 0, j = 1; i < n; ++i, ++j) {
-		tmp0 = 1.0 -  halfmu;
-		tmp1 = 1.0 + (halfmu = 0.5 * mu[j]);
-
-		I[j]  = (tmp0 - halfgamma) * I[i]                             + Z[j];
-		I[j] /= tmp1 + halfgamma;
-
-		R[j]  = (tmp0 - halfdelta) * R[i] + halfgamma * (I[i] + I[j]);
-		R[j] /= tmp1 + halfdelta;
-
-		S[j]  =  tmp0              * S[i] + halfdelta * (R[i] + R[j]) - Z[j] + B[j];
-		S[j] /= tmp1;
-
-		r_ = r;
-		for (k = 0; k < 2; ++k) {
-			if (warn[k] && (ISNAN(*r) || *r < 0.0)) {
-				warning("%c[%d] is NA or negative", name[k], k);
-				warn[k] = 0;
-			}
-			r += n + 1;
+		for (int k = 0; k < m; ++k) {
+		x[j] = ((work[0] - halfsigma) * x[i] + work[2])/(work[1] + halfsigma);
+		work[2] = halfsigma * (x[i] + x[j]);
+		x += lengthOut;
 		}
-		r = r_ + 1;
+		for (int k = 0; k < n; ++k) {
+		x[j] = ((work[0] - halfgamma) * x[i] + work[2])/(work[1] + halfgamma);
+		work[2] = halfgamma * (x[i] + x[j]);
+		work[3] += x[i];
+		x += lengthOut;
+		}
+		x[j] = ((work[0] - halfdelta) * x[i] + work[2])/(work[1] + halfdelta);
+		work[2] = halfdelta * (x[i] + x[j]);
+		x += lengthOut;
+		S[j] = ( work[0]              * S[i] + work[2])/ work[1]             ;
+		x[i] = (Z[i] + Z[j]) / (2.0 * S[i] * work[3]);
 
-		beta[i] = 0.5 * (Z[i] + Z[j]) / (S[i] * I[i]);
+		x = x_;
 	}
+
 	return;
 }
-#endif
 
 SEXP R_fastbeta(SEXP s_series,
                 SEXP s_sigma, SEXP s_gamma, SEXP s_delta,
@@ -90,9 +68,20 @@ SEXP R_fastbeta(SEXP s_series,
 	int m = INTEGER(s_m)[0], n = INTEGER(s_n)[0],
 		lengthOut = INTEGER(getAttrib(s_series, R_DimSymbol))[0];
 	SEXP x = allocMatrix(REALSXP, lengthOut, m + n + 3);
+
 	fastbeta(REAL(s_series),
 	         REAL(s_sigma)[0], REAL(s_gamma)[0], REAL(s_delta)[0],
 	         REAL(s_init), m, n, lengthOut,
 	         REAL(x));
+
+	double *px = REAL(x);
+	for (R_xlen_t k = 0, l = XLENGTH(x) - 1; k < l; ++k) {
+		if (ISNAN(px[k]) || px[k] < 0.0) {
+			warning("entry [%d, %d] of result is negative or NA",
+			        (int) (k % lengthOut) + 1, (int) (k / lengthOut) + 1);
+			break;
+		}
+	}
+
 	return x;
 }
