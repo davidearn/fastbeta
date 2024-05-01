@@ -77,7 +77,7 @@ SEXP R_adseir_initialize(SEXP s_beta, SEXP s_nu, SEXP s_mu,
 		*(pDF++) = sigmaVal;
 		pDF += nrow;
 	}
-	for (int i = 0; i < n; ++i) {
+	for (int j = 0; j < n; ++j) {
 		*(pDF++) = gammaVal;
 		pDF += nrow;
 	}
@@ -108,7 +108,7 @@ void R_adseir_setup(double *px)
 	swork1 = swork2 = 0.0;
 	for (int i = 0; i < m; ++i)
 		swork1 += *(px++);
-	for (int i = 0; i < n; ++i)
+	for (int j = 0; j < n; ++j)
 		swork2 += *(px++);
 	ok = swork1 + swork2 > 1.0;
 
@@ -125,19 +125,19 @@ SEXP R_adseir_dot(SEXP s_t, SEXP s_x)
 	*(pFF++) = betaVal * px[0] * swork2;
 	*(pFF++) = nuVal;
 	if (ok)
-		for (int i = 0; i < p; ++i)
-			*(pFF++) = muVal * px[i];
+		for (int k = 0; i < p; ++k)
+			*(pFF++) = muVal * px[k];
 	else {
 		memset(pFF, 0, p * sizeof(double));
-		pFF[    0] = muVal * px[    0];
+		pFF[0    ] = muVal * px[0    ];
 		pFF[p - 1] = muVal * px[p - 1];
 		pFF += p;
 	}
 	for (int i = 0; i < m; ++i)
 		*(pFF++) = sigmaVal * px[1 + i];
 	if (ok)
-		for (int i = 0; i < n; ++i)
-			*(pFF++) = gammaVal * px[1 + m + i];
+		for (int j = 0; j < n; ++j)
+			*(pFF++) = gammaVal * px[1 + m + j];
 	else {
 		memset(pFF, 0, n * sizeof(double));
 		pFF += n;
@@ -158,11 +158,11 @@ SEXP R_adseir_jac(SEXP t, SEXP x)
 	pDF = REAL(DF);
 	*(pDF++) = betaVal * swork2;
 	pDF += m;
-	for (int i = 0; i < n; ++i)
+	for (int j = 0; j < n; ++j)
 		*(pDF++) = tmp;
 
 	pDF += 3 + nrow;
-	for (int i = 0; i < p; ++i) {
+	for (int k = 0; k < p; ++k) {
 		*(pDF++) = muVal;
 		pDF += nrow;
 	}
@@ -218,11 +218,11 @@ void R_deseir_setup(double *px)
 
 	swork1 = swork2 = 0.0;
 	for (int i = 0; i < m; ++i)
-		work0[    i] = exp(*(px++) - *(py++));
-	for (int i = 0; i < n; ++i) {
-		swork1 += (work0[i] = exp(*px      ));
-		swork2 += (work1[i] = exp(*px - tmp));
-		work0[m + i] = exp(*(px++) - *(py++));
+		work0[i    ] = exp(*(px++) - *(py++));
+	for (int j = 0; j < n; ++j) {
+		swork1 += (work0[j] = exp(*px      ));
+		swork2 += (work1[j] = exp(*px - tmp));
+		work0[m + j] = exp(*(px++) - *(py++));
 	}
 
 	return;
@@ -243,8 +243,8 @@ void R_deseir_dot(int *neq, double *t, double *y, double *ydot,
 	*(ydot++) = sigmaVal * work0[i    ] - sigmaVal - muVal;
 	*(ydot++) = sigmaVal * work0[m - 1] - gammaVal - muVal;
 	}
-	for (int i = 0; i < n - 1; ++i)
-	*(ydot++) = gammaVal * work0[m + i] - gammaVal - muVal;
+	for (int j = 0; j < n - 1; ++j)
+	*(ydot++) = gammaVal * work0[m + j] - gammaVal - muVal;
 	*(ydot++) = gammaVal * work0[m + n] - deltaVal - muVal;
 	*(ydot++) = betaVal * y[0] * swork1;
 	*(ydot++) = nuVal;
@@ -262,19 +262,19 @@ void R_deseir_jac(int *neq, double *t, double *y, int *ml,
 	pd[1] =           betaVal * swork2         ;
 	pd += nrow + 2;
 	for (int i = 0; i < m; ++i) {
-		*(pd + nrow) = -(*pd = sigmaVal * work0[    i]);
+		*(pd + nrow) = -(*pd = sigmaVal * work0[i    ]);
 		*pd += nrow + 1;
 	}
-	for (int i = 0; i < n; ++i) {
-		*(pd + nrow) = -(*pd = gammaVal * work0[m + i]);
+	for (int j = 0; j < n; ++j) {
+		*(pd + nrow) = -(*pd = gammaVal * work0[m + j]);
 		*pd += nrow + 1;
 	}
 	pd -= p;
 	pd[0] = deltaVal * exp(y[p - 1]);
 	pd -= (size_t) nrow * n;
-	for (int i = 0; i < n; ++i) {
-		pd[0] = -(pd[p] = betaVal * y[0] * work1[i]);
-		pd[1] =           betaVal * y[0] * work2[i] ;
+	for (int j = 0; i < n; ++i) {
+		pd[0] = -(pd[p] = betaVal * y[0] * work1[j]);
+		pd[1] =           betaVal * y[0] * work2[j] ;
 		pd += nrow;
 	}
 	pd -= (size_t) nrow * (m + n);
