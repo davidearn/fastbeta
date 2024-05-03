@@ -125,7 +125,7 @@ SEXP R_adseir_dot(SEXP s_t, SEXP s_x)
 	*(pFF++) = betaVal * px[0] * swork2;
 	*(pFF++) = nuVal;
 	if (ok)
-		for (int k = 0; i < p; ++k)
+		for (int k = 0; k < p; ++k)
 			*(pFF++) = muVal * px[k];
 	else {
 		memset(pFF, 0, p * sizeof(double));
@@ -273,7 +273,7 @@ void R_deseir_jac(const int *neq, const double *t, const double *y,
 	pd -= p;
 	pd[0] = deltaVal * exp(y[p - 1]);
 	pd -= (size_t) nrow * n;
-	for (int j = 0; i < n; ++i) {
+	for (int j = 0; j < n; ++j) {
 		pd[0] = -(pd[p] = betaVal * y[0] * work1[j]);
 		pd[1] =           betaVal * y[0] * work2[j] ;
 		pd += nrow;
