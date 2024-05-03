@@ -1,61 +1,57 @@
 #include <Rinternals.h>
 
 static
-void fastbeta(double *series,
+void fastbeta(const double *series,
               double sigma, double gamma, double delta,
-              double *init, int m, int n, int lengthOut,
+              const double *init, int m, int n, int lengthOut,
               double *x)
 {
 	if (lengthOut <= 0)
 		return;
 
-	double *x_ = x;
-	for (int k = 0, end = m + n + 2; k < end; ++k) {
-		*x = *(init++);
-		x += lengthOut;
-	}
-	x[lengthOut - 1] = NA_REAL;
-	x = x_;
+	const
+	double *Z  = series, *B  = Z + lengthOut, *mu = B + lengthOut;
 
-	if (lengthOut <= 1)
-		return;
-
-	double work[4],
-		*Z    = series,
-		*B    = Z + lengthOut,
-		*mu   = B + lengthOut,
-		*S    = x,
-		halfmu    = 0.5 * mu[0] * (double) 1,
+	double *S = x,
 		halfsigma = 0.5 * sigma * (double) m,
 		halfgamma = 0.5 * gamma * (double) n,
-		halfdelta = 0.5 * delta * (double) 1;
+		halfdelta = 0.5 * delta * (double) 1,
+		work[4];
 
-	x = x_ = x_ + lengthOut;
+	int d[2];
+	d[0] = lengthOut;
+	d[1] = m + n + 2; /* not counting last column storing 'beta' */
 
-	for (int s = 0, t = 1; t < lengthOut; ++s, ++t) {
-		work[0] = 1.0 -  halfmu               ;
-		work[1] = 1.0 + (halfmu = 0.5 * mu[t]);
+	for (int k = 0; k < d[1]; ++k) {
+		x[0] = init[k];
+		x += d[0];
+	}
+	x[d[0] - 1] = NA_REAL;
+
+	for (int s = 0, t = 1; t < d[0]; ++s, ++t) {
+		x = S + d[0];
+
+		work[0] = 1.0 - 0.5 * mu[s];
+		work[1] = 1.0 + 0.5 * mu[t];
 		work[2] = Z[t];
 		work[3] = 0.0;
 
 		for (int i = 0; i < m; ++i) {
 		x[t] = ((work[0] - halfsigma) * x[s] + work[2])/(work[1] + halfsigma);
 		work[2] = halfsigma * (x[s] + x[t]);
-		x += lengthOut;
+		x += d[0];
 		}
 		for (int j = 0; j < n; ++j) {
 		x[t] = ((work[0] - halfgamma) * x[s] + work[2])/(work[1] + halfgamma);
 		work[2] = halfgamma * (x[s] + x[t]);
 		work[3] += x[s];
-		x += lengthOut;
+		x += d[0];
 		}
 		x[t] = ((work[0] - halfdelta) * x[s] + work[2])/(work[1] + halfdelta);
-		work[2] = halfdelta * (x[s] + x[t]);
-		x += lengthOut;
+		work[2] = halfdelta * (x[s] + x[t]) + B[t];
+		x += d[0];
 		S[t] = ( work[0]              * S[s] + work[2])/ work[1]             ;
 		x[s] = (Z[s] + Z[t]) / (2.0 * S[s] * work[3]);
-
-		x = x_;
 	}
 
 	return;
