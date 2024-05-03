@@ -101,7 +101,7 @@ SEXP R_adseir_finalize(void)
 }
 
 static
-void R_adseir_setup(double *px)
+void R_adseir_setup(const double *px)
 {
 	px++;
 
@@ -209,10 +209,10 @@ SEXP R_deseir_finalize(void)
 }
 
 static
-void R_deseir_setup(double *px)
+void R_deseir_setup(const double *px)
 {
 	px++;
-	double *py = px + 1;
+	const double *py = px + 1;
 
 	tmp = *px;
 
@@ -229,8 +229,8 @@ void R_deseir_setup(double *px)
 }
 
 /* vignette("compiledCode", package = "deSolve") */
-void R_deseir_dot(int *neq, double *t, double *y, double *ydot,
-                  double *yout, int *ip)
+void R_deseir_dot(const int *neq, const double *t, const double *y,
+                  double *ydot, double *yout, const int *ip)
 {
 	SETUP(deseir, lastTimeDot, *t, y);
 
@@ -253,8 +253,9 @@ void R_deseir_dot(int *neq, double *t, double *y, double *ydot,
 }
 
 /* vignette("compiledCode", package = "deSolve") */
-void R_deseir_jac(int *neq, double *t, double *y, int *ml,
-                  int *mu, double *pd, int *nrowpd, double *yout, int *ip)
+void R_deseir_jac(const int *neq, const double *t, const double *y,
+                  const int *ml, const int *mu,
+                  double *pd, const int *nrowpd, double *yout, const int *ip)
 {
 	SETUP(deseir, lastTimeDot, *t, y);
 
