@@ -1,108 +1,149 @@
-\name{sir}
+\name{seir}
+\alias{seir}
 \alias{sir}
 \title{Simulate Infectious Disease Time Series}
 \description{
-Simulates time series of the susceptible, infected, and removed
-population sizes and corresponding time series of births, incidence,
-and \emph{reported} incidence.  Simulations are based on an SIR model
-with user-defined forcing and a simple model for observation error.
-}
-\details{
-\code{sir(stochastic = FALSE)} works by numerically integrating the
-system of ordinary differential equations
-\deqn{
-  \begin{aligned}
-  \frac{\text{d} S}{\text{d} t} &= \nu(t) - \beta(t) S I + \delta R - \mu(t) S \\
-  \frac{\text{d} I}{\text{d} t} &= \beta(t) S I - \gamma I - \mu(t) I \\
-  \frac{\text{d} R}{\text{d} t} &= \gamma I - \delta R - \mu(t) R
-  \end{aligned}
-}{
-  dS/dt = nu(t) - beta(t) S I + delta R - mu(t) S
-  dI/dt = beta(t) S I - gamma I - mu(t) I
-  dR/dt = gamma I - delta R - mu(t) R
-}
-between times \eqn{t = 0, \ldots, n}, where \eqn{t} is understood
-to be a unitless measure of time relative to the duration of an
-observation interval.  To generate time series of births and incidence
-\deqn{
-  \begin{aligned}
-  B(t) &= \int_{t - 1}^{t} \nu(s)\,\text{d}s \\
-  Z(t) &= \int_{t - 1}^{t} \beta(s) S(s) I(s)\,\text{d}s
-  \end{aligned}
-}{
-  B(t) = integrate(            nu(s), t - 1, t)
-  Z(t) = integrate(beta(s) S(s) I(s), t - 1, t)
-}
-the system is augmented with two additional equations describing
-\emph{cumulative} incidence and \emph{cumulative} births (with right
-hand sides given by the integrands above), and the \emph{augmented}
-system with five equations is integrated.  Case reports are simulated
-by scaling incidence by \code{prob} and convolving the result with
-\code{delay}.
-
-\code{sir(stochastic = TRUE)} works by simulating a Markov process
-corresponding to the augmented system, as described in the reference.
-Case reports are simulated from incidence by binning binomial samples
-taken with probabilities \code{prob} over future observation intervals
-according to multinomial samples taken with probabilities \code{delay}.
+Simulates incidence time series based on an \eqn{SEIR} model with
+user-defined forcing and a simple model for observation error.
 }
 \usage{
-sir(n, beta, nu, mu, constants, stochastic = TRUE,
-    prob = 1, delay = 1, useCompiled = TRUE, \dots)
+seir(length.out = 1L,
+     beta, nu, mu, sigma = gamma, gamma = 1, delta = 0,
+     init, m = length(init) - n - 2L, n = 1L,
+     stochastic = TRUE, prob = 1, delay = 1,
+     useCompiled = TRUE, \dots)
+
+## A basic wrapper for the 'm = 0L' case:
+
+ sir(length.out = 1L,
+     beta, nu, mu, gamma = 1, delta = 0,
+     init, n = 1L,
+     stochastic = TRUE, prob = 1, delay = 1,
+     useCompiled = TRUE, \dots)
 }
 \arguments{
-\item{n}{a positive integer.  The simulation uses \code{0:n} as
-  time points, yielding \code{n} observation intervals of equal
-  duration.}
-\item{beta, nu, mu}{functions of one or more argument returning
-  transmission, birth, and natural death rates, respectively,
-  at the time point indicated by the first argument.  Arguments
-  after the first must be strictly optional.  The functions need
-  not be vectorized.}
-\item{constants}{a numeric vector of the form
-  \code{c(S0, I0, R0, gamma, delta)}, specifying an initial state
-  and rates of removal and loss of immunity, in that order.}
-\item{stochastic}{a logical indicating if the simulation should
-  be stochastic; see \sQuote{Details}.}
-\item{prob}{a numeric vector of length \code{n} such that
-  \code{prob[i]} is the probability that an infection during
-  interval \code{i} is eventually reported.  \code{prob} of
-  length 1 is recycled.}
-\item{delay}{a numeric vector of positive length such that
-  \code{delay[i]} is the probability that an infection during
-  interval \code{j} is reported during interval \code{j+i-1},
-  given that it is eventually reported.  \code{delay} need
-  not sum to 1 but must not sum to 0.}
-\item{useCompiled}{a logical indicating if derivatives should be
-  computed by compiled \proglang{C} functions rather than by \R{}
-  functions (which \emph{may} be \emph{byte}-compiled).  Set to
-  \code{FALSE} only if \code{TRUE} seems to cause problems, and
-  in that case please report the problems with
-  \code{\link{bug.report}(package="fastbeta")}.}
-\item{\dots}{optional arguments passed to
-  \code{\link[deSolve]{ode}} (directly) or
-  \code{\link[adaptivetau]{ssa.adaptivetau}}
-  (via its list argument \code{tl.params}),
-  depending on \code{stochastic}.}
+\item{length.out}{
+  a non-negative integer indicating the time series length.}
+\item{beta, nu, mu}{
+  functions of one or more arguments returning transmission, birth, and
+  natural death rates at the time point indicated by the first argument.
+  Arguments after the first must be strictly optional.  The functions
+  need not be vectorized.}
+\item{sigma, gamma, delta}{
+  non-negative numbers.  \code{m*sigma}, \code{n*gamma}, and
+  \code{delta} are the rates of removal from each latent, infectious,
+  and recovered compartment.}
+\item{init}{
+  a numeric vector of length \code{1+m+n+1} giving an initial state with
+  compartments ordered as \eqn{(S, E, I, R)}{c(S, E, I, R)}.}
+\item{m}{
+  a non-negative integer indicating a number of latent stages.}
+\item{n}{
+  a positive integer indicating a number of infectious stages.}
+\item{stochastic}{
+  a logical indicating if the simulation should be stochastic; see
+  \sQuote{Details}.}
+\item{prob}{
+  a numeric vector of length \code{n} such that \code{prob[i]} is the
+  probability that an infection during interval \code{i} is eventually
+  observed.  \code{prob} of length 1 is recycled.}
+\item{delay}{
+  a numeric vector of positive length such that \code{delay[i]} is the
+  probability that an infection during interval \code{j} is observed
+  during interval \code{j+i-1}, given that it is eventually observed.
+  \code{delay} need not sum to 1 but must not sum to 0.}
+\item{useCompiled}{
+  a logical indicating if derivatives should be computed by compiled
+  \proglang{C} functions rather than by \R{} functions (which \emph{may}
+  be \emph{byte}-compiled).  Set to \code{FALSE} only if \code{TRUE}
+  seems to cause problems, and in that case please report the problems
+  with \code{\link{bug.report}(package = "fastbeta")}.}
+\item{\dots}{
+  optional arguments passed to \code{\link[deSolve]{lsoda}} (directly)
+  or \code{\link[adaptivetau]{ssa.adaptivetau}} (via its list argument
+  \code{tl.params}), depending on \code{stochastic}.}
 }
 \value{
 A \dQuote{multiple time series} object, inheriting from class
-\code{\link[=ts]{mts}}.  Beneath the class,
-it is an \code{(n+1)}-by-\code{(5+r)} numeric matrix \code{X},
-where \code{r} is 0 if both \code{prob} and \code{delay}
-are missing (indicating no observation error) and 1 otherwise.
+\code{\link[=ts]{mts}}.  Beneath the class, it is a
+\code{length.out}-by-\code{1+m+n+1+2} numeric matrix with columns
+\code{S}, \code{E}, \code{I}, \code{R}, \code{Z}, and \code{B}, where
+\code{Z} and \code{B} specify incidence and births as the number of
+infections and births since the previous time point.
 
-Rows correspond to time points \code{0:n}.  Columns are named
-\code{S}, \code{I}, \code{R}, \code{B}, \code{Z}, and (if \code{r}
-is 1) \code{Z.obs}.  \code{X[, 1:3]} give the state at each time,
-and \code{X[, 4:6]} give the number of births, infections, and
-infections \emph{reported} during the observation interval ending
-at each time.
-
-\code{X[1, 4:6]} is \code{NA}, and \code{X[2:length(delay), 6]}
-can contain incomplete information if \code{length(delay) >= 2}.
+If \code{prob} or \code{delay} is not missing, then there is an
+additional column \code{Z.obs} specifying \emph{observed} incidence as
+the number of infections observed since the previous time point.
+The first \code{length(delay)} elements of this column contain partial
+counts.
 }
-\seealso{\code{\link{sir.library}}.}
+\details{
+Simulations are based on an \eqn{SEIR} model with
+\itemize{
+\item \eqn{m} latent stages
+  (\eqn{E^{i}}{E[i]}, \eqn{i = 1,\ldots,m}{for i in 1:m});
+\item \eqn{n} infectious stages
+  (\eqn{I^{j}}{I[j]}, \eqn{j = 1,\ldots,n}{for j in 1:n});
+\item time-varying rates \eqn{\beta}, \eqn{\nu}, and \eqn{\mu} of
+  transmission, birth, and natural death; and
+\item constant rates \eqn{m \sigma}, \eqn{n \gamma}, and \eqn{\delta} of
+  removal from each latent, infectious, and recovered compartment, where
+  removal from the recovered compartment implies return to the
+  susceptible compartment (loss of immunity).
+}
+\code{seir(stochastic = FALSE)} works by numerically integrating the
+system of ordinary differential equations
+\deqn{
+  \begin{alignedat}{10}
+  \text{d} & S         &{} / \text{d} t
+  &{} = {}&     \delta &R     &{} - ( && \lambda(t) &{} + \mu(t)) S         &{} + \nu(t) \\
+  \text{d} & E^{    1} &{} / \text{d} t
+  &{} = {}& \lambda(t) &S     &{} - ( &&   m \sigma &{} + \mu(t)) E^{    1} &{}          \\
+  \text{d} & E^{i + 1} &{} / \text{d} t
+  &{} = {}&   m \sigma &E^{i} &{} - ( &&   m \sigma &{} + \mu(t)) E^{i + 1} &{}          \\
+  \text{d} & I^{    1} &{} / \text{d} t
+  &{} = {}&   m \sigma &E^{m} &{} - ( &&   n \gamma &{} + \mu(t)) I^{    1} &{}          \\
+  \text{d} & I^{j + 1} &{} / \text{d} t
+  &{} = {}&   n \gamma &I^{j} &{} - ( &&   n \gamma &{} + \mu(t)) I^{j + 1} &{}          \\
+  \text{d} & R         &{} / \text{d} t
+  &{} = {}&   n \gamma &I^{n} &{} - ( &&     \delta &{} + \mu(t)) R         &{}
+  \end{alignedat} \\
+  \lambda(t) = \beta(t) \sum_{j} I^{j}
+}{
+  dS       /dt =     delta * R    - ( lambda(t) + mu(t) ) * S        + nu(t)
+  dE[    1]/dt = lambda(t) * S    - ( m * sigma + mu(t) ) * E[    1]
+  dE[i + 1]/dt = m * sigma * E[i] - ( m * sigma + mu(t) ) * E[i + 1]
+  dI[    1]/dt = m * sigma * E[m] - ( n * gamma + mu(t) ) * I[    1]
+  dI[j + 1]/dt = n * gamma * I[j] - ( n * gamma + mu(t) ) * I[j + 1]
+  dR       /dt = n * gamma * I[n] - (     delta + mu(t) ) * R
+
+  lambda(t) = beta(t) * sum(I)
+}
+where it is understood that the independent variable \eqn{t} is a
+unitless measure of time relative to an observation interval.  To get
+time series of incidence and births, the system is augmented with two
+equations describing \emph{cumulative} incidence and births
+\deqn{
+  \begin{aligned}
+  \text{d} Z / \text{dt} &{} = \lambda(t) S
+  \text{d} B / \text{dt} &{} = \nu(t)
+  \end{aligned}
+}{
+  dZ/dt = lambda(t) * S
+  dB/dt = nu(t)
+}
+and the \emph{augmented} system is numerically integrated.
+Observed incidence is simulated from incidence by scaling the latter
+by \code{prob} and convolving the result with \code{delay}.
+
+\code{seir(stochastic = TRUE)} works by simulating a Markov process
+corresponding to the augmented system, as described in the reference.
+Observed incidence is simulated from incidence by binning binomial
+samples taken with probabilities \code{prob} over future observation
+intervals according to multinomial samples taken with probabilities
+\code{delay}.
+}
+\seealso{\code{\link{seir.library}}.}
 \references{
 Cao, Y., Gillespie, D. T., & Petzold, L. R. (2007).
 Adaptive explicit-implicit tau-leaping method with
