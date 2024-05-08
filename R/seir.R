@@ -370,3 +370,20 @@ function(beta, nu, mu, sigma, gamma, delta, m = 0L, n = 1L)
 	names(ans) <- rep.int(c("S", "E", "I", "R"), c(1L, m, n, 1L))
 	ans
 }
+
+sir <-
+function (length.out = 1L,
+          beta, nu, mu, gamma = 1, delta = 0,
+          init, n = length(init) - 2L,
+          stochastic = TRUE, prob = 1, delay = 1,
+          useCompiled = TRUE, ...)
+{
+	if (any(...names() == "m"))
+		stop(gettextf("call '%s', not '%s', when setting '%s'",
+		              "seir", "sir", "m"),
+		     domain = NA)
+	call <- match.call(expand.dots = TRUE)
+	call[[1L]] <- quote(seir)
+	call[["m"]] <- 0L
+	eval(call, parent.frame())
+}

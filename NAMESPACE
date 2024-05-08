@@ -1,5 +1,5 @@
 useDynLib(fastbeta, .registration = TRUE)
-export(deconvolve, fastbeta, fastbeta.bootstrap, ptpi, seir)
+export(deconvolve, fastbeta, fastbeta.bootstrap, ptpi, seir, sir)
 S3method(plot, fastbeta.bootstrap)
 importFrom(adaptivetau, ssa.adaptivetau)
 importFrom(deSolve, lsoda)
