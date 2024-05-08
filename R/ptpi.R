@@ -2,7 +2,8 @@ ptpi <-
 function (series,
           sigma = gamma, gamma = 1, delta = 0,
           init, m = length(init) - n - 2L, n = 1L,
-          a = 0L, b = nrow(series) - 1L, tol = 1e-03, iter.max = 32L,
+          start = tsp(series)[1L], end = tsp(series)[2L],
+          tol = 1e-03, iter.max = 32L,
           backcalc = FALSE, complete = FALSE, ...)
 {
 	stopifnot(is.mts(series),
@@ -18,13 +19,13 @@ function (series,
 	          length(init) == m + n + 2L,
 	          all(is.finite(init)),
 	          min(init) >= 0,
-	          is.numeric(a),
-	          length(a) == 1L,
-	          a >= tsp(series)[1L],
-	          is.numeric(b),
-	          length(b) == 1L,
-	          b <= tsp(series)[2L],
-	          b - a >= 1 / tsp(series)[3L],
+	          is.numeric(start),
+	          length(start) == 1L,
+	          start >= tsp(series)[1L],
+	          is.numeric(end),
+	          length(end) == 1L,
+	          end < tsp(series)[2L] + 1/tsp(series)[3L],
+	          start <= end,
 	          is.double(tol),
 	          length(tol) == 1L,
 	          !is.na(tol),
@@ -38,11 +39,11 @@ function (series,
 	          length(complete) == 1L,
 	          !is.na(complete))
 	tsp <- tsp(series)
-	a <- as.integer(round((a - tsp[1L]) * tsp[3L]))
-	b <- as.integer(round((b - tsp[1L]) * tsp[3L]))
-	if (a > b)
-		stop(gettextf("'%s' is greater than '%s' after rounding; should never happen ...",
-		              "a", "b"),
+	a <- as.integer(trunc((start - tsp[1L]) * tsp[3L]))
+	b <- as.integer(trunc((  end - tsp[1L]) * tsp[3L])) + 1L
+	if (a >= b)
+		stop(gettextf("'%s' is greater than '%s' after truncation; should never happen ...",
+		              "start", "end"),
 		     domain = NA)
 	if (...length() > 0L) {
 		x <- series[, 1L]
@@ -54,7 +55,7 @@ function (series,
 	names(ans[["value"]]) <- rep.int(c("S", "E", "I", "R"), c(1L, m, n, 1L))
 	if (complete) {
 		oldClass(ans[["x"]]) <- oldClass(series)
-		tsp(ans[["x"]]) <- c(tsp[1L] + c(a, b) / tsp[3L], tsp[3L])
+		tsp(ans[["x"]]) <- c(tsp[1L] + c(a, b - 1L) / tsp[3L], tsp[3L])
 		dimnames(ans[["x"]]) <- list(NULL, names(ans[["value"]]), NULL)
 	}
 	ans
