@@ -50,8 +50,8 @@ function (series,
 		y <- deconvolve(x = x, ...)[["value"]]
 		series[, 1L] <- y[seq.int(to = length(y), length.out = length(x))]
 	}
-	ans <- .Call(R_ptpi, series, sigma, gamma, delta, init,
-	             m, n, a, b, tol, iter.max, backcalc, complete)
+	ans <- .Call(R_ptpi, series, sigma, gamma, delta, init, m, n,
+	             a, b, tol, iter.max, backcalc, complete)
 	names(ans[["value"]]) <- rep.int(c("S", "E", "I", "R"), c(1L, m, n, 1L))
 	if (complete) {
 		oldClass(ans[["x"]]) <- oldClass(series)

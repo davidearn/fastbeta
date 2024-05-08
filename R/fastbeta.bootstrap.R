@@ -1,6 +1,6 @@
 fastbeta.bootstrap <-
-function (r, series,
-          sigma = gamma, gamma = 1, delta = 0,
+function (r,
+          series, sigma = gamma, gamma = 1, delta = 0,
           init, m = length(init) - n - 2L, n = 1L, ...)
 {
 	stopifnot(is.mts(series),

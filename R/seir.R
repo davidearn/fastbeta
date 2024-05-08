@@ -1,8 +1,9 @@
 seir <-
-function (length.out = 1L, beta, nu, mu,
-          sigma = gamma, gamma = 1, delta = 0,
+function (length.out = 1L,
+          beta, nu, mu, sigma = gamma, gamma = 1, delta = 0,
           init, m = length(init) - n - 2L, n = 1L,
-          stochastic = TRUE, prob = 1, delay = 1, useCompiled = TRUE, ...)
+          stochastic = TRUE, prob = 1, delay = 1,
+          useCompiled = TRUE, ...)
 {
 	stopifnot(is.integer(length.out) && length(length.out) == 1L && length.out >= 1L,
 	          is.function(beta) && !is.null(formals(beta)),
@@ -374,7 +375,7 @@ function(beta, nu, mu, sigma, gamma, delta, m = 0L, n = 1L)
 sir <-
 function (length.out = 1L,
           beta, nu, mu, gamma = 1, delta = 0,
-          init, n = length(init) - 2L,
+          init, n = 1L,
           stochastic = TRUE, prob = 1, delay = 1,
           useCompiled = TRUE, ...)
 {
