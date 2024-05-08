@@ -315,22 +315,18 @@ function (length.out = 1L,
 seir.R0 <-
 function (beta, nu, mu, sigma, gamma, delta, m = 0L, n = 1L)
 {
-	if (!missing(nu) && nu != mu)
-		.NotYetUsed("nu")
 	if (!missing(delta) && delta != 0)
 		.NotYetUsed("delta")
 	sigma <- sigma * m
 	gamma <- gamma * n
 	delta <- delta * 1
-	(sigma / (sigma + mu))^m * (beta / (gamma + mu)) *
+	(nu / mu) * (sigma / (sigma + mu))^m * (beta / (gamma + mu)) *
 		sum(cumprod(rep.int(c(1, gamma / (gamma + mu)), c(1L, n - 1L))))
 }
 
 seir.ee <-
 function (beta, nu, mu, sigma, gamma, delta, m = 0L, n = 1L)
 {
-	if (!missing(nu) && nu != mu)
-		.NotYetUsed("nu")
 	sigma <- sigma * m
 	gamma <- gamma * n
 	delta <- delta * 1
@@ -344,7 +340,7 @@ function (beta, nu, mu, sigma, gamma, delta, m = 0L, n = 1L)
 		x <- cumprod(rep.int((c(gamma, sigma) + mu) / sigma, c(1L, m - 1L))) *
 			y[n]
 		S. <- (sigma + mu) * x[m] / beta / sum(y)
-		R. <- ((sigma + mu) * x[m] - mu * (1 - S.)) / delta
+		R. <- ((sigma + mu) * x[m] + mu * S. - nu) / delta
 		ans <- c(S., x[m:1L], y[n:1L], R.)
 	}
 	names(ans) <- rep.int(c("S", "E", "I", "R"), c(1L, m, n, 1L))
