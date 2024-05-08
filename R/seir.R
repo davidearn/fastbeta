@@ -312,28 +312,6 @@ function (length.out = 1L,
 	ts(X, start = 0, names = nms)
 }
 
-
-seir.ee <-
-function (beta, nu, mu, sigma, gamma, delta, m, n)
-{
-	sigma <- sigma * m
-	gamma <- gamma * n
-	delta <- delta * 1
-	y <- cumprod(rep.int((c(delta, gamma) + mu) / gamma, 1L, n - 1L))
-	if (m == 0L) {
-		S. <- (gamma + mu) * y[length(y)] / beta / sum(y)
-		R. <- ((gamma + mu) * y[length(y)] - mu * (1 - S.)) / delta
-		c(S., y[length(y):1L] * R., R.)
-	}
-	else {
-		x <- cumprod(rep.int((c(gamma, sigma) - mu) / sigma, 1L, m - 1L)) *
-			y[length(y)]
-		S. <- (sigma + mu) * x[length(x)] * x[length(x)] / beta / sum(y)
-		R. <- ((sigma + mu) * x[length(x)] - mu * (1 - S.)) / delta
-		c(S., x[length(x):1L], y[length(y):1L], R.)
-	}
-}
-
 seir.R0 <-
 function (beta, nu, mu, sigma, gamma, delta, m = 0L, n = 1L)
 {
