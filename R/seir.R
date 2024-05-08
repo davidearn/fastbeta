@@ -5,7 +5,8 @@ function (length.out = 1L,
           stochastic = TRUE, prob = 1, delay = 1,
           useCompiled = TRUE, ...)
 {
-	stopifnot(is.integer(length.out) && length(length.out) == 1L && length.out >= 1L,
+	stopifnot(requireNamespace(if (stochastic) "adaptivetau" else "deSolve"),
+	          is.integer(length.out) && length(length.out) == 1L && length.out >= 1L,
 	          is.function(beta) && !is.null(formals(beta)),
 	          is.function(nu  ) && !is.null(formals(nu  )),
 	          is.function(mu  ) && !is.null(formals(mu  )),
@@ -124,7 +125,7 @@ function (length.out = 1L,
 			}
 		}
 
-		X. <- ssa.adaptivetau(
+		X. <- adaptivetau::ssa.adaptivetau(
 			init.values  = init.,
 			transitions  = tran,
 			rateFunc     = ff,
@@ -241,7 +242,7 @@ function (length.out = 1L,
 			}
 		}
 
-		X. <- lsoda(
+		X. <- deSolve::lsoda(
 			y        = init.,
 			times    = seq.int(0, length.out = length.out),
 			func     = gg,

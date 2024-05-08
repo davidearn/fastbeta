@@ -17,6 +17,6 @@ Authors@R:
 	         role = c("aut", "cre"),
 	         comment = c(ORCID = "0000-0002-3542-2938")))
 Depends: R (>= 4.3.0)
-Imports: adaptivetau, deSolve, graphics, stats
-Suggests: grDevices, tools, utils
+Imports: graphics, stats
+Suggests: adaptivetau, deSolve, grDevices, tools, utils
 BuildResaveData: no
