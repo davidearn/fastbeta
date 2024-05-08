@@ -1,6 +1,7 @@
 #include <math.h> /* sqrt */
 #include <string.h> /* memcpy */
 #include <Rinternals.h>
+#include <R_ext/RS.h>
 
 static
 void ptpi(const double *series,
@@ -10,18 +11,12 @@ void ptpi(const double *series,
           double *value, double *diff, int *iter,
           double *x)
 {
-	x -= a; /* so that 'x' can be indexed like 'series' */
-
-	memcpy(value, init, (m + n + 2) * sizeof(double));
-
 	if (lengthOut <= 0) {
+		memcpy(value, init, (m + n + 2) * sizeof(double));
 		*diff = 0.0;
 		*iter = iterMax;
 		return;
 	}
-
-	*diff = 1.0;
-	*iter = 0;
 
 	const
 	double *Z = series, *B = Z + lengthOut, *mu = B + lengthOut;
@@ -30,19 +25,26 @@ void ptpi(const double *series,
 		halfsigma = 0.5 * sigma * (double) m,
 		halfgamma = 0.5 * gamma * (double) n,
 		halfdelta = 0.5 * delta * (double) 1,
-		work[5];
+		work[4];
 
 	int d[2];
 	d[0] = b - a;
 	d[1] = m + n + 2;
 
-	R_xlen_t step = (R_xlen_t) d[0] * d[1];
+	double *state = (x) ? value : R_Calloc((size_t) m + n + 2, double);
+	memcpy(state, init, (m + n + 2) * sizeof(double));
+	*diff = 0.0;
+	*iter = 0;
+
+	if (x) {
+
+	x -= a; /* so that 'x' can be indexed like 'series' */
 
 	while (*iter < iterMax) {
 
 	x = S;
 	for (int k = 0; k < d[1]; ++k) {
-		x[a] = value[k];
+		x[a] = state[k];
 		x += d[0];
 	}
 
@@ -71,21 +73,64 @@ void ptpi(const double *series,
 
 	*iter += 1;
 
-	x = S; work[3] = work[4] = 0.0;
+	x = S;
+	work[0] = work[1] = 0.0;
 	for (int k = 0; k < d[1]; ++k) {
-		work[3] += (x[b - 1] - value[k]) * (x[b - 1] - value[k]);
-		work[4] +=             value[k]  *             value[k] ;
-		value[k] = x[b - 1];
+		work[0] += (x[b - 1] - state[k]) * (x[b - 1] - state[k]);
+		work[1] +=             state[k]  *             state[k] ;
+		state[k] = x[b - 1];
 		x += d[0];
 	}
 
-	*diff = sqrt(work[3] / work[4]);
+	*diff = sqrt(work[0] / work[1]);
 	if (ISNAN(*diff) || *diff < tol)
 		break;
 
-	S += step;
+	S += (R_xlen_t) d[0] * d[1];
 
-	} /* while (*iter < iterMax) */
+	}
+
+	}
+	else {
+
+	while (*iter < iterMax) {
+
+	for (int s = a, t = a + 1; t < b; ++s, ++t) {
+		work[0] = 1.0 - 0.5 * mu[s];
+		work[1] = 1.0 + 0.5 * mu[t];
+		work[2] = Z[t];
+
+		for (int i = 0; i < m; ++i) {
+		value[1 + i    ] = ((work[0] - halfsigma) * state[1 + i    ] + work[2])/(work[1] + halfsigma);
+		work[2] = halfsigma * (state[1 + i    ] + value[1 + i    ]);
+		}
+		for (int j = 0; j < n; ++j) {
+		value[1 + m + j] = ((work[0] - halfgamma) * state[1 + m + j] + work[2])/(work[1] + halfgamma);
+		work[2] = halfgamma * (state[1 + m + j] + value[1 + m + j]);
+		}
+		value[1 + m + n] = ((work[0] - halfdelta) * state[1 + m + n] + work[2])/(work[1] + halfdelta);
+		work[2] = halfdelta * (state[1 + m + n] + value[1 + m + n]) + B[t];
+		value[0        ] = ( work[0]              * state[0        ] + work[2])/ work[1]             ;
+	}
+
+	*iter += 1;
+
+	work[0] = work[1] = 0.0;
+	for (int k = 0; k < d[1]; ++k) {
+		work[0] += (value[k] - state[k]) * (value[k] - state[k]);
+		work[1] +=             state[k]  *             state[k] ;
+		state[k] = value[k];
+	}
+
+	*diff = sqrt(work[0] / work[1]);
+	if (ISNAN(*diff) || *diff < tol)
+		break;
+
+	}
+
+	R_Free(state);
+
+	}
 
 	if (backcalc) {
 
@@ -97,20 +142,20 @@ void ptpi(const double *series,
 		for (int i = 0; i < m; ++i) {
 		work[3] = value[1 + i    ];
 		value[1 + i    ] = ((work[1] + halfsigma) * value[1 + i    ] - work[2])/(work[0] - halfsigma);
-		work[2] = halfsigma * (value[1 + i    ] + work[3]);
+		work[2] = halfsigma * (work[3] + value[1 + i    ]);
 		}
 		for (int j = 0; j < n; ++j) {
 		work[3] = value[1 + m + j];
 		value[1 + m + j] = ((work[1] + halfgamma) * value[1 + m + j] - work[2])/(work[0] - halfgamma);
-		work[2] = halfgamma * (value[1 + m + j] + work[3]);
+		work[2] = halfgamma * (work[3] + value[1 + m + j]);
 		}
 		work[3] = value[1 + m + n];
 		value[1 + m + n] = ((work[1] + halfdelta) * value[1 + m + n] - work[2])/(work[0] - halfdelta);
-		work[2] = halfdelta * (value[1 + m + n] + work[3]) + B[t];
+		work[2] = halfdelta * (work[3] + value[1 + m + n]) + B[t];
 		value[0        ] = ( work[1]              * value[0        ] - work[2])/ work[0]             ;
 	}
 
-	} /* if (backcalc) */
+	}
 
 	return;
 }
