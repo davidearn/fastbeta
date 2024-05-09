@@ -122,7 +122,7 @@ SEXP R_adseir_dot(SEXP s_t, SEXP s_x)
 	SETUP(adseir, lastTimeDot, *pt, px);
 
 	pFF = REAL(FF);
-	*(pFF++) = betaVal * px[0] * swork2;
+	*(pFF++) = betaVal * swork2 * px[0];
 	*(pFF++) = nuVal;
 	if (ok)
 		for (int k = 0; k < p; ++k)
@@ -236,19 +236,19 @@ void R_deseir_dot(const int *neq, const double *t, const double *y,
 
 	int i, j;
 
-	*(ydot++) = nuVal - betaVal * y[0] * swork1 + deltaVal * exp(y[p - 1]) - muVal * y[0];
+	*(ydot++) = nuVal + deltaVal * exp(y[p - 1]) - (betaVal * swork1 + muVal) * y[0];
 	if (m == 0)
-	*(ydot++) = betaVal * y[0] * swork2 - gammaVal - muVal;
+	*(ydot++) = betaVal * swork2 * y[0] - (gammaVal + muVal);
 	else {
-	*(ydot++) = betaVal * y[0] * swork2 - sigmaVal - muVal;
+	*(ydot++) = betaVal * swork2 * y[0] - (sigmaVal + muVal);
 	for (i = 0; i < m - 1; ++i)
-	*(ydot++) = sigmaVal * work0[i    ] - sigmaVal - muVal;
-	*(ydot++) = sigmaVal * work0[i    ] - gammaVal - muVal;
+	*(ydot++) = sigmaVal * work0[i    ] - (sigmaVal + muVal);
+	*(ydot++) = sigmaVal * work0[i    ] - (gammaVal + muVal);
 	}
 	for (j = 0; j < n - 1; ++j)
-	*(ydot++) = gammaVal * work0[m + j] - gammaVal - muVal;
-	*(ydot++) = gammaVal * work0[m + j] - deltaVal - muVal;
-	*(ydot++) = betaVal * y[0] * swork1;
+	*(ydot++) = gammaVal * work0[m + j] - (gammaVal + muVal);
+	*(ydot++) = gammaVal * work0[m + j] - (deltaVal + muVal);
+	*(ydot++) = betaVal * swork1 * y[0];
 	*(ydot++) = nuVal;
 
 	return;

@@ -101,15 +101,15 @@ function (length.out = 1L,
 				nu   <- nu  (t)
 				mu   <- mu  (t)
 				ok <- sum(x.E) + (s <- sum(x.I)) > 1
-				c(        beta  * x.S * s           ,
-				          nu                        ,
-				          mu    * x.S               ,
-				  if (ok) mu    * x.E else double(m),
-				  if (ok) mu    * x.I else double(n),
-				          mu    * x.R               ,
-				          sigma * x.E               ,
-				  if (ok) gamma * x.I else double(n),
-				          delta * x.R               )
+				c(        beta * s * x.S               ,
+				                nu                     ,
+				                mu * x.S               ,
+				  if (ok)       mu * x.E else double(m),
+				  if (ok)       mu * x.I else double(n),
+				                mu * x.R               ,
+				             sigma * x.E               ,
+				  if (ok)    gamma * x.I else double(n),
+				             delta * x.R               )
 			}
 			Df <-
 			function (x, theta, t)
@@ -200,7 +200,7 @@ function (length.out = 1L,
 
 			i.1 <- 2L:(p - 1L)
 			i.0 <- 3L:p
-			a.1 <- rep.int(c(sigma, gamma), c(m, n))
+			a.1 <- rep.int(c(sigma, gamma), c(m, n)); a.11 <- a.1[1L]
 			a.0 <- c(a.1[-1L], delta)
 
 			gg <-
@@ -215,10 +215,10 @@ function (length.out = 1L,
 				mu   <- mu  (t)
 				s.1 <- sum(exp(x.I        ))
 				s.2 <- sum(exp(x.I - x[2L]))
-				list(c(nu - beta * x.S * s.1 + delta * exp(x.R) - mu * x.S,
-				       beta * x.S * s.2 - a.1[1L] - mu,
-				       a.1 * exp(x[i.1] - x[i.0]) - a.0 - mu,
-				       beta * x.S * s.1,
+				list(c(nu + delta * exp(x.R) - (beta * s.1 + mu) * x.S,
+				       beta * s.2 * x.S - (a.11 + mu),
+				       a.1 * exp(x[i.1] - x[i.0]) - (a.0 + mu),
+				       beta * s.1 * x.S,
 				       nu))
 			}
 			Dg <-
@@ -232,10 +232,10 @@ function (length.out = 1L,
 				s.1 <- sum(u.1 <- exp(x.I        ))
 				s.2 <- sum(u.2 <- exp(x.I - x[2L]))
 				D[i.S, i.S] <<- -(D[p + 1L, i.S] <<- beta * s.1) - mu
-				D[i.S, i.I] <<- -(D[p + 1L, i.I] <<- beta * x.S * u.1)
+				D[i.S, i.I] <<- -(D[p + 1L, i.I] <<- beta * u.1 * x.S)
 				D[i.S, i.R] <<- delta * exp(x.R)
 				D[ 2L, i.S] <<- beta * s.2
-				D[ 2L, i.I] <<- beta * x.S * u.2
+				D[ 2L, i.I] <<- beta * u.2 * x.S
 				D[ 2L,  2L] <<- if (m) -beta * s.2 else 0
 				D[k.0] <<- -(D[k.1] <<- a.1 * exp(x[i.1] - x[i.0]))
 				D
