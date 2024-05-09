@@ -315,8 +315,6 @@ function (length.out = 1L,
 seir.R0 <-
 function (beta, nu, mu, sigma, gamma, delta, m = 0L, n = 1L)
 {
-	if (!missing(delta) && delta != 0)
-		.NotYetUsed("delta")
 	sigma <- sigma * m
 	gamma <- gamma * n
 	delta <- delta * 1
