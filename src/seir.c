@@ -220,8 +220,8 @@ void R_deseir_setup(const double *px)
 	for (int i = 0; i < m; ++i)
 		work0[i    ] = exp(*(px++) - *(py++));
 	for (int j = 0; j < n; ++j) {
-		swork1 += (work0[j] = exp(*px      ));
-		swork2 += (work1[j] = exp(*px - tmp));
+		swork1 += (work1[j] = exp(*px      ));
+		swork2 += (work2[j] = exp(*px - tmp));
 		work0[m + j] = exp(*(px++) - *(py++));
 	}
 
@@ -234,18 +234,20 @@ void R_deseir_dot(const int *neq, const double *t, const double *y,
 {
 	SETUP(deseir, lastTimeDot, *t, y);
 
-	*(ydot++) = nuVal - betaVal * y[0] * swork1 + deltaVal * y[p - 1] - muVal * y[0];
+	int i, j;
+
+	*(ydot++) = nuVal - betaVal * y[0] * swork1 + deltaVal * exp(y[p - 1]) - muVal * y[0];
 	if (m == 0)
 	*(ydot++) = betaVal * y[0] * swork2 - gammaVal - muVal;
 	else {
 	*(ydot++) = betaVal * y[0] * swork2 - sigmaVal - muVal;
-	for (int i = 0; i < m - 1; ++i)
+	for (i = 0; i < m - 1; ++i)
 	*(ydot++) = sigmaVal * work0[i    ] - sigmaVal - muVal;
-	*(ydot++) = sigmaVal * work0[m - 1] - gammaVal - muVal;
+	*(ydot++) = sigmaVal * work0[i    ] - gammaVal - muVal;
 	}
-	for (int j = 0; j < n - 1; ++j)
+	for (j = 0; j < n - 1; ++j)
 	*(ydot++) = gammaVal * work0[m + j] - gammaVal - muVal;
-	*(ydot++) = gammaVal * work0[m + n] - deltaVal - muVal;
+	*(ydot++) = gammaVal * work0[m + j] - deltaVal - muVal;
 	*(ydot++) = betaVal * y[0] * swork1;
 	*(ydot++) = nuVal;
 
@@ -259,21 +261,23 @@ void R_deseir_jac(const int *neq, const double *t, const double *y,
 {
 	SETUP(deseir, lastTimeDot, *t, y);
 
+	int i, j;
+
 	pd[0] = -(pd[p] = betaVal * swork1) - muVal;
 	pd[1] =           betaVal * swork2         ;
 	pd += nrow + 2;
-	for (int i = 0; i < m; ++i) {
+	for (i = 0; i < m; ++i) {
 		*(pd + nrow) = -(*pd = sigmaVal * work0[i    ]);
 		*pd += nrow + 1;
 	}
-	for (int j = 0; j < n; ++j) {
+	for (j = 0; j < n; ++j) {
 		*(pd + nrow) = -(*pd = gammaVal * work0[m + j]);
 		*pd += nrow + 1;
 	}
 	pd -= p;
 	pd[0] = deltaVal * exp(y[p - 1]);
 	pd -= (size_t) nrow * n;
-	for (int j = 0; j < n; ++j) {
+	for (j = 0; j < n; ++j) {
 		pd[0] = -(pd[p] = betaVal * y[0] * work1[j]);
 		pd[1] =           betaVal * y[0] * work2[j] ;
 		pd += nrow;

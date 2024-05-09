@@ -201,7 +201,7 @@ function (length.out = 1L,
 			i.1 <- 2L:(p - 1L)
 			i.0 <- 3L:p
 			a.1 <- rep.int(c(sigma, gamma), c(m, n))
-			a.0 <- c(a.0[-1L], delta)
+			a.0 <- c(a.1[-1L], delta)
 
 			gg <-
 			function (t, x, theta)
@@ -213,12 +213,12 @@ function (length.out = 1L,
 				beta <- beta(t)
 				nu   <- nu  (t)
 				mu   <- mu  (t)
-				s.0 <- sum(exp(x.I        ))
-				s.1 <- sum(exp(x.I - x[2L]))
-				list(c(nu - beta * x.S * s.0 + delta * exp(x.R) - mu * x.S,
-				       beta * x.S * s.1 - a.1[1L] - mu,
+				s.1 <- sum(exp(x.I        ))
+				s.2 <- sum(exp(x.I - x[2L]))
+				list(c(nu - beta * x.S * s.1 + delta * exp(x.R) - mu * x.S,
+				       beta * x.S * s.2 - a.1[1L] - mu,
 				       a.1 * exp(x[i.1] - x[i.0]) - a.0 - mu,
-				       beta * x.S * s.0,
+				       beta * x.S * s.1,
 				       nu))
 			}
 			Dg <-
@@ -229,14 +229,14 @@ function (length.out = 1L,
 				x.R <- x[i.R]
 				beta <- beta(t)
 				mu   <- mu  (t)
-				s.0 <- sum(u.0 <- exp(x.I        ))
-				s.1 <- sum(u.1 <- exp(x.I - x[2L]))
-				D[i.S, i.S] <<- -(D[p + 1L, i.S] <<- beta * s.0) - mu
-				D[i.S, i.I] <<- -(D[p + 1L, i.I] <<- beta * x.S * u.0)
+				s.1 <- sum(u.1 <- exp(x.I        ))
+				s.2 <- sum(u.2 <- exp(x.I - x[2L]))
+				D[i.S, i.S] <<- -(D[p + 1L, i.S] <<- beta * s.1) - mu
+				D[i.S, i.I] <<- -(D[p + 1L, i.I] <<- beta * x.S * u.1)
 				D[i.S, i.R] <<- delta * exp(x.R)
-				D[ 2L, i.S] <<- beta * s.1
-				D[ 2L, i.I] <<- beta * x.S * u.1
-				D[ 2L,  2L] <<- if (m) -beta * s.1 else 0
+				D[ 2L, i.S] <<- beta * s.2
+				D[ 2L, i.I] <<- beta * x.S * u.2
+				D[ 2L,  2L] <<- if (m) -beta * s.2 else 0
 				D[k.0] <<- -(D[k.1] <<- a.1 * exp(x[i.1] - x[i.0]))
 				D
 			}
