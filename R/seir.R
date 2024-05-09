@@ -330,16 +330,16 @@ function (beta, nu, mu, sigma, gamma, delta, m = 0L, n = 1L)
 	delta <- delta * 1
 	y <- cumprod(rep.int((c(delta, gamma) + mu) / gamma, c(1L, n - 1L)))
 	if (m == 0L) {
-		S. <- (gamma + mu) * y[n] / beta / sum(y)
-		R. <- ((gamma + mu) * y[n] - mu * (1 - S.)) / delta
+		S. <- (tmp <- (gamma + mu) * y[n]) / beta / sum(y)
+		R. <- (nu - mu * S.) / (tmp - delta)
 		ans <- c(S., y[n:1L] * R., R.)
 	}
 	else {
 		x <- cumprod(rep.int((c(gamma, sigma) + mu) / sigma, c(1L, m - 1L))) *
 			y[n]
-		S. <- (sigma + mu) * x[m] / beta / sum(y)
-		R. <- ((sigma + mu) * x[m] + mu * S. - nu) / delta
-		ans <- c(S., x[m:1L], y[n:1L], R.)
+		S. <- (tmp <- (sigma + mu) * x[m]) / beta / sum(y)
+		R. <- (nu - mu * S.) / (tmp - delta)
+		ans <- c(S., x[m:1L] * R., y[n:1L] * R., R.)
 	}
 	names(ans) <- rep.int(c("S", "E", "I", "R"), c(1L, m, n, 1L))
 	ans
