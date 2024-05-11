@@ -51,6 +51,13 @@ function (length.out = 1L,
 
 	if (stochastic) {
 
+		if (any(init. != (tmp <- trunc(init.)))) {
+			warning(gettextf("truncating fractional part of '%s'",
+			                 "init"),
+			        domain = NA)
+			init. <- tmp
+		}
+
 		tl.params <-
 			(function (maxtau = 1, ...) list(maxtau = maxtau, ...))(...)
 
