@@ -1,57 +1,70 @@
-library(grDevices, pos = "package:base", verbose = FALSE)
 library(    stats, pos = "package:base", verbose = FALSE)
+library(grDevices, pos = "package:base", verbose = FALSE)
 library(    utils, pos = "package:base", verbose = FALSE)
 
 library(fastbeta)
 options(warn = 2L, error = if (interactive()) recover)
 
-beta <- function (t, a = 1e-01, b = 1e-05)
-	b * (1 + a * cospi(t / 26))
-nu <- function (t) 1e+03
-mu <- function (t) 1e-03
+beta <- function (t, a = 1e-01, b = 1e-05) b * (1 + a * sinpi(t / 26))
+nu   <- function (t) 1e+03
+mu   <- function (t) 1e-03
 
-S0 <- 5e+04
-I0 <- 1e+03
-R0 <- 1e+06 - S0 - I0
-constants <- c(S0 = S0, I0 = I0, R0 = R0, gamma = 0.5, delta = 0)
+sigma <- 0.5
+gamma <- 0.5
+delta <- 0
 
-n <- 250L
+m <- 1L
+n <- 1L
+init <- fastbeta:::seir.ee(beta(0), nu(0), mu(0), sigma, gamma, delta, m, n)
+
+stopifnot(exprs = {
+	is.double(init)
+	length(init) == m + n + 2L
+	!anyNA(init)
+	min(init) >= 0
+	isTRUE(all.equal(sum(init), nu(0) / mu(0)))
+})
+
+init <- trunc(init)
+
+length.out <- 250L
 prob <- 0.1
-delay <- diff(pgamma(0:8, 2.5))
+delay <- diff(stats::pgamma(0L:8L, 2.5))
 
 ## At the very least, these should not signal warnings or
 ## errors unexpectedly, and the compiled and uncompiled
 ## code should generate equal results
 
-X00 <- sir(n, beta, nu, mu, constants, stochastic = FALSE,
-           prob, delay, useCompiled = FALSE)
+seir2 <-
+function (stochastic, useCompiled)
+{
+	set.seed(0L)
+	seir(length.out, beta, nu, mu, sigma, gamma, delta, init, m, n,
+	     stochastic, prob, delay, useCompiled)
+}
 
-X01 <- sir(n, beta, nu, mu, constants, stochastic = FALSE,
-           prob, delay, useCompiled =  TRUE)
+L <- .mapply(seir2,
+             list(stochastic  = c(FALSE,  TRUE, FALSE, TRUE),
+                  useCompiled = c(FALSE, FALSE,  TRUE, TRUE)),
+             NULL)
+dim(L) <- c(2L, 2L)
 
-set.seed(0L)
-X10 <- sir(n, beta, nu, mu, constants, stochastic =  TRUE,
-           prob, delay, useCompiled = FALSE)
-
-set.seed(0L)
-X11 <- sir(n, beta, nu, mu, constants, stochastic =  TRUE,
-           prob, delay, useCompiled =  TRUE)
+X <- L[[1L, 1L]]
 
 stopifnot(exprs = {
-	all.equal(X00, X01)
-	all.equal(X10, X11)
-	is.double(X11)
-	is.mts(X11)
-	identical(dim(X11), c(n + 1L, 6L))
-	identical(dimnames(X11), list(NULL, c("S", "I", "R", "B", "Z", "Z.obs")))
-	identical(tsp(X11), c(0, n, 1))
-	!anyNA(X11[-1L, ])
-	min(X11, na.rm = TRUE) >= 0
+	all.equal(L[, 1L], L[, 2L], tolerance = 1/sum(init))
+	is.double(X)
+	is.mts(X)
+	identical(dim(X), c(length.out, m + n + 5L))
+	identical(dimnames(X), list(NULL, rep.int(c("S", "E", "I", "R", "Z", "B", "Z.obs"), c(1L, m, n, 1L, 1L, 1L, 1L))))
+	identical(tsp(X), c(0, length.out - 1, 1))
+	!anyNA(X[-1L, ])
+	min(0, X, na.rm = TRUE) >= 0
 })
 
 if (dev.interactive(TRUE))
-	plot(X11)
+	plot(X)
 
-tools::assertError(sir(0L, beta, nu, mu, constants))
+tools::assertError(seir(0L, beta, nu, mu, sigma, gamma, delta, init, m, n))
 
 proc.time()

@@ -1,8 +1,8 @@
 \name{seir.library}
 \alias{seir.library}
 \alias{sir.library}
-\alias{seir.e01}
-\alias{seir.e02}
+\alias{seir.E01}
+\alias{seir.E02}
 \docType{data}
 \title{Often Used Simulations}
 \description{
@@ -32,11 +32,11 @@ see, e.g.
 ## for R_DEFAULT_PACKAGES=NULL
 library(utils, pos = "package:base", verbose = FALSE)
 }
-data(sir.e01, package = "fastbeta")
-str(sir.e01)
-plot(sir.e01)
+data(seir.E01, package = "fastbeta")
+str(seir.E01)
+plot(seir.E01)
 
-data(sir.e02, package = "fastbeta")
-str(sir.e02)
-plot(sir.e02)
+data(seir.E02, package = "fastbeta")
+str(seir.E02)
+plot(seir.E02)
 }

@@ -54,25 +54,22 @@ and \code{r} bootstrap estimates.  It is completely parallel to argument
 \examples{
 \dontshow{
 ## for R_DEFAULT_PACKAGES=NULL
-library(graphics, pos = "package:base", verbose = FALSE)
-library(   utils, pos = "package:base", verbose = FALSE)
+library(utils, pos = "package:base", verbose = FALSE)
 }
-data(sir.e02, package = "fastbeta")
-a <- attributes(sir.e02)
-str(sir.e02)
-plot(sir.e02)
+data(seir.E02, package = "fastbeta")
+a <- attributes(seir.E02)
+str(seir.E02)
+plot(seir.E02)
 
 ## We suppose that we have perfect knowledge of incidence,
 ## births, and the data-generating parameters
-series <- cbind(sir.e02[, c("Z", "B")], mu = a[["mu"]](0))
+series <- cbind(seir.E02[, c("Z", "B")], mu = a[["mu"]](0))
 colnames(series) <- c("Z", "B", "mu") # FIXME: stats:::cbind.ts mangles dimnames
-constants <- c(S0 = sir.e02[[1L, "S"]],
-               I0 = sir.e02[[1L, "I"]],
-               R0 = sir.e02[[1L, "R"]],
-               gamma = a[["gamma"]],
-               delta = a[["delta"]])
 
-R <- fastbeta.bootstrap(100L, series, constants)
+args <- c(list(r = 100L, series = series),
+          a[c("sigma", "gamma", "delta", "init", "m", "n")])
+
+R <- do.call(fastbeta.bootstrap, args)
 str(R)
 plot(R)
 plot(R, level = 0.95)

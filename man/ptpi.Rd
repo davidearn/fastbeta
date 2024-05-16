@@ -99,37 +99,41 @@ Fast estimation of time-varying infectious disease transmission rates.
 \examples{
 \dontshow{
 ## for R_DEFAULT_PACKAGES=NULL
+library(   stats, pos = "package:base", verbose = FALSE)
 library(graphics, pos = "package:base", verbose = FALSE)
 library(   utils, pos = "package:base", verbose = FALSE)
 }
-data(sir.e01, package = "fastbeta")
-a <- attributes(sir.e01)
-str(sir.e01)
-plot(sir.e01)
+data(seir.E01, package = "fastbeta")
+a <- attributes(seir.E01); p <- length(a[["init"]])
+str(seir.E01)
+plot(seir.E01)
 
 ## We suppose that we have perfect knowledge of incidence,
 ## births, and the data-generating parameters, except for
 ## the initial state, which we "guess"
-series <- cbind(sir.e01[, c("Z", "B")], mu = a[["mu"]](0))
+series <- cbind(seir.E01[, c("Z", "B")], mu = a[["mu"]](0))
 colnames(series) <- c("Z", "B", "mu") # FIXME: stats:::cbind.ts mangles dimnames
-constants <- c(Sa = sir.e01[[1L, "S"]],
-               Ia = sir.e01[[1L, "I"]],
-               Ra = sir.e01[[1L, "R"]],
-               gamma = a[["gamma"]],
-               delta = a[["delta"]])
 
 plot(series[, "Z"])
-a <- 8; b <- 216
-abline(v = c(a, b), lty = 2)
+start <- 23; end <- 231
+abline(v = c(start, end), lty = 2)
 
-L <- ptpi(series, constants, a = a, b = b, complete = TRUE, tol = 1e-06)
+set.seed(0L)
+args <- c(list(series = series),
+          a[c("sigma", "gamma", "delta", "init", "m", "n")],
+          list(start = start, end = end, complete = TRUE))
+init <- seir.E01[which.min(abs(time(seir.E01) - start)), seq_len(p)]
+args[["init"]] <- init * rlnorm(p, 0, 0.1)
+
+L <- do.call(ptpi, args)
 str(L)
 
-S <- L[["X"]][, "S", ]
+S <- L[["x"]][, "S", ]
 plot(S, plot.type = "single")
-lines(sir.e01[, "S"], col = "red", lwd = 4) # the "truth"
-abline(h = L[["value"]]["S"], v = a, col = "blue", lwd = 4, lty = 2)
+lines(seir.E01[, "S"], col = "red", lwd = 4) # the "truth"
+abline(h = L[["value"]]["S"], v = start, col = "blue", lwd = 4, lty = 2)
 
-## The relative error
-L[["value"]]["S"] / sir.e01[1L + a, "S"] - 1
+## Relative error
+L[["value"]] / init - 1
+sqrt(sum((L[["value"]] - init)^2)/sum(init^2))
 }
