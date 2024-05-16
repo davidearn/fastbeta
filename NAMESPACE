@@ -1,6 +1,7 @@
 useDynLib(fastbeta, .registration = TRUE)
 export(deconvolve, fastbeta, fastbeta.bootstrap, ptpi, seir, sir)
 S3method(plot, fastbeta.bootstrap)
+importFrom(grDevices, dev.flush, dev.hold)
 importFrom(graphics, lines, par, polygon)
 importFrom(stats, approxfun, filter, is.mts, plot.ts, quantile, rbinom,
            time, ts, tsp, "tsp<-")

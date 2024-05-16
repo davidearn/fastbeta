@@ -84,6 +84,7 @@ plot.fastbeta.bootstrap <-
 function (x, y, level = NULL,
           col = c("#FF0000FF", "#7F7F7F40"), lwd = c(2, 1), ...)
 {
+	dev.hold()
 	if (is.null(level))
 		plot.ts(x, plot.type = "single", col = 0, lwd = 0, ...)
 	else {
@@ -129,6 +130,7 @@ function (x, y, level = NULL,
 			polygon(t[c(1L:n, n:1L)], y[c(1L:n, (n+n):(n+1L))], col = col[2L])
 	}
 	lines(s, x[, 1L], col = col[1L], lwd = lwd[1L])
+	dev.flush()
 	invisible(NULL)
 }
 
