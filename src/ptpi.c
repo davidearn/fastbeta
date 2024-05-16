@@ -11,17 +11,17 @@ void ptpi(const double *series,
           double *value, double *diff, int *iter,
           double *x)
 {
-	if (lengthOut <= 0) {
-		memcpy(value, init, (m + n + 2) * sizeof(double));
-		*diff = 0.0;
-		*iter = iterMax;
+	memcpy(value, init, (m + n + 2) * sizeof(double));
+	*diff = 0.0;
+	*iter = (lengthOut <= 0) ? iterMax : 0;
+
+	if (lengthOut <= 0)
 		return;
-	}
 
 	const
 	double *Z = series, *B = Z + lengthOut, *mu = B + lengthOut;
 
-	double *S = x,
+	double *S = (x) ? x - a : R_Calloc((size_t) 2 * (m + n + 2), double),
 		halfsigma = 0.5 * sigma * (double) m,
 		halfgamma = 0.5 * gamma * (double) n,
 		halfdelta = 0.5 * delta * (double) 1,
@@ -31,30 +31,21 @@ void ptpi(const double *series,
 	d[0] = b - a;
 	d[1] = m + n + 2;
 
-	double *state = (x) ? value : R_Calloc((size_t) m + n + 2, double);
-	memcpy(state, init, (m + n + 2) * sizeof(double));
-	*diff = 0.0;
-	*iter = 0;
-
 	if (x) {
-
-	x -= a; /* so that 'x' can be indexed like 'series' */
 
 	while (*iter < iterMax) {
 
 	x = S;
 	for (int k = 0; k < d[1]; ++k) {
-		x[a] = state[k];
+		x[a] = value[k];
 		x += d[0];
 	}
 
 	for (int s = a, t = a + 1; t < b; ++s, ++t) {
 		x = S + d[0];
-
 		work[0] = 1.0 - 0.5 * mu[s];
 		work[1] = 1.0 + 0.5 * mu[t];
 		work[2] = Z[t];
-
 		for (int i = 0; i < m; ++i) {
 		x[t] = ((work[0] - halfsigma) * x[s] + work[2])/(work[1] + halfsigma);
 		work[2] = halfsigma * (x[s] + x[t]);
@@ -66,7 +57,7 @@ void ptpi(const double *series,
 		x += d[0];
 		}
 		x[t] = ((work[0] - halfdelta) * x[s] + work[2])/(work[1] + halfdelta);
-		work[2] = halfdelta * (x[s] + x[t]) + B[t];
+		work[2] = halfdelta * (x[s] + x[t]) - Z[t] + B[t];
 		x += d[0];
 		S[t] = ( work[0]              * S[s] + work[2])/ work[1]             ;
 	}
@@ -76,9 +67,9 @@ void ptpi(const double *series,
 	x = S;
 	work[0] = work[1] = 0.0;
 	for (int k = 0; k < d[1]; ++k) {
-		work[0] += (x[b - 1] - state[k]) * (x[b - 1] - state[k]);
-		work[1] +=             state[k]  *             state[k] ;
-		state[k] = x[b - 1];
+		work[0] += (x[b - 1] - value[k]) * (x[b - 1] - value[k]);
+		work[1] +=             value[k]  *             value[k] ;
+		value[k] = x[b - 1];
 		x += d[0];
 	}
 
@@ -91,35 +82,48 @@ void ptpi(const double *series,
 	}
 
 	}
+
 	else {
 
 	while (*iter < iterMax) {
 
+	x = S;
+	for (int k = 0; k < d[1]; ++k) {
+		x[0] = value[k];
+		x += 2;
+	}
+
 	for (int s = a, t = a + 1; t < b; ++s, ++t) {
+		x = S + 2;
 		work[0] = 1.0 - 0.5 * mu[s];
 		work[1] = 1.0 + 0.5 * mu[t];
 		work[2] = Z[t];
-
 		for (int i = 0; i < m; ++i) {
-		value[1 + i    ] = ((work[0] - halfsigma) * state[1 + i    ] + work[2])/(work[1] + halfsigma);
-		work[2] = halfsigma * (state[1 + i    ] + value[1 + i    ]);
+		x[1] = ((work[0] - halfsigma) * x[0] + work[2])/(work[1] + halfsigma);
+		work[2] = halfsigma * (x[0] + x[1]);
+		x[0] = x[1]; x += 2;
 		}
 		for (int j = 0; j < n; ++j) {
-		value[1 + m + j] = ((work[0] - halfgamma) * state[1 + m + j] + work[2])/(work[1] + halfgamma);
-		work[2] = halfgamma * (state[1 + m + j] + value[1 + m + j]);
+		x[1] = ((work[0] - halfgamma) * x[0] + work[2])/(work[1] + halfgamma);
+		work[2] = halfgamma * (x[0] + x[1]);
+		x[0] = x[1]; x += 2;
 		}
-		value[1 + m + n] = ((work[0] - halfdelta) * state[1 + m + n] + work[2])/(work[1] + halfdelta);
-		work[2] = halfdelta * (state[1 + m + n] + value[1 + m + n]) + B[t];
-		value[0        ] = ( work[0]              * state[0        ] + work[2])/ work[1]             ;
+		x[1] = ((work[0] - halfdelta) * x[0] + work[2])/(work[1] + halfdelta);
+		work[2] = halfdelta * (x[0] + x[1]) - Z[t] + B[t];
+		x[0] = x[1]; x += 2;
+		S[1] = ( work[0]              * S[0] + work[2])/ work[1]             ;
+		S[0] = S[1];
 	}
 
 	*iter += 1;
 
+	x = S;
 	work[0] = work[1] = 0.0;
 	for (int k = 0; k < d[1]; ++k) {
-		work[0] += (value[k] - state[k]) * (value[k] - state[k]);
-		work[1] +=             state[k]  *             state[k] ;
-		state[k] = value[k];
+		work[0] += (x[1] - value[k]) * (x[1] - value[k]);
+		work[1] +=         value[k]  *         value[k] ;
+		value[k] = x[1];
+		x += 2;
 	}
 
 	*diff = sqrt(work[0] / work[1]);
@@ -128,7 +132,7 @@ void ptpi(const double *series,
 
 	}
 
-	R_Free(state);
+	R_Free(S);
 
 	}
 
@@ -151,7 +155,7 @@ void ptpi(const double *series,
 		}
 		work[3] = value[1 + m + n];
 		value[1 + m + n] = ((work[1] + halfdelta) * value[1 + m + n] - work[2])/(work[0] - halfdelta);
-		work[2] = halfdelta * (work[3] + value[1 + m + n]) + B[t];
+		work[2] = halfdelta * (work[3] + value[1 + m + n]) - Z[t] + B[t];
 		value[0        ] = ( work[1]              * value[0        ] - work[2])/ work[0]             ;
 	}
 
@@ -204,22 +208,21 @@ SEXP R_ptpi(SEXP s_series, SEXP s_sigma, SEXP s_gamma, SEXP s_delta,
 
 	if (complete) {
 		d[2] = INTEGER(iter)[0];
+
 		PROTECT(x);
+		if (d[2] < iterMax) {
+		SEXP y = allocVector(REALSXP, (R_xlen_t) d[0] * d[1] * d[2]);
+		memcpy(REAL(y), REAL(x), (size_t) d[0] * d[1] * d[2] * sizeof(double));
+		UNPROTECT(1);
+		PROTECT(x = y);
+		}
 
 		SEXP dim = PROTECT(allocVector(INTSXP, 3));
 		memcpy(INTEGER(dim), &d, 3 * sizeof(int));
 		setAttrib(x, R_DimSymbol, dim);
 		UNPROTECT(1);
 
-		if (d[2] >= iterMax)
 		SET_VECTOR_ELT(ans, 3, x);
-		else {
-		SEXP y = PROTECT(allocVector(REALSXP, (R_xlen_t) d[0] * d[1] * d[2]));
-		memcpy(REAL(y), REAL(x), (size_t) d[0] * d[1] * d[2] * sizeof(double));
-		SET_VECTOR_ELT(ans, 3, y);
-		UNPROTECT(1);
-		}
-
 		UNPROTECT(1);
 	}
 

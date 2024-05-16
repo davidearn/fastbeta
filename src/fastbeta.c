@@ -48,7 +48,7 @@ void fastbeta(const double *series,
 		x += d[0];
 		}
 		x[t] = ((work[0] - halfdelta) * x[s] + work[2])/(work[1] + halfdelta);
-		work[2] = halfdelta * (x[s] + x[t]) + B[t];
+		work[2] = halfdelta * (x[s] + x[t]) - Z[t] + B[t];
 		x += d[0];
 		S[t] = ( work[0]              * S[s] + work[2])/ work[1]             ;
 		x[s] = (Z[s] + Z[t]) / (2.0 * S[s] * work[3]);
