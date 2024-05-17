@@ -16,9 +16,7 @@ sources := \
 	inst/scripts/*.R \
 	man/*.Rd \
 	src/*.c \
-	tests/*.R \
-	vignettes/*.Rnw \
-	vignettes/*.bib
+	tests/*.R
 
 .PHONY: all
 all: build
