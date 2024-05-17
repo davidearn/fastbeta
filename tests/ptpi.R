@@ -1,13 +1,13 @@
 library(fastbeta)
 options(warn = 2L, error = if (interactive()) utils::recover)
 
-utils::data(seir.E01, package = "fastbeta")
-a <- attributes(seir.E01)
+utils::data(seir.ts01, package = "fastbeta")
+a <- attributes(seir.ts01)
 m <- a[["m"]]
 n <- a[["n"]]
 p <- m + n + 2L
 
-series <- cbind(seir.E01[, c("Z", "B")], mu = a[["mu"]](0))
+series <- cbind(seir.ts01[, c("Z", "B")], mu = a[["mu"]](0))
 colnames(series) <- c("Z", "B", "mu")
 
 start <- 23; end <- 231
@@ -16,7 +16,7 @@ set.seed(0L)
 args <- c(list(series = series),
           a[c("sigma", "gamma", "delta", "init", "m", "n")],
           list(start = start, end = end))
-init <- seir.E01[which.min(abs(time(seir.E01) - start)), seq_len(p)]
+init <- seir.ts01[which.min(abs(time(seir.ts01) - start)), seq_len(p)]
 args[["init"]] <- init * rlnorm(p, 0, 0.1)
 
 L0 <- do.call(ptpi, `[[<-`(args, "complete", FALSE))

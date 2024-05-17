@@ -103,15 +103,15 @@ library(   stats, pos = "package:base", verbose = FALSE)
 library(graphics, pos = "package:base", verbose = FALSE)
 library(   utils, pos = "package:base", verbose = FALSE)
 }
-data(seir.E01, package = "fastbeta")
-a <- attributes(seir.E01); p <- length(a[["init"]])
-str(seir.E01)
-plot(seir.E01)
+data(seir.ts01, package = "fastbeta")
+a <- attributes(seir.ts01); p <- length(a[["init"]])
+str(seir.ts01)
+plot(seir.ts01)
 
 ## We suppose that we have perfect knowledge of incidence,
 ## births, and the data-generating parameters, except for
 ## the initial state, which we "guess"
-series <- cbind(seir.E01[, c("Z", "B")], mu = a[["mu"]](0))
+series <- cbind(seir.ts01[, c("Z", "B")], mu = a[["mu"]](0))
 colnames(series) <- c("Z", "B", "mu") # FIXME: stats:::cbind.ts mangles dimnames
 
 plot(series[, "Z"])
@@ -122,7 +122,7 @@ set.seed(0L)
 args <- c(list(series = series),
           a[c("sigma", "gamma", "delta", "init", "m", "n")],
           list(start = start, end = end, complete = TRUE))
-init <- seir.E01[which.min(abs(time(seir.E01) - start)), seq_len(p)]
+init <- seir.ts01[which.min(abs(time(seir.ts01) - start)), seq_len(p)]
 args[["init"]] <- init * rlnorm(p, 0, 0.1)
 str(args)
 
@@ -131,7 +131,7 @@ str(L)
 
 S <- L[["x"]][, "S", ]
 plot(S, plot.type = "single")
-lines(seir.E01[, "S"], col = "red", lwd = 4) # the "truth"
+lines(seir.ts01[, "S"], col = "red", lwd = 4) # the "truth"
 abline(h = L[["value"]]["S"], v = start, col = "blue", lwd = 4, lty = 2)
 
 ## Relative error

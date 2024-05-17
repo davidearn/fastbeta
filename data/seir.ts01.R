@@ -1,6 +1,6 @@
-## NB: seir.E02 differs mainly in setting of 'stochastic'
+## NB: seir.ts02 differs mainly in setting of 'stochastic'
 
-seir.E01 <- local({
+seir.ts01 <- local({
 stochastic <- FALSE
 
 beta <- function (t, a = 1e-01, b = 1e-05) b * (1 + a * sinpi(t / 26))

@@ -1,6 +1,6 @@
-## NB: seir.E01 differs mainly in setting of 'stochastic'
+## NB: seir.ts01 differs mainly in setting of 'stochastic'
 
-seir.E02 <- local({
+seir.ts02 <- local({
 if (!exists(".Random.seed", envir = globalenv(), inherits = FALSE))
 	set.seed(NULL, "default", "default", "default")
 .R.s <- get(".Random.seed", envir = globalenv(), inherits = FALSE)

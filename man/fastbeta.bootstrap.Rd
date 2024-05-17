@@ -56,14 +56,14 @@ and \code{r} bootstrap estimates.  It is completely parallel to argument
 ## for R_DEFAULT_PACKAGES=NULL
 library(utils, pos = "package:base", verbose = FALSE)
 }
-data(seir.E02, package = "fastbeta")
-a <- attributes(seir.E02)
-str(seir.E02)
-plot(seir.E02)
+data(seir.ts02, package = "fastbeta")
+a <- attributes(seir.ts02)
+str(seir.ts02)
+plot(seir.ts02)
 
 ## We suppose that we have perfect knowledge of incidence,
 ## births, and the data-generating parameters
-series <- cbind(seir.E02[, c("Z", "B")], mu = a[["mu"]](0))
+series <- cbind(seir.ts02[, c("Z", "B")], mu = a[["mu"]](0))
 colnames(series) <- c("Z", "B", "mu") # FIXME: stats:::cbind.ts mangles dimnames
 
 args <- c(list(r = 100L, series = series),
