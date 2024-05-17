@@ -40,8 +40,8 @@ iteration described in \sQuote{Details}.  It is completely parallel to
 argument \code{series}, having the same \code{\link{tsp}} attribute.
 }
 \details{
-The algorithm implemented by \code{fastbeta} is based on an \eqn{SEIR}
-model with
+The algorithm implemented by \code{fastbeta} is based on an SEIR model
+with
 \itemize{
 \item \eqn{m} latent stages
   (\eqn{E^{i}}{E[i]}, \eqn{i = 1,\ldots,m}{for i in 1:m});

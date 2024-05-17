@@ -3,8 +3,8 @@
 \alias{sir}
 \title{Simulate Infectious Disease Time Series}
 \description{
-Simulates incidence time series based on an \eqn{SEIR} model with
-user-defined forcing and a simple model for observation error.
+Simulates incidence time series based on an SEIR model with user-defined
+forcing and a simple model for observation error.
 }
 \usage{
 seir(length.out = 1L,
@@ -78,7 +78,7 @@ The first \code{length(delay)} elements of this column contain partial
 counts.
 }
 \details{
-Simulations are based on an \eqn{SEIR} model with
+Simulations are based on an SEIR model with
 \itemize{
 \item \eqn{m} latent stages
   (\eqn{E^{i}}{E[i]}, \eqn{i = 1,\ldots,m}{for i in 1:m});
