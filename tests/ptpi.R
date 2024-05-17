@@ -74,5 +74,3 @@ stopifnot(exprs = {
 
 if (grDevices::dev.interactive(TRUE))
 	plot(x[, "S", ], plot.type = "single")
-
-proc.time()

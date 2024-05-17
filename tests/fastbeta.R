@@ -30,5 +30,3 @@ stopifnot(exprs = {
 
 if (grDevices::dev.interactive(TRUE))
 	plot(X)
-
-proc.time()

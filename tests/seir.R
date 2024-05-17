@@ -66,5 +66,3 @@ if (grDevices::dev.interactive(TRUE))
 	plot(X)
 
 tools::assertError(seir(0L, beta, nu, mu, sigma, gamma, delta, init, m, n))
-
-proc.time()
