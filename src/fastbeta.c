@@ -63,7 +63,7 @@ SEXP R_fastbeta(SEXP s_series,
 {
 	int m = INTEGER(s_m)[0], n = INTEGER(s_n)[0],
 		lengthOut = INTEGER(getAttrib(s_series, R_DimSymbol))[0];
-	SEXP x = allocMatrix(REALSXP, lengthOut, m + n + 3);
+	SEXP x = PROTECT(allocMatrix(REALSXP, lengthOut, m + n + 3));
 
 	fastbeta(REAL(s_series),
 	         REAL(s_sigma)[0], REAL(s_gamma)[0], REAL(s_delta)[0],
@@ -72,12 +72,13 @@ SEXP R_fastbeta(SEXP s_series,
 
 	double *px = REAL(x);
 	for (R_xlen_t k = 0, end = XLENGTH(x) - 1; k < end; ++k) {
-		if (ISNAN(px[k]) || px[k] < 0.0) {
-			warning("entry [%d, %d] of result is negative or NA",
+		if (!ISNAN(px[k]) && px[k] < 0.0) {
+			warning("entry [%d, %d] of result is negative",
 			        (int) (k % lengthOut) + 1, (int) (k / lengthOut) + 1);
 			break;
 		}
 	}
 
+	UNPROTECT(1);
 	return x;
 }

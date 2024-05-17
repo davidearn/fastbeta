@@ -180,7 +180,17 @@ SEXP R_ptpi(SEXP s_series, SEXP s_sigma, SEXP s_gamma, SEXP s_delta,
 		value = PROTECT(allocVector(REALSXP, m + n + 2)),
 		diff = PROTECT(allocVector(REALSXP, 1)),
 		iter = PROTECT(allocVector(INTSXP, 1)),
-		x = NULL;
+		x = R_NilValue;
+
+	int d[3];
+	if (complete) {
+		d[0] = b - a;
+		d[1] = m + n + 2;
+		d[2] = iterMax;
+		x = allocVector(REALSXP, (R_xlen_t) d[0] * d[1] * d[2]);
+	}
+
+	PROTECT(x);
 
 	SET_STRING_ELT(nms, 0, mkChar("value"));
 	SET_STRING_ELT(nms, 1, mkChar("diff"));
@@ -192,14 +202,6 @@ SEXP R_ptpi(SEXP s_series, SEXP s_sigma, SEXP s_gamma, SEXP s_delta,
 	SET_VECTOR_ELT(ans, 1, diff);
 	SET_VECTOR_ELT(ans, 2, iter);
 
-	int d[3];
-	if (complete) {
-		d[0] = b - a;
-		d[1] = m + n + 2;
-		d[2] = iterMax;
-		x = allocVector(REALSXP, (R_xlen_t) d[0] * d[1] * d[2]);
-	}
-
 	ptpi(REAL(s_series),
 	     REAL(s_sigma)[0], REAL(s_gamma)[0], REAL(s_delta)[0],
 	     REAL(s_init), m, n, lengthOut,
@@ -209,23 +211,24 @@ SEXP R_ptpi(SEXP s_series, SEXP s_sigma, SEXP s_gamma, SEXP s_delta,
 	if (complete) {
 		d[2] = INTEGER(iter)[0];
 
-		PROTECT(x);
-		if (d[2] < iterMax) {
-		SEXP y = allocVector(REALSXP, (R_xlen_t) d[0] * d[1] * d[2]);
-		memcpy(REAL(y), REAL(x), (size_t) d[0] * d[1] * d[2] * sizeof(double));
-		UNPROTECT(1);
-		PROTECT(x = y);
-		}
-
 		SEXP dim = PROTECT(allocVector(INTSXP, 3));
 		memcpy(INTEGER(dim), &d, 3 * sizeof(int));
-		setAttrib(x, R_DimSymbol, dim);
-		UNPROTECT(1);
 
+		if (d[2] >= iterMax) {
+		setAttrib(x, R_DimSymbol, dim);
 		SET_VECTOR_ELT(ans, 3, x);
+		}
+		else {
+		SEXP y = PROTECT(allocVector(REALSXP, (R_xlen_t) d[0] * d[1] * d[2]));
+		memcpy(REAL(y), REAL(x), (size_t) d[0] * d[1] * d[2] * sizeof(double));
+		setAttrib(y, R_DimSymbol, dim);
+		SET_VECTOR_ELT(ans, 3, y);
+		UNPROTECT(1);
+		}
+
 		UNPROTECT(1);
 	}
 
-	UNPROTECT(5);
+	UNPROTECT(6);
 	return ans;
 }
