@@ -31,8 +31,9 @@ X <- fastbeta::seir(length.out,
                     sigma, gamma, delta,
                     init, m, n,
                     stochastic = stochastic,
-                    prob = prob, delay = delay)
-X <- stats::window(X, start = length.out - 1L - 52L * 5L)
+                    prob = prob, delay = delay,
+                    epsilon = 0.002)
+X <- stats::window(X, start = stats::tsp(X)[2L] - 52L * 5L / stats::tsp(X)[3L])
 stats::tsp(X)[1L:2L] <- stats::tsp(X)[1L:2L] - stats::tsp(X)[1L]
 
 assign(".Random.seed", .R.s, envir = globalenv())

@@ -1,34 +1,31 @@
-library(    stats, pos = "package:base", verbose = FALSE)
-library(grDevices, pos = "package:base", verbose = FALSE)
-library(    utils, pos = "package:base", verbose = FALSE)
-
 library(fastbeta)
-options(warn = 2L, error = if (interactive()) recover)
+options(warn = 2L, error = if (interactive()) utils::recover)
 
-data(seir.E02, package = "fastbeta")
+utils::data(seir.E02, package = "fastbeta")
 a <- attributes(seir.E02)
 m <- a[["m"]]
 n <- a[["n"]]
+p <- m + n + 2L
 
 series <- cbind(seir.E02[, c("Z.obs", "B")], mu = a[["mu"]](0))
 colnames(series) <- c("Z.obs", "B", "mu")
 
-X <- do.call(fastbeta,
-             c(list(series = series),
-               a[c("sigma", "gamma", "delta", "init", "m", "n", "prob", "delay")]))
+args <- c(list(series = series),
+          a[c("sigma", "gamma", "delta", "init", "m", "n", "prob", "delay")])
+X <- do.call(fastbeta, args)
 str(X)
 
 stopifnot(exprs = {
 	is.double(X)
-	is.mts(X)
-	identical(dim(X), c(nrow(seir.E02), m + n + 3L))
+	stats::is.mts(X)
+	identical(dim(X), c(nrow(seir.E02), p + 1L))
 	identical(dimnames(X), list(NULL, rep.int(c("S", "E", "I", "R", "beta"), c(1L, m, n, 1L, 1L))))
-	identical(tsp(X), tsp(seir.E02))
+	identical(stats::tsp(X), stats::tsp(seir.E02))
 	!anyNA(X[-length(X)])
 	min(0, X, na.rm = TRUE) >= 0
 })
 
-if (dev.interactive(TRUE))
+if (grDevices::dev.interactive(TRUE))
 	plot(X)
 
 proc.time()

@@ -68,6 +68,7 @@ colnames(series) <- c("Z", "B", "mu") # FIXME: stats:::cbind.ts mangles dimnames
 
 args <- c(list(r = 100L, series = series),
           a[c("sigma", "gamma", "delta", "init", "m", "n")])
+str(args)
 
 R <- do.call(fastbeta.bootstrap, args)
 str(R)

@@ -147,6 +147,7 @@ Fast estimation of time-varying infectious disease transmission rates.
 \examples{
 \dontshow{
 ## for R_DEFAULT_PACKAGES=NULL
+library(   stats, pos = "package:base", verbose = FALSE)
 library(graphics, pos = "package:base", verbose = FALSE)
 library(   utils, pos = "package:base", verbose = FALSE)
 }
@@ -162,11 +163,12 @@ colnames(series) <- c("Z", "B", "mu") # FIXME: stats:::cbind.ts mangles dimnames
 
 args <- c(list(series = series),
           a[c("sigma", "gamma", "delta", "init", "m", "n")])
+str(args)
 
-X <- do.call(fastbeta, args)       
+X <- do.call(fastbeta, args)
 str(X)
 plot(X)
 
-plot(X[, "beta"], ylab = "Transmission rate")
+plot(X[, "beta"], ylab = "transmission rate")
 lines(a[["beta"]](time(X)), col = "red") # the "truth"
 }

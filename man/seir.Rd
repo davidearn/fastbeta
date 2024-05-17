@@ -174,14 +174,21 @@ delay <- diff(pgamma(0:8, 2.5))
 
 set.seed(0L)
 X <- seir(length.out, beta, nu, mu, sigma, gamma, delta, init,
-          prob = prob, delay = delay, epsilon = 0.005)
+          prob = prob, delay = delay, epsilon = 0.002)
+##                                    ^^^^^^^
+## default epsilon = 0.05 allows too big leaps => spurious noise
+##
 str(X)
 plot(X)
 
 r <- 10L
 Y <- do.call(cbind, replicate(r, simplify = FALSE,
 	seir(length.out, beta, nu, mu, sigma, gamma, delta, init,
-	     prob = prob, delay = delay)[, "Z.obs"]))
+	     prob = prob, delay = delay, epsilon = 0.002)[, "Z.obs"]))
 str(Y) # FIXME: stats:::cbind.ts mangles dimnames
-plot(Y, plot.type = "single", col = seq_len(r), ylab = "Case reports")
+plot(window(Y, start = tsp(Y)[1L] + length(delay) / tsp(Y)[3L]),
+     ##        ^^^^^
+     ## discards points showing edge effects due to 'delay'
+     ##
+     plot.type = "single", col = seq_len(r), ylab = "case reports")
 }

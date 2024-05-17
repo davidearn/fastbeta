@@ -124,6 +124,7 @@ args <- c(list(series = series),
           list(start = start, end = end, complete = TRUE))
 init <- seir.E01[which.min(abs(time(seir.E01) - start)), seq_len(p)]
 args[["init"]] <- init * rlnorm(p, 0, 0.1)
+str(args)
 
 L <- do.call(ptpi, args)
 str(L)
@@ -135,5 +136,4 @@ abline(h = L[["value"]]["S"], v = start, col = "blue", lwd = 4, lty = 2)
 
 ## Relative error
 L[["value"]] / init - 1
-sqrt(sum((L[["value"]] - init)^2)/sum(init^2))
 }
