@@ -56,6 +56,8 @@ and \code{r} bootstrap estimates.  It is completely parallel to argument
 ## for R_DEFAULT_PACKAGES=NULL
 library(utils, pos = "package:base", verbose = FALSE)
 }
+if (requireNamespace("adaptivetau")) withAutoprint({
+
 data(seir.ts02, package = "fastbeta")
 a <- attributes(seir.ts02)
 str(seir.ts02)
@@ -74,4 +76,6 @@ R <- do.call(fastbeta.bootstrap, args)
 str(R)
 plot(R)
 plot(R, level = 0.95)
+
+})
 }

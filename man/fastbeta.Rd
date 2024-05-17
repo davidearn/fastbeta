@@ -151,6 +151,8 @@ library(   stats, pos = "package:base", verbose = FALSE)
 library(graphics, pos = "package:base", verbose = FALSE)
 library(   utils, pos = "package:base", verbose = FALSE)
 }
+if (requireNamespace("adaptivetau")) withAutoprint({
+
 data(seir.ts02, package = "fastbeta")
 a <- attributes(seir.ts02)
 str(seir.ts02)
@@ -171,4 +173,6 @@ plot(X)
 
 plot(X[, "beta"], ylab = "transmission rate")
 lines(a[["beta"]](time(X)), col = "red") # the "truth"
+
+})
 }

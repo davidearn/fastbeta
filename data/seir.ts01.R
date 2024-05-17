@@ -1,6 +1,6 @@
 ## NB: seir.ts02 differs mainly in setting of 'stochastic'
+seir.ts01 <- if (requireNamespace("deSolve")) local({
 
-seir.ts01 <- local({
 stochastic <- FALSE
 
 beta <- function (t, a = 1e-01, b = 1e-05) b * (1 + a * sinpi(t / 26))
@@ -36,4 +36,5 @@ structure(X,
           init = X[1L, seq_len(m + n + 2L)], m = m, n = n,
           stochastic = stochastic,
           prob = prob, delay = delay)
+
 })

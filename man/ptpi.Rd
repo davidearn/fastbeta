@@ -103,6 +103,8 @@ library(   stats, pos = "package:base", verbose = FALSE)
 library(graphics, pos = "package:base", verbose = FALSE)
 library(   utils, pos = "package:base", verbose = FALSE)
 }
+if (requireNamespace("deSolve")) withAutoprint({
+
 data(seir.ts01, package = "fastbeta")
 a <- attributes(seir.ts01); p <- length(a[["init"]])
 str(seir.ts01)
@@ -136,4 +138,6 @@ abline(h = L[["value"]]["S"], v = start, col = "blue", lwd = 4, lty = 2)
 
 ## Relative error
 L[["value"]] / init - 1
+
+})
 }

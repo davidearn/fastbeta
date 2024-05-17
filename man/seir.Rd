@@ -5,6 +5,10 @@
 \description{
 Simulates incidence time series based on an SEIR model with user-defined
 forcing and a simple model for observation error.
+
+Note that simulation code depends on availability of suggested packages
+\pkg{adaptivetau} and \pkg{deSolve}.  If the dependency cannot be loaded
+then an error is signaled.
 }
 \usage{
 seir(length.out = 1L,
@@ -158,6 +162,8 @@ automatic tau selection.
 library(stats, pos = "package:base", verbose = FALSE)
 library(utils, pos = "package:base", verbose = FALSE)
 }
+if (requireNamespace("adaptivetau")) withAutoprint({
+
 beta <- function (t, a = 1e-01, b = 1e-05) b * (1 + a * sinpi(t / 26))
 nu   <- function (t) 1e+03
 mu   <- function (t) 1e-03
@@ -191,4 +197,6 @@ plot(window(Y, start = tsp(Y)[1L] + length(delay) / tsp(Y)[3L]),
      ## discards points showing edge effects due to 'delay'
      ##
      plot.type = "single", col = seq_len(r), ylab = "case reports")
+
+})
 }

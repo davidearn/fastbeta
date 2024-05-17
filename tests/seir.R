@@ -1,3 +1,6 @@
+if (!(requireNamespace("adaptivetau") && requireNamespace("deSolve")))
+	q("no")
+
 library(fastbeta)
 options(warn = 2L, error = if (interactive()) utils::recover)
 

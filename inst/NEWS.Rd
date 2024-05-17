@@ -6,8 +6,8 @@
     \itemize{
       \item \pkg{adaptivetau} and \pkg{deSolve} are now suggested,
       not imported, as they are only needed for simulation.
-      Examples, tests, and simulated data sets are now conditional
-      on their availability.
+      Usage of simulated data sets is now everywhere conditional on
+      successful loading of the dependency.
     }
   }
   \subsection{BUG FIXES}{

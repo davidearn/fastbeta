@@ -1,6 +1,6 @@
 ## NB: seir.ts01 differs mainly in setting of 'stochastic'
+seir.ts02 <- if (requireNamespace("adaptivetau")) local({
 
-seir.ts02 <- local({
 if (!exists(".Random.seed", envir = globalenv(), inherits = FALSE))
 	set.seed(NULL, "default", "default", "default")
 .R.s <- get(".Random.seed", envir = globalenv(), inherits = FALSE)
@@ -44,4 +44,5 @@ structure(X,
           init = X[1L, seq_len(m + n + 2L)], m = m, n = n,
           stochastic = stochastic,
           prob = prob, delay = delay)
+
 })
