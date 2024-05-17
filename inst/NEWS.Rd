@@ -2,11 +2,23 @@
 \title{News for \R{} Package \pkg{fastbeta}}
 
 \section{Changes in version 0.3.0 (2024-05-17)}{
+  \subsection{INSTALLATION}{
+    \itemize{
+      \item \pkg{adaptivetau} and \pkg{deSolve} are now suggested,
+      not imported, as they are only needed for simulation.
+      Examples, tests, and simulated data sets are now conditional
+      on their availability.
+    }
+  }
   \subsection{BUG FIXES}{
     \itemize{
       \item More simulations set \code{tl.params = list(epsilon = .)}
       to mitigate noise attributable to too big leaps in the adaptive
       tau-leaping algorithm.
+
+      \item \code{plot} method for class \code{fastbeta.bootstrap}
+      uses \code{dev.hold} and \code{dev.flush} from \pkg{grDevices}
+      to avoid \dQuote{incremental} graphical output on some devices.
     }
   }
   \subsection{NEW FEATURES}{
