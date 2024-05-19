@@ -1,0 +1,3 @@
+* TODO fastbeta 0.3.1
+
+** TODO 'seir' with option to give rowSums(x[, colnames(x) == "E"]), ditto "I"
