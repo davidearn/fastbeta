@@ -1,6 +1,24 @@
 \name{NEWS}
 \title{News for \R{} Package \pkg{fastbeta}}
 
+\section{Changes in version 0.3.1 (2024-05-19)}{
+  \subsection{INSTALLATION}{
+    \itemize{
+      \item .
+    }
+  }
+  \subsection{BUG FIXES}{
+    \itemize{
+      \item .
+    }
+  }
+  \subsection{NEW FEATURES}{
+    \itemize{
+      \item .
+    }
+  }
+}
+
 \section{Changes in version 0.3.0 (2024-05-17)}{
   \subsection{INSTALLATION}{
     \itemize{
@@ -24,7 +42,7 @@
   \subsection{NEW FEATURES}{
     \itemize{
       \item Compartmental model is generalized to support multiple
-      infected compartments: \eqn{m} latent and \eqn{n} infectious,
+      infected compartments, \eqn{m} latent and \eqn{n} infectious,
       resulting in several backwards incompatible changes to the API;
       see below.
     }

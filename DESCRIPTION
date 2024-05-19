@@ -1,6 +1,6 @@
 Package: fastbeta
-Version: 0.3.0
-Date: 2024-05-17
+Version: 0.3.1
+Date: 2024-05-19
 Title:
 	Fast Approximation of Time-Varying Infectious Disease Transmission Rates
 Description:
@@ -16,7 +16,7 @@ Authors@R:
 	         email = "jaganmn@mcmaster.ca",
 	         role = c("aut", "cre"),
 	         comment = c(ORCID = "0000-0002-3542-2938")))
-Depends: R (>= 4.3.0)
+Depends: R (>= 4.3)
 Imports: grDevices, graphics, stats
 Suggests: adaptivetau, deSolve, tools, utils
 BuildResaveData: no
