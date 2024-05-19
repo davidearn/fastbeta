@@ -1,6 +1,5 @@
 \name{smallpox}
 \alias{smallpox}
-\docType{data}
 \title{Smallpox Mortality in London, England, 1661-1930}
 \description{
 Time series of deaths due to smallpox, deaths due to all causes, and
@@ -51,3 +50,4 @@ str(smallpox)
 table(smallpox[["nday"]]) # not all 7 days, hence:
 plot(7 * smallpox / as.double(nday) ~ from, smallpox, type = "l")
 }
+\docType{data}

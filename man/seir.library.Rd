@@ -2,7 +2,6 @@
 \alias{seir.library}
 \alias{seir.ts01}
 \alias{seir.ts02}
-\docType{data}
 \title{Often Used Simulations}
 \description{
 Infectious disease time series simulated using \code{\link{seir}}, for
@@ -56,3 +55,4 @@ plot(seir.ts02)
 
 })
 }
+\docType{data}

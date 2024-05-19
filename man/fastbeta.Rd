@@ -3,8 +3,8 @@
 \title{Estimate a Time-Varying Infectious Disease Transmission Rate}
 \description{
 Generates a discrete approximation of a time-varying infectious disease
-transmission rate from an equally spaced incidence time series and other
-data.
+transmission rate from an equally spaced disease incidence time series
+and other data.
 }
 \usage{
 fastbeta(series, sigma = gamma, gamma = 1, delta = 0,
