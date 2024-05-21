@@ -75,7 +75,7 @@ then launching a new shell) and (re)moving `~/.R/Makevars`.
 ## Documentation
 
 After installing, users can access the package index (a list of
-availabile help topics) with:
+available help topics) with:
 
 ```r
 help(package = "fastbeta")
