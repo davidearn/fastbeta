@@ -1,4 +1,4 @@
-fastbeta.affine <-
+fastbeta.matrix <-
 function (series, constants, m, n)
 {
 	r <- nrow(series)
