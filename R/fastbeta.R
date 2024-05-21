@@ -21,9 +21,10 @@ function (series, sigma = gamma, gamma = 1, delta = 0,
 		series[, 1L] <- y[seq.int(to = length(y), length.out = length(x))]
 	}
 	x <- .Call(R_fastbeta, series, sigma, gamma, delta, init, m, n)
-	oldClass(x) <- oldClass(series)
+	oldClass(x) <- c("mts", "ts", "matrix", "array")
 	tsp(x) <- tsp(series)
 	dimnames(x) <-
-		list(NULL, rep.int(c("S", "E", "I", "R", "beta"), c(1L, m, n, 1L, 1L)))
+		list(NULL,
+		     rep.int(c("S", "E", "I", "R", "beta"), c(1L, m, n, 1L, 1L)))
 	x
 }

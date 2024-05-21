@@ -75,7 +75,7 @@ function (r,
 		          sigma = sigma, gamma = gamma, delta = delta,
 		          init = init, m = m, n = n, ...)[, p + 1L]
 	})))
-	oldClass(R) <- c("fastbeta.bootstrap", oldClass(series))
+	oldClass(R) <- c("fastbeta.bootstrap", "mts", "ts", "matrix", "array")
 	tsp(R) <- tsp(series)
 	R
 }

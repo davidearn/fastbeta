@@ -3,7 +3,7 @@ function (length.out = 1L,
           beta, nu, mu, sigma = gamma, gamma = 1, delta = 0,
           init, m = length(init) - n - 2L, n = 1L,
           stochastic = TRUE, prob = 1, delay = 1,
-          useCompiled = TRUE, ...)
+          aggregate = FALSE, useCompiled = TRUE, ...)
 {
 	stopifnot(requireNamespace(if (stochastic) "adaptivetau" else "deSolve"),
 	          is.integer(length.out) && length(length.out) == 1L && length.out >= 1L,
@@ -314,9 +314,13 @@ function (length.out = 1L,
 		}
 	}
 
-	nms <- rep.int(c("S", "E", "I", "R", "Z", "B", "Z.obs"),
-	               c(1L, m, n, 1L, 1L, 1L, if (doObs) 1L else 0L))
-	ts(X, start = 0, names = nms)
+	oldClass(X) <- c("mts", "ts", "matrix", "array")
+	tsp(X) <- c(0, length.out - 1, 1)
+	dimnames(X) <-
+		list(NULL,
+		     rep.int(c("S", "E", "I", "R", "Z", "B", "Z.obs"),
+		             c(1L, m, n, 1L, 1L, 1L, if (doObs) 1L else 0L)))
+	if (aggregate) seir.aggregate(X, m, n) else X
 }
 
 seir.R0 <-
@@ -352,12 +356,32 @@ function (beta, nu, mu, sigma, gamma, delta, m = 0L, n = 1L)
 	ans
 }
 
+seir.aggregate <-
+function (x, m, n)
+{
+	if (m <= 1L && n <= 1L)
+		x
+	else if (m == 0L) {
+		y <- x[, c(1L, 2L, (n + 2L):ncol(x))]
+		y[, 2L] <- rowSums(x[, 2L:(n + 1L)])
+		y
+	}
+	else {
+		y <- x[, c(1L, 2L, m + 2L, (m + n + 2L):ncol(x))]
+		if (m > 1L)
+			y[, 2L] <- rowSums(x[,      2L :(m     + 1L)])
+		if (n > 1L)
+			y[, 3L] <- rowSums(x[, (m + 2L):(m + n + 1L)])
+		y
+	}
+}
+
 sir <-
 function (length.out = 1L,
           beta, nu, mu, gamma = 1, delta = 0,
           init, n = 1L,
           stochastic = TRUE, prob = 1, delay = 1,
-          useCompiled = TRUE, ...)
+          aggregate = FALSE, useCompiled = TRUE, ...)
 {
 	if (any(...names() == "m"))
 		stop(gettextf("call '%s', not '%s', when setting '%s'",

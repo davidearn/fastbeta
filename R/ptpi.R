@@ -54,7 +54,7 @@ function (series,
 	             a, b, tol, iter.max, backcalc, complete)
 	names(ans[["value"]]) <- rep.int(c("S", "E", "I", "R"), c(1L, m, n, 1L))
 	if (complete) {
-		oldClass(ans[["x"]]) <- oldClass(series)
+		oldClass(ans[["x"]]) <- c("mts", "ts", "array")
 		tsp(ans[["x"]]) <- c(tsp[1L] + c(a, b - 1L) / tsp[3L], tsp[3L])
 		dimnames(ans[["x"]]) <- list(NULL, names(ans[["value"]]), NULL)
 	}

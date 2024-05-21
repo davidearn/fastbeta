@@ -15,7 +15,7 @@ seir(length.out = 1L,
      beta, nu, mu, sigma = gamma, gamma = 1, delta = 0,
      init, m = length(init) - n - 2L, n = 1L,
      stochastic = TRUE, prob = 1, delay = 1,
-     useCompiled = TRUE, \dots)
+     aggregate = FALSE, useCompiled = TRUE, \dots)
 
 ## A basic wrapper for the 'm = 0L' case:
 
@@ -23,7 +23,7 @@ seir(length.out = 1L,
      beta, nu, mu, gamma = 1, delta = 0,
      init, n = 1L,
      stochastic = TRUE, prob = 1, delay = 1,
-     useCompiled = TRUE, \dots)
+     aggregate = FALSE, useCompiled = TRUE, \dots)
 }
 \arguments{
 \item{length.out}{
@@ -56,6 +56,9 @@ seir(length.out = 1L,
   probability that an infection during interval \code{j} is observed
   during interval \code{j+i-1}, given that it is eventually observed.
   \code{delay} need not sum to 1 but must not sum to 0.}
+\item{aggregate}{
+  a logical indicating if latent and infectious compartments should be
+  aggregated.}
 \item{useCompiled}{
   a logical indicating if derivatives should be computed by compiled
   \proglang{C} functions rather than by \R{} functions (which \emph{may}
