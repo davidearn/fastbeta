@@ -171,7 +171,7 @@ X <- do.call(fastbeta, args)
 str(X)
 plot(X)
 
-plot(X[, "beta"], ylab = "transmission rate")
+plot(X[, "beta"], ylab = "Transmission rate")
 lines(a[["beta"]](time(X)), col = "red") # the "truth"
 
 })

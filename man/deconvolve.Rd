@@ -93,13 +93,13 @@ matplot(-(d - 1L):n,
         type = c("p", "p", "p", "l"),
         col = c(1L, 1L, 2L, 4L), pch = c(16L, 1L, 16L, NA),
         lty = c(0L, 0L, 0L, 1L), lwd = c(NA, NA, NA, 3L),
-        xlab = "time", ylab = "count")
+        xlab = "Time", ylab = "Count")
 legend("topleft", NULL,
        c("actual", "actual+delay", "actual+delay+deconvolution", "p*h"),
        col = c(1L, 1L, 2L, 4L), pch = c(16L, 1L, 16L, NA),
        lty = c(0L, 0L, 0L, 1L), lwd = c(NA, NA, NA, 3L),
        bty = "n")
 
-plot(0L:D1[["iter"]], D1[["chisq"]], xlab = "iterations", ylab = quote(chi^2))
+plot(0L:D1[["iter"]], D1[["chisq"]], xlab = "Iterations", ylab = quote(chi^2))
 abline(h = 1, lty = 2L)
 }

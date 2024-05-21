@@ -199,7 +199,7 @@ plot(window(Y, start = tsp(Y)[1L] + length(delay) / tsp(Y)[3L]),
      ##        ^^^^^
      ## discards points showing edge effects due to 'delay'
      ##
-     plot.type = "single", col = seq_len(r), ylab = "case reports")
+     plot.type = "single", col = seq_len(r), ylab = "Case reports")
 
 })
 }
