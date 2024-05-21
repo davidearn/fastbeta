@@ -132,7 +132,7 @@ function (length.out = 1L,
 			}
 		}
 
-		X. <- adaptivetau::ssa.adaptivetau(
+		x. <- adaptivetau::ssa.adaptivetau(
 			init.values  = init.,
 			transitions  = tran,
 			rateFunc     = ff,
@@ -141,9 +141,9 @@ function (length.out = 1L,
 			jacobianFunc = Df,
 			tl.params    = tl.params)
 
-		D. <- dim(X.)
-		i <- D.[1L] - match(seq.int(0L, length.out = length.out),
-		                    as.integer(ceiling(X.[D.[1L]:1L, 1L]))) + 1L
+		d. <- dim(x.)
+		i <- d.[1L] - match(seq.int(0L, length.out = length.out),
+		                    as.integer(ceiling(x.[d.[1L]:1L, 1L]))) + 1L
 		if (anyNA(i)) {
 			## tl.params[["maxtau"]] constrains leaps but not steps => LOCF
 			i[is.na(i)] <- 0L
@@ -153,7 +153,7 @@ function (length.out = 1L,
 			ik[w] <- ik[w - 1L]
 			i <- rep.int(ik, k - c(0L, k[-length(k)]))
 		}
-		X <- X.[i, -1L, drop = FALSE] # discarding time
+		x <- x.[i, -1L, drop = FALSE] # discarding time
 
 	}
 	else {
@@ -249,7 +249,7 @@ function (length.out = 1L,
 			}
 		}
 
-		X. <- deSolve::lsoda(
+		x. <- deSolve::lsoda(
 			y        = init.,
 			times    = seq.int(0, length.out = length.out),
 			func     = gg,
@@ -263,64 +263,64 @@ function (length.out = 1L,
 			initpar  = NULL,
 			...)
 
-		X. <- X.[, -1L, drop = FALSE]
-		X.[, 2L:p] <- exp(X.[, 2L:p])
-		D. <- dim(X.)
-		X <-
-			if (D.[1L] < length.out)
+		x. <- x.[, -1L, drop = FALSE]
+		x.[, 2L:p] <- exp(x.[, 2L:p])
+		d. <- dim(x.)
+		x <-
+			if (d.[1L] < length.out)
 				## not seen, but help("lsoda") says that it is possible
-				rbind(X., matrix(NaN, length.out - D.[1L], D.[2L]),
+				rbind(x., matrix(NaN, length.out - d.[1L], d.[2L]),
 				      deparse.level = 0L)
-			else X.
+			else x.
 
 	}
 
 	if (length.out > 1L) {
 	head <- 1L:(length.out - 1L)
 	tail <- 2L:length.out
-	X[tail, p + 1L:2L] <- X[tail, p + 1L:2L] - X[head, p + 1L:2L]
+	x[tail, p + 1L:2L] <- x[tail, p + 1L:2L] - x[head, p + 1L:2L]
 	}
-	X[  1L, p + 1L:2L] <- NA_real_
+	x[  1L, p + 1L:2L] <- NA_real_
 
 	m.p <- missing(prob)
 	m.d <- missing(delay)
 	if (doObs <- !(m.p && m.d)) {
-		X <- cbind(X, NA_real_, deparse.level = 0L)
+		x <- cbind(x, NA_real_, deparse.level = 0L)
 		if (length.out > 1L) {
-		Z <- X[tail, p + 1L]
+		z <- x[tail, p + 1L]
 		if (stochastic) {
-			Z <- as.integer(Z)
+			z <- as.integer(z)
 			if (!m.p)
-				Z <- rbinom(length.out - 1L, Z, prob)
+				z <- rbinom(length.out - 1L, z, prob)
 			if (!m.d)
 				## FIXME? 'rmultinom' is more efficient, but not vectorized ...
-				Z <- tabulate(rep.int(seq_len(length.out - 1L), Z) +
+				z <- tabulate(rep.int(seq_len(length.out - 1L), z) +
 				              sample(seq.int(0L, length.out = length(delay)),
-				                     size = sum(Z),
+				                     size = sum(z),
 				                     replace = TRUE,
 				                     prob = delay),
 				              length.out - 1L)
 		}
 		else {
 			if (!m.p)
-				Z <- Z * prob
+				z <- z * prob
 			if (!m.d) {
 				d <- length(delay) - 1L
-				Z <- filter(c(double(d), Z), delay / sum(delay),
+				z <- filter(c(double(d), z), delay / sum(delay),
 				            sides = 1)[(d + 1L):(d + length.out - 1L)]
 			}
 		}
-		X[tail, p + 3L] <- Z
+		x[tail, p + 3L] <- z
 		}
 	}
 
-	oldClass(X) <- c("mts", "ts", "matrix", "array")
-	tsp(X) <- c(0, length.out - 1, 1)
-	dimnames(X) <-
+	oldClass(x) <- c("mts", "ts", "matrix", "array")
+	tsp(x) <- c(0, length.out - 1, 1)
+	dimnames(x) <-
 		list(NULL,
 		     rep.int(c("S", "E", "I", "R", "Z", "B", "Z.obs"),
 		             c(1L, m, n, 1L, 1L, 1L, if (doObs) 1L else 0L)))
-	if (aggregate) seir.aggregate(X, m, n) else X
+	if (aggregate) seir.aggregate(x, m, n) else x
 }
 
 seir.R0 <-
