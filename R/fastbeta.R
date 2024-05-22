@@ -220,8 +220,8 @@ function (pos, series, sigma = gamma, gamma = 1, delta = 0, m = 1L, n = 1L)
 	r.1 <- b / (1 + mu.t + a)
 
 	## L := [1, 0; L0, L1]
-	## x := [1; E; I; R; S]
-	## iterate x = L * x = L0 + L1 * [E; I; R; S]
+	## y := [1; E; I; R; S]
+	## iterate y = L * y = L0 + L1 * [E; I; R; S]
 
 	L <- matrix(0, p + 1L, p + 1L)
 	L[1L] <- 1

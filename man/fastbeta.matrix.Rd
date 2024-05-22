@@ -4,10 +4,10 @@
 \description{
 Calculates the coefficient matrix corresponding to one step of the
 iteration carried out by \code{\link{fastbeta}}:
-\preformatted{x <- c(1, E, I, R, S)
+\preformatted{y <- c(1, E, I, R, S)
 for (pos in seq_len(nrow(series) - 1L)) {
 	L <- fastbeta.matrix(pos, series, ...)
-	x <- L \%*\% x
+	y <- L \%*\% y
 }
 }
 }
@@ -48,7 +48,7 @@ library(utils, pos = "package:base", verbose = FALSE)
 if (requireNamespace("adaptivetau")) withAutoprint({
 
 data(seir.ts02, package = "fastbeta")
-a <- attributes(seir.ts02)
+a <- attributes(seir.ts02); p <- length(a[["init"]])
 str(seir.ts02)
 plot(seir.ts02)
 
@@ -57,6 +57,15 @@ plot(seir.ts02)
 series <- cbind(seir.ts02[, c("Z", "B")], mu = a[["mu"]](0))
 colnames(series) <- c("Z", "B", "mu") # FIXME: stats:::cbind.ts mangles dimnames
 
+args <- c(list(series = series),
+          a[c("sigma", "gamma", "delta", "init", "m", "n")])
+str(args)
+
+X <- unclass(do.call(fastbeta, args))[, seq_len(p)]
+colnames(X)
+Y <- Y. <- cbind(1, X[, c(2L:p, 1L)], deparse.level = 2L)
+colnames(Y)
+
 args <- c(list(pos = 1L, series = series),
           a[c("sigma", "gamma", "delta", "m", "n")])
 str(args)
@@ -64,6 +73,13 @@ str(args)
 L <- do.call(fastbeta.matrix, args)
 str(L)
 symnum(L != 0)
+
+for (pos in seq_len(nrow(series) - 1L)) {
+    args[["pos"]] <- pos
+    L. <- do.call(fastbeta.matrix, args)
+    Y.[pos + 1L, ] <- L. \%*\% Y.[pos, ]
+}
+stopifnot(all.equal(Y, Y.))
 
 })
 }
