@@ -29,7 +29,7 @@ set.seed(0L, "default", "default", "default")
 X <- fastbeta::seir(length.out,
                     beta, nu, mu,
                     sigma, gamma, delta,
-                    init, m, n,
+                    m, n, init,
                     stochastic = stochastic,
                     prob = prob, delay = delay,
                     epsilon = 0.002)
@@ -41,7 +41,7 @@ assign(".Random.seed", .R.s, envir = globalenv())
 structure(X,
           beta = beta, nu = nu, mu = mu,
           sigma = sigma, gamma = gamma, delta = delta,
-          init = X[1L, seq_len(m + n + 2L)], m = m, n = n,
+          m = m, n = n, init = X[1L, seq_len(m + n + 2L)],
           stochastic = stochastic,
           prob = prob, delay = delay)
 

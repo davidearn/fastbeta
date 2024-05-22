@@ -8,7 +8,7 @@ and other data.
 }
 \usage{
 fastbeta(series, sigma = gamma, gamma = 1, delta = 0,
-         init, m = length(init) - n - 2L, n = 1L, \dots)
+         m = length(init) - n - 2L, n = 1L, init, \dots)
 }
 \arguments{
 \item{series}{
@@ -20,13 +20,13 @@ fastbeta(series, sigma = gamma, gamma = 1, delta = 0,
   non-negative numbers.  \code{m*sigma}, \code{n*gamma}, and
   \code{delta} are the rates of removal from each latent, infectious,
   and recovered compartment.}
-\item{init}{
-  a numeric vector of length \code{1+m+n+1} giving an initial state with
-  compartments ordered as \eqn{(S, E, I, R)}{c(S, E, I, R)}.}
 \item{m}{
   a non-negative integer indicating a number of latent stages.}
 \item{n}{
   a positive integer indicating a number of infectious stages.}
+\item{init}{
+  a numeric vector of length \code{1+m+n+1} giving an initial state with
+  compartments ordered as \eqn{(S, E, I, R)}{c(S, E, I, R)}.}
 \item{\dots}{
   optional arguments passed to \code{\link{deconvolve}}, if the first
   column of \code{series} represents \emph{observed} incidence rather
@@ -164,7 +164,7 @@ series <- cbind(seir.ts02[, c("Z", "B")], mu = a[["mu"]](0))
 colnames(series) <- c("Z", "B", "mu") # FIXME: stats:::cbind.ts mangles dimnames
 
 args <- c(list(series = series),
-          a[c("sigma", "gamma", "delta", "init", "m", "n")])
+          a[c("sigma", "gamma", "delta", "m", "n", "init")])
 str(args)
 
 X <- do.call(fastbeta, args)

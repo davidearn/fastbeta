@@ -22,6 +22,13 @@
       coefficient matrix.
     }
   }
+  \subsection{SIGNIFICANT USER-VISIBLE CHANGES}{
+    \itemize{
+      \item Formal argument \code{init} of \code{fastbeta},
+      \code{fastbeta.bootstrap}, \code{ptpi}, and \code{seir} is
+      repositioned.
+    }
+  }
 }
 
 \section{Changes in version 0.3.0 (2024-05-17)}{

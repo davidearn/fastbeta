@@ -11,7 +11,7 @@ interpret with care.
 }
 \usage{
 ptpi(series, sigma = gamma, gamma = 1, delta = 0,
-     init, m = length(init) - n - 2L, n = 1L,
+     m = length(init) - n - 2L, n = 1L, init,
      start = tsp(series)[1L], end = tsp(series)[2L],
      tol = 1e-03, iter.max = 32L,
      backcalc = FALSE, complete = FALSE, \dots)
@@ -26,13 +26,13 @@ ptpi(series, sigma = gamma, gamma = 1, delta = 0,
   non-negative numbers.  \code{m*sigma}, \code{n*gamma}, and
   \code{delta} are the rates of removal from each latent, infectious,
   and recovered compartment.}
-\item{init}{
-  a numeric vector of length \code{1+m+n+1} giving an initial guess for
-  the state at time \code{start}.}
 \item{m}{
   a non-negative integer indicating a number of latent stages.}
 \item{n}{
   a positive integer indicating a number of infectious stages.}
+\item{init}{
+  a numeric vector of length \code{1+m+n+1} giving an initial guess for
+  the state at time \code{start}.}
 \item{start, end}{
   start and end times for the iteration, whose difference should be
   approximately equal to an integer number of periods.  One often
@@ -78,8 +78,8 @@ algorithm can be expressed in \R{} code as:
 diff <- Inf; iter <- 0L
 while (diff > tol && iter < iter.max) {
     init. <- init
-    init <- fastbeta(w, sigma, gamma, delta, init, m, n)[i, j]
-	diff <- sqrt(sum((init - init.)^2) / sum(init.^2))
+    init <- fastbeta(w, sigma, gamma, delta, m, n, init)[i, j]
+    diff <- sqrt(sum((init - init.)^2) / sum(init.^2))
     iter <- iter + 1L
 }
 value <- init
@@ -122,7 +122,7 @@ abline(v = c(start, end), lty = 2)
 
 set.seed(0L)
 args <- c(list(series = series),
-          a[c("sigma", "gamma", "delta", "init", "m", "n")],
+          a[c("sigma", "gamma", "delta", "m", "n", "init")],
           list(start = start, end = end, complete = TRUE))
 init <- seir.ts01[which.min(abs(time(seir.ts01) - start)), seq_len(p)]
 args[["init"]] <- init * rlnorm(p, 0, 0.1)

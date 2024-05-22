@@ -24,7 +24,7 @@ delay <- diff(stats::pgamma(0L:8L, 2.5))
 X <- fastbeta::seir(length.out,
                     beta, nu, mu,
                     sigma, gamma, delta,
-                    init, m, n,
+                    m, n, init,
                     stochastic = stochastic,
                     prob = prob, delay = delay, useCompiled = FALSE)
 X <- stats::window(X, start = length.out - 1L - 52L * 5L)
@@ -33,7 +33,7 @@ stats::tsp(X)[1L:2L] <- stats::tsp(X)[1L:2L] - stats::tsp(X)[1L]
 structure(X,
           beta = beta, nu = nu, mu = mu,
           sigma = sigma, gamma = gamma, delta = delta,
-          init = X[1L, seq_len(m + n + 2L)], m = m, n = n,
+          m = m, n = n, init = X[1L, seq_len(m + n + 2L)],
           stochastic = stochastic,
           prob = prob, delay = delay)
 

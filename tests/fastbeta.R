@@ -14,7 +14,7 @@ series <- cbind(seir.ts02[, c("Z.obs", "B")], mu = a[["mu"]](0))
 colnames(series) <- c("Z.obs", "B", "mu")
 
 args <- c(list(series = series),
-          a[c("sigma", "gamma", "delta", "init", "m", "n", "prob", "delay")])
+          a[c("sigma", "gamma", "delta", "m", "n", "init", "prob", "delay")])
 X <- do.call(fastbeta, args)
 str(X)
 

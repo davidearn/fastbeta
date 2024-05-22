@@ -1,6 +1,6 @@
 fastbeta <-
 function (series, sigma = gamma, gamma = 1, delta = 0,
-          init, m = length(init) - n - 2L, n = 1L, ...)
+          m = length(init) - n - 2L, n = 1L, init, ...)
 {
 	stopifnot(is.mts(series),
 	          is.double(series),
@@ -20,7 +20,7 @@ function (series, sigma = gamma, gamma = 1, delta = 0,
 		y <- deconvolve(x = x, ...)[["value"]]
 		series[, 1L] <- y[seq.int(to = length(y), length.out = length(x))]
 	}
-	x <- .Call(R_fastbeta, series, sigma, gamma, delta, init, m, n)
+	x <- .Call(R_fastbeta, series, sigma, gamma, delta, m, n, init)
 	oldClass(x) <- c("mts", "ts", "matrix", "array")
 	tsp(x) <- tsp(series)
 	dimnames(x) <-
@@ -32,7 +32,7 @@ function (series, sigma = gamma, gamma = 1, delta = 0,
 fastbeta.bootstrap <-
 function (r,
           series, sigma = gamma, gamma = 1, delta = 0,
-          init, m = length(init) - n - 2L, n = 1L, ...)
+          m = length(init) - n - 2L, n = 1L, init, ...)
 {
 	stopifnot(is.mts(series),
 	          is.double(series),
@@ -50,7 +50,7 @@ function (r,
 
 	## Filtering out arguments to 'seir'
 	fastbeta. <-
-	function (series, sigma, gamma, delta, init, m, n,
+	function (series, sigma, gamma, delta, m, n, init,
 	          length.out, beta, nu, mu, stochastic, prob, delay,
 	          useCompiled, ...)
 	{
@@ -59,33 +59,33 @@ function (r,
 		m.p <- missing(prob)
 		m.d <- missing(delay)
 		if (m.p && m.d)
-			fastbeta(series, sigma, gamma, delta, init, m, n,
+			fastbeta(series, sigma, gamma, delta, m, n, init,
 			         ...)
 		else if (m.p)
-			fastbeta(series, sigma, gamma, delta, init, m, n,
+			fastbeta(series, sigma, gamma, delta, m, n, init,
 			         delay = delay, ...)
 		else if (m.d)
-			fastbeta(series, sigma, gamma, delta, init, m, n,
+			fastbeta(series, sigma, gamma, delta, m, n, init,
 			         prob = prob, ...)
 		else {
 			if (length(prob) > 1L)
 				prob <- c(rep.int(1, length(delay) - 1L), prob)
-			fastbeta(series, sigma, gamma, delta, init, m, n,
+			fastbeta(series, sigma, gamma, delta, m, n, init,
 			         prob = prob, delay = delay, ...)
 		}
 	}
 
 	## Filtering out arguments to 'fastbeta'
 	seir. <-
-	function (length.out, beta, nu, mu, sigma, gamma, delta, init, m, n,
+	function (length.out, beta, nu, mu, sigma, gamma, delta, m, n, init,
 	          start, tol, iter.max, complete, ...)
-		seir(length.out, beta, nu, mu, sigma, gamma, delta, init, m, n, ...)
+		seir(length.out, beta, nu, mu, sigma, gamma, delta, m, n, init, ...)
 
 	p <- m + n + 2L
 
 	beta. <- fastbeta.(series = series,
 	                   sigma = sigma, gamma = gamma, delta = delta,
-	                   init = init, m = m, n = n, ...)[, p + 1L]
+	                   m = m, n = n, init = init, ...)[, p + 1L]
 	nu. <- series[, 2L] # FIXME? see below
 	mu. <- series[, 3L]
 
@@ -99,12 +99,12 @@ function (r,
 		X <- seir.(length.out = length.out,
 		           beta = beta, nu = nu, mu = mu,
 		           sigma = sigma, gamma = gamma, delta = delta,
-		           init = init, m = m, n = n, ...)
+		           m = m, n = n, init = init, ...)
 		j <- p + if (ncol(X) - p == 2L) 1L:2L else 3L:2L
 		series[, 1L:2L] <<- X[, j]
 		fastbeta.(series = series,
 		          sigma = sigma, gamma = gamma, delta = delta,
-		          init = init, m = m, n = n, ...)[, p + 1L]
+		          m = m, n = n, init = init, ...)[, p + 1L]
 	})))
 	oldClass(R) <- c("fastbeta.bootstrap", "mts", "ts", "matrix", "array")
 	tsp(R) <- tsp(series)

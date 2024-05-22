@@ -17,7 +17,7 @@ start <- 23; end <- 231
 
 set.seed(0L)
 args <- c(list(series = series),
-          a[c("sigma", "gamma", "delta", "init", "m", "n")],
+          a[c("sigma", "gamma", "delta", "m", "n", "init")],
           list(start = start, end = end))
 init <- seir.ts01[which.min(abs(time(seir.ts01) - start)), seq_len(p)]
 args[["init"]] <- init * rlnorm(p, 0, 0.1)

@@ -4,9 +4,9 @@
 #include <R_ext/RS.h>
 
 static
-void ptpi(const double *series,
+void ptpi(const double *series, int lengthOut,
           double sigma, double gamma, double delta,
-          const double *init, int m, int n, int lengthOut,
+          int m, int n, const double *init,
           int a, int b, double tol, int iterMax, int backcalc,
           double *value, double *diff, int *iter,
           double *x)
@@ -165,7 +165,7 @@ void ptpi(const double *series,
 }
 
 SEXP R_ptpi(SEXP s_series, SEXP s_sigma, SEXP s_gamma, SEXP s_delta,
-            SEXP s_init, SEXP s_m, SEXP s_n,
+            SEXP s_m, SEXP s_n, SEXP s_init,
             SEXP s_a, SEXP s_b, SEXP s_tol, SEXP s_iterMax,
             SEXP s_backcalc, SEXP s_complete)
 {
@@ -202,9 +202,9 @@ SEXP R_ptpi(SEXP s_series, SEXP s_sigma, SEXP s_gamma, SEXP s_delta,
 	SET_VECTOR_ELT(ans, 1, diff);
 	SET_VECTOR_ELT(ans, 2, iter);
 
-	ptpi(REAL(s_series),
+	ptpi(REAL(s_series), lengthOut,
 	     REAL(s_sigma)[0], REAL(s_gamma)[0], REAL(s_delta)[0],
-	     REAL(s_init), m, n, lengthOut,
+	     m, n, REAL(s_init),
 	     a, b, REAL(s_tol)[0], iterMax, LOGICAL(s_backcalc)[0],
 	     REAL(value), REAL(diff), INTEGER(iter), (complete) ? REAL(x) : NULL);
 

@@ -13,7 +13,7 @@ then an error is signaled.
 \usage{
 seir(length.out = 1L,
      beta, nu, mu, sigma = gamma, gamma = 1, delta = 0,
-     init, m = length(init) - n - 2L, n = 1L,
+     m = length(init) - n - 2L, n = 1L, init,
      stochastic = TRUE, prob = 1, delay = 1,
      aggregate = FALSE, useCompiled = TRUE, \dots)
 
@@ -21,7 +21,7 @@ seir(length.out = 1L,
 
  sir(length.out = 1L,
      beta, nu, mu, gamma = 1, delta = 0,
-     init, n = 1L,
+     n = 1L, init,
      stochastic = TRUE, prob = 1, delay = 1,
      aggregate = FALSE, useCompiled = TRUE, \dots)
 }
@@ -37,13 +37,13 @@ seir(length.out = 1L,
   non-negative numbers.  \code{m*sigma}, \code{n*gamma}, and
   \code{delta} are the rates of removal from each latent, infectious,
   and recovered compartment.}
-\item{init}{
-  a numeric vector of length \code{1+m+n+1} giving an initial state with
-  compartments ordered as \eqn{(S, E, I, R)}{c(S, E, I, R)}.}
 \item{m}{
   a non-negative integer indicating a number of latent stages.}
 \item{n}{
   a positive integer indicating a number of infectious stages.}
+\item{init}{
+  a numeric vector of length \code{1+m+n+1} giving an initial state with
+  compartments ordered as \eqn{(S, E, I, R)}{c(S, E, I, R)}.}
 \item{stochastic}{
   a logical indicating if the simulation should be stochastic; see
   \sQuote{Details}.}
@@ -182,9 +182,9 @@ prob <- 0.1
 delay <- diff(pgamma(0:8, 2.5))
 
 set.seed(0L)
-X <- seir(length.out, beta, nu, mu, sigma, gamma, delta, init,
+X <- seir(length.out, beta, nu, mu, sigma, gamma, delta, init = init,
           prob = prob, delay = delay, epsilon = 0.002)
-##                                    ^^^^^^^
+##                                                 ^^^^^^^
 ## default epsilon = 0.05 allows too big leaps => spurious noise
 ##
 str(X)
@@ -192,7 +192,7 @@ plot(X)
 
 r <- 10L
 Y <- do.call(cbind, replicate(r, simplify = FALSE,
-	seir(length.out, beta, nu, mu, sigma, gamma, delta, init,
+	seir(length.out, beta, nu, mu, sigma, gamma, delta, init = init,
 	     prob = prob, delay = delay, epsilon = 0.002)[, "Z.obs"]))
 str(Y) # FIXME: stats:::cbind.ts mangles dimnames
 plot(window(Y, start = tsp(Y)[1L] + length(delay) / tsp(Y)[3L]),

@@ -1,7 +1,7 @@
 seir <-
 function (length.out = 1L,
           beta, nu, mu, sigma = gamma, gamma = 1, delta = 0,
-          init, m = length(init) - n - 2L, n = 1L,
+          m = length(init) - n - 2L, n = 1L, init,
           stochastic = TRUE, prob = 1, delay = 1,
           aggregate = FALSE, useCompiled = TRUE, ...)
 {
@@ -379,7 +379,7 @@ function (x, m, n)
 sir <-
 function (length.out = 1L,
           beta, nu, mu, gamma = 1, delta = 0,
-          init, n = 1L,
+          n = 1L, init,
           stochastic = TRUE, prob = 1, delay = 1,
           aggregate = FALSE, useCompiled = TRUE, ...)
 {
