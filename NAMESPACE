@@ -1,5 +1,6 @@
 useDynLib(fastbeta, .registration = TRUE)
-export(deconvolve, fastbeta, fastbeta.bootstrap, ptpi, seir, sir)
+export(deconvolve, fastbeta, fastbeta.bootstrap, fastbeta.matrix, ptpi,
+       seir, sir)
 S3method(plot, fastbeta.bootstrap)
 importFrom(grDevices, dev.flush, dev.hold)
 importFrom(graphics, lines, par, polygon)

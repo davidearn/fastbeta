@@ -239,5 +239,7 @@ function (pos, series, sigma = gamma, gamma = 1, delta = 0, m = 1L, n = 1L)
 	for (i in 2L:p)
 		L[i + 1L, ] <- tmp <- L[i + 1L, ] + r.1[i] * tmp
 
+	nms <- rep.int(c("1", "E", "I", "R", "S"), c(1L, m, n, 1L, 1L))
+	dimnames(L) <- list(nms, nms)
 	L
 }

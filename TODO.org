@@ -2,4 +2,4 @@
 
 ** DONE 'seir' with option to give rowSums(x[, colnames(x) == "E"]), ditto "I"
 
-** TODO export, document 'fastbeta.matrix'
+** DONE export, document 'fastbeta.matrix'

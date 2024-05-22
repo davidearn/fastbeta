@@ -1,7 +1,7 @@
 \name{NEWS}
 \title{News for \R{} Package \pkg{fastbeta}}
 
-\section{Changes in version 0.3.1 (2024-05-21)}{
+\section{Changes in version 0.3.1 (2024-05-22)}{
   \subsection{INSTALLATION}{
     \itemize{
       \item .
@@ -17,6 +17,9 @@
       \item \code{seir} gains logical argument \code{aggregate}
       indicating whether latent and infectious compartments should be
       aggregated.
+
+      \item \code{fastbeta.matrix} for calculating lower triangular
+      coefficient matrix.
     }
   }
 }
