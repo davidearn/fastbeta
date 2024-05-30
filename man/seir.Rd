@@ -150,7 +150,7 @@ samples taken with probabilities \code{prob} over future observation
 intervals according to multinomial samples taken with probabilities
 \code{delay}.
 }
-\seealso{\code{\link{seir.library}}.}
+\seealso{\code{\link{seir.auxiliary}}, \code{\link{seir.library}}.}
 \references{
 Cao, Y., Gillespie, D. T., & Petzold, L. R. (2007).
 Adaptive explicit-implicit tau-leaping method with

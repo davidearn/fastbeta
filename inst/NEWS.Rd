@@ -19,6 +19,10 @@
       indicating whether latent and infectious compartments should be
       aggregated.
 
+      \item \code{seir.R0}, \code{seir.ee}, and \code{seir.jacobian} for
+      calculating the basic reproduction number, endemic equilibrium,
+      and Jacobian matrix.
+
       \item \code{fastbeta.matrix} for calculating lower triangular
       coefficient matrix.
     }
