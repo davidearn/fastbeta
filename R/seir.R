@@ -126,7 +126,7 @@ function (length.out = 1L,
 				beta <- beta(t)
 				mu   <- mu  (t)
 				D[ 1L] <<- beta * sum(x.I)
-				D[k.0] <<- beta * x.S
+				D[k.0] <<- beta *     x.S
 				D[k.1] <<- mu
 				D
 			}
@@ -201,10 +201,8 @@ function (length.out = 1L,
 			##
 			## where log(.) is suppressed only for pretty printing
 			D <- matrix(0, p + 2L, p + 2L)
-			k.0 <- seq.int(from = (p + 2L) * 2L + 3L, by = p + 3L,
-			               length.out = p - 2L)
-			k.1 <- k.0 - p - 2L
-
+			k.1 <- seq.int(from = p + 5L, by = p + 3L, length.out = p - 2L)
+			k.0 <- k.1 + p + 2L
 			i.1 <- 2L:(p - 1L)
 			i.0 <- 3L:p
 			a.1 <- rep.int(c(sigma, gamma), c(m, n)); a.11 <- a.1[1L]
@@ -214,7 +212,6 @@ function (length.out = 1L,
 			function (t, x, theta)
 			{
 				x.S <- x[i.S]
-				x.E <- x[i.E]
 				x.I <- x[i.I]
 				x.R <- x[i.R]
 				beta <- beta(t)
@@ -324,7 +321,7 @@ function (length.out = 1L,
 }
 
 seir.R0 <-
-function (beta, nu, mu, sigma, gamma, delta, m = 1L, n = 1L)
+function (beta, nu, mu, sigma = gamma, gamma = 1, delta = 0, m = 1L, n = 1L)
 {
 	sigma <- sigma * m
 	gamma <- gamma * n
@@ -334,7 +331,7 @@ function (beta, nu, mu, sigma, gamma, delta, m = 1L, n = 1L)
 }
 
 seir.ee <-
-function (beta, nu, mu, sigma, gamma, delta, m = 1L, n = 1L)
+function (beta, nu, mu, sigma = gamma, gamma = 1, delta = 0, m = 1L, n = 1L)
 {
 	sigma <- sigma * m
 	gamma <- gamma * n
@@ -354,6 +351,34 @@ function (beta, nu, mu, sigma, gamma, delta, m = 1L, n = 1L)
 	}
 	names(ans) <- rep.int(c("S", "E", "I", "R"), c(1L, m, n, 1L))
 	ans
+}
+
+seir.jacobian <-
+function (beta, nu, mu, sigma = gamma, gamma = 1, delta = 0, m = 1L, n = 1L)
+{
+	p <- m + n + 2L
+	nms <- rep.int(c("S", "E", "I", "R"), c(1L, m, n, 1L))
+	sigma <- sigma * m
+	gamma <- gamma * n
+	delta <- delta * 1
+	i.S <- 1L
+	i.E <- seq.int(    2L, length.out = m)
+	i.I <- seq.int(m + 2L, length.out = n)
+	i.R <- p
+	k <- seq.int(from = p + 3L, by = p + 1L, length.out = p - 2L)
+	a <- rep.int(c(sigma, gamma), c(m, n))
+	D <- array(0, c(p, p), list(nms, nms))
+	D[i.S, i.R] <- delta
+	D[k    ] <- a
+	D[k + p] <- -c(a[-1L], delta) - mu
+	rm(a, k, p, nms)
+	function (x)
+	{
+		D[i.S, i.S] <<- -(D[2L, i.S] <<- beta * sum(x[i.I])) - mu
+		D[i.S, i.I] <<- -(D[2L, i.I] <<- beta *     x[i.S] )
+		D[ 2L,  2L] <<- if (m) -sigma - mu else -gamma - mu + beta * x[i.S]
+		D
+	}
 }
 
 seir.aggregate <-
