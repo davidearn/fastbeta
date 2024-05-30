@@ -9,9 +9,12 @@ Calculate the basic reproduction number, endemic equilibrium,
 and Jacobian matrix of the SEIR model without forcing.
 }
 \usage{
-seir.R0      (beta, nu, mu, sigma = gamma, gamma = 1, delta = 0, m = 1L, n = 1L)
-seir.ee      (beta, nu, mu, sigma = gamma, gamma = 1, delta = 0, m = 1L, n = 1L)
-seir.jacobian(beta, nu, mu, sigma = gamma, gamma = 1, delta = 0, m = 1L, n = 1L)
+seir.R0      (beta, nu = 0, mu = 0, sigma = 1, gamma = 1, delta = 0,
+              m = 1L, n = 1L)
+seir.ee      (beta, nu = 0, mu = 0, sigma = 1, gamma = 1, delta = 0,
+              m = 1L, n = 1L)
+seir.jacobian(beta, nu = 0, mu = 0, sigma = 1, gamma = 1, delta = 0,
+              m = 1L, n = 1L)
 }
 \arguments{
 \item{beta, nu, mu, sigma, gamma, delta}{

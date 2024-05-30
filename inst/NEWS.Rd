@@ -19,6 +19,10 @@
       indicating whether latent and infectious compartments should be
       aggregated.
 
+      \item \code{seir} arguments \code{nu} and \code{mu} gain
+      default values.  In both cases, it is \code{function(t) 0},
+      indicating no vital dynamics.
+
       \item \code{seir.R0}, \code{seir.ee}, and \code{seir.jacobian} for
       calculating the basic reproduction number, endemic equilibrium,
       and Jacobian matrix.
@@ -32,6 +36,11 @@
       \item Formal argument \code{init} of \code{fastbeta},
       \code{fastbeta.bootstrap}, \code{ptpi}, and \code{seir} is
       repositioned.
+
+      \item Formal arguments \code{sigma} and \code{m} of
+      \code{fastbeta}, \code{fastbeta.bootstrap}, \code{ptpi}, and
+      \code{seir} have constant default values (\code{sigma = 1},
+      \code{m = 1L}) not depending on the values of other arguments.
     }
   }
 }

@@ -1,6 +1,6 @@
 fastbeta <-
-function (series, sigma = gamma, gamma = 1, delta = 0,
-          m = length(init) - n - 2L, n = 1L, init, ...)
+function (series, sigma = 1, gamma = 1, delta = 0,
+          m = 1L, n = 1L, init, ...)
 {
 	stopifnot(is.mts(series),
 	          is.double(series),
@@ -31,8 +31,8 @@ function (series, sigma = gamma, gamma = 1, delta = 0,
 
 fastbeta.bootstrap <-
 function (r,
-          series, sigma = gamma, gamma = 1, delta = 0,
-          m = length(init) - n - 2L, n = 1L, init, ...)
+          series, sigma = 1, gamma = 1, delta = 0,
+          m = 1L, n = 1L, init, ...)
 {
 	stopifnot(is.mts(series),
 	          is.double(series),
@@ -200,7 +200,9 @@ if (FALSE) {
 }
 
 fastbeta.matrix <-
-function (pos, series, sigma = gamma, gamma = 1, delta = 0, m = 1L, n = 1L)
+function (pos,
+          series, sigma = 1, gamma = 1, delta = 0,
+          m = 1L, n = 1L)
 {
 	s <- pos
 	t <- pos + 1L

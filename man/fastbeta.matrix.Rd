@@ -13,7 +13,7 @@ for (pos in seq_len(nrow(series) - 1L)) {
 }
 \usage{
 fastbeta.matrix(pos,
-                series, sigma = gamma, gamma = 1, delta = 0,
+                series, sigma = 1, gamma = 1, delta = 0,
                 m = 1L, n = 1L)
 }
 \arguments{
@@ -34,7 +34,7 @@ fastbeta.matrix(pos,
   a positive integer indicating a number of infectious stages.}
 }
 \value{
-A lower triangular matrix of size \code{m + n + 3}.
+A lower triangular matrix of size \code{1+m+n+1+1}.
 }
 %\details{}
 %\seealso{}

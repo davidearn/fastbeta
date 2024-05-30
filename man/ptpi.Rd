@@ -10,8 +10,8 @@ admitting a locally stable, \eqn{T}-periodic attractor.  Hence do
 interpret with care.
 }
 \usage{
-ptpi(series, sigma = gamma, gamma = 1, delta = 0,
-     m = length(init) - n - 2L, n = 1L, init,
+ptpi(series, sigma = 1, gamma = 1, delta = 0,
+     m = 1L, n = 1L, init,
      start = tsp(series)[1L], end = tsp(series)[2L],
      tol = 1e-03, iter.max = 32L,
      backcalc = FALSE, complete = FALSE, \dots)

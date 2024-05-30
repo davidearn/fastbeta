@@ -12,15 +12,17 @@ then an error is signaled.
 }
 \usage{
 seir(length.out = 1L,
-     beta, nu, mu, sigma = gamma, gamma = 1, delta = 0,
-     m = length(init) - n - 2L, n = 1L, init,
+     beta, nu = function(t) 0, mu = function(t) 0,
+     sigma = 1, gamma = 1, delta = 0,
+     m = 1L, n = 1L, init,
      stochastic = TRUE, prob = 1, delay = 1,
      aggregate = FALSE, useCompiled = TRUE, \dots)
 
-## A basic wrapper for the 'm = 0L' case:
+## A basic wrapper for the m=0L case:
 
  sir(length.out = 1L,
-     beta, nu, mu, gamma = 1, delta = 0,
+     beta, nu = function(t) 0, mu = function(t) 0,
+     gamma = 1, delta = 0,
      n = 1L, init,
      stochastic = TRUE, prob = 1, delay = 1,
      aggregate = FALSE, useCompiled = TRUE, \dots)

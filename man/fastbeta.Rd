@@ -7,8 +7,8 @@ transmission rate from an equally spaced disease incidence time series
 and other data.
 }
 \usage{
-fastbeta(series, sigma = gamma, gamma = 1, delta = 0,
-         m = length(init) - n - 2L, n = 1L, init, \dots)
+fastbeta(series, sigma = 1, gamma = 1, delta = 0,
+         m = 1L, n = 1L, init, \dots)
 }
 \arguments{
 \item{series}{

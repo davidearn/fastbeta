@@ -1,7 +1,8 @@
 seir <-
 function (length.out = 1L,
-          beta, nu, mu, sigma = gamma, gamma = 1, delta = 0,
-          m = length(init) - n - 2L, n = 1L, init,
+          beta, nu = function(t) 0, mu = function(t) 0,
+          sigma = 1, gamma = 1, delta = 0,
+          m = 1L, n = 1L, init,
           stochastic = TRUE, prob = 1, delay = 1,
           aggregate = FALSE, useCompiled = TRUE, ...)
 {
@@ -321,7 +322,8 @@ function (length.out = 1L,
 }
 
 seir.R0 <-
-function (beta, nu, mu, sigma = gamma, gamma = 1, delta = 0, m = 1L, n = 1L)
+function (beta, nu = 0, mu = 0, sigma = 1, gamma = 1, delta = 0,
+          m = 1L, n = 1L)
 {
 	sigma <- sigma * m
 	gamma <- gamma * n
@@ -331,7 +333,8 @@ function (beta, nu, mu, sigma = gamma, gamma = 1, delta = 0, m = 1L, n = 1L)
 }
 
 seir.ee <-
-function (beta, nu, mu, sigma = gamma, gamma = 1, delta = 0, m = 1L, n = 1L)
+function (beta, nu = 0, mu = 0, sigma = 1, gamma = 1, delta = 0,
+          m = 1L, n = 1L)
 {
 	sigma <- sigma * m
 	gamma <- gamma * n
@@ -354,7 +357,8 @@ function (beta, nu, mu, sigma = gamma, gamma = 1, delta = 0, m = 1L, n = 1L)
 }
 
 seir.jacobian <-
-function (beta, nu, mu, sigma = gamma, gamma = 1, delta = 0, m = 1L, n = 1L)
+function (beta, nu = 0, mu = 0, sigma = 1, gamma = 1, delta = 0,
+          m = 1L, n = 1L)
 {
 	p <- m + n + 2L
 	nms <- rep.int(c("S", "E", "I", "R"), c(1L, m, n, 1L))
@@ -403,7 +407,8 @@ function (x, m, n)
 
 sir <-
 function (length.out = 1L,
-          beta, nu, mu, gamma = 1, delta = 0,
+          beta, nu = function(t) 0, mu = function(t) 0,
+          gamma = 1, delta = 0,
           n = 1L, init,
           stochastic = TRUE, prob = 1, delay = 1,
           aggregate = FALSE, useCompiled = TRUE, ...)
