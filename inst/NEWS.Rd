@@ -1,7 +1,7 @@
 \name{NEWS}
 \title{News for \R{} Package \pkg{fastbeta}}
 
-\section{Changes in version 0.3.1 (2024-05-22)}{
+\section{Changes in version 0.3.1 (2024-05-30)}{
   \subsection{INSTALLATION}{
     \itemize{
       \item .
@@ -9,7 +9,8 @@
   }
   \subsection{BUG FIXES}{
     \itemize{
-      \item .
+      \item Entry \code{[2, 2]} of the Jacobian matrix constructed by
+      \code{seir(stochastic = FALSE, useCompiled = FALSE)} was wrong.
     }
   }
   \subsection{NEW FEATURES}{

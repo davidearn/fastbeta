@@ -191,7 +191,7 @@ function (length.out = 1L,
 			##
 			##       S I I I I R Z B
 			##     S | | | | | | . .
-			##     I | . | | | . . .
+			##     I | | | | | . . .
 			##     I . | | . . . . .
 			##     I . . | | . . . .
 			##     I . . . | | . . .
@@ -243,7 +243,7 @@ function (length.out = 1L,
 				D[i.S, i.R] <<- delta * exp(x.R)
 				D[ 2L, i.S] <<- beta * s.2
 				D[ 2L, i.I] <<- beta * u.2 * x.S
-				D[ 2L,  2L] <<- if (m) -beta * s.2 else 0
+				D[ 2L,  2L] <<- -beta * (if (m) s.2 else s.2 - 1) * x.S
 				D[k.0] <<- -(D[k.1] <<- a.1 * exp(x[i.1] - x[i.0]))
 				D
 			}
