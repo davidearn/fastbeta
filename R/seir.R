@@ -324,7 +324,7 @@ function (length.out = 1L,
 }
 
 seir.R0 <-
-function (beta, nu, mu, sigma, gamma, delta, m = 0L, n = 1L)
+function (beta, nu, mu, sigma, gamma, delta, m = 1L, n = 1L)
 {
 	sigma <- sigma * m
 	gamma <- gamma * n
@@ -334,7 +334,7 @@ function (beta, nu, mu, sigma, gamma, delta, m = 0L, n = 1L)
 }
 
 seir.ee <-
-function (beta, nu, mu, sigma, gamma, delta, m = 0L, n = 1L)
+function (beta, nu, mu, sigma, gamma, delta, m = 1L, n = 1L)
 {
 	sigma <- sigma * m
 	gamma <- gamma * n
