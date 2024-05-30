@@ -6,8 +6,8 @@ Calculates the coefficient matrix corresponding to one step of the
 iteration carried out by \code{\link{fastbeta}}:
 \preformatted{y <- c(1, E, I, R, S)
 for (pos in seq_len(nrow(series) - 1L)) {
-	L <- fastbeta.matrix(pos, series, ...)
-	y <- L \%*\% y
+    L <- fastbeta.matrix(pos, series, ...)
+    y <- L \%*\% y
 }
 }
 }
