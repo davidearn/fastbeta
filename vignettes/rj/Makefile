@@ -2,13 +2,10 @@
 all : RJwrapper.pdf
 
 RJwrapper.pdf : RJwrapper.tex fastbeta-ms.tex fastbeta-ms.bib
-	pdflatex $<
-	bibtex $(basename $<)
-	pdflatex $<
-	pdflatex $<
+	R --quiet --vanilla -e 'tools::texi2pdf("$<")'
 
 fastbeta-ms.tex : fastbeta-ms.Rnw
-	R --vanilla -e 'Sweave("$<")'
+	R --quiet --vanilla -e 'utils::Sweave("$<")'
 
 .PHONY : clean
 clean :
