@@ -37,7 +37,7 @@ There will likely be several sections, perhaps including code snippets, such as:
 
 This file is only a basic article template. For full details of \emph{The R Journal} style and information on how to prepare your article for submission, see the \href{https://journal.r-project.org/share/author-guide.pdf}{Instructions for Authors}.
 
-\bibliography{RJreferences}
+\bibliography{fastbeta-ms}
 
 \address{Author One\\
   Affiliation\\
