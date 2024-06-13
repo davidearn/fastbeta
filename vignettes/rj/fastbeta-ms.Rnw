@@ -10,6 +10,10 @@ An abstract of less than 150 words.
 
 \section{Section title in sentence case}
 
+<<zzz>>=
+"Hello world!"
+@
+
 Introductory section which may include references in parentheses
 \citep{R}, or cite a reference such as \citet{R} in the text.
 

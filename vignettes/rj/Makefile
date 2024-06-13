@@ -6,6 +6,12 @@ RJwrapper.pdf : RJwrapper.tex fastbeta-ms.tex fastbeta-ms.bib
 
 fastbeta-ms.tex : fastbeta-ms.Rnw
 	R --quiet --vanilla -e 'utils::Sweave("$<")'
+	sed -i '' -e 's/\begin{Schunk}/\begin{example}/g' \
+	          -e 's/\end{Schunk}/\end{example}/g' \
+	          -e '/\begin{Sinput}/d' \
+	          -e '/\end{Sinput}/d' \
+	          -e '/\begin{Soutput}/d' \
+	          -e '/\end{Soutput}/d' $@
 
 .PHONY : clean
 clean :
