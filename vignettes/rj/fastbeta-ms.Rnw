@@ -1,6 +1,6 @@
 % !TeX root = RJwrapper.tex
 \title{Capitalized Title Here}
-\author{by Author One, Author Two and Author Three}
+\author{by Mikael Jagan and David Earn}
 
 \maketitle
 
@@ -43,23 +43,16 @@ This file is only a basic article template. For full details of \emph{The R Jour
 
 \bibliography{fastbeta-ms}
 
-\address{Author One\\
-  Affiliation\\
-  Address\\
-  Country\\
-  (ORCiD if desired)\\
-  \email{author1@work}}
+\address{Mikael Jagan\\
+  McMaster University\\
+  1280 Main Street West, Hamilton, Ontario\\
+  Canada\\
+  0000-0002-3542-2938\\
+  \email{jaganmn@mcmaster.ca}}
 
-\address{Author Two\\
-  Affiliation\\
-  Address\\
-  Country\\
-  (ORCiD if desired)\\
-  \email{author2@work}}
-
-\address{Author Three\\
-  Affiliation\\
-  Address\\
-  Country\\
-  (ORCiD if desired)\\
-  \email{author3@work}}
+\address{David J. D. Earn\\
+  McMaster University\\
+  1280 Main Street West, Hamilton, Ontario\\
+  Canada\\
+  0000-0002-7562-1341\\
+  \email{earn@math.mcmaster.ca}}
