@@ -1,7 +1,7 @@
 \name{NEWS}
 \title{News for \R{} Package \pkg{fastbeta}}
 
-\section{Changes in version 0.3.1 (2024-05-30)}{
+\section{Changes in version 0.3.1 (2024-06-17)}{
   \subsection{INSTALLATION}{
     \itemize{
       \item .
@@ -11,6 +11,12 @@
     \itemize{
       \item Entry \code{[2, 2]} of the Jacobian matrix constructed by
       \code{seir(stochastic = FALSE, useCompiled = FALSE)} was wrong.
+
+      \item \code{seir} handles more comprehensively the situation in
+      which the number of rows of the matrix returned by \pkg{deSolve}
+      function \code{lsoda} is less than \code{length.out}.  It now
+      distinguishes termination due to found roots from termination due
+      to an unsuccessful solver call.
     }
   }
   \subsection{NEW FEATURES}{

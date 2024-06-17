@@ -141,10 +141,10 @@ function (length.out = 1L,
 			tf           = length.out - 1L,
 			jacobianFunc = Df,
 			tl.params    = tl.params)
+		m. <- nrow(x.)
 
-		d. <- dim(x.)
-		i <- d.[1L] - match(seq.int(0L, length.out = length.out),
-		                    as.integer(ceiling(x.[d.[1L]:1L, 1L]))) + 1L
+		i <- m. - match(seq.int(0L, length.out = length.out),
+		                as.integer(ceiling(x.[m.:1L, 1L]))) + 1L
 		if (anyNA(i)) {
 			## tl.params[["maxtau"]] constrains leaps but not steps => LOCF
 			i[is.na(i)] <- 0L
@@ -260,16 +260,16 @@ function (length.out = 1L,
 			initfunc = NULL,
 			initpar  = NULL,
 			...)
+		m. <- nrow(x.)
 
-		x. <- x.[, -1L, drop = FALSE]
-		x.[, 2L:p] <- exp(x.[, 2L:p])
-		d. <- dim(x.)
-		x <-
-			if (d.[1L] < length.out)
-				## not seen, but help("lsoda") says that it is possible
-				rbind(x., matrix(NaN, length.out - d.[1L], d.[2L]),
-				      deparse.level = 0L)
-			else x.
+		if (m. < length.out) {
+			if (attr(x., "istate")[1L] < 0L)
+				warning("integration terminated due to unsuccessful solver call")
+			length.out <- m.
+		}
+
+		x <- x.[, -1L, drop = FALSE]
+		x[, 2L:p] <- exp(x[, 2L:p])
 
 	}
 
@@ -312,13 +312,24 @@ function (length.out = 1L,
 		}
 	}
 
+	if (aggregate) {
+		x <- seir.aggregate(x, m, n)
+		m <- 1L
+		n <- 1L
+	}
+
+	if (!stochastic &&
+	    !is.null((function(rootfunc = NULL, ...) rootfunc)(...)))
+		for (nm in grep("root", names(attributes(x.)), value = TRUE))
+			attr(x, nm) <- attr(x., nm)
+
 	oldClass(x) <- c("mts", "ts", "matrix", "array")
 	tsp(x) <- c(0, length.out - 1, 1)
 	dimnames(x) <-
 		list(NULL,
 		     rep.int(c("S", "E", "I", "R", "Z", "B", "Z.obs"),
 		             c(1L, m, n, 1L, 1L, 1L, if (doObs) 1L else 0L)))
-	if (aggregate) seir.aggregate(x, m, n) else x
+	x
 }
 
 seir.R0 <-

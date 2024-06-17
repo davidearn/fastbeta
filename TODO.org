@@ -4,4 +4,4 @@
 
 ** DONE export, document 'fastbeta.matrix'
 
-** TODO 'seir' with option to *not* complete with rows of NaN
+** DONE 'seir' handling early termination due to root finding
