@@ -1,16 +1,16 @@
 R := R --quiet --vanilla
-
-  name := fastbeta-ms
-rjname := RJwrapper
+ms := fastbeta-ms
+main := RJwrapper
 
 .PHONY : all
-all : $(rjname).pdf
+all : $(ms).pdf
 
-$(rjname).pdf : $(rjname).tex $(name).tex $(name).bib
-	$(R) -e 'tools::texi2pdf("$<")'
+$(ms).pdf : $(main).tex $(ms).tex $(ms).bib
+	$(R) -e 'tools::texi2pdf("$(main).tex")'
+	cp $(main).pdf $(ms).pdf
 
-$(name).tex : $(name).Rnw
-	$(R) -e 'utils::Sweave("$<")'
+$(ms).tex : $(ms).Rnw
+	$(R) -e 'utils::Sweave("$(ms).Rnw")'
 	sed \
 	    -i '' \
 	    -e 's/\begin{Schunk}/\begin{example}/g' \
@@ -23,9 +23,9 @@ $(name).tex : $(name).Rnw
 
 .PHONY : clean
 clean :
-	rm -f $(name).tex
+	rm -f $(ms).tex
 	rm -f *~ .*~ *.aux *.bbl *.brf *.blg *.log *.out
 
 .PHONY : distclean
 distclean : clean
-	rm -f $(rjname).pdf
+	rm -f $(ms).pdf $(main).pdf
