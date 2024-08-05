@@ -1,5 +1,5 @@
 #include <math.h> /* sqrt */
-#include <string.h> /* memcpy */
+#include <string.h> /* size_t, ptrdiff_t, memcpy */
 #include <Rinternals.h>
 #include <R_ext/RS.h>
 
@@ -11,7 +11,7 @@ void ptpi(const double *series, int lengthOut,
           double *value, double *diff, int *iter,
           double *x)
 {
-	memcpy(value, init, (m + n + 2) * sizeof(double));
+	memcpy(value, init, (size_t) ((ptrdiff_t) m + n + 2) * sizeof(double));
 	*diff = 0.0;
 	*iter = (lengthOut <= 0) ? iterMax : 0;
 
@@ -21,7 +21,7 @@ void ptpi(const double *series, int lengthOut,
 	const
 	double *Z = series, *B = Z + lengthOut, *mu = B + lengthOut;
 
-	double *S = (x) ? x - a : R_Calloc((size_t) 2 * (m + n + 2), double),
+	double *S = (x) ? x - a : R_Calloc((size_t) ((ptrdiff_t) m + n + 2) * 2, double),
 		halfsigma = 0.5 * sigma * (double) m,
 		halfgamma = 0.5 * gamma * (double) n,
 		halfdelta = 0.5 * delta * (double) 1,
@@ -220,7 +220,7 @@ SEXP R_ptpi(SEXP s_series, SEXP s_sigma, SEXP s_gamma, SEXP s_delta,
 		}
 		else {
 		SEXP y = PROTECT(allocVector(REALSXP, (R_xlen_t) d[0] * d[1] * d[2]));
-		memcpy(REAL(y), REAL(x), (size_t) d[0] * d[1] * d[2] * sizeof(double));
+		memcpy(REAL(y), REAL(x), (size_t) ((ptrdiff_t) d[0] * d[1] * d[2]) * sizeof(double));
 		setAttrib(y, R_DimSymbol, dim);
 		SET_VECTOR_ELT(ans, 3, y);
 		UNPROTECT(1);

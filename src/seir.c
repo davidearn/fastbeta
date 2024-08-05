@@ -1,5 +1,5 @@
 #include <math.h> /* exp */
-#include <string.h> /* memset */
+#include <string.h> /* size_t, ptrdiff_t, memset */
 #include <Rinternals.h>
 #include <R_ext/RS.h>
 
@@ -58,12 +58,12 @@ SEXP R_adseir_initialize(SEXP s_beta, SEXP s_nu, SEXP s_mu,
 	FF = allocVector(REALSXP, ncol);
 	R_PreserveObject(FF);
 	pFF = REAL(FF);
-	memset(pFF, 0, LENGTH(FF) * sizeof(double));
+	memset(pFF, 0, (size_t) LENGTH(FF) * sizeof(double));
 
 	DF = allocMatrix(REALSXP, nrow, ncol);
 	R_PreserveObject(DF);
 	pDF = REAL(DF);
-	memset(pDF, 0, LENGTH(DF) * sizeof(double));
+	memset(pDF, 0, (size_t) LENGTH(DF) * sizeof(double));
 
 	INIT_CALL(beta);
 	INIT_CALL(nu);
@@ -128,7 +128,7 @@ SEXP R_adseir_dot(SEXP s_t, SEXP s_x)
 		for (int k = 0; k < p; ++k)
 			*(pFF++) = muVal * px[k];
 	else {
-		memset(pFF, 0, p * sizeof(double));
+		memset(pFF, 0, (size_t) p * sizeof(double));
 		pFF[0    ] = muVal * px[0    ];
 		pFF[p - 1] = muVal * px[p - 1];
 		pFF += p;
@@ -139,7 +139,7 @@ SEXP R_adseir_dot(SEXP s_t, SEXP s_x)
 		for (int j = 0; j < n; ++j)
 			*(pFF++) = gammaVal * px[1 + m + j];
 	else {
-		memset(pFF, 0, n * sizeof(double));
+		memset(pFF, 0, (size_t) n * sizeof(double));
 		pFF += n;
 	}
 	*(pFF++) = deltaVal * px[1 + m + n];
@@ -188,7 +188,7 @@ SEXP R_deseir_initialize(SEXP s_beta, SEXP s_nu, SEXP s_mu,
 	gammaVal = REAL(s_gamma)[0] * (double) n;
 	deltaVal = REAL(s_delta)[0] * (double) 1;
 
-	work0 = R_Calloc((size_t) m + n + n + n, double);
+	work0 = R_Calloc((size_t) ((ptrdiff_t) m + n + n + n), double);
 	work1 = work0 + m + n;
 	work2 = work1     + n;
 
@@ -276,13 +276,13 @@ void R_deseir_jac(const int *neq, const double *t, const double *y,
 	}
 	pd -= p;
 	pd[0] = deltaVal * exp(y[p - 1]);
-	pd -= (size_t) nrow * n;
+	pd -= (ptrdiff_t) nrow * n;
 	for (j = 0; j < n; ++j) {
 		pd[0] = -(pd[p] = betaVal * y[0] * work1[j]);
 		pd[1] =           betaVal * y[0] * work2[j] ;
 		pd += nrow;
 	}
-	pd -= (size_t) nrow * (m + n);
+	pd -= (ptrdiff_t) nrow * (m + n);
 	pd[1] = (m == 0) ? 0.0 : -betaVal * swork2;
 
 	return;

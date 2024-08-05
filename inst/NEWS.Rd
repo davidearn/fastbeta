@@ -1,7 +1,7 @@
 \name{NEWS}
 \title{News for \R{} Package \pkg{fastbeta}}
 
-\section{Changes in version 0.3.1 (2024-06-17)}{
+\section{Changes in version 0.3.1 (2024-08-05)}{
   \subsection{INSTALLATION}{
     \itemize{
       \item .
@@ -17,6 +17,8 @@
       function \code{lsoda} is less than \code{length.out}.  It now
       distinguishes termination due to found roots from termination due
       to an unsuccessful solver call.
+
+      \item Warnings caught by \option{-Wconversion} are squashed.
     }
   }
   \subsection{NEW FEATURES}{
