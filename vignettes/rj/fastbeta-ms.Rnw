@@ -19,16 +19,71 @@
   We highlight additional tools provided by the package, including a
   function for efficient SEIR model simulation and an implementation
   of the Richardson-Lucy deconvolution used to recover incidence from
-  reported incidence conditional on a delay distribution.
+  reported incidence conditioned on a delay distribution.
   %% If we can devise a fastbeta-pomp example, then we should include
   %% it and mention it here.
 }
 
-\section{The \texorpdfstring{$SE^{m}I^{n}RS$}{SE\{m\}I\{n\}RS} model}
+\section{Introduction}
+
+\section{The \texorpdfstring{$SE^{m}I^{n}R$}{SE\{m\}I\{n\}R} model}
+
+The algorithm for transmission rate back-calculation implemented in
+\CRANpkg{fastbeta} assumes that spread of the infectious disease of interest
+in the population of interest can be represented by a compartmental
+$SE^{m}I^{n}R$ model formulated with time-varying rates of birth, death,
+and transmission---that is, an $SEIR$ model where the $E$ and $I$
+compartments are partitioned explicitly as having $m$ and $n$ stages,
+respectively.  As a system of ordinary differential equations, the model
+is expressed as
+%
+\begin{subequations}
+\begin{align}
+  \frac{\text{d} S}{\text{d} t}
+  &= \nu(t) + \delta R - \beta(t) S \sum\nolimits_{j} I^{j} - \mu(t) S \\
+  \frac{\text{d} E^{1}}{\text{d} t}
+  &= \beta(t) S \sum\nolimits_{j} I^{j} - m \sigma E^{1} - \mu(t) E^{1} \\
+  \frac{\text{d} E^{i}}{\text{d} t}
+  &= m \sigma E^{i-1} - m \sigma E^{i} - \mu(t) E^{i} \\
+  \frac{\text{d} I^{1}}{\text{d} t}
+  &= m \sigma E^{m} - n \gamma I^{1} - \mu(t) I^{1} \\
+  \frac{\text{d} I^{j}}{\text{d} t}
+  &= n \gamma I^{j-1} - n \gamma I^{j} - \mu(t) I^{j} \\
+  \frac{\text{d} R}{\text{d} t}
+  &= n \gamma I^{n} - \delta R - \mu(t) R
+\end{align}
+\end{subequations}
+%
+where $S$, $E=\sum_{i=1}^{m} E^{i}$, $I=\sum_{j=1}^{n} I^{j}$, and $R$
+are the numbers of individuals who are susceptible, exposed (infected
+and not infectious), infectious, and recovered individuals, respectively,
+so that $N = S + E + I + R$ is the population size.
+
+The time-varying parameters are $\nu(t)$, the birth rate; $\mu(t)$,
+the natural mortality rate; and $\beta(t)$, the transmission rate.
+The constant parameters are $1/\sigma$ and $1/\gamma$, the mean latent
+and infectious periods conditioned on survival, and $\delta$, the
+rate of loss of immunity.
+
+Here, the integers $m$ and $n$ are fixed by the modeler with the
+understanding that \ldots{}
 
 \section{Back-calculating the transmission rate from incidence}
 
 \subsection{The iteration}
+
+\begin{subequations}
+\begin{align}
+  E_{t+1}^{1} &= \frac{(1 - \frac{1}{2} (m \sigma + \mu_{t})) E_{t}^{1} + Z_{t+1}}{1 + \frac{1}{2} (m \sigma + \mu_{t+1})} \\
+  E_{t+1}^{i} &= \frac{(1 - \frac{1}{2} (m \sigma + \mu_{t})) E_{t}^{i} + \frac{1}{2} m \sigma (E_{t}^{i-1} + E_{t+1}^{i-1})}{1 + \frac{1}{2} (m \sigma + \mu_{t+1})} \\
+  I_{t+1}^{1} &= \frac{(1 - \frac{1}{2} (n \gamma + \mu_{t})) I_{t}^{1} + \frac{1}{2} m \sigma (E_{t}^{m} + E_{t+1}^{m})}{1 + \frac{1}{2} (n \gamma + \mu_{t+1})} \\
+  I_{t+1}^{j} &= \frac{(1 - \frac{1}{2} (n \gamma + \mu_{t})) I_{t}^{j} + \frac{1}{2} n \gamma (I_{t}^{j-1} + I_{t+1}^{j-1})}{1 + \frac{1}{2} (n \gamma + \mu_{t+1})} \\
+  R_{t+1} &= \frac{(1 - \frac{1}{2} (\delta + \mu_{t})) R_{t} + \frac{1}{2} n \gamma (I_{t}^{n} + I_{t+1}^{n})}{1 + \frac{1}{2} (\delta + \mu_{t+1})} \\
+  S_{t+1} &= \frac{(1 - \frac{1}{2} \mu_{t}) S_{t} + B_{t+1} - Z_{t+1} + \frac{1}{2} \delta (R_{t} + R_{t+1})}{1 + \frac{1}{2} \mu_{t+1}} \\
+  \beta_{t} &= \frac{Z_{t} + Z_{t+1}}{2 S_{t} \sum\nolimits_{j} I_{t}^{j}}
+\end{align}
+\end{subequations}
+
 
 \subsection{An example}
 
