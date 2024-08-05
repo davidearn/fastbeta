@@ -1,45 +1,50 @@
 % !TeX root = RJwrapper.tex
-\title{Capitalized Title Here}
+\title{fastbeta: Tools for Back-Calculating Infectious Disease Transmission Rates}
 \author{by Mikael Jagan and David Earn}
 
 \maketitle
 
-\abstract{
-An abstract of less than 150 words.
+\abstract{ % An abstract of less than 150 words.
+  Infectious disease transmission rates vary over time due to temporal
+  changes in the environment, host behaviour, and pathogen characteristics
+  such as transmissibility and virulence.  Variation in the transmission
+  rate is not observed directly but has a strong effect on patterns of
+  recurrent epidemics, motivating algorithms for estimating transmission
+  rates from time series of observed case (or death) counts.  Rigorous
+  statistical algorithms, such as iterated filtering, are well documented
+  but computationally expensive, often scaling poorly to longer time series.
+  Here, we present an \R{} package, \CRANpkg{fastbeta}, that implements
+  a fast, non-probabilistic, non-parametric algorithm for back-calculating
+  time-varying transmission rates from incidence time series.
+  We highlight additional tools provided by the package, including a
+  function for efficient SEIR model simulation and an implementation
+  of the Richardson-Lucy deconvolution used to recover incidence from
+  reported incidence conditional on a delay distribution.
+  %% If we can devise a fastbeta-pomp example, then we should include
+  %% it and mention it here.
 }
 
-\section{Section title in sentence case}
+\section{The \texorpdfstring{$SE^{m}I^{n}RS$}{SE\{m\}I\{n\}RS} model}
+
+\section{Back-calculating the transmission rate from incidence}
+
+\subsection{The iteration}
+
+\subsection{An example}
+
+\section{Back-calculating incidence from reported incidence}
+
+\subsection{The iteration: Richardson-Lucy deconvolution}
+
+\subsection{An example}
+
+\section{Using \CRANpkg{fastbeta} in conjunction with \CRANpkg{pomp}}
+
+\section{Discussion}
 
 <<zzz>>=
 "Hello world!"
 @
-
-Introductory section which may include references in parentheses
-\citep{R}, or cite a reference such as \citet{R} in the text.
-
-\section{Another section}
-
-This section may contain a figure such as Figure~\ref{figure:rlogo}.
-
-\begin{figure}[htbp]
-  \centering
-  \includegraphics{Rlogo-5}
-  \caption{The logo of R.}
-  \label{figure:rlogo}
-\end{figure}
-
-\section{Another section}
-
-There will likely be several sections, perhaps including code snippets, such as:
-
-\begin{example}
-  x <- 1:10
-  result <- myFunction(x)
-\end{example}
-
-\section{Summary}
-
-This file is only a basic article template. For full details of \emph{The R Journal} style and information on how to prepare your article for submission, see the \href{https://journal.r-project.org/share/author-guide.pdf}{Instructions for Authors}.
 
 \bibliography{fastbeta-ms}
 
@@ -56,3 +61,32 @@ This file is only a basic article template. For full details of \emph{The R Jour
   Canada\\
   0000-0002-7562-1341\\
   \email{earn@math.mcmaster.ca}}
+
+% \section{Section title in sentence case}
+
+% Introductory section which may include references in parentheses
+% \citep{R}, or cite a reference such as \citet{R} in the text.
+
+% \section{Another section}
+
+% This section may contain a figure such as Figure~\ref{figure:rlogo}.
+
+% \begin{figure}[htbp]
+%   \centering
+%   \includegraphics{Rlogo-5}
+%   \caption{The logo of R.}
+%   \label{figure:rlogo}
+% \end{figure}
+
+% \section{Another section}
+
+% There will likely be several sections, perhaps including code snippets, such as:
+
+% \begin{example}
+%   x <- 1:10
+%   result <- myFunction(x)
+% \end{example}
+
+% \section{Summary}
+
+% This file is only a basic article template. For full details of \emph{The R Journal} style and information on how to prepare your article for submission, see the \href{https://journal.r-project.org/share/author-guide.pdf}{Instructions for Authors}.
