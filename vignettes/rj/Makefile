@@ -23,9 +23,9 @@ $(ms).tex : $(ms).Rnw
 
 .PHONY : clean
 clean :
-	rm -f $(ms).tex
+	rm -f $(ms).tex figure-[0-9]*.tex
 	rm -f *~ .*~ *.aux *.bbl *.brf *.blg *.log *.out
 
 .PHONY : distclean
 distclean : clean
-	rm -f $(ms).pdf $(main).pdf
+	rm -f $(ms).pdf $(main).pdf figure-[0-9]*.pdf
