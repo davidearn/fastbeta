@@ -1,4 +1,4 @@
-% !TeX root = RJwrapper.tex
+% -*- mode: tex -*-
 \title{fastbeta: Tools for Back-Calculating Infectious Disease Transmission Rates}
 \author{by Mikael Jagan and David Earn}
 
@@ -24,20 +24,44 @@
   %% it and mention it here.
 }
 
+<<init, echo=FALSE>>=
+fig.count <- 0L
+fig.tex <- NULL
+fig.pdf <- NULL
+fig.par <- NULL
+fig.begin <- function(...) {
+    fig.count <<- fig.count + 1L
+    fig.tex <<- sprintf("figure-%02d.tex", fig.count)
+    fig.pdf <<- sprintf("figure-%02d.pdf", fig.count)
+    tikzDevice:::tikz(filename = fig.tex, standAlone = TRUE, ...)
+    fig.par <<- par(las = 1, mgp = c(2.5, 0.5, 0), tcl = -0.2,
+                    xaxs = "i", yaxs = "i")
+    invisible(NULL)
+}
+fig.end <- function() {
+    fig.par <<- par(fig.par) # MJ: is this necessary ... ?
+    dev.off()
+    tools:::texi2pdf(fig.tex)
+    invisible(NULL)
+}
+@
+
 \section{Introduction}
 
 \section{The \texorpdfstring{$SE^{m}I^{n}R$}{SE\{m\}I\{n\}R} model}
 
 The algorithm for transmission rate back-calculation implemented in
-\CRANpkg{fastbeta} assumes that spread of the infectious disease of interest
+\CRANpkg{fastbeta}~\cite{R-fastbeta} assumes that spread of the
+infectious disease of interest
 in the population of interest can be represented by a compartmental
 $SE^{m}I^{n}R$ model formulated with time-varying rates of birth, death,
-and transmission---that is, an $SEIR$ model where the $E$ and $I$
-compartments are partitioned explicitly as having $m$ and $n$ stages,
-respectively.  As a system of ordinary differential equations, the model
-is expressed as
+and transmission---that is, an $SEIR$ model in which the $E$ and $I$
+compartments are partitioned into $m$ and $n$ stages, respectively,
+for positive integers $m$ and $n$.  As a system of ordinary differential
+equations, this model is expressed as
 %
 \begin{subequations}
+\label{eq:seir}
 \begin{align}
   \frac{\text{d} S}{\text{d} t}
   &= \nu(t) + \delta R - \beta(t) S \sum\nolimits_{j} I^{j} - \mu(t) S \\
@@ -56,23 +80,122 @@ is expressed as
 %
 where $S$, $E=\sum_{i=1}^{m} E^{i}$, $I=\sum_{j=1}^{n} I^{j}$, and $R$
 are the numbers of individuals who are susceptible, exposed (infected
-and not infectious), infectious, and recovered individuals, respectively,
-so that $N = S + E + I + R$ is the population size.
+and not infectious), infectious, and recovered with immunity,
+respectively, so that $N = S + E + I + R$ is the population size.
 
-The time-varying parameters are $\nu(t)$, the birth rate; $\mu(t)$,
-the natural mortality rate; and $\beta(t)$, the transmission rate.
-The constant parameters are $1/\sigma$ and $1/\gamma$, the mean latent
-and infectious periods conditioned on survival, and $\delta$, the
-rate of loss of immunity.
+The functional parameters are $\nu(t) \geq 0$, the birth rate;
+$\mu(t) \geq 0$, the natural mortality rate; and $\beta(t) \geq 0$,
+the transmission rate.  The constant parameters are $\sigma > 0$,
+$\gamma > 0$, and $\delta \geq 0$.  $\delta$ is a rate of loss of
+immunity, allowing for reinfection of recovered individuals.
 
-Here, the integers $m$ and $n$ are fixed by the modeler with the
-understanding that \ldots{}
+Equations \eqref{eq:seir} admit a corresponding continuous time Markov
+process, in which the latent and infectious periods conditioned on
+survival until recovery are Erlang-distributed with means $1/\sigma$
+and $1/\gamma$:
+%
+\begin{subequations}
+\label{eq:erlang}
+\begin{align}
+  T_\text{lat} \sim& \mathrm{Erlang}(k=m, \lambda=m \sigma) \\
+  T_\text{inf} \sim& \mathrm{Erlang}(k=n, \lambda=n \gamma)
+\end{align}
+\end{subequations}
+%
+The probability density function corresponding to
+$\mathrm{Erlang}(k, \lambda)$ (a restriction of the gamma family
+$\mathrm{Gamma}(k, \lambda)$ to integer $k$) is given by
+%
+\begin{equation}
+\label{eq:erlang-pdf}
+f(\tau; k, \lambda) = \frac{\lambda^{k}}{(k - 1)!} \tau^{k - 1} \exp(-\lambda \tau)\,,\quad k \in \{1, 2, \dots\}\,, \lambda > 0
+\end{equation}
+%
+(see Figure~\ref{fig:erlang-pdf}).
+%
+<<erlang-pdf, echo=FALSE>>=
+fig.begin(width = 6, height = 3)
+x <- seq.int(0, 4, by = 0.01)
+k <- 1:8
+s <- matrix(k, nrow = length(x), ncol = length(k), byrow = TRUE)
+y <- dgamma(x, shape = s, rate = s)
+matplot(x, y, type = "n",
+        xlab = "$\\tau$", ylab = "density, $f(\\tau; k, \\lambda)$")
+abline(v = 1)
+matlines(x, y, lwd = 2, lty = 1:5, col = 2:7)
+legend("topright", lwd = 2, lty = 1:5, col = 2:7,
+       bty = "n", cex = 0.8, legend = sprintf("$k = %d$", k))
+fig.end()
+@
+\begin{figure}[h]
+  \centering
+  \includegraphics{\Sexpr{fig.pdf}}
+  \caption{Probability density function, $f(\tau; k, \lambda)$,
+    of the Erlang distribution with shape parameter $k$ and
+    rate parameter $\lambda = k \alpha$, for $k \in \{1, \ldots, 8\}$
+    and $\alpha = 1$.  Here, the mean $\tau = k / \lambda$
+    is fixed and equal to 1.}
+  \label{fig:erlang-pdf}
+\end{figure}
+%
+Setting $m = n = 1$, one recovers as a special case the traditional
+$SEIR$ model with exponentially distributed stage durations:
+%
+\begin{subequations}
+\label{eq:erlang}
+\begin{align}
+  T_\text{lat} \overset{m = 1}{\sim}& \mathrm{Exponential}(\lambda=\sigma) \\
+  T_\text{inf} \overset{n = 1}{\sim}& \mathrm{Exponential}(\lambda=\gamma)
+\end{align}
+\end{subequations}
+%
+Partitioning of the exposed and infectious compartments by
+\CRANpkg{fastbeta} is done to free the user from the conventional
+but strong assumption that the stage durations are exponentially
+distributed.
+
+\CRANpkg{fastbeta} further supports the limiting case $\sigma \to \infty$,
+corresponding to the $SI^{n}R$ model:
+%
+\begin{subequations}
+\label{eq:seir}
+\begin{align}
+  \frac{\text{d} S}{\text{d} t}
+  &= \nu(t) + \delta R - \beta(t) S \sum\nolimits_{j} I^{j} - \mu(t) S \\
+  \frac{\text{d} I^{1}}{\text{d} t}
+  &= \beta(t) S \sum\nolimits_{j} I^{j} - - n \gamma I^{1} - \mu(t) I^{1} \\
+  \frac{\text{d} I^{j}}{\text{d} t}
+  &= n \gamma I^{j-1} - n \gamma I^{j} - \mu(t) I^{j} \\
+  \frac{\text{d} R}{\text{d} t}
+  &= n \gamma I^{n} - \delta R - \mu(t) R
+\end{align}
+\end{subequations}
+%
 
 \section{Back-calculating the transmission rate from incidence}
 
-\subsection{The iteration}
-
+In model \eqref{eq:seir}, the transmission rate $\beta$ and compartment
+sizes $S$, $E^{i}$, $I^{j}$, and $R$ are not directly observed.
+\CRANpkg{fastbeta}\code{::fastbeta} implements an iterative algorithm
+for back-calculating their values at discrete time points,
+provided equally spaced time series of three variables that tend to be
+either observed or readily estimated, namely disease incidence,
+%
+\begin{equation}
+Z_{t} = \int_{t - 1}^{t} \beta(s) S(s) \sum_{j=1}^{n} I^{j}(s)\,\text{d}s\,,
+\end{equation}
+%
+births,
+%
+\begin{equation}
+B_{t} = \int_{t - 1}^{t} \nu(s)\,\text{d}s\,,
+\end{equation}
+%
+and the natural mortality rate $\mu_{t} = \mu(t)$.  The iteration is
+given by
+%
 \begin{subequations}
+\label{eq:fastbeta}
 \begin{align}
   E_{t+1}^{1} &= \frac{(1 - \frac{1}{2} (m \sigma + \mu_{t})) E_{t}^{1} + Z_{t+1}}{1 + \frac{1}{2} (m \sigma + \mu_{t+1})} \\
   E_{t+1}^{i} &= \frac{(1 - \frac{1}{2} (m \sigma + \mu_{t})) E_{t}^{i} + \frac{1}{2} m \sigma (E_{t}^{i-1} + E_{t+1}^{i-1})}{1 + \frac{1}{2} (m \sigma + \mu_{t+1})} \\
@@ -83,7 +206,16 @@ understanding that \ldots{}
   \beta_{t} &= \frac{Z_{t} + Z_{t+1}}{2 S_{t} \sum\nolimits_{j} I_{t}^{j}}
 \end{align}
 \end{subequations}
-
+%
+which can be written as a linear difference equation of the form
+%
+\begin{equation}
+\label{eq:fastbeta-linear}
+x_{t+1} = L_{t} x_{t}
+\end{equation}
+%
+where $L$ is an lower triangular coefficient matrix and
+$x = (1, (E)_{i=1}^{m}, (I)_{j=1}^{n}, R, S)$.
 
 \subsection{An example}
 
@@ -96,10 +228,6 @@ understanding that \ldots{}
 \section{Using \CRANpkg{fastbeta} in conjunction with \CRANpkg{pomp}}
 
 \section{Discussion}
-
-<<zzz>>=
-"Hello world!"
-@
 
 \bibliography{fastbeta-ms}
 
