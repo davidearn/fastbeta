@@ -172,6 +172,111 @@ corresponding to the $SI^{n}R$ model:
 \end{subequations}
 %
 
+\subsection{Arguments}
+
+\begin{description}
+\item[\code{length.out}] \hfill \\
+  a non-negative integer indicating the time series length.
+\item[\code{beta, nu, mu}] \hfill \\
+  functions of one or more arguments returning transmission, birth, and
+  natural death rates at the time point indicated by the first argument.
+  Arguments after the first must be strictly optional.  The functions
+  need not be vectorized.
+\item[\code{sigma, gamma, delta}] \hfill \\
+  non-negative numbers.  \code{m*sigma}, \code{n*gamma}, and
+  \code{delta} are the rates of removal from each latent, infectious,
+  and recovered compartment.
+\item[\code{m}] \hfill \\
+  a non-negative integer indicating a number of latent stages.
+\item[\code{n}] \hfill \\
+  a positive integer indicating a number of infectious stages.
+\item[\code{init}] \hfill \\
+  a numeric vector of length \code{1+m+n+1} giving an initial state with
+  compartments ordered as $(S, E, I, R)$.
+\item[\code{stochastic}] \hfill \\
+  a logical indicating if the simulation should be stochastic.
+\item[\code{prob}] \hfill \\
+  a numeric vector of length \code{n} such that \code{prob[i]} is the
+  probability that an infection during interval \code{i} is eventually
+  observed.  \code{prob} of length 1 is recycled.
+\item[\code{delay}] \hfill \\
+  a numeric vector of positive length such that \code{delay[i]} is the
+  probability that an infection during interval \code{j} is observed
+  during interval \code{j+i-1}, given that it is eventually observed.
+  \code{delay} need not sum to 1 but must not sum to 0.
+\item[\code{aggregate}] \hfill \\
+  a logical indicating if latent and infectious compartments should be
+  aggregated.
+\item[\code{useCompiled}] \hfill \\
+  a logical indicating if derivatives should be computed by compiled
+  C functions rather than by \R{} functions (which \emph{may} be
+  \emph{byte}-compiled).  Set to \code{FALSE} only if \code{TRUE}
+  seems to cause problems, and in that case please report the problems
+  with \code{bug.report(package = "fastbeta")}.
+\item[\code{\ldots}] \hfill \\
+  optional arguments passed to \CRANpkg{deSolve}\code{::lsoda} (directly)
+  or \CRANpkg{adaptivetau}\code{::ssa.adaptivetau} (via its list argument
+  \code{tl.params}), depending on \code{stochastic}.
+\end{description}
+
+\subsection{An example}
+
+<<seir-ex-1>>=
+library(fastbeta)
+beta <- function (t, a = 1e-01, b = 1e-05) b * (1 + a * sinpi(t / 26))
+nu   <- function (t) 1e+03
+mu   <- function (t) 1e-03
+
+sigma <- 0.5
+gamma <- 0.5
+delta <- 0
+
+init <- c(S = 50200, E = 1895, I = 1892, R = 946011)
+
+length.out <- 250L
+prob <- 0.1
+delay <- diff(pgamma(0:8, 2.5))
+
+set.seed(0L)
+X <- seir(length.out, beta, nu, mu, sigma, gamma, delta, init = init,
+          prob = prob, delay = delay, epsilon = 0.002)
+##                                                 ^^^^^^^
+## default epsilon = 0.05 allows too big leaps => spurious noise
+##
+str(X)
+
+fig.begin(width = 6, height = 6)
+plot(X)
+fig.end()
+@
+\begin{figure}[h]
+  \centering
+  \includegraphics{\Sexpr{fig.pdf}}
+  \caption{\CRANpkg{fastbeta}\code{::seir} example.}
+  \label{fig:seir-ex}
+\end{figure}
+<<seir-ex-2>>=
+r <- 10L
+Y <- do.call(cbind, replicate(r, simplify = FALSE,
+	seir(length.out, beta, nu, mu, sigma, gamma, delta, init = init,
+	     prob = prob, delay = delay, epsilon = 0.002)[, "Z.obs"]))
+str(Y)
+
+fig.begin(width = 6, height = 3)
+plot(window(Y, start = tsp(Y)[1L] + length(delay) / tsp(Y)[3L]),
+     ##        ^^^^^
+     ## discards points showing edge effects due to 'delay'
+     ##
+     plot.type = "single", col = seq_len(r), ylab = "Case reports")
+fig.end()
+@
+\begin{figure}[h]
+  \centering
+  \includegraphics{\Sexpr{fig.pdf}}
+  \caption{\CRANpkg{fastbeta}\code{::seir} example.}
+  \label{fig:seir-ex}
+\end{figure}
+
 \section{Back-calculating the transmission rate from incidence}
 
 In model \eqref{eq:seir}, the transmission rate $\beta$ and compartment
@@ -217,13 +322,156 @@ x_{t+1} = L_{t} x_{t}
 where $L$ is an lower triangular coefficient matrix and
 $x = (1, (E)_{i=1}^{m}, (I)_{j=1}^{n}, R, S)$.
 
+\subsection{Arguments}
+
+\begin{description}
+\item[\code{series}] \hfill \\
+  a ``multiple time series'' object, inheriting from class \code{mts},
+  with three columns storing (``parallel'', equally spaced) time series
+  of incidence, births, and the per capita natural mortality rate,
+  in that order.
+\item[\code{sigma, gamma, delta}] \hfill \\
+  non-negative numbers.  \code{m*sigma}, \code{n*gamma}, and
+  \code{delta} are the rates of removal from each latent, infectious,
+  and recovered compartment.
+\item[\code{m}] \hfill \\
+  a non-negative integer indicating a number of latent stages.
+\item[\code{n}] \hfill \\
+  a positive integer indicating a number of infectious stages.
+\item[\code{init}] \hfill \\
+  a numeric vector of length \code{1+m+n+1} giving an initial state with
+  compartments ordered as $(S, E, I, R)$.
+\item[\code{\ldots}] \hfill \\
+  optional arguments passed to \code{deconvolve}, if the first column
+  of \code{series} represents \emph{observed} incidence rather than
+  actual or estimated incidence.
+\end{description}
+
 \subsection{An example}
+
+<<fastbeta-ex>>=
+library(fastbeta)
+data(seir.ts02, package = "fastbeta")
+a <- attributes(seir.ts02)
+str(seir.ts02)
+# plot(seir.ts02)
+
+## We suppose that we have perfect knowledge of incidence,
+## births, and the data-generating parameters
+series <- cbind(seir.ts02[, c("Z", "B")], mu = a[["mu"]](0))
+colnames(series) <- c("Z", "B", "mu")
+
+args <- c(list(series = series),
+          a[c("sigma", "gamma", "delta", "m", "n", "init")])
+str(args)
+
+X <- do.call(fastbeta, args)
+
+str(X)
+## plot(X)
+
+fig.begin(width = 6, height = 3)
+plot(X[, "beta"], ylab = "Transmission rate")
+lines(a[["beta"]](time(X)), col = "red") # the "truth"
+fig.end()
+@
+\begin{figure}[h]
+  \centering
+  \includegraphics{\Sexpr{fig.pdf}}
+  \caption{\CRANpkg{fastbeta}\code{::fastbeta} example.}
+  \label{fig:fastbeta-ex}
+\end{figure}
 
 \section{Back-calculating incidence from reported incidence}
 
 \subsection{The iteration: Richardson-Lucy deconvolution}
 
+\subsection{Arguments}
+
+\begin{description}
+\item[\code{x}] \hfill \\
+  a numeric vector of length \code{n} giving the number of infections or
+  deaths reported during \code{n} observation intervals of equal
+  duration.
+\item[\code{prob}] \hfill \\
+  a numeric vector of length \code{d+n} such that \code{prob[d+i]} is
+  the probability that an infection during interval \code{i} is
+  eventually reported.  \code{prob} of length 1 is recycled.
+\item[\code{delay}] \hfill \\
+  a numeric vector of length \code{d+1} such that \code{delay[j]} is the
+  probability that an infection during interval \code{i} is reported
+  during interval \code{i+j-1}, given that it is eventually reported.
+  \code{delay} need not sum to 1 but must not sum to 0.
+\item[\code{start}] \hfill \\
+  a numeric vector of length \code{d+n} giving a starting value for the
+  iteration.  \code{start[d+i]} estimates the expected number of
+  infections during interval \code{i} that are eventually reported.  If
+  missing, then a starting value is generated by padding \code{x} on the
+  left and right with \code{d-d0} and \code{d0} zeros, choosing
+  \code{d0 = which.max(delay)-1}.
+\item[\code{tol}] \hfill \\
+  a tolerance indicating a stopping condition.
+\item[\code{iter.max}] \hfill \\
+  the maximum number of iterations.
+\item[\code{complete}] \hfill \\
+  a logical flag indicating if the result should preserve successive
+  updates to \code{start}.
+\end{description}
+
 \subsection{An example}
+
+<<deconvolve-ex-1>>=
+library(fastbeta)
+set.seed(2L)
+n <- 200L
+d <- 50L
+p <- 0.1
+prob <- plogis(rlogis(d + n, location = qlogis(p), scale = 0.1))
+delay <- diff(pgamma(0L:(d + 1L), 12, 0.4))
+
+h <- function (x, a = 1, b = 1, c = 0) a * exp(-b * (x - c)^2)
+ans <- floor(h(seq(-60, 60, length.out = d + n), a = 1000, b = 0.001))
+
+x0 <- rbinom(d + n, ans, prob)
+x <- tabulate(rep.int(1L:(d + n), x0) +
+              sample(0L:d, size = sum(x0), replace = TRUE, prob = delay),
+              d + n)[-(1L:d)]
+
+str(D0 <- deconvolve(x, prob, delay, complete = FALSE))
+str(D1 <- deconvolve(x, prob, delay, complete =  TRUE))
+
+fig.begin(width = 6, height = 5)
+matplot(-(d - 1L):n,
+        cbind(x0, c(rep.int(NA, d), x), prob * D0[["value"]], p * ans),
+        type = c("p", "p", "p", "l"),
+        col = c(1L, 1L, 2L, 4L), pch = c(16L, 1L, 16L, NA),
+        lty = c(0L, 0L, 0L, 1L), lwd = c(NA, NA, NA, 3L),
+        xlab = "Time", ylab = "Count")
+legend("topleft", NULL,
+       c("actual", "actual+delay", "actual+delay+deconvolution", "p*h"),
+       col = c(1L, 1L, 2L, 4L), pch = c(16L, 1L, 16L, NA),
+       lty = c(0L, 0L, 0L, 1L), lwd = c(NA, NA, NA, 3L),
+       bty = "n")
+fig.end()
+@
+\begin{figure}[h]
+  \centering
+  \includegraphics{\Sexpr{fig.pdf}}
+  \caption{\CRANpkg{fastbeta}\code{::deconvolve} example.}
+  \label{fig:fastbeta-ex}
+\end{figure}
+<<deconvolve-ex-2>>=
+fig.begin(width = 6, height = 3)
+plot(0L:D1[["iter"]], D1[["chisq"]], xlab = "Iterations", ylab = quote(chi^2))
+abline(h = 1, lty = 2L)
+fig.end()
+@
+\begin{figure}[h]
+  \centering
+  \includegraphics{\Sexpr{fig.pdf}}
+  \caption{\CRANpkg{fastbeta}\code{::deconvolve} example.}
+  \label{fig:fastbeta-ex}
+\end{figure}
 
 \section{Using \CRANpkg{fastbeta} in conjunction with \CRANpkg{pomp}}
 
