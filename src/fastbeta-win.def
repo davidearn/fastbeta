@@ -1,0 +1,3 @@
+LIBRARY fastbeta.dll
+EXPORTS
+ R_init_fastbeta
