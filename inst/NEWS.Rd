@@ -1,10 +1,11 @@
 \name{NEWS}
 \title{News for \R{} Package \pkg{fastbeta}}
 
-\section{Changes in version 0.3.1 (2024-08-05)}{
+\section{Changes in version 0.3.1 (2024-11-07)}{
   \subsection{INSTALLATION}{
     \itemize{
-      \item .
+      \item Compilation now uses \option{-DSTRICT_R_HEADERS} and
+      \option{-DR_NO_REMAP}.
     }
   }
   \subsection{BUG FIXES}{

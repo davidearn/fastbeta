@@ -1,19 +1,19 @@
 #include <math.h> /* exp */
 #include <string.h> /* size_t, ptrdiff_t, memset */
-#include <Rinternals.h>
 #include <R_ext/RS.h>
+#include <Rinternals.h>
 
 static SEXP FF, DF, betaCall, betaArg, nuCall, nuArg, muCall, muArg, s;
-static double *pFF, *pDF, *pbetaArg, betaVal, *pnuArg, nuVal, *pmuArg, muVal,
-	sigmaVal, gammaVal, deltaVal, lastTimeDot, lastTimeJac, *pt, *px,
-	tmp, *work0, *work1, swork1, *work2, swork2;
+static double *pFF, *pDF, *pbetaArg, betaVal, *pnuArg, nuVal, *pmuArg,
+	muVal, sigmaVal, gammaVal, deltaVal, lastTimeDot, lastTimeJac, *pt,
+	*px, *work0, *work1, swork1, *work2, swork2, tmp;
 static int m, n, p, nrow, ncol, ok;
 
 #define INIT_CALL(_V_) \
 do { \
-	_V_ ## Call = allocVector(LANGSXP, 2); \
+	_V_ ## Call = Rf_allocVector(LANGSXP, 2); \
 	R_PreserveObject(_V_ ## Call); \
-	_V_ ## Arg = allocVector(REALSXP, 1); \
+	_V_ ## Arg = Rf_allocVector(REALSXP, 1); \
 	R_PreserveObject(_V_ ## Arg); \
 	SETCAR(_V_ ## Call, s_ ## _V_); \
 	SETCADR(_V_ ## Call, _V_ ## Arg); \
@@ -22,14 +22,17 @@ do { \
 
 #define EVAL_CALL(_V_) \
 do { \
-	s = eval(_V_ ## Call, R_GlobalEnv); \
+	s = Rf_eval(_V_ ## Call, R_GlobalEnv); \
 	if (TYPEOF(s) != REALSXP) \
-		error("'%s' did not evaluate to type \"%s\"", #_V_, "double"); \
+		Rf_error("'%s' did not evaluate to type \"%s\"", \
+		         #_V_, "double"); \
 	if (LENGTH(s) != 1) \
-		error("'%s' did not evaluate to length %d", #_V_, 1); \
+		Rf_error("'%s' did not evaluate to length %d", \
+		         #_V_, 1); \
 	_V_ ## Val = REAL(s)[0]; \
 	if (!R_FINITE(_V_ ## Val) || _V_ ## Val < 0.0) \
-		error("'%s' returned a nonfinite or negative value", #_V_); \
+		Rf_error("'%s' returned a nonfinite or negative value", \
+		         #_V_); \
 } while (0)
 
 #define SETUP(_MODE_, _T0_, _T1_, _X_) \
@@ -55,12 +58,12 @@ SEXP R_adseir_initialize(SEXP s_beta, SEXP s_nu, SEXP s_mu,
 	nrow = p + 2;
 	ncol = p + p + 1;
 
-	FF = allocVector(REALSXP, ncol);
+	FF = Rf_allocVector(REALSXP, ncol);
 	R_PreserveObject(FF);
 	pFF = REAL(FF);
 	memset(pFF, 0, (size_t) LENGTH(FF) * sizeof(double));
 
-	DF = allocMatrix(REALSXP, nrow, ncol);
+	DF = Rf_allocMatrix(REALSXP, nrow, ncol);
 	R_PreserveObject(DF);
 	pDF = REAL(DF);
 	memset(pDF, 0, (size_t) LENGTH(DF) * sizeof(double));
@@ -256,8 +259,8 @@ void R_deseir_dot(const int *neq, const double *t, const double *y,
 
 /* vignette("compiledCode", package = "deSolve") */
 void R_deseir_jac(const int *neq, const double *t, const double *y,
-                  const int *ml, const int *mu,
-                  double *pd, const int *nrowpd, double *yout, const int *ip)
+                  const int *ml, const int *mu, double *pd,
+                  const int *nrowpd, double *yout, const int *ip)
 {
 	SETUP(deseir, lastTimeDot, *t, y);
 

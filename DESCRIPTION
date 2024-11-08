@@ -1,13 +1,14 @@
 Package: fastbeta
 Version: 0.3.1
-Date: 2024-08-05
+Date: 2024-11-07
 Title:
-	Fast Approximation of Time-Varying Infectious Disease Transmission Rates
+	Fast Approximation of Time-Varying Infectious Disease Transmission
+	Rates
 Description:
 	A fast method for approximating time-varying infectious disease
 	transmission rates from disease incidence time series and other
-	data, based on a discrete time approximation of an SEIR model,
-	as analyzed in Jagan et al. (2020) <doi:10.1371/journal.pcbi.1008124>.
+	data, based on a discrete time approximation of an SEIR model, as
+	analyzed in Jagan et al. (2020) <doi:10.1371/journal.pcbi.1008124>.
 License: GPL (>= 2)
 URL: https://github.com/davidearn/fastbeta
 BugReports: https://github.com/davidearn/fastbeta/issues

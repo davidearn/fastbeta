@@ -1,21 +1,23 @@
-#include <Rinternals.h>
 #include <R_ext/Rdynload.h>
 #include <R_ext/Visibility.h>
+#include <Rinternals.h>
 
 SEXP R_fastbeta(SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP);
-SEXP R_ptpi(SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP,
-            SEXP, SEXP, SEXP, SEXP, SEXP);
+SEXP R_ptpi(SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP,
+            SEXP, SEXP, SEXP);
 
-SEXP R_adseir_initialize(SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP);
+SEXP R_adseir_initialize(SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP,
+                         SEXP);
 SEXP R_adseir_finalize(void);
 SEXP R_adseir_dot(SEXP, SEXP);
 SEXP R_adseir_jac(SEXP, SEXP);
 
-SEXP R_deseir_initialize(SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP);
+SEXP R_deseir_initialize(SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP,
+                         SEXP);
 SEXP R_deseir_finalize(void);
 void R_deseir_dot(int *, double *, double *, double *, double *, int *);
-void R_deseir_jac(int *, double *, double *, int *, int *, double *, int *,
-                  double *, int *);
+void R_deseir_jac(int *, double *, double *, int *, int *, double *,
+                  int *, double *, int *);
 
 static const R_CallMethodDef CallMethods[] =
 {
@@ -34,13 +36,14 @@ static const R_CallMethodDef CallMethods[] =
 };
 
 static R_NativePrimitiveArgType
-	type0[] = { INTSXP, REALSXP, REALSXP, REALSXP, REALSXP, INTSXP },
-	type1[] = { INTSXP, REALSXP, REALSXP, INTSXP, INTSXP, REALSXP, INTSXP, REALSXP, INTSXP };
+	dottype[] = { INTSXP, REALSXP, REALSXP, REALSXP, REALSXP, INTSXP },
+	jactype[] = { INTSXP, REALSXP, REALSXP, INTSXP, INTSXP, REALSXP,
+	              INTSXP, REALSXP, INTSXP };
 
 static const R_CMethodDef CMethods[] =
 {
-	{ "R_deseir_dot",        (DL_FUNC) &R_deseir_dot,         6, type0 },
-	{ "R_deseir_jac",        (DL_FUNC) &R_deseir_jac,         9, type1 },
+	{ "R_deseir_dot",        (DL_FUNC) &R_deseir_dot,         6, dottype },
+	{ "R_deseir_jac",        (DL_FUNC) &R_deseir_jac,         9, jactype },
 
 	{ NULL, NULL, 0, NULL }
 };
