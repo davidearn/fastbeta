@@ -1,0 +1,380 @@
+\documentclass[fleqn]{article}
+\usepackage[margin=1in]{geometry}
+\usepackage{amsmath}
+\begin{document}
+\setlength{\parindent}{0in}
+\setlength{\parskip}{0.2in}
+
+\section{Standard equations}
+
+\begin{subequations}
+\begin{align}
+  \frac{\text{d} S    }{\text{d} t}
+  &= \nu N + \delta R - \frac{\beta}{N} S \sum\nolimits_{j} I^{j} - \mu S \\
+  \frac{\text{d} E^{1}}{\text{d} t}
+  &= \frac{\beta}{N} S \sum\nolimits_{j} I^{j} / N - m \sigma E^{1} - \mu E^{1} \\
+  \frac{\text{d} E^{i}}{\text{d} t}
+  &= m \sigma E^{i-1} - m \sigma E^{i} - \mu E^{i} \\
+  \frac{\text{d} I^{1}}{\text{d} t}
+  &= m \sigma E^{m} - n \gamma I^{1} - \mu I^{1} \\
+  \frac{\text{d} I^{j}}{\text{d} t}
+  &= n \gamma I^{j-1} - n \gamma I^{j} - \mu I^{j} \\
+  \frac{\text{d} R    }{\text{d} t}
+  &= n \gamma I^{n} - \delta R - \mu R \\
+  \frac{\text{d} N    }{\text{d} t}
+  &= (\nu - \mu) N
+\end{align}
+\end{subequations}
+
+where $\nu,\mu,\delta \geq 0$ and $\beta,\sigma,\gamma > 0$.
+
+\subsection{Equilibria}
+
+$(0, 0, 0, 0)$ is an equilibrium, and if $\nu \neq \mu$,
+then there are no other equilibria.
+We assume henceforth that $\nu = \mu$ and that $N$ is a positive constant.
+There is a unique equilibrium satisfying $R = 0$,
+namely $(N, 0, 0, 0)$,
+hence it remains to find equilibria satisfying $0 < R \leq N$.
+If $\delta + \mu = 0$, then they are $(N - R, 0, 0, R)$.
+Now suppose $\delta + \mu > 0$.
+
+\subsubsection{Case: $\mu = 0$}
+
+There is a unique equilibrium given by
+\begin{equation}
+\begin{bmatrix}
+  N \frac{\gamma}{\beta} \\
+  R \frac{\delta}{m \sigma} \\
+  R \frac{\delta}{n \gamma} \\
+  R
+\end{bmatrix}
+\,,\quad
+R = N \frac{1 - \frac{\gamma}{\beta}}{1 + \delta \big(\frac{1}{\sigma} + \frac{1}{\gamma}\big)}\,,
+\end{equation}
+where $R$ is chosen so that the sum is $N$, but it exists only if
+\begin{equation}
+\mathcal{R}_{0} = \frac{\beta}{\gamma} > 1\,.
+\end{equation}
+
+\subsubsection{Case: $\mu > 0$}
+
+There is a unique equilibrium given by
+\begin{equation}
+\begin{bmatrix}
+  N \frac{\mu}{\beta} \big(\frac{m \sigma + \mu}{m \sigma}\big)^{m} \big/ \big[1 - \big(\frac{n \gamma + \mu}{n \gamma}\big)^{-n}\big] \\
+  R \big(\frac{m \sigma + \mu}{m \sigma}\big)^{m - i} \big(\frac{n \gamma + \mu}{n \gamma}\big)^{n} \frac{\delta + \mu}{m \sigma} \\
+  R \big(\frac{n \gamma + \mu}{n \gamma}\big)^{n - j} \frac{\delta + \mu}{n \gamma} \\
+  R
+\end{bmatrix}
+\,,\quad
+R = N \frac{1 - \frac{\mu}{\beta} \big(\frac{m \sigma + \mu}{m \sigma}\big)^{m} \big/ \big[1 - \big(\frac{n \gamma + \mu}{n \gamma}\big)^{-n}\big]}{\big(\frac{m \sigma + \mu}{m \sigma}\big)^{m} \big(\frac{n \gamma + \mu}{n \gamma}\big)^{n} + \frac{\delta}{\mu} \big[\big(\frac{m \sigma + \mu}{m \sigma}\big)^{m} \big(\frac{n \gamma + \mu}{n \gamma}\big)^{n} - 1\big]}\,,
+\end{equation}
+where $R$ is chosen so that the sum is $N$, but it exists only if
+\begin{equation}
+\mathcal{R}_{0} = \frac{\beta}{\mu} \Big(\frac{m \sigma}{m \sigma + \mu}\Big)^{m} \Big[1 - \Big(\frac{n \gamma}{n \gamma + \mu}\Big)^{n}\Big] > 1\,.
+\end{equation}
+\clearpage
+
+
+\section{Standard equations for proportions $\bar{X} = X/N, N > 0$}
+
+\begin{subequations}
+\begin{align}
+  \frac{\text{d} \bar{S}    }{\text{d} t}
+  &= \nu + \delta \bar{R} - \beta \bar{S} \sum\nolimits_{j} \bar{I}^{j} - \nu \bar{S} \\
+  \frac{\text{d} \bar{E}^{1}}{\text{d} t}
+  &= \beta \bar{S} \sum\nolimits_{j} \bar{I}^{j} - m \sigma \bar{E}^{1} - \nu \bar{E}^{1} \\
+  \frac{\text{d} \bar{E}^{i}}{\text{d} t}
+  &= m \sigma \bar{E}^{i-1} - m \sigma \bar{E}^{i} - \nu \bar{E}^{i} \\
+  \frac{\text{d} \bar{I}^{1}}{\text{d} t}
+  &= m \sigma \bar{E}^{m} - n \gamma \bar{I}^{1} - \nu \bar{I}^{1} \\
+  \frac{\text{d} \bar{I}^{j}}{\text{d} t}
+  &= n \gamma \bar{I}^{j-1} - n \gamma \bar{I}^{j} - \nu \bar{I}^{j} \\
+  \frac{\text{d} \bar{R}    }{\text{d} t}
+  &= n \gamma \bar{I}^{n} - \delta \bar{R} - \nu \bar{R} \\
+  \frac{\text{d}      N     }{\text{d} t}
+  &= (\nu - \mu) N
+\end{align}
+\end{subequations}
+
+where $\nu,\mu,\delta \geq 0$ and $\beta,\sigma,\gamma > 0$.
+
+\subsection{Equilibria}
+
+$N$ does not appear in the equations for $S$, $E^{i}$, $I^{j}$, and $R$,
+hence we ``ignore'' the equation for $N$.
+
+There is a unique equilibrium satisfying $\bar{R} = 0$,
+namely $(1, 0, 0, 0)$,
+hence it remains to find equilibria satisfying $0 < \bar{R} \leq 1$.
+If $\delta + \nu = 0$, then they are $(1 - \bar{R}, 0, 0, \bar{R})$.
+Now suppose $\delta + \nu > 0$.
+
+\subsubsection{Case: $\nu = 0$}
+
+There is a unique equilibrium given by
+\begin{equation}
+\begin{bmatrix}
+  \frac{\gamma}{\beta} \\
+  \bar{R} \frac{\delta}{m \sigma} \\
+  \bar{R} \frac{\delta}{n \gamma} \\
+  \bar{R}
+\end{bmatrix}
+\,,\quad
+\bar{R} = \frac{1 - \frac{\gamma}{\beta}}{1 + \delta \big(\frac{1}{\sigma} + \frac{1}{\gamma}\big)}\,,
+\end{equation}
+where $\bar{R}$ is chosen so that the sum is 1, but it exists only if
+\begin{equation}
+\mathcal{R}_{0} = \frac{\beta}{\gamma} > 1\,.
+\end{equation}
+
+\subsubsection{Case: $\nu > 0$}
+
+There is a unique equilibrium given by
+\begin{equation}
+\begin{bmatrix}
+  \frac{\nu}{\beta} \big(\frac{m \sigma + \nu}{m \sigma}\big)^{m} \big/ \big[1 - \big(\frac{n \gamma + \nu}{n \gamma}\big)^{-n}\big] \\
+  \bar{R} \big(\frac{m \sigma + \nu}{m \sigma}\big)^{m - i} \big(\frac{n \gamma + \nu}{n \gamma}\big)^{n} \frac{\delta + \nu}{m \sigma} \\
+  \bar{R} \big(\frac{n \gamma + \nu}{n \gamma}\big)^{n - j} \frac{\delta + \nu}{n \gamma} \\
+  \bar{R}
+\end{bmatrix}
+\,,\quad
+\bar{R} = \frac{1 - \frac{\nu}{\beta} \big(\frac{m \sigma + \nu}{m \sigma}\big)^{m} \big/ \big[1 - \big(\frac{n \gamma + \nu}{n \gamma}\big)^{-n}\big]}{\big(\frac{m \sigma + \nu}{m \sigma}\big)^{m} \big(\frac{n \gamma + \nu}{n \gamma}\big)^{n} + \frac{\delta}{\nu} \big[\big(\frac{m \sigma + \nu}{m \sigma}\big)^{m} \big(\frac{n \gamma + \nu}{n \gamma}\big)^{n} - 1\big]}\,,
+\end{equation}
+where $\bar{R}$ is chosen so that the sum is 1, but it exists only if
+\begin{equation}
+\mathcal{R}_{0} = \frac{\beta}{\nu} \Big(\frac{m \sigma}{m \sigma + \nu}\Big)^{m} \Big[1 - \Big(\frac{n \gamma}{n \gamma + \nu}\Big)^{n}\Big] > 1\,.
+\end{equation}
+\clearpage
+
+
+\section{Mass action equations}
+
+\begin{subequations}
+\begin{align}
+  \frac{\text{d} S    }{\text{d} t}
+  &= \nu + \delta R - \beta S \sum\nolimits_{j} I^{j} - \mu S \\
+  \frac{\text{d} E^{1}}{\text{d} t}
+  &= \beta S \sum\nolimits_{j} I^{j} - m \sigma E^{1} - \mu E^{1} \\
+  \frac{\text{d} E^{i}}{\text{d} t}
+  &= m \sigma E^{i-1} - m \sigma E^{i} - \mu E^{i} \\
+  \frac{\text{d} I^{1}}{\text{d} t}
+  &= m \sigma E^{m} - n \gamma I^{1} - \mu I^{1} \\
+  \frac{\text{d} I^{j}}{\text{d} t}
+  &= n \gamma I^{j-1} - n \gamma I^{j} - \mu I^{j} \\
+  \frac{\text{d} R    }{\text{d} t}
+  &= n \gamma I^{n} - \delta R - \mu R \\
+  \frac{\text{d} N    }{\text{d} t}
+  &= \nu - \mu N
+\end{align}
+\end{subequations}
+
+where $\nu,\mu,\delta \geq 0$ and $\beta,\sigma,\gamma > 0$.
+
+\subsection{Equilibria}
+
+\subsubsection{Case: $\nu, \mu = 0$}
+
+In this case, $N$ can be regarded as a non-negative constant.
+There is a unique equilibrium satisfying $R = 0$,
+namely $(N, 0, 0, 0)$,
+hence it remains to find equilibria satisfying $0 < R \leq N$.
+If $\delta = 0$, then they are $(N - R, 0, 0, R)$.
+Otherwise, there is a unique equilibrium given by
+\begin{equation}
+\begin{bmatrix}
+  \frac{\gamma}{\beta} \\
+  R \frac{\delta}{m \sigma} \\
+  R \frac{\delta}{n \gamma} \\
+  R
+\end{bmatrix}
+\,,\quad
+R = \frac{N - \frac{\gamma}{\beta}}{1 + \delta \big(\frac{1}{\sigma} + \frac{1}{\gamma}\big)}\,,
+\end{equation}
+where $R$ is chosen so that the sum is $N$, but it exists only if
+\begin{equation}
+\mathcal{R}_{0} = N \frac{\beta}{\gamma} > 1\,.
+\end{equation}
+
+\subsubsection{Case: $0 = \nu < \mu$}
+
+$(0, 0, 0, 0)$ is an equilibrium and there are no other equilibria.
+
+\subsubsection{Case: $0 = \mu < \nu$}
+
+There are no equilibria.
+
+\subsubsection{Case: $\nu, \mu > 0$}
+
+The equilibrium value of $N$ is $\nu / \mu$.
+There is a unique equilibrium satisfying $R = 0$,
+namely $(\nu / \mu, 0, 0, 0)$.
+There is a unique equilibrium satisying $0 < R \leq \nu / \mu$, given by
+\begin{equation}
+\begin{bmatrix}
+  \frac{\mu}{\beta} \big(\frac{m \sigma + \mu}{m \sigma}\big)^{m} \big/ \big[1 - \big(\frac{n \gamma + \mu}{n \gamma}\big)^{-n}\big] \\
+  R \big(\frac{m \sigma + \mu}{m \sigma}\big)^{m - i} \big(\frac{n \gamma + \mu}{n \gamma}\big)^{n} \frac{\delta + \mu}{m \sigma} \\
+  R \big(\frac{n \gamma + \mu}{n \gamma}\big)^{n - j} \frac{\delta + \mu}{n \gamma} \\
+  R
+\end{bmatrix}
+\,,\quad
+R = \frac{N - \frac{\mu}{\beta} \big(\frac{m \sigma + \mu}{m \sigma}\big)^{m} \big/ \big[1 - \big(\frac{n \gamma + \mu}{n \gamma}\big)^{-n}\big]}{\big(\frac{m \sigma + \mu}{m \sigma}\big)^{m} \big(\frac{n \gamma + \mu}{n \gamma}\big)^{n} + \frac{\delta}{\mu} \big[\big(\frac{m \sigma + \mu}{m \sigma}\big)^{m} \big(\frac{n \gamma + \mu}{n \gamma}\big)^{n} - 1\big]}\,,
+\end{equation}
+where $R$ is chosen so that the sum is $\nu / \mu$, but it exists only if
+\begin{equation}
+\mathcal{R}_{0} = \frac{\nu}{\mu} \frac{\beta}{\mu} \Big(\frac{m \sigma}{m \sigma + \mu}\Big)^{m} \Big[1 - \Big(\frac{n \gamma}{n \gamma + \mu}\Big)^{n}\Big] > 1\,.
+\end{equation}
+\clearpage
+
+
+\section{Mass action equations for proportions $\bar{X} = X/N, N > 0$}
+
+\begin{subequations}
+\begin{align}
+  \frac{\text{d} \bar{S}    }{\text{d} t}
+  &= \frac{\nu}{N} + \delta \bar{R} - \beta N \bar{S} \sum\nolimits_{j} \bar{I}^{j} - \frac{\nu}{N} \bar{S} \\
+  \frac{\text{d} \bar{E}^{1}}{\text{d} t}
+  &= \beta N \bar{S} \sum\nolimits_{j} \bar{I}^{j} - m \sigma \bar{E}^{1} - \frac{\nu}{N} \bar{E}^{1} \\
+  \frac{\text{d} \bar{E}^{i}}{\text{d} t}
+  &= m \sigma \bar{E}^{i-1} - m \sigma \bar{E}^{i} - \frac{\nu}{N} \bar{E}^{i} \\
+  \frac{\text{d} \bar{I}^{1}}{\text{d} t}
+  &= m \sigma \bar{E}^{m} - n \gamma \bar{I}^{1} - \frac{\nu}{N} \bar{I}^{1} \\
+  \frac{\text{d} \bar{I}^{j}}{\text{d} t}
+  &= n \gamma \bar{I}^{j-1} - n \gamma \bar{I}^{j} - \frac{\nu}{N} \bar{I}^{j} \\
+  \frac{\text{d} \bar{R}    }{\text{d} t}
+  &= n \gamma \bar{I}^{n} - \delta \bar{R} - \frac{\nu}{N} \bar{R} \\
+  \frac{\text{d}      N     }{\text{d} t}
+  &= \nu - \mu N
+\end{align}
+\end{subequations}
+
+where $\nu,\mu,\delta \geq 0$ and $\beta,\sigma,\gamma > 0$.
+
+\subsection{Equilibria}
+
+\subsubsection{Case: $\nu, \mu = 0$}
+
+In this case, $N$ can be regarded as a positive constant.
+There is a unique equilibrium satisfying $\bar{R} = 0$,
+namely $(1, 0, 0, 0)$,
+hence it remains to find equilibria satisfying $0 < \bar{R} \leq 1$.
+If $\delta = 0$, then they are $(1 - \bar{R}, 0, 0, \bar{R})$.
+Otherwise, there is a unique equilibrium given by
+\begin{equation}
+\begin{bmatrix}
+  \frac{1}{N} \frac{\gamma}{\beta} \\
+  \bar{R} \frac{\delta}{m \sigma} \\
+  \bar{R} \frac{\delta}{n \gamma} \\
+  \bar{R}
+\end{bmatrix}
+\,,\quad
+\bar{R} = \frac{1 - \frac{\gamma}{\beta N}}{1 + \delta \big(\frac{1}{\sigma} + \frac{1}{\gamma}\big)}\,,
+\end{equation}
+where $\bar{R}$ is chosen so that the sum is $1$, but it exists only if
+\begin{equation}
+\mathcal{R}_{0} = N \frac{\beta}{\gamma} > 1\,.
+\end{equation}
+
+\subsubsection{Case: $0 = \nu < \mu$}
+
+There are no equilibria.
+
+\subsubsection{Case: $0 = \mu < \nu$}
+
+There are no equilibria.
+
+\subsubsection{Case: $\nu, \mu > 0$}
+
+The equilibrium value of $N$ is $\nu / \mu$, hence we substitute
+$N = \nu / \mu$ and ``ignore'' the equation for $N$.
+
+There is a unique equilibrium satisfying $\bar{R} = 0$,
+namely $(1, 0, 0, 0)$.
+There is a unique equilibrium satisying $0 < R \leq 1$, given by
+\begin{equation}
+\begin{bmatrix}
+  \frac{\mu}{\nu} \frac{\mu}{\beta} \big(\frac{m \sigma + \mu}{m \sigma}\big)^{m} \big/ \big[1 - \big(\frac{n \gamma + \mu}{n \gamma}\big)^{-n}\big] \\
+  \bar{R} \big(\frac{m \sigma + \mu}{m \sigma}\big)^{m - i} \big(\frac{n \gamma + \mu}{n \gamma}\big)^{n} \frac{\delta + \mu}{m \sigma} \\
+  \bar{R} \big(\frac{n \gamma + \mu}{n \gamma}\big)^{n - j} \frac{\delta + \mu}{n \gamma} \\
+  \bar{R}
+\end{bmatrix}
+\,,\quad
+\bar{R} = \frac{1 - \frac{\mu}{\nu} \frac{\mu}{\beta} \big(\frac{m \sigma + \mu}{m \sigma}\big)^{m} \big/ \big[1 - \big(\frac{n \gamma + \mu}{n \gamma}\big)^{-n}\big]}{\big(\frac{m \sigma + \mu}{m \sigma}\big)^{m} \big(\frac{n \gamma + \mu}{n \gamma}\big)^{n} + \frac{\delta}{\mu} \big[\big(\frac{m \sigma + \mu}{m \sigma}\big)^{m} \big(\frac{n \gamma + \mu}{n \gamma}\big)^{n} - 1\big]}\,,
+\end{equation}
+where $\bar{R}$ is chosen so that the sum is 1, but it exists only if
+\begin{equation}
+\mathcal{R}_{0} = \frac{\nu}{\mu} \frac{\beta}{\mu} \Big(\frac{m \sigma}{m \sigma + \mu}\Big)^{m} \Big[1 - \Big(\frac{n \gamma}{n \gamma + \mu}\Big)^{n}\Big] > 1\,.
+\end{equation}
+\clearpage
+
+
+\section{Next generation matrix \texttt{[FIXME]}}
+
+Jacobian matrix:
+
+\begin{equation*}
+\mathrm{D}f(x) =
+\begin{bmatrix}
+-m\sigma-\mu &      0 &            0 &             0 &             0 &             0 &           0 &                 0 \\
+ m\sigma     & \ddots &            0 &      h_{2}(x) &      h_{2}(x) &      h_{2}(x) &           0 &          h_{1}(x) \\
+           0 & \ddots & -m\sigma-\mu &             0 &             0 &             0 &           0 &                 0 \\
+           0 &      0 &  m\sigma     &  -n\gamma-\mu &             0 &             0 &           0 &                 0 \\
+           0 &      0 &            0 &   n\gamma     &        \ddots &             0 &           0 &                 0 \\
+           0 &      0 &            0 &             0 &        \ddots &  -n\gamma-\mu &           0 &                 0 \\
+           0 &      0 &            0 &             0 &             0 &   n\gamma     & -\delta-\mu &                 0 \\
+         \nu &    \nu &          \nu & -h_{2}(x)+\nu & -h_{2}(x)+\nu & -h_{2}(x)+\nu &  \delta+\nu & -h_{1}(x)-\mu+\nu
+\end{bmatrix}
+\end{equation*}
+
+where
+$h_{1}(x) = \beta (1 - S/N) (\sum_{j} I^{j}/N)$
+and
+$h_{2}(x) = \beta (S/N) (1 - \sum_{j} I^{j}/N)$.
+
+Next generation matrix:
+
+\begin{equation*}
+\mathcal{F}(x) =
+\begin{bmatrix}
+\beta S \sum_{j} I^{j} / N \\ 0 \\ \vdots \\ 0
+\end{bmatrix}
+\qquad
+\mathcal{V}^{-}(x) =
+\begin{bmatrix}
+m \sigma E^{1} + \mu E^{1} \\ \vdots \\ m \sigma E^{m} + \mu E^{m} \\ n \gamma I^{1} + \mu I^{1} \\ \vdots \\ n \gamma I^{n} + \mu I^{n} \\ \delta R + \mu R \\ \beta S \sum_{j} I^{j} / N + \mu S
+\end{bmatrix}
+\qquad
+\mathcal{V}^{+}(x) =
+\begin{bmatrix}
+0 \\ m \sigma E^{1} \\ \vdots \\ m \sigma E^{m} \\ n \gamma I^{1} \\ \vdots \\ n \gamma I^{n} \\ \nu N + \delta R
+\end{bmatrix}
+\end{equation*}
+
+\begin{equation*}
+\mathrm{D}\mathcal{F}(x) =
+\begin{bmatrix}
+     0 & \cdots &      0 &  h_{2}(x) & \cdots &  h_{2}(x) &      0 &  h_{1}(x) \\
+     0 &      0 &      0 &         0 &      0 &         0 &      0 &         0 \\
+\vdots & \vdots & \vdots &    \vdots & \vdots &    \vdots & \vdots &    \vdots \\
+     0 &      0 &      0 &         0 &      0 &         0 &      0 &         0
+\end{bmatrix}
+\end{equation*}
+
+\begin{equation*}
+\mathrm{D}(\mathcal{V}^{-} - \mathcal{V}^{+})(x) =
+\begin{bmatrix}
+ m\sigma+\mu &      0 &            0 &            0 &            0 &            0 &           0 &                  0 \\
+-m\sigma     & \ddots &            0 &            0 &            0 &            0 &           0 &                  0 \\
+           0 & \ddots &  m\sigma+\mu &            0 &            0 &            0 &           0 &                  0 \\
+           0 &      0 & -m\sigma     &  n\gamma+\mu &            0 &            0 &           0 &                  0 \\
+           0 &      0 &            0 & -n\gamma     &       \ddots &            0 &           0 &                  0 \\
+           0 &      0 &            0 &            0 &       \ddots &  n\gamma+\mu &           0 &                  0 \\
+           0 &      0 &            0 &            0 &            0 & -n\gamma     &  \delta+\mu &                  0 \\
+           0 &      0 &            0 & h_{2}(x)-\nu & h_{2}(x)-\nu & h_{2}(x)-\nu & -\delta-\nu & h_{1}(x)-(\nu-\mu)
+\end{bmatrix}
+\end{equation*}
+
+\clearpage
+
+\end{document}
