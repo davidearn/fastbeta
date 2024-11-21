@@ -10,7 +10,7 @@
 \begin{subequations}
 \begin{align}
   \frac{\text{d} S    }{\text{d} t}
-  &= \nu N + \delta R - \frac{\beta}{N} S \sum\nolimits_{j} I^{j} - \mu S \\
+  &= \nu N + \delta R - \frac{\beta}{N} S \sum\nolimits_{j} I^{j} / N - \mu S \\
   \frac{\text{d} E^{1}}{\text{d} t}
   &= \frac{\beta}{N} S \sum\nolimits_{j} I^{j} / N - m \sigma E^{1} - \mu E^{1} \\
   \frac{\text{d} E^{i}}{\text{d} t}
@@ -30,14 +30,12 @@ where $\nu,\mu,\delta \geq 0$ and $\beta,\sigma,\gamma > 0$.
 
 \subsection{Equilibria}
 
-$(0, 0, 0, 0)$ is an equilibrium, and if $\nu \neq \mu$,
-then there are no other equilibria.
-We assume henceforth that $\nu = \mu$ and that $N$ is a positive constant.
-There is a unique equilibrium satisfying $R = 0$,
-namely $(N, 0, 0, 0)$,
-hence it remains to find equilibria satisfying $0 < R \leq N$.
-If $\delta + \mu = 0$, then they are $(N - R, 0, 0, R)$.
-Now suppose $\delta + \mu > 0$.
+$(0, 0, 0, 0)$ is an equilibrium, and if $\nu \neq \mu$, then there are
+no other equilibria.  We assume henceforth that $\nu = \mu$ and that $N$
+is a positive constant.  There is a unique equilibrium satisfying
+$R = 0$, namely $(N, 0, 0, 0)$, hence it remains to find equilibria
+satisfying $0 < R \leq N$.  If $\delta + \mu = 0$, then they are
+$(N - R, 0, 0, R)$.  Now suppose $\delta + \mu > 0$.
 
 \subsubsection{Case: $\mu = 0$}
 
@@ -102,14 +100,13 @@ where $\nu,\mu,\delta \geq 0$ and $\beta,\sigma,\gamma > 0$.
 
 \subsection{Equilibria}
 
-$N$ does not appear in the equations for $S$, $E^{i}$, $I^{j}$, and $R$,
-hence we ``ignore'' the equation for $N$.
+$N$ does not appear in the equations for $\bar{S}$, $\bar{E}^{i}$,
+$\bar{I}^{j}$, and $\bar{R}$, hence we ``ignore'' the equation for $N$.
 
-There is a unique equilibrium satisfying $\bar{R} = 0$,
-namely $(1, 0, 0, 0)$,
-hence it remains to find equilibria satisfying $0 < \bar{R} \leq 1$.
-If $\delta + \nu = 0$, then they are $(1 - \bar{R}, 0, 0, \bar{R})$.
-Now suppose $\delta + \nu > 0$.
+There is a unique equilibrium satisfying $\bar{R} = 0$, namely
+$(1, 0, 0, 0)$, hence it remains to find equilibria satisfying
+$0 < \bar{R} \leq 1$.  If $\delta + \nu = 0$, then they are
+$(1 - \bar{R}, 0, 0, \bar{R})$.  Now suppose $\delta + \nu > 0$.
 
 \subsubsection{Case: $\nu = 0$}
 
@@ -176,12 +173,11 @@ where $\nu,\mu,\delta \geq 0$ and $\beta,\sigma,\gamma > 0$.
 
 \subsubsection{Case: $\nu, \mu = 0$}
 
-In this case, $N$ can be regarded as a non-negative constant.
-There is a unique equilibrium satisfying $R = 0$,
-namely $(N, 0, 0, 0)$,
-hence it remains to find equilibria satisfying $0 < R \leq N$.
-If $\delta = 0$, then they are $(N - R, 0, 0, R)$.
-Otherwise, there is a unique equilibrium given by
+In this case, $N$ can be regarded as a non-negative constant.  There is
+a unique equilibrium satisfying $R = 0$, namely $(N, 0, 0, 0)$, hence it
+remains to find equilibria satisfying $0 < R \leq N$.  If $\delta = 0$,
+then they are $(N - R, 0, 0, R)$.  Otherwise, there is a unique
+equilibrium given by
 \begin{equation}
 \begin{bmatrix}
   \frac{\gamma}{\beta} \\
@@ -194,7 +190,7 @@ R = \frac{N - \frac{\gamma}{\beta}}{1 + \delta \big(\frac{1}{\sigma} + \frac{1}{
 \end{equation}
 where $R$ is chosen so that the sum is $N$, but it exists only if
 \begin{equation}
-\mathcal{R}_{0} = N \frac{\beta}{\gamma} > 1\,.
+\mathcal{R}_{0} = \frac{\beta N}{\gamma} > 1\,.
 \end{equation}
 
 \subsubsection{Case: $0 = \nu < \mu$}
@@ -207,10 +203,10 @@ There are no equilibria.
 
 \subsubsection{Case: $\nu, \mu > 0$}
 
-The equilibrium value of $N$ is $\nu / \mu$.
-There is a unique equilibrium satisfying $R = 0$,
-namely $(\nu / \mu, 0, 0, 0)$.
-There is a unique equilibrium satisying $0 < R \leq \nu / \mu$, given by
+The equilibrium value of $N$ is $\nu / \mu$, hence below we take
+$N = \nu / \mu$.  There is a unique equilibrium satisfying $R = 0$,
+namely $(\nu / \mu, 0, 0, 0)$.  There is a unique equilibrium satisfying
+$0 < R \leq \nu / \mu$, given by
 \begin{equation}
 \begin{bmatrix}
   \frac{\mu}{\beta} \big(\frac{m \sigma + \mu}{m \sigma}\big)^{m} \big/ \big[1 - \big(\frac{n \gamma + \mu}{n \gamma}\big)^{-n}\big] \\
@@ -221,9 +217,9 @@ There is a unique equilibrium satisying $0 < R \leq \nu / \mu$, given by
 \,,\quad
 R = \frac{N - \frac{\mu}{\beta} \big(\frac{m \sigma + \mu}{m \sigma}\big)^{m} \big/ \big[1 - \big(\frac{n \gamma + \mu}{n \gamma}\big)^{-n}\big]}{\big(\frac{m \sigma + \mu}{m \sigma}\big)^{m} \big(\frac{n \gamma + \mu}{n \gamma}\big)^{n} + \frac{\delta}{\mu} \big[\big(\frac{m \sigma + \mu}{m \sigma}\big)^{m} \big(\frac{n \gamma + \mu}{n \gamma}\big)^{n} - 1\big]}\,,
 \end{equation}
-where $R$ is chosen so that the sum is $\nu / \mu$, but it exists only if
+where $R$ is chosen so that the sum is $N$, but it exists only if
 \begin{equation}
-\mathcal{R}_{0} = \frac{\nu}{\mu} \frac{\beta}{\mu} \Big(\frac{m \sigma}{m \sigma + \mu}\Big)^{m} \Big[1 - \Big(\frac{n \gamma}{n \gamma + \mu}\Big)^{n}\Big] > 1\,.
+\mathcal{R}_{0} = \frac{\beta N}{\mu} \Big(\frac{m \sigma}{m \sigma + \mu}\Big)^{m} \Big[1 - \Big(\frac{n \gamma}{n \gamma + \mu}\Big)^{n}\Big] > 1\,.
 \end{equation}
 \clearpage
 
@@ -255,9 +251,8 @@ where $\nu,\mu,\delta \geq 0$ and $\beta,\sigma,\gamma > 0$.
 
 \subsubsection{Case: $\nu, \mu = 0$}
 
-In this case, $N$ can be regarded as a positive constant.
-There is a unique equilibrium satisfying $\bar{R} = 0$,
-namely $(1, 0, 0, 0)$,
+In this case, $N$ can be regarded as a positive constant.  There is a
+unique equilibrium satisfying $\bar{R} = 0$, namely $(1, 0, 0, 0)$,
 hence it remains to find equilibria satisfying $0 < \bar{R} \leq 1$.
 If $\delta = 0$, then they are $(1 - \bar{R}, 0, 0, \bar{R})$.
 Otherwise, there is a unique equilibrium given by
@@ -273,7 +268,7 @@ Otherwise, there is a unique equilibrium given by
 \end{equation}
 where $\bar{R}$ is chosen so that the sum is $1$, but it exists only if
 \begin{equation}
-\mathcal{R}_{0} = N \frac{\beta}{\gamma} > 1\,.
+\mathcal{R}_{0} = \frac{\beta N}{\gamma} > 1\,.
 \end{equation}
 
 \subsubsection{Case: $0 = \nu < \mu$}
@@ -286,25 +281,23 @@ There are no equilibria.
 
 \subsubsection{Case: $\nu, \mu > 0$}
 
-The equilibrium value of $N$ is $\nu / \mu$, hence we substitute
-$N = \nu / \mu$ and ``ignore'' the equation for $N$.
-
-There is a unique equilibrium satisfying $\bar{R} = 0$,
-namely $(1, 0, 0, 0)$.
-There is a unique equilibrium satisying $0 < R \leq 1$, given by
+The equilibrium value of $N$ is $\nu / \mu$, hence below we use
+$N = \nu / \mu$.  There is a unique equilibrium satisfying
+$\bar{R} = 0$, namely $(1, 0, 0, 0)$.  There is a unique equilibrium
+satisying $0 < R \leq 1$, given by
 \begin{equation}
 \begin{bmatrix}
-  \frac{\mu}{\nu} \frac{\mu}{\beta} \big(\frac{m \sigma + \mu}{m \sigma}\big)^{m} \big/ \big[1 - \big(\frac{n \gamma + \mu}{n \gamma}\big)^{-n}\big] \\
+  \frac{\mu}{\beta N} \big(\frac{m \sigma + \mu}{m \sigma}\big)^{m} \big/ \big[1 - \big(\frac{n \gamma + \mu}{n \gamma}\big)^{-n}\big] \\
   \bar{R} \big(\frac{m \sigma + \mu}{m \sigma}\big)^{m - i} \big(\frac{n \gamma + \mu}{n \gamma}\big)^{n} \frac{\delta + \mu}{m \sigma} \\
   \bar{R} \big(\frac{n \gamma + \mu}{n \gamma}\big)^{n - j} \frac{\delta + \mu}{n \gamma} \\
   \bar{R}
 \end{bmatrix}
 \,,\quad
-\bar{R} = \frac{1 - \frac{\mu}{\nu} \frac{\mu}{\beta} \big(\frac{m \sigma + \mu}{m \sigma}\big)^{m} \big/ \big[1 - \big(\frac{n \gamma + \mu}{n \gamma}\big)^{-n}\big]}{\big(\frac{m \sigma + \mu}{m \sigma}\big)^{m} \big(\frac{n \gamma + \mu}{n \gamma}\big)^{n} + \frac{\delta}{\mu} \big[\big(\frac{m \sigma + \mu}{m \sigma}\big)^{m} \big(\frac{n \gamma + \mu}{n \gamma}\big)^{n} - 1\big]}\,,
+\bar{R} = \frac{1 - \frac{\mu}{\beta N} \big(\frac{m \sigma + \mu}{m \sigma}\big)^{m} \big/ \big[1 - \big(\frac{n \gamma + \mu}{n \gamma}\big)^{-n}\big]}{\big(\frac{m \sigma + \mu}{m \sigma}\big)^{m} \big(\frac{n \gamma + \mu}{n \gamma}\big)^{n} + \frac{\delta}{\mu} \big[\big(\frac{m \sigma + \mu}{m \sigma}\big)^{m} \big(\frac{n \gamma + \mu}{n \gamma}\big)^{n} - 1\big]}\,,
 \end{equation}
 where $\bar{R}$ is chosen so that the sum is 1, but it exists only if
 \begin{equation}
-\mathcal{R}_{0} = \frac{\nu}{\mu} \frac{\beta}{\mu} \Big(\frac{m \sigma}{m \sigma + \mu}\Big)^{m} \Big[1 - \Big(\frac{n \gamma}{n \gamma + \mu}\Big)^{n}\Big] > 1\,.
+\mathcal{R}_{0} = \frac{\beta N}{\mu} \Big(\frac{m \sigma}{m \sigma + \mu}\Big)^{m} \Big[1 - \Big(\frac{n \gamma}{n \gamma + \mu}\Big)^{n}\Big] > 1\,.
 \end{equation}
 \clearpage
 
