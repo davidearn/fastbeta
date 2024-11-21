@@ -1,6 +1,6 @@
 seir <-
 function (length.out = 1L,
-          beta, nu = function(t) 0, mu = function(t) 0,
+          beta, nu = function (t) 0, mu = function (t) 0,
           sigma = 1, gamma = 1, delta = 0,
           m = 1L, n = 1L, init,
           stochastic = TRUE, prob = 1, delay = 1,
@@ -66,9 +66,9 @@ function (length.out = 1L,
 			c(list(`names<-`(c(-1, 1, 1), c("S", nms[2L], "Z"))),
 			  list(`names<-`(c(1, 1), c("S", "B"))),
 			  lapply(1L:p,
-			         function(i) `names<-`(-1, nms[i])),
+			         function (i) `names<-`(-1, nms[i])),
 			  lapply(2L:(p - 1L),
-			         function(i) `names<-`(c(-1, 1), nms[c(i, i + 1L)])),
+			         function (i) `names<-`(c(-1, 1), nms[c(i, i + 1L)])),
 			  list(`names<-`(c(1, -1), c("S", "R"))))
 		## infection, birth, natural mortality, removal, loss of immunity
 
@@ -319,7 +319,7 @@ function (length.out = 1L,
 	}
 
 	if (!stochastic &&
-	    !is.null((function(rootfunc = NULL, ...) rootfunc)(...)))
+	    !is.null((function (rootfunc = NULL, ...) rootfunc)(...)))
 		for (nm in grep("root", names(attributes(x.)), value = TRUE))
 			attr(x, nm) <- attr(x., nm)
 
@@ -418,7 +418,7 @@ function (x, m, n)
 
 sir <-
 function (length.out = 1L,
-          beta, nu = function(t) 0, mu = function(t) 0,
+          beta, nu = function (t) 0, mu = function (t) 0,
           gamma = 1, delta = 0,
           n = 1L, init,
           stochastic = TRUE, prob = 1, delay = 1,

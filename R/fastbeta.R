@@ -176,11 +176,11 @@ if (FALSE) {
 				matrix(c(0.5, 0.5, double(n)), n + 1L, n + 1L))
 			L[1L] <- 1
 			b <- as.double(series[, 2L])
-			fn <- function(par) {
+			fn <- function (par) {
 				e <- as.double(L %*% exp(par) - b)
 				sum(e * e)
 			}
-			gr <- function(par) {
+			gr <- function (par) {
 				e <- as.double(L %*% exp(par) - b)
 				2 * exp(par) * colSums(e * a)
 			}
