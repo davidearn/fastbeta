@@ -349,9 +349,10 @@ function (beta, nu = 0, mu = 0, sigma = 1, gamma = 1, delta = 0,
 	if (mu == 0)
 		N * beta / gamma
 	else {
+		N <- nu / mu
 		a <- 1 + mu / (m * sigma)
 		b <- 1 + mu / (n * gamma)
-		nu / mu * beta / mu * a^-m * (1 - b^-n)
+		N * beta / mu * a^-m * (1 - b^-n)
 	}
 }
 
@@ -368,10 +369,11 @@ function (beta, nu = 0, mu = 0, sigma = 1, gamma = 1, delta = 0,
 		ans <- rep.int(c(S, E, I, R), c(1L, m, n, 1L))
 	}
 	else {
+		N <- nu / mu
 		a <- 1 + mu / (m * sigma)
 		b <- 1 + mu / (n * gamma)
-		S <- mu / nu * mu / beta * a^m / (1 - b^-n)
-		R <- (1 - S) / (a^m * b^n + delta / mu * (a^m * b^n - 1))
+		S <- mu / beta * a^m / (1 - b^-n)
+		R <- (N - S) / (a^m * b^n + delta / mu * (a^m * b^n - 1))
 		I <- cumprod(rep.int(c(R       * (delta + mu) / (n * gamma), b), c(1L, n - 1L)))[n:1L]
 		E <- if (m > 0L)
 		     cumprod(rep.int(c(R * b^n * (delta + mu) / (m * sigma), a), c(1L, m - 1L)))[m:1L]
