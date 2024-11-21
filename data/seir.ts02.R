@@ -18,7 +18,7 @@ delta <- 0
 
 m <- 1L
 n <- 1L
-init <- fastbeta:::seir.ee(beta(0), nu(0), mu(0), sigma, gamma, delta, m, n)
+init <- fastbeta::seir.ee(beta(0), nu(0), mu(0), sigma, gamma, delta, m, n)
 init <- trunc(init)
 
 length.out <- 52L * 55L
