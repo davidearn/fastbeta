@@ -10,9 +10,9 @@ and Jacobian matrix of the SEIR model without forcing.
 }
 \usage{
 seir.R0      (beta, nu = 0, mu = 0, sigma = 1, gamma = 1, delta = 0,
-              m = 1L, n = 1L)
+              m = 1L, n = 1L, N = 1)
 seir.ee      (beta, nu = 0, mu = 0, sigma = 1, gamma = 1, delta = 0,
-              m = 1L, n = 1L)
+              m = 1L, n = 1L, N = 1)
 seir.jacobian(beta, nu = 0, mu = 0, sigma = 1, gamma = 1, delta = 0,
               m = 1L, n = 1L)
 }
@@ -26,6 +26,9 @@ seir.jacobian(beta, nu = 0, mu = 0, sigma = 1, gamma = 1, delta = 0,
   a non-negative integer indicating a number of latent stages.}
 \item{n}{
   a positive integer indicating a number of infectious stages.}
+\item{N}{
+  a non-negative number indicating a population size for the
+  \code{(nu == 0 && mu == 0)} case.}
 }
 \value{
 \code{seir.R0} returns a numeric vector of length 1.  \code{seir.ee}

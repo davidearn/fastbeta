@@ -15,7 +15,7 @@ delta <- 0
 m <- 1L
 n <- 1L
 p <- m + n + 2L
-init <- fastbeta:::seir.ee(beta(0), nu(0), mu(0), sigma, gamma, delta, m, n)
+init <- seir.ee(beta(0), nu(0), mu(0), sigma, gamma, delta, m, n)
 
 stopifnot(exprs = {
 	is.double(init)
