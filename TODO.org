@@ -1,7 +1,6 @@
-* TODO fastbeta 0.3.1
+* DONE fastbeta 0.3.1
 
-** DONE 'seir' with option to give rowSums(x[, colnames(x) == "E"]), ditto "I"
-
-** DONE export, document 'fastbeta.matrix'
-
-** DONE 'seir' handling early termination due to root finding
+** DONE 'seir': provide option to aggregate infected subcompartments
+	rowSums(x[, colnames(x) == "E"]), ditto "I"
+** DONE 'fastbeta.matrix': export and document
+** DONE 'seir': handle early termination due to root finding
