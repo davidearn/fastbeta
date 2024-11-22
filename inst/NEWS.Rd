@@ -1,7 +1,7 @@
 \name{NEWS}
 \title{News for \R{} Package \pkg{fastbeta}}
 
-\section{Changes in version 0.3.1 (2024-11-21)}{
+\section{Changes in version 0.3.1 (2024-11-22)}{
   \subsection{INSTALLATION}{
     \itemize{
       \item Compilation now uses \option{-DSTRICT_R_HEADERS} and
