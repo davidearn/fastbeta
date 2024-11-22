@@ -2,13 +2,19 @@
 \title{News for \R{} Package \pkg{fastbeta}}
 
 \section{Changes in version 0.3.1 (2024-11-22)}{
-  \subsection{INSTALLATION}{
+  \subsection{Significant User-Visible Changes}{
     \itemize{
-      \item Compilation now uses \option{-DSTRICT_R_HEADERS} and
-      \option{-DR_NO_REMAP}.
+      \item Formal argument \code{init} of \code{fastbeta},
+      \code{fastbeta.bootstrap}, \code{ptpi}, and \code{seir} is
+      repositioned.
+
+      \item Formal arguments \code{sigma} and \code{m} of
+      \code{fastbeta}, \code{fastbeta.bootstrap}, \code{ptpi}, and
+      \code{seir} have constant default values (\code{sigma = 1},
+      \code{m = 1L}) not depending on the values of other arguments.
     }
   }
-  \subsection{BUG FIXES}{
+  \subsection{Bug Fixes}{
     \itemize{
       \item Entry \code{[2, 2]} of the Jacobian matrix constructed by
       \code{seir(stochastic = FALSE, useCompiled = FALSE)} was wrong.
@@ -22,7 +28,7 @@
       \item Warnings caught by \option{-Wconversion} are squashed.
     }
   }
-  \subsection{NEW FEATURES}{
+  \subsection{New Features}{
     \itemize{
       \item \code{seir} gains logical argument \code{aggregate}
       indicating whether latent and infectious compartments should be
@@ -40,49 +46,16 @@
       coefficient matrix.
     }
   }
-  \subsection{SIGNIFICANT USER-VISIBLE CHANGES}{
+  \subsection{Installation}{
     \itemize{
-      \item Formal argument \code{init} of \code{fastbeta},
-      \code{fastbeta.bootstrap}, \code{ptpi}, and \code{seir} is
-      repositioned.
-
-      \item Formal arguments \code{sigma} and \code{m} of
-      \code{fastbeta}, \code{fastbeta.bootstrap}, \code{ptpi}, and
-      \code{seir} have constant default values (\code{sigma = 1},
-      \code{m = 1L}) not depending on the values of other arguments.
+      \item Compilation now uses \option{-DSTRICT_R_HEADERS} and
+      \option{-DR_NO_REMAP}.
     }
   }
 }
 
 \section{Changes in version 0.3.0 (2024-05-17)}{
-  \subsection{INSTALLATION}{
-    \itemize{
-      \item \pkg{adaptivetau} and \pkg{deSolve} are now suggested,
-      not imported, as they are only needed for simulation.
-      Usage of simulated data sets is now everywhere conditional on
-      successful loading of the dependency.
-    }
-  }
-  \subsection{BUG FIXES}{
-    \itemize{
-      \item More simulations set \code{tl.params = list(epsilon = .)}
-      to mitigate noise attributable to too big leaps in the adaptive
-      tau-leaping algorithm.
-
-      \item \code{plot} method for class \code{fastbeta.bootstrap}
-      uses \code{dev.hold} and \code{dev.flush} from \pkg{grDevices}
-      to avoid \dQuote{incremental} graphical output on some devices.
-    }
-  }
-  \subsection{NEW FEATURES}{
-    \itemize{
-      \item Compartmental model is generalized to support multiple
-      infected compartments, \eqn{m} latent and \eqn{n} infectious,
-      resulting in several backwards incompatible changes to the API;
-      see below.
-    }
-  }
-  \subsection{SIGNIFICANT USER-VISIBLE CHANGES}{
+  \subsection{Significant User-Visible Changes}{
     \itemize{
       \item Argument \code{constants} of functions \code{sir},
       \code{fastbeta}, \code{fastbeta.bootstrap}, and \code{ptpi} is
@@ -104,25 +77,37 @@
       the API of \code{seir}.
     }
   }
+  \subsection{Bug Fixes}{
+    \itemize{
+      \item More simulations set \code{tl.params = list(epsilon = .)}
+      to mitigate noise attributable to too big leaps in the adaptive
+      tau-leaping algorithm.
+
+      \item \code{plot} method for class \code{fastbeta.bootstrap}
+      uses \code{dev.hold} and \code{dev.flush} from \pkg{grDevices}
+      to avoid \dQuote{incremental} graphical output on some devices.
+    }
+  }
+  \subsection{New Features}{
+    \itemize{
+      \item Compartmental model is generalized to support multiple
+      infected compartments, \eqn{m} latent and \eqn{n} infectious,
+      resulting in several backwards incompatible changes to the API;
+      see below.
+    }
+  }
+  \subsection{Installation}{
+    \itemize{
+      \item \pkg{adaptivetau} and \pkg{deSolve} are now suggested,
+      not imported, as they are needed only for simulation.
+      Usage of simulated data sets is now everywhere conditional on
+      successful loading of the dependency.
+    }
+  }
 }
 
 \section{Changes in version 0.2.0 (2023-12-11)}{
-  \subsection{INSTALLATION}{
-    \itemize{
-      \item \file{data/*.R} are no longer copied to \file{inst/scripts}
-      at install time by a \command{make} rule in \file{src/Makevars}.
-      There is no need: the scripts are preserved due to the setting of
-      \code{BuildResaveData: no}.  Hence \file{src/Makevars} is removed.
-    }
-  }
-  \subsection{NEW FEATURES}{
-    \itemize{
-      \item Compartmental model is generalized to support loss of
-      immunity at rate \eqn{delta}, resulting in several backwards
-      incompatible changes to the API; see below.
-    }
-  }
-  \subsection{SIGNIFICANT USER-VISIBLE CHANGES}{
+  \subsection{Significant User-Visible Changes}{
     \itemize{
       \item \code{sir}
       expects \code{constants = c(S0, I0, R0, gamma, delta)},
@@ -152,31 +137,46 @@
       Simulation \code{sir.e02} gives the stochastic variant.
     }
   }
+  \subsection{New Features}{
+    \itemize{
+      \item Compartmental model is generalized to support loss of
+      immunity at rate \eqn{delta}, resulting in several backwards
+      incompatible changes to the API; see below.
+    }
+  }
+  \subsection{Installation}{
+    \itemize{
+      \item \file{data/*.R} are no longer copied to \file{inst/scripts}
+      at install time by a \command{make} rule in \file{src/Makevars}.
+      There is no need: the scripts are preserved due to the setting of
+      \code{BuildResaveData: no}.  Hence \file{src/Makevars} is removed.
+    }
+  }
 }
 
 \section{Changes in version 0.1.1 (2023-11-28)}{
-  \subsection{INSTALLATION}{
-    \itemize{
-      \item \file{data/*.R} are copied into \file{inst/scripts}
-      at install time by a \command{make} rule in \file{src/Makevars}.
-
-      \item \code{Depends: R (>= 4.3.0)} for \verb{amsmath} in PDF
-      output, which was not supported until 4.2.2.
-    }
-  }
-  \subsection{BUG FIXES}{
+  \subsection{Bug Fixes}{
     \itemize{
       \item Typo in \file{src/sir.c} triggering \option{-Wformat}
       is fixed.
     }
   }
-  \subsection{NEW FEATURES}{
+  \subsection{New Features}{
     \itemize{
       \item Changes are logged in \file{inst/NEWS.Rd}.
 
       \item \file{DESCRIPTION} sets \code{BuildResaveData: no},
       so that \command{R CMD build} works without
       \option{--no-resave-data} when \pkg{fastbeta} is not installed.
+    }
+  }
+  \subsection{Installation}{
+    \itemize{
+      \item \file{data/*.R} are copied into \file{inst/scripts}
+      at install time by a \command{make} rule in \file{src/Makevars}.
+
+      \item \code{Depends: R (>= 4.3.0)} for \verb{amsmath} in PDF
+      output, which was not supported until 4.2.2.
     }
   }
 }
