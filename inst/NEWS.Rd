@@ -29,7 +29,7 @@
       aggregated.
 
       \item \code{seir} arguments \code{nu} and \code{mu} gain
-      default values.  In both cases, it is \code{function(t) 0},
+      default values.  In both cases, it is \code{function (t) 0},
       indicating no vital dynamics.
 
       \item \code{seir.R0}, \code{seir.ee}, and \code{seir.jacobian} for

@@ -116,7 +116,8 @@ system of ordinary differential equations
   &{} = {}&   n \gamma &I^{j} &{} - ( &&   n \gamma &{} + \mu(t)) I^{j + 1} &{}          \\
   \text{d} & R         &{} / \text{d} t
   &{} = {}&   n \gamma &I^{n} &{} - ( &&     \delta &{} + \mu(t)) R         &{}
-  \end{alignedat} \\
+  \end{alignedat}
+  \\
   \lambda(t) = \beta(t) \sum_{j} I^{j}
 }{
   dS       /dt =     delta * R    - ( lambda(t) + mu(t) ) * S        + nu(t)
@@ -134,11 +135,13 @@ time series of incidence and births, the system is augmented with two
 equations describing \emph{cumulative} incidence and births
 \deqn{
   \begin{aligned}
-  \text{d} Z / \text{dt} &{} = \lambda(t) S
+  \text{d} Z / \text{dt} &{} = \lambda(t) S \\
   \text{d} B / \text{dt} &{} = \nu(t)
   \end{aligned}
 }{
   dZ/dt = lambda(t) * S
+  %% Rd bug?  {0,1,2} newlines => {0,0,2} line breaks.
+
   dB/dt = nu(t)
 }
 and the \emph{augmented} system is numerically integrated.
@@ -186,7 +189,7 @@ delay <- diff(pgamma(0:8, 2.5))
 set.seed(0L)
 X <- seir(length.out, beta, nu, mu, sigma, gamma, delta, init = init,
           prob = prob, delay = delay, epsilon = 0.002)
-##                                                 ^^^^^^^
+##                                              ^^^^^
 ## default epsilon = 0.05 allows too big leaps => spurious noise
 ##
 str(X)

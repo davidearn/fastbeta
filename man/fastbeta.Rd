@@ -70,7 +70,8 @@ equations
   &{} = {}&   n \gamma &I^{j} &{} - ( &&   n \gamma &{} + \mu(t)) I^{j + 1} &{}          \\
   \text{d} & R         &{} / \text{d} t
   &{} = {}&   n \gamma &I^{n} &{} - ( &&     \delta &{} + \mu(t)) R         &{}
-  \end{alignedat} \\
+  \end{alignedat}
+  \\
   \lambda(t) = \beta(t) \sum_{j} I^{j}
 }{
   dS       /dt =     delta * R    - ( lambda(t) + mu(t) ) * S        + nu(t)
@@ -106,7 +107,8 @@ approximation of \eqn{\beta}:
   &S_{t + 1}
   &{} = {}& [(1 - \tfrac{1}{2} ( &            \mu_{t})) & S_{t}         &{} + {}& \tfrac{1}{2} &   \delta ( & R_{t}     &{} + {}& R_{t + 1}     & ) &{} - Z_{t + 1} &{} + B_{t + 1}] &{} /
   [1 + \tfrac{1}{2} ( &            \mu_{t + 1})]
-  \end{alignedat} \\
+  \end{alignedat}
+  \\
   \beta_{t} = (Z_{t} + Z_{t + 1}) / (2 S_{t} \sum_{j} I_{t}^{j})
 }{
   E[t + 1,     1] = ( (1 - 0.5 * (m * sigma + mu[t])) * E[t, 1]                                             + Z[t + 1]            ) / ( 1 + 0.5 * (m * sigma + mu[t + 1]) )
