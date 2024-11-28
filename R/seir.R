@@ -1,6 +1,6 @@
 seir <-
 function (length.out = 1L,
-          beta, nu = function(t) 0, mu = function(t) 0,
+          beta, nu = function (t) 0, mu = function (t) 0,
           sigma = 1, gamma = 1, delta = 0,
           m = 1L, n = 1L, init,
           stochastic = TRUE, prob = 1, delay = 1,
@@ -13,7 +13,7 @@ function (length.out = 1L,
 	          is.function(mu  ) && !is.null(formals(mu  )),
 	          is.double(sigma) && length(sigma) == 1L && sigma >= 0,
 	          is.double(gamma) && length(gamma) == 1L && gamma >= 0,
-	          is.double(delta) && length(delta) == 1L && sigma >= 0,
+	          is.double(delta) && length(delta) == 1L && delta >= 0,
 	          is.integer(m) && length(m) == 1L && m >= 0L && m < 4096L,
 	          is.integer(n) && length(n) == 1L && n >= 1L && n < 4096L,
 	          is.double(init),
@@ -66,9 +66,9 @@ function (length.out = 1L,
 			c(list(`names<-`(c(-1, 1, 1), c("S", nms[2L], "Z"))),
 			  list(`names<-`(c(1, 1), c("S", "B"))),
 			  lapply(1L:p,
-			         function(i) `names<-`(-1, nms[i])),
+			         function (i) `names<-`(-1, nms[i])),
 			  lapply(2L:(p - 1L),
-			         function(i) `names<-`(c(-1, 1), nms[c(i, i + 1L)])),
+			         function (i) `names<-`(c(-1, 1), nms[c(i, i + 1L)])),
 			  list(`names<-`(c(1, -1), c("S", "R"))))
 		## infection, birth, natural mortality, removal, loss of immunity
 
@@ -319,7 +319,7 @@ function (length.out = 1L,
 	}
 
 	if (!stochastic &&
-	    !is.null((function(rootfunc = NULL, ...) rootfunc)(...)))
+	    !is.null((function (rootfunc = NULL, ...) rootfunc)(...)))
 		for (nm in grep("root", names(attributes(x.)), value = TRUE))
 			attr(x, nm) <- attr(x., nm)
 
@@ -334,34 +334,50 @@ function (length.out = 1L,
 
 seir.R0 <-
 function (beta, nu = 0, mu = 0, sigma = 1, gamma = 1, delta = 0,
-          m = 1L, n = 1L)
+          m = 1L, n = 1L, N = 1)
 {
-	sigma <- sigma * m
-	gamma <- gamma * n
-	delta <- delta * 1
-	(nu / mu) * (sigma / (sigma + mu))^m * (beta / (gamma + mu)) *
-		sum(cumprod(rep.int(c(1, gamma / (gamma + mu)), c(1L, n - 1L))))
+	stopifnot(is.double( beta) && length( beta) == 1L &&  beta >= 0,
+	          is.double(   nu) && length(   nu) == 1L &&    nu >= 0,
+	          is.double(   mu) && length(   mu) == 1L &&    mu >= 0,
+	          is.double(sigma) && length(sigma) == 1L && sigma >  0,
+	          is.double(gamma) && length(gamma) == 1L && gamma >  0,
+	          is.double(delta) && length(delta) == 1L && delta >= 0,
+	          is.integer(m) && length(m) == 1L && m >= 0L,
+	          is.integer(n) && length(n) == 1L && n >= 1L,
+	          is.double(N) && length(N) == 1L && N >= 0,
+	          (nu > 0) == (mu > 0))
+	if (mu == 0)
+		N * beta / gamma
+	else {
+		N <- nu / mu
+		a <- 1 + mu / (m * sigma)
+		b <- 1 + mu / (n * gamma)
+		N * beta / mu * a^-m * (1 - b^-n)
+	}
 }
 
 seir.ee <-
 function (beta, nu = 0, mu = 0, sigma = 1, gamma = 1, delta = 0,
-          m = 1L, n = 1L)
+          m = 1L, n = 1L, N = 1)
 {
-	sigma <- sigma * m
-	gamma <- gamma * n
-	delta <- delta * 1
-	y <- cumprod(rep.int((c(delta, gamma) + mu) / gamma, c(1L, n - 1L)))
-	if (m == 0L) {
-		S. <- (tmp <- (gamma + mu) * y[n]) / beta / sum(y)
-		R. <- (nu - mu * S.) / (tmp - delta)
-		ans <- c(S., y[n:1L] * R., R.)
+	stopifnot(seir.R0(beta, nu, mu, sigma, gamma, delta, m, n, N) >= 1)
+	if (mu == 0) {
+		S <- gamma / beta
+		R <- (N - S) / (1 + delta * ((if (m > 0L) 1 / sigma else 0) + 1 / gamma))
+		I <- R * delta / (n * gamma)
+		E <- R * delta / (m * sigma)
+		ans <- rep.int(c(S, E, I, R), c(1L, m, n, 1L))
 	}
 	else {
-		x <- cumprod(rep.int((c(gamma, sigma) + mu) / sigma, c(1L, m - 1L))) *
-			y[n]
-		S. <- (tmp <- (sigma + mu) * x[m]) / beta / sum(y)
-		R. <- (nu - mu * S.) / (tmp - delta)
-		ans <- c(S., x[m:1L] * R., y[n:1L] * R., R.)
+		N <- nu / mu
+		a <- 1 + mu / (m * sigma)
+		b <- 1 + mu / (n * gamma)
+		S <- mu / beta * a^m / (1 - b^-n)
+		R <- (N - S) / (a^m * b^n + delta / mu * (a^m * b^n - 1))
+		I <- cumprod(rep.int(c(R       * (delta + mu) / (n * gamma), b), c(1L, n - 1L)))[n:1L]
+		E <- if (m > 0L)
+		     cumprod(rep.int(c(R * b^n * (delta + mu) / (m * sigma), a), c(1L, m - 1L)))[m:1L]
+		ans <- c(S, E, I, R)
 	}
 	names(ans) <- rep.int(c("S", "E", "I", "R"), c(1L, m, n, 1L))
 	ans
@@ -418,7 +434,7 @@ function (x, m, n)
 
 sir <-
 function (length.out = 1L,
-          beta, nu = function(t) 0, mu = function(t) 0,
+          beta, nu = function (t) 0, mu = function (t) 0,
           gamma = 1, delta = 0,
           n = 1L, init,
           stochastic = TRUE, prob = 1, delay = 1,

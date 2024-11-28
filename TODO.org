@@ -1,7 +1,18 @@
-* TODO fastbeta 0.3.1
+* TODO fastbeta 0.3.2
 
-** DONE 'seir' with option to give rowSums(x[, colnames(x) == "E"]), ditto "I"
+** TODO less boilerplate in examples and tests
+	The main problems stem from subscripting the time series that are
+	needed and from getting parameters values stored as attributes into
+	a call.  The wrangling is not interesting or useful and it gives the
+	impression that usage is complicated.
+** TODO more comprehensive tests for correctness
+	Notably, for deterministic simulations, it should be tested that
+	the back-calculated time series are equal to the latent ones within
+	a tolerance.  This applies to 'fastbeta', 'ptpi', and 'deconvolve'.
 
-** DONE export, document 'fastbeta.matrix'
+* DONE fastbeta 0.3.1
 
-** DONE 'seir' handling early termination due to root finding
+** DONE 'seir': provide option to aggregate infected subcompartments
+	rowSums(x[, colnames(x) == "E"]), ditto "I"
+** DONE 'fastbeta.matrix': export and document
+** DONE 'seir': handle early termination due to root finding
