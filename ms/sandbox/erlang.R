@@ -86,7 +86,8 @@ function (from = 0, to = from + 1, by = 1,
     init <- c(init[1L], init[2L] * (ydis/sum(ydis)), 1 - sum(init))
     if (min(init[-1L]) == 0) {
         ## fastbeta::seir handles E[i], I[j], R on logarithmic scale
-        warning("setting zero-valued E[i], I[j], R to 2^-256")
+        warning(warningCondition("setting zero-valued E[i], I[j], R to 2^-256",
+                                 class = "zeroReplacedWarning"))
         init[-1L][init[-1L] == 0] <- 0x1p-256 # == 2^-256
         init <- init/sum(init)
     }
