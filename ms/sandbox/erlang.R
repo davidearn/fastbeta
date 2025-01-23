@@ -1,9 +1,6 @@
 ##  Nondimensionalized interface to fastbeta::seir also computing some
 ##  summary statistics
 ##
-##  TODO: separate simulation and computation of summary statistics;
-##        do the latter in a method for 'summary'.
-##
 ##  [in]  from, to, by  define a sequence of increasing time points in
 ##                      units of the mean generation interval.
 ##  [in]            R0  the basic reproduction number.
@@ -19,6 +16,8 @@
 ##                      compartments.
 ##  [in]          init  initial state c(X, Y), 0 <= X, Y, X+Y <= 1;
 ##                      X, Y are the susceptible, infected proportions.
+##  [in]            yi  initial prevalence.  It is an error to set both
+##                      'init' and 'yi'.
 ##  [in]          ydis  numeric vector of length m+n containing weights
 ##                      such that init[2] * ydis/sum(ydis) gives the
 ##                      initial distribution of infecteds over the m+n
@@ -39,25 +38,37 @@
 ## [out]          peak  c(tp, yp), the time at which prevalence Y
 ##                      attains a local maximum and the corresponding
 ##                      value.  NaN means that Y' never changed sign.
+## [out]          call  the original call to 'erlang' after matching and
+##                      evaluation of arguments.
 erlang <-
 function (from = 0, to = from + 1, by = 1,
           R0,
-          sigma = gamma/(gamma - 2 * n * (n + 1)),
-          gamma = 2 * n * (n + 1) * sigma/(sigma - 1),
+          sigma = 1/(1 - 1/gamma * (n + 1)/(2 * n)),
+          gamma = 1/((1 - 1/sigma) * (2 * n)/(n + 1)),
           m = 1L,
           n = 1L,
-          init = c(1, 0),
-          ydis = c(1, double(m + n - 1L)),
+          init = c(1 - yi, yi),
+          yi = 0x1p-10, # == 2^-10
+          ydis = rep(c(1, 0), c(1L, m + n - 1L)),
           smooth = TRUE, smooth.by = by * 1e-2, ...) {
+    call <- match.call(expand.dots = FALSE)
+    call <- as.call(c(list(quote(erlang)),
+                      mget(names(call)[-c(1L, length(call))]),
+                      list(...)))
     ## NB: This function works in units of the mean generation interval.
     ##     fastbeta::seir works in units of the observation interval.
     ##     Hence: sigma -> sigma * by, gamma -> gamma * by
     t <- seq.int(from = from, to = to, by = by)
     m <- as.integer(m)
     n <- as.integer(n)
-    stopifnot(length(t) >= 2L, t[1L] < t[2L], m >= 0L, n >= 1L,
+    stopifnot(length(t) >= 2L, t[1L] < t[2L],
               is.double(R0), length(R0) == 1L, R0 >= 0,
-              missing(sigma) || missing(gamma),
+              m >= 0L,
+              n >= 1L,
+              if (m == 0L)
+                  missing(sigma) && missing(gamma)
+              else missing(sigma) || missing(gamma),
+              missing(init) || missing(yi),
               is.double(init),
               length(init) == 2L,
               all(is.finite(init)),
@@ -69,13 +80,14 @@ function (from = 0, to = from + 1, by = 1,
               min(ydis) >= 0,
               sum(ydis) > 0)
     if (missing(sigma) && missing(gamma))
-        sigma <- 2 # or any number greater than 1
+        sigma <- if (m == 0L) Inf else 2 # or any number greater than 1
     beta <- function (t) {}
     body(beta, envir = emptyenv()) <- R0 * gamma * by
     init <- c(init[1L], init[2L] * (ydis/sum(ydis)), 1 - sum(init))
     if (min(init[-1L]) == 0) {
         ## fastbeta::seir handles E[i], I[j], R on logarithmic scale
-        init[-1L][init[-1L] == 0] <- 0x1p-256
+        warning("setting zero-valued E[i], I[j], R to 2^-256")
+        init[-1L][init[-1L] == 0] <- 0x1p-256 # == 2^-256
         init <- init/sum(init)
     }
     out <- fastbeta::seir(length.out = length(t), beta = beta,
@@ -86,7 +98,8 @@ function (from = 0, to = from + 1, by = 1,
     ## Y=(E+I)/N
     y <- rowSums(out[, 2L:(1L + m + n), drop = FALSE])
     ans <- list(t = t, x = x, y = y,
-                exponent = c(NaN, NaN), peak = c(NaN, NaN))
+                exponent = c(NaN, NaN), peak = c(NaN, NaN),
+                call = call)
     ## NaN => nonincreasing head(Y) or nondecreasing tail(Y)
     if (max(y) <= 0)
         return(ans)
