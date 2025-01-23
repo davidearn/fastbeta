@@ -49,7 +49,7 @@ function (from = 0, to = from + 1, by = 1,
           n = 1L,
           init = c(1 - yi, yi),
           yi = 0x1p-10, # == 2^-10
-          ydis = rep(c(1, 0), c(1L, m + n - 1L)),
+          ydis = rep(c(1, 0x1p-256), c(1L, m + n - 1L)),
           smooth = TRUE, smooth.by = by * 1e-2, ...) {
     call <- match.call(expand.dots = FALSE)
     call <- as.call(c(list(quote(erlang)),
