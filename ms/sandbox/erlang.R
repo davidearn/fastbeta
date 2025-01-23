@@ -100,6 +100,10 @@ function (from = 0, to = from + 1, by = 1,
     y <- rowSums(out[, 2L:(1L + m + n), drop = FALSE])
     ans <- list(t = t, x = x, y = y,
                 exponent = c(NaN, NaN), peak = c(NaN, NaN),
+                from = from, to = to, by = by,
+                R0 = R0, sigma = sigma, gamma = gamma,
+                m = m, n = n, init = init, ydis = ydis,
+                smooth = smooth, smooth.by = smooth.by,
                 call = call)
     ## NaN => nonincreasing head(Y) or nondecreasing tail(Y)
     if (max(y) <= 0)
