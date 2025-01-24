@@ -18,7 +18,7 @@
 ##                      such that yw/sum(yw) is the initial distribution
 ##                      of infecteds over the m+n infected compartments.
 ## [out] tau, x, ye, y  define time series of X=S/N, YE=E/N, Y=(E+I)/N.
-## [out]      exponent  numeric vector of length 2 containing the
+## [out]          rate  numeric vector of length 2 containing the
 ##                      exponential rate of change at the start and end
 ##                      of the time series.  The first element is
 ##                      positive if head(Y) is increasing, else NaN.
@@ -89,7 +89,7 @@ function (from = 0, to = from + 1, by = 1,
     y  <- rowSums(out[, (1L + 1L):(1L + m + n), drop = FALSE])
     }
     ans <- list(tau = tau, x = x, ye = if (m > 0L) ye, y = y,
-                exponent = rep(NaN, 4L), peak = rep(NaN, 4L),
+                rate = rep(NaN, 4L), peak = rep(NaN, 4L),
                 from = from, to = to, by = by,
                 R0 = R0, ell = ell, m = m, n = n, init = init, yw = yw,
                 call = call)
@@ -100,8 +100,8 @@ function (from = 0, to = from + 1, by = 1,
         if (y[1L] >= y[2L])
             1L
         else {
-            ## Start once exponential growth rate of Y is nonincreasing
-            ## to not be misled by transient behaviour
+            ## Start once exponential rate of change of Y is
+            ## nonincreasing to not be misled by transient behaviour
             i <- 2L; j <- 3L; r <- y[2L]/y[1L]
             j. <- length(y)
             while (j <= j. && r < (tmp <- y[j]/y[i])) {
@@ -120,7 +120,7 @@ function (from = 0, to = from + 1, by = 1,
             max(2L, w[length(w)])
         }
     y. <- y[c(start + 0:1, end - 1:0)]
-    ans[["exponent"]] <- tmp <-
+    ans[["rate"]] <- tmp <-
         c(if (y.[1L] < y.[2L]) (log(y.[2L]) - log(y.[1L]))/by else NaN,
           if (y.[3L] > y.[4L]) (log(y.[4L]) - log(y.[3L]))/by else NaN)
     if (!anyNA(tmp)) {

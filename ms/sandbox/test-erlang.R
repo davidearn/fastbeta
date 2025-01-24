@@ -24,7 +24,7 @@ close(con)
 ll.num <-
 suppressWarnings(classes = "zeroReplacedWarning",
 t(mapply(function(R0, ell)
-             erlang(to = 256, by = 1/8, R0 = R0, ell = ell)$exponent,
+             erlang(to = 256, by = 1/8, R0 = R0, ell = ell)$rate,
          R0 = tt$R0, ell = tt$ell))
 )
 
