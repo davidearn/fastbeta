@@ -37,11 +37,9 @@ erlang <-
 function (from = 0, to = from + 1, by = 1,
           R0, ell = if (m == 0L) 0 else (2 * n)/(3 * n + 1),
           m = 1L, n = 1L, init = c(1 - y0, y0),
-          y0 = 0x1p-64, yw = rep(c(1, 0), c(1L, m + n - 1L)), ...) {
-    call <- match.call(expand.dots = FALSE)
-    call <- as.call(c(list(quote(erlang)),
-                      mget(names(call)[-c(1L, if (...length()) length(call))]),
-                      list(...)))
+          y0 = 0x1p-64, yw = rep(c(1, 0), c(1L, m + n - 1L))) {
+    call <- match.call()
+    call <- as.call(c(list(quote(erlang)), mget(names(call)[-1L])))
     ## NB: This function works in units of the mean generation interval.
     ##     fastbeta::seir works in units of the observation interval.
     tau <- seq.int(from = from, to = to, by = by)
