@@ -31,6 +31,8 @@
 ##                      values of X, YE, and Y.  If Y is monotone, then
 ##                      all of the elements are NaN.  If m=0, then the
 ##                      third element is NaN.
+## [out]yepeak, yipeak  numeric vectors of length giving E[i]/N, I[j]/N
+##                      at the peak time.
 ## [out]          call  original function call after matching and
 ##                      evaluation of arguments.
 erlang <-
@@ -88,6 +90,7 @@ function (from = 0, to = from + 1, by = 1,
     }
     ans <- list(tau = tau, x = x, ye = if (m > 0L) ye, y = y,
                 rate = rep(NaN, 4L), peak = rep(NaN, 4L),
+				yepeak = NULL, yipeak = NULL,
                 from = from, to = to, by = by,
                 R0 = R0, ell = ell, m = m, n = n, init = init, yw = yw,
                 call = call)
@@ -126,6 +129,12 @@ function (from = 0, to = from + 1, by = 1,
         ans[["peak"]] <-
             c(tau = tau[w], x = x[w], ye = if (m > 0L) ye[w] else NaN,
               y = y[w])
+        if (m == 0L)
+        ans[["yipeak"]] <- as.double(out[w, (1L +     1L):(1L +     n)])
+        else {
+        ans[["yepeak"]] <- as.double(out[w, (1L +     1L):(1L + m    )])
+        ans[["yipeak"]] <- as.double(out[w, (1L + m + 1L):(1L + m + n)])
+        }
     }
     ans
 }
