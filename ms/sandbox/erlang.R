@@ -67,17 +67,17 @@ function (from = 0, to = from + 1, by = 1,
     sigma <- by/ell
     gamma <- by/(1 - ell) * (n + 1)/(2 * n)
     body(beta, envir = emptyenv()) <- R0 * gamma
-    init <- c(init[1L], yw/sum(yw) * init[2L], 1 - sum(init))
-    if (min(init[-1L]) == 0) {
+    init. <- c(init[1L], yw/sum(yw) * init[2L], 1 - sum(init))
+    if (min(init.[-1L]) == 0) {
         ## fastbeta::seir handles E[i], I[j], R on logarithmic scale
         warning(warningCondition("setting zero-valued E[i], I[j], R to 2^-256",
                                  class = "zeroReplacedWarning"))
-        init[-1L][init[-1L] == 0] <- 0x1p-256 # == 2^-256
-        init <- init/sum(init)
+        init.[-1L][init.[-1L] == 0] <- 0x1p-256 # == 2^-256
+        init. <- init./sum(init.)
     }
     out <- fastbeta::seir(length.out = length(tau),
                           beta = beta, sigma = sigma, gamma = gamma,
-                          m = m, n = n, init = init,
+                          m = m, n = n, init = init.,
                           stochastic = FALSE)
     x  <- as.double(out[, 1L])
     if (m == 0L)
