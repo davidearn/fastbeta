@@ -89,52 +89,75 @@ function (from = 0, to = from + 1, by = 1,
     y  <- rowSums(out[, (1L + 1L):(1L + m + n), drop = FALSE])
     }
     ans <- list(tau = tau, x = x, ye = if (m > 0L) ye, y = y,
-                rate = rep(NaN, 4L), peak = rep(NaN, 4L),
-				yepeak = NULL, yipeak = NULL,
+                rate = NULL, peak = NULL,
                 from = from, to = to, by = by,
                 R0 = R0, ell = ell, m = m, n = n, init = init, yw = yw,
                 call = call)
-    ## NaN => nonincreasing head(Y) or nondecreasing tail(Y)
-    if (max(y) <= 0)
-        return(ans)
-    start <-
-        if (y[1L] >= y[2L])
-            1L
-        else {
-            ## Start once exponential rate of change of Y is
-            ## nonincreasing to not be misled by transient behaviour
-            i <- 2L; j <- 3L; r <- y[2L]/y[1L]
-            j. <- length(y)
-            while (j <= j. && r < (tmp <- y[j]/y[i])) {
-                i <- j
-                j <- j + 1L
-                r <- tmp
-            }
-            i - 1L
-        }
     end <-
         if (y[length(y)] > 0)
             length(y)
         else {
             ## End at last nonzero Y as Y underflowed to zero
+            ## MJ: option to not invert logarithm in fastbeta::seir (?)
             w <- which(y > 0)
             max(2L, w[length(w)])
         }
-    y. <- y[c(start + 0:1, end - 1:0)]
-    ans[["rate"]] <- tmp <-
-        c(if (y.[1L] < y.[2L]) (log(y.[2L]) - log(y.[1L]))/by else NaN,
-          if (y.[3L] > y.[4L]) (log(y.[4L]) - log(y.[3L]))/by else NaN)
-    if (!anyNA(tmp)) {
-        w <- which.max(y)
-        ans[["peak"]] <-
-            c(tau = tau[w], x = x[w], ye = if (m > 0L) ye[w] else NaN,
-              y = y[w])
-        if (m == 0L)
-        ans[["yipeak"]] <- as.double(out[w, (1L +     1L):(1L +     n)])
-        else {
-        ans[["yepeak"]] <- as.double(out[w, (1L +     1L):(1L + m    )])
-        ans[["yipeak"]] <- as.double(out[w, (1L + m + 1L):(1L + m + n)])
-        }
+    ## Return early if head(Y) nonincreasing or tail(Y) nondecreasing
+    if (y[1L] >= y[2L] || y[end - 1L] <= y[end])
+        return(ans)
+    w <- which.max(y)
+    rate <- c(NaN, (log(y[end]) - log(y[end - 1L]))/by)
+    peak.full <- list(tau = tau[w], x = x[w], ye = NULL, yi = NULL)
+    if (m == 0L)
+    peak.full[["yi"]] <- as.double(out[w, (1L +     1L):(1L +     n)])
+    else {
+    peak.full[["ye"]] <- as.double(out[w, (1L +     1L):(1L + m    )])
+    peak.full[["yi"]] <- as.double(out[w, (1L + m + 1L):(1L + m + n)])
     }
+    peak <- c(tau = tau[w], x = x[w], ye = NaN, y = NaN)
+    if (m == 0L)
+    peak[["y" ]] <- sum(peak.full[["yi"]])
+    else {
+    peak[["ye"]] <- sum(peak.full[["ye"]])
+    peak[["y" ]] <- sum(peak.full[["ye"]], peak.full[["yi"]])
+    }
+    if (w >= 6L) {
+        z <- as.double(out[, 1L + m + n + 2L])
+        tau. <- tau[4L:w]
+        z. <- z[5L:w]
+        size <- x[1L] + Wp(-R0 * x[1L] * exp(-R0 * x[1L] + y[1L]))/R0
+        f <- function(par) sum((diff(size/(1 + exp(-exp(par) * (tau. - tau.[w - 3L])))) - z.)^2)
+        rate[1L] <- exp(optimize(f, c(-100, 100))[["minimum"]])
+    }
+    ans[["rate"]] <- rate
+    ans[["peak"]] <- peak
     ans
+}
+
+Wp <-
+function(z, iter.max = 10L, eps = 100 * .Machine[["double.eps"]]) {
+    stopifnot(is.double(z), all(is.finite(r <- range(0, z))),
+              r[1L] >= -exp(-1), r[2L] <= 0,
+              is.integer(iter.max), length(iter.max) == 1L, !is.na(iter.max),
+              is.double(eps), length(eps) == 1L, is.finite(eps), eps >= 0)
+    w <- sqrt(2 * exp(1) * z + 2) - 1
+    iter <- 0L
+    done <- FALSE
+    while (iter < iter.max) {
+        p <- exp(w)
+        t <- w * p - z
+        f <- w != -1
+        w <- w - f * t / (p * (w + f) - 0.5 * (w + 2) * t / (w + f))
+        aok <- all(ok <- is.finite(t) & is.finite(w)) # ever not TRUE?
+        if (all(abs(if (aok) t else t[ok]) <= eps * (1 + abs(if (aok) w else w[ok])))) {
+            done <- TRUE
+            break
+        }
+        iter <- iter - 1L
+    }
+    if (!done)
+        warning(gettextf("iteration limit (%d) reached in Lambert W approximation",
+                         iter.max),
+                domain = NA)
+    w
 }
