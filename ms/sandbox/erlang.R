@@ -31,8 +31,10 @@
 ##                      values of X, YE, and Y.  If Y is monotone, then
 ##                      all of the elements are NaN.  If m=0, then the
 ##                      third element is NaN.
-## [out]yepeak, yipeak  numeric vectors of length giving E[i]/N, I[j]/N
-##                      at the peak time.
+## [out]     peak.info  list of length 3 of the form
+##                      list(ye.sub, yi.sub, curvature) storing E[i]/N,
+##                      I[j]/N and Y''=((E+I)/N)'' at time peak["tau"].
+##                      If m=0, then the first element is NULL.
 ## [out]          call  original function call after matching and
 ##                      evaluation of arguments.
 erlang <-
@@ -89,7 +91,7 @@ function (from = 0, to = from + 1, by = 1,
     y  <- rowSums(out[, (1L + 1L):(1L + m + n), drop = FALSE])
     }
     ans <- list(tau = tau, x = x, ye = if (m > 0L) ye, y = y,
-                rate = NULL, peak = NULL,
+                rate = NULL, peak = NULL, peak.info = NULL,
                 from = from, to = to, by = by,
                 R0 = R0, ell = ell, m = m, n = n, init = init, yw = yw,
                 call = call)
@@ -106,31 +108,54 @@ function (from = 0, to = from + 1, by = 1,
     if (y[1L] >= y[2L] || y[end - 1L] <= y[end])
         return(ans)
     w <- which.max(y)
-    rate <- c(NaN, (log(y[end]) - log(y[end - 1L]))/by)
-    peak.full <- list(tau = tau[w], x = x[w], ye = NULL, yi = NULL)
-    if (m == 0L)
-    peak.full[["yi"]] <- as.double(out[w, (1L +     1L):(1L +     n)])
-    else {
-    peak.full[["ye"]] <- as.double(out[w, (1L +     1L):(1L + m    )])
-    peak.full[["yi"]] <- as.double(out[w, (1L + m + 1L):(1L + m + n)])
+    peak.info <- list(ye.sub = NULL, yi.sub = NULL, curvature = NULL)
+    ## y''
+    ## = (beta S I - n gamma I[n])'
+    ## = beta (S I' + S' I) - n gamma I[n]'
+    if (m == 0L) {
+    peak.info[["yi.sub"]] <- i.. <- as.double(out[w, (1L +     1L):(1L +     n)])
+    peak.info[["curvature"]] <-
+        {
+            s <- x[w]
+            i <- sum(i..)
+            beta <- beta(0)/by
+            gamma <- gamma/by
+            beta * (s * (beta * s * i - n * gamma * i..[n]) + (-beta * s * i) * i) -
+                n * gamma * ((if (n == 1L) beta * s * i else n * gamma * i..[n - 1L]) - n * gamma * i..[n])
+        }
+    } else {
+    peak.info[["ye.sub"]] <- e.. <- as.double(out[w, (1L +     1L):(1L + m    )])
+    peak.info[["yi.sub"]] <- i.. <- as.double(out[w, (1L + m + 1L):(1L + m + n)])
+    peak.info[["curvature"]] <-
+        {
+            s <- x[w]
+            i <- sum(i..)
+            beta <- beta(0)/by
+            gamma <- gamma/by
+            beta * (s * (m * sigma * e..[m] - n * gamma * i..[n]) + (-beta * s * i) * i) -
+                n * gamma * ((if (n == 1L) m * sigma * e..[m] else n * gamma * i..[n - 1L]) - n * gamma * i..[n])
+        }
     }
     peak <- c(tau = tau[w], x = x[w], ye = NaN, y = NaN)
     if (m == 0L)
-    peak[["y" ]] <- sum(peak.full[["yi"]])
+    peak[["y" ]] <- sum(i..)
     else {
-    peak[["ye"]] <- sum(peak.full[["ye"]])
-    peak[["y" ]] <- sum(peak.full[["ye"]], peak.full[["yi"]])
+    peak[["ye"]] <- sum(e..)
+    peak[["y" ]] <- sum(e.., i..)
     }
+    rate <- c(NaN, (log(y[end]) - log(y[end - 1L]))/by)
     if (w >= 6L) {
         z <- as.double(out[, 1L + m + n + 2L])
-        tau. <- tau[4L:w]
-        z. <- z[5L:w]
-        size <- x[1L] + Wp(-R0 * x[1L] * exp(-R0 * x[1L] + y[1L]))/R0
-        f <- function(par) sum((diff(size/(1 + exp(-exp(par) * (tau. - tau.[w - 3L])))) - z.)^2)
+        w. <- which.max(z)
+        tau. <- tau[4L:w.]
+        z. <- z[5L:w.]
+        size <- x[1L] + Wp(-R0 * x[1L] * exp(-R0 * (x[1L] + y[1L])))/R0
+        f <- function(par) sum((diff(size/(1 + exp(-exp(par) * (tau. - tau.[w. - 3L])))) - z.)^2)
         rate[1L] <- exp(optimize(f, c(-100, 100))[["minimum"]])
     }
-    ans[["rate"]] <- rate
-    ans[["peak"]] <- peak
+    ans[["rate"     ]] <- rate
+    ans[["peak"     ]] <- peak
+    ans[["peak.info"]] <- peak.info
     ans
 }
 
