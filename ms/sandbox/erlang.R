@@ -84,6 +84,7 @@ function (from = 0, to = from + 1, by = 1,
                           beta = beta, sigma = sigma, gamma = gamma,
                           m = m, n = n, init = init.,
                           stochastic = FALSE)
+    length(tau) <- nrow(out) # in case of early termination
     x  <- as.double(out[, 1L])
     if (m == 0L)
     y  <- rowSums(out[, (1L + 1L):(1L +     n), drop = FALSE])
