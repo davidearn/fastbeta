@@ -42,7 +42,8 @@ erlang <-
 function (from = 0, to = from + 1, by = 1,
           R0, ell = if (m == 0L) 0 else (2 * n)/(3 * n + 1),
           m = 1L, n = 1L, init = c(1 - y0, y0),
-          y0 = 0x1p-64, yw = rep(c(1, 0), c(1L, m + n - 1L))) {
+          y0 = 0x1p-64, yw = rep(c(1, 0), c(1L, m + n - 1L)),
+          useCompiled = TRUE) {
     call <- match.call()
     call <- as.call(c(list(quote(erlang)), mget(names(call)[-1L])))
     ## NB: This function works in units of the mean generation interval.
@@ -83,7 +84,7 @@ function (from = 0, to = from + 1, by = 1,
     out <- fastbeta::seir(length.out = length(tau),
                           beta = beta, sigma = sigma, gamma = gamma,
                           m = m, n = n, init = init.,
-                          stochastic = FALSE)
+                          stochastic = FALSE, useCompiled = useCompiled)
     length(tau) <- nrow(out) # in case of early termination
     x  <- as.double(out[, 1L])
     if (m == 0L)
