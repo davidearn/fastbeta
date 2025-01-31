@@ -34,7 +34,8 @@
 ## [out]     peak.info  list of length 3 of the form
 ##                      list(ye.sub, yi.sub, curvature) storing E[i]/N,
 ##                      I[j]/N and Y''=((E+I)/N)'' at time peak["tau"].
-##                      If m=0, then the first element is NULL.
+##                      If Y is monotone, then all of the elements are
+##                      NULL.  If m=0, then the first element is NULL.
 ## [out]          call  original function call after matching and
 ##                      evaluation of arguments.
 erlang <-
