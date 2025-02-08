@@ -45,8 +45,8 @@ function (length.out = 1L,
 		gamma <- gamma * n
 		delta <- delta * 1
 		i.S <- 1L
-		i.E <- seq.int(    2L, length.out = m)
-		i.I <- seq.int(m + 2L, length.out = n)
+		i.E <- seq.int(from =     2L, length.out = m)
+		i.I <- seq.int(from = m + 2L, length.out = n)
 		i.R <- p
 	}
 
@@ -143,7 +143,7 @@ function (length.out = 1L,
 			tl.params    = tl.params)
 		m. <- nrow(x.)
 
-		i <- m. - match(seq.int(0L, length.out = length.out),
+		i <- m. - match(seq.int(from = 0L, length.out = length.out),
 		                as.integer(ceiling(x.[m.:1L, 1L]))) + 1L
 		if (anyNA(i)) {
 			## tl.params[["maxtau"]] constrains leaps but not steps => LOCF
@@ -249,7 +249,7 @@ function (length.out = 1L,
 
 		x. <- deSolve::lsoda(
 			y        = init.,
-			times    = seq.int(0, length.out = length.out),
+			times    = seq.int(from = 0, length.out = length.out),
 			func     = gg,
 			parms    = NULL,
 			jacfunc  = Dg,
@@ -293,7 +293,7 @@ function (length.out = 1L,
 			if (!m.d)
 				## FIXME? 'rmultinom' is more efficient, but not vectorized ...
 				z <- tabulate(rep.int(seq_len(length.out - 1L), z) +
-				              sample(seq.int(0L, length.out = length(delay)),
+				              sample(seq.int(from = 0L, length.out = length(delay)),
 				                     size = sum(z),
 				                     replace = TRUE,
 				                     prob = delay),
