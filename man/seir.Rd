@@ -75,7 +75,7 @@ seir(length.out = 1L,
 \value{
 A \dQuote{multiple time series} object, inheriting from class
 \code{\link[=ts]{mts}}.  Beneath the class, it is a
-\code{length.out}-by-\code{1+m+n+1+2} numeric matrix with columns
+\code{length.out}-by-\code{(1+m+n+1+2)} numeric matrix with columns
 \code{S}, \code{E}, \code{I}, \code{R}, \code{Z}, and \code{B}, where
 \code{Z} and \code{B} specify incidence and births as the number of
 infections and births since the previous time point.

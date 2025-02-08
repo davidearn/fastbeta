@@ -332,6 +332,158 @@ function (length.out = 1L,
 	x
 }
 
+seir.canonical <-
+function (from = 0, to = from + 1, by = 1,
+          R0, ell = if (m == 0L) 0 else (2 * n)/(3 * n + 1),
+          m = 1L, n = 1L, init = c(1 - p, p), p = 0x1p-64,
+          weights = rep(c(1, 0), c(1L, m + n - 1L)),
+          root = c("none", "peak"), ...)
+{
+	tau <- seq.int(from = from, to = to, by = by)
+	m <- as.integer(m)
+	n <- as.integer(n)
+	stopifnot(length(tau) >= 2L, tau[1L] < tau[2L],
+	          length(m) == 1L, !is.na(m), m >= 0L && m < 4096L,
+	          length(n) == 1L, !is.na(n), n >= 1L && n < 4096L,
+	          is.double(R0), length(R0) == 1L, is.finite(R0), R0 > 0,
+	          is.double(ell), length(ell) == 1L, is.finite(ell),
+	          if (m == 0L) ell == 0 else ell > 0 && ell < 1,
+	          missing(init) || missing(y0),
+	          is.double(init),
+	          length(init) == 2L,
+	          all(is.finite(init)),
+	          init[1L] >= 0,
+	          init[2L] > 0,
+	          sum(init) <= 1,
+	          is.double(weights),
+	          length(weights) == m + n,
+	          all(is.finite(weights)),
+	          min(weights) >= 0,
+	          sum(weights) > 0)
+	root <- match.arg(root)
+	init <- c(init[1L], weights/sum(weights) * init[2L], 1 - sum(init), 0,
+	          use.names = FALSE)
+	if (min(init[-1L]) == 0) {
+		## E[i], I[j], R are handled on a logarithmic scale
+		warning(warningCondition("setting zero-valued E[i], I[j] to 2^-256",
+		                         class = "zeroReplacedWarning"))
+		init[-1L][init[-1L] == 0] <- 0x1p-256 # == 2^-256
+		init <- init/sum(init)
+	}
+	init[-1L] <- log(init[-1L])
+
+	i.S <- 1L
+	i.I <- (1L + m + 1L):(1L + m + n)
+	i.1 <- seq.int(from = 2L, length.out = 1L + m + n - 2L)
+	i.2 <- seq.int(from = 3L, length.out = 1L + m + n - 2L)
+
+	h <- (n + 1)/2/n
+	q.1 <- 1 * m/ell
+	q.2 <- h * n/(1 - ell)
+	q.3 <- if (m) q.1 else q.2
+	q.4 <- h * (q.5 <- R0/(1 - ell))
+
+	a.1 <- rep.int(c(q.1, q.2),        c(m, n - 1L)                   )
+	a.2 <- rep.int(c(q.1, q.2), if (m) c(m - 1L, n) else c(0L, n - 1L))
+
+	## D[i, j] = d(rate of change in state i)/d(state j)
+	##
+	## nonzero pattern in m = 4, n = 4 case :
+	##
+	##       S E E E E I I I I Y
+	##     S | . . . . | | | | .
+	##     E | | . . . | | | | .
+	##     E . | | . . . . . . .
+	##     E . . | | . . . . . .
+	##     E . . . | | . . . . .
+	##     I . . . . | | . . . .
+	##     I . . . . . | | . . .
+	##     I . . . . . . | | . .
+	##     I . . . . . . . | | .
+	##     Y | . . . . | | | | .
+	##
+	## nonzero pattern in m = 0, n = 4 case :
+	##
+	##       S I I I I Y
+	##     S | | | | | .
+	##     I | | | | | .
+	##     I . | | . . .
+	##     I . . | | . .
+	##     I . . . | | .
+	##     Y | | | | | .
+	##
+	## where log(.) is suppressed only for pretty printing
+
+	p <- 1L + m + n + 1L
+	D <- matrix(0, p, p)
+	k.1 <- seq.int(from = p + 3L, by = p + 1L, length.out = p - 3L)
+	k.2 <- k.1 + p
+
+	gg <-
+	function (t, x, theta)
+	{
+		x.S <- x[i.S]
+		x.I <- x[i.I]
+		s.1 <- sum(exp(x.I        ))
+		s.2 <- sum(exp(x.I - x[2L]))
+		list(c(-q.4 * s.1 * x.S,
+		       q.4 * s.2 * x.S - q.3,
+		       a.1 * exp(x[i.1] - x[i.2]) - a.2,
+		       q.5 * s.1 * x.S - s.1))
+	}
+	Dg <-
+	function (t, x, theta)
+	{
+		x.S <- x[i.S]
+		x.I <- x[i.I]
+		s.1 <- sum(u.1 <- exp(x.I        ))
+		s.2 <- sum(u.2 <- exp(x.I - x[2L]))
+		D[   i.S, i.S] <<- -q.4 * s.1
+		D[    2L, i.S] <<-  q.4 * s.2
+		D[p + 1L, i.S] <<-  q.5 * s.1
+		D[   i.S, i.I] <<- -q.4 * u.1 * x.S
+		D[    2L, i.I] <<-  q.4 * u.2 * x.S
+		D[p + 1L, i.I] <<-  q.5 * u.1 * x.S - u.1
+		D[    2L,  2L] <<- -q.4 * (if (m) s.2 else s.2 - 1) * x.S
+		D[k.2] <<- -(D[k.1] <<- a.1 * exp(x[i.1] - x[i.2]))
+		D
+	}
+	Rg <-
+	switch(root,
+	"peak" =
+	function (t, x, theta)
+		q.5 * x[i.S] - 1
+	)
+
+	x. <- deSolve::lsoda(
+		y        = init,
+		times    = tau,
+		func     = gg,
+		parms    = NULL,
+		jacfunc  = Dg,
+		jactype  = "fullusr",
+		rootfunc = switch(root, "peak" = Rg)
+		hmax     = by,
+		ynames   = FALSE,
+		initfunc = NULL,
+		initpar  = NULL,
+		...)
+
+	if (attr(x., "istate")[1L] < 0L)
+		warning("integration terminated due to unsuccessful solver call")
+	if (root != "none")
+		return(if (is.null(tmp <- attr(x., "troot"))) NaN else tmp)
+
+	t <- x.[, 1L]
+	x <- x.[, -1L, drop = FALSE]
+	x[, (1L + 1L):(1L + m + n)] <- exp(x[, (1L + 1L):(1L + m + n)])
+
+	oldClass(x) <- c("mts", "ts", "matrix", "array")
+	tsp(x) <- c(t[1L], t[length(t)], 1/by)
+	dimnames(x) <- list(NULL, rep.int(c("S", "E", "I", "Y"), c(1L, m, n, 1L)))
+	x
+}
+
 seir.R0 <-
 function (beta, nu = 0, mu = 0, sigma = 1, gamma = 1, delta = 0,
           m = 1L, n = 1L, N = 1)

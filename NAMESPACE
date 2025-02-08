@@ -1,6 +1,6 @@
 useDynLib(fastbeta, .registration = TRUE)
 export(deconvolve, fastbeta, fastbeta.bootstrap, fastbeta.matrix, ptpi,
-       seir, seir.R0, seir.ee, seir.jacobian, sir)
+       seir, seir.R0, seir.canonical, seir.ee, seir.jacobian, sir)
 S3method(plot, fastbeta.bootstrap)
 importFrom(grDevices, dev.flush, dev.hold)
 importFrom(graphics, lines, par, polygon)
