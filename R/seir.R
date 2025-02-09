@@ -381,7 +381,7 @@ function (from = 0, to = from + 1, by = 1,
 	q.1 <- 1 * m/ell
 	q.2 <- h * n/(1 - ell)
 	q.3 <- if (m) q.1 else q.2
-	q.4 <- h * (q.5 <- R0/(1 - ell))
+	q.4 <- h * R0/(1 - ell)
 
 	a.1 <- rep.int(c(q.1, q.2),        c(m, n - 1L)                   )
 	a.2 <- rep.int(c(q.1, q.2), if (m) c(m - 1L, n) else c(0L, n - 1L))
@@ -429,7 +429,7 @@ function (from = 0, to = from + 1, by = 1,
 		list(c(-q.4 * s.1 * x.S,
 		       q.4 * s.2 * x.S - q.3,
 		       a.1 * exp(x[i.1] - x[i.2]) - a.2,
-		       q.5 * s.1 * x.S - s.1))
+		       q.4 * s.1 * x.S - s.1))
 	}
 	Dg <-
 	function (t, x, theta)
@@ -440,10 +440,10 @@ function (from = 0, to = from + 1, by = 1,
 		s.2 <- sum(u.2 <- exp(x.I - x[2L]))
 		D[   i.S, i.S] <<- -q.4 * s.1
 		D[    2L, i.S] <<-  q.4 * s.2
-		D[p + 1L, i.S] <<-  q.5 * s.1
+		D[p + 1L, i.S] <<-  q.4 * s.1
 		D[   i.S, i.I] <<- -q.4 * u.1 * x.S
 		D[    2L, i.I] <<-  q.4 * u.2 * x.S
-		D[p + 1L, i.I] <<-  q.5 * u.1 * x.S - u.1
+		D[p + 1L, i.I] <<-  q.4 * u.1 * x.S - u.1
 		D[    2L,  2L] <<- -q.4 * (if (m) s.2 else s.2 - 1) * x.S
 		D[k.2] <<- -(D[k.1] <<- a.1 * exp(x[i.1] - x[i.2]))
 		D
@@ -452,7 +452,7 @@ function (from = 0, to = from + 1, by = 1,
 	switch(root,
 	"peak" =
 	function (t, x, theta)
-		q.5 * x[i.S] - 1
+		q.4 * x[i.S] - 1
 	)
 
 	x. <- deSolve::lsoda(
