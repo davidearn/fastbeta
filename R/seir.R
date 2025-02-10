@@ -436,13 +436,13 @@ function (from = 0, to = from + 1, by = 1,
 		x.I <- x[i.I]
 		s.1 <- sum(u.1 <- exp(x.I        ))
 		s.2 <- sum(u.2 <- exp(x.I - x[2L]))
-		D[   i.S, i.S] <<- -q.4 * s.1
-		D[    2L, i.S] <<-  q.4 * s.2
-		D[p + 1L, i.S] <<-  q.4 * s.1
-		D[   i.S, i.I] <<- -q.4 * u.1 * x.S
-		D[    2L, i.I] <<-  q.4 * u.2 * x.S
-		D[p + 1L, i.I] <<-  q.4 * u.1 * x.S - u.1
-		D[    2L,  2L] <<- -q.4 * (if (m) s.2 else s.2 - 1) * x.S
+		D[i.S, i.S] <<- -q.4 * s.1
+		D[ 2L, i.S] <<-  q.4 * s.2
+		D[  p, i.S] <<-  q.4 * s.1
+		D[i.S, i.I] <<- -q.4 * u.1 * x.S
+		D[ 2L, i.I] <<-  q.4 * u.2 * x.S
+		D[  p, i.I] <<-  q.4 * u.1 * x.S - u.1
+		D[ 2L,  2L] <<- -q.4 * (if (m) s.2 else s.2 - 1) * x.S
 		D[k.2] <<- -(D[k.1] <<- a.1 * exp(x[i.1] - x[i.2]))
 		D
 	}
