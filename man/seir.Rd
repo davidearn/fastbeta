@@ -75,7 +75,7 @@ seir(length.out = 1L,
 \value{
 A \dQuote{multiple time series} object, inheriting from class
 \code{\link[=ts]{mts}}.  Beneath the class, it is a
-\code{length.out}-by-\code{1+m+n+1+2} numeric matrix with columns
+\code{length.out}-by-\code{(1+m+n+1+2)} numeric matrix with columns
 \code{S}, \code{E}, \code{I}, \code{R}, \code{Z}, and \code{B}, where
 \code{Z} and \code{B} specify incidence and births as the number of
 infections and births since the previous time point.
@@ -155,7 +155,10 @@ samples taken with probabilities \code{prob} over future observation
 intervals according to multinomial samples taken with probabilities
 \code{delay}.
 }
-\seealso{\code{\link{seir.auxiliary}}, \code{\link{seir.library}}.}
+\seealso{
+\code{\link{seir.auxiliary}}, \code{\link{seir.canonical}},
+\code{\link{seir.library}}.
+}
 \references{
 Cao, Y., Gillespie, D. T., & Petzold, L. R. (2007).
 Adaptive explicit-implicit tau-leaping method with

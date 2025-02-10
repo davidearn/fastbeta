@@ -90,7 +90,7 @@ function (r,
 	mu. <- series[, 3L]
 
 	length.out <- nrow(series)
-	s <- as.double(seq.int(0, length.out = length.out))
+	s <- as.double(seq.int(from = 0, length.out = length.out))
 	beta <- approxfun(s, beta., method =   "linear", rule = 2L, ties = "ordered")
 	nu   <- approxfun(s,   nu., method = "constant", rule = 2L, ties = "ordered")
 	mu   <- approxfun(s,   mu., method =   "linear", rule = 2L, ties = "ordered")
@@ -132,7 +132,7 @@ function (x, y, level = NULL,
 	lwd <- rep_len(if (is.null(lwd)) par("lwd") else lwd, 2L)
 	s <- as.vector(time(x))
 	if (is.null(level))
-		for (i in seq.int(2L, length.out = ncol(x) - 1L))
+		for (i in seq.int(from = 2L, length.out = ncol(x) - 1L))
 			lines(s, x[, i], col = col[2L], lwd = lwd[2L])
 	else {
 		doPolygon <- TRUE
