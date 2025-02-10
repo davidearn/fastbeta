@@ -116,9 +116,9 @@ without loss of generality, \code{seir.canonical} assumes \eqn{N = 1}
 and drops the last equation.  The resulting system of \eqn{1 + m + n}
 equations is augmented with a final equation
 \deqn{
-  \text{d}Y/\text{d}\tau = ((\mathcal{R}_{0}/(1 - \ell)) S - 1) \sum_{j} I^{j}
+  \text{d}Y/\text{d}\tau = ((h \mathcal{R}_{0}/(1 - \ell)) S - 1) \sum_{j} I^{j}
 }{
-  dY/tau = ((R0/(1 - ell)) * S - 1) * sum(I)
+  dY/tau = ((h * R0/(1 - ell)) * S - 1) * sum(I)
 }
 due to the usefulness of the solution \eqn{Y} in applications.
 }
