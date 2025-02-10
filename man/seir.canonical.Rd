@@ -58,19 +58,19 @@ with columns \code{S}, \code{E}, \code{I}, and \code{Y}.
 \details{
 The general SEIR equations handled by \code{\link{seir}} are
 \deqn{
-  \begin{alignedat}{5}
+  \begin{alignedat}{4}
   \text{d} & S         &{} / \text{d} t
-  &{} = {}& \nu(t) + \delta R - (\beta(t) \sum_{j} I^{j} + \mu(t)) S \\
+  &{} = \nu(t) + \delta R - (\beta(t) \textstyle\sum_{j} I^{j} + \mu(t)) S \\
   \text{d} & E^{    1} &{} / \text{d} t
-  &{} = {}& \beta(t) S \sum_{j} I^{j} - (m \sigma + \mu(t)) E^{1} \\
+  &{} = \beta(t) S \textstyle\sum_{j} I^{j} - (m \sigma + \mu(t)) E^{1} \\
   \text{d} & E^{i + 1} &{} / \text{d} t
-  &{} = {}& m \sigma E^{i} - (m \sigma + \mu(t)) E^{i + 1} \\
+  &{} = m \sigma E^{i} - (m \sigma + \mu(t)) E^{i + 1} \\
   \text{d} & I^{    1} &{} / \text{d} t
-  &{} = {}& m \sigma E^{m} - (n \gamma + \mu(t)) I^{1} \\
+  &{} = m \sigma E^{m} - (n \gamma + \mu(t)) I^{1} \\
   \text{d} & I^{j + 1} &{} / \text{d} t
-  &{} = {}& n \gamma I^{j} - (n \gamma + \mu(t)) I^{j + 1} \\
+  &{} = n \gamma I^{j} - (n \gamma + \mu(t)) I^{j + 1} \\
   \text{d} & R         &{} / \text{d} t
-  &{} = {}& n \gamma I^{n} - (\delta + \mu(t)) R
+  &{} = n \gamma I^{n} - (\delta + \mu(t)) R
   \end{alignedat}
 }{
   dS       /dt = nu(t) + delta * R - (beta(t) * sum(I) + mu(t)) * S
@@ -88,19 +88,19 @@ The canonical SEIR equations are obtained by substituting
 \eqn{h = (n + 1)/(2 n)}{h = (n + 1)/(2 * n)}, then choosing
 \eqn{\tau = t/g} as an independent variable:
 \deqn{
-  \begin{alignedat}{5}
+  \begin{alignedat}{4}
   \text{d} & S         &{} / \text{d} \tau
-  &{} = {}& -(h \mathcal{R}_{0}/(1 - \ell)) S \sum_{j} I^{j} \\
+  &{} = -(h \mathcal{R}_{0}/(1 - \ell)) S \textstyle\sum_{j} I^{j} \\
   \text{d} & E^{    1} &{} / \text{d} \tau
-  &{} = {}& (h \mathcal{R}_{0}/(1 - \ell)) S \sum_{j} I^{j} - (m/\ell) E^{1} \\
+  &{} = (h \mathcal{R}_{0}/(1 - \ell)) S \textstyle\sum_{j} I^{j} - (m/\ell) E^{1} \\
   \text{d} & E^{i + 1} &{} / \text{d} \tau
-  &{} = {}& (m/\ell) E^{i} - (m/\ell) E^{i + 1} \\
+  &{} = (m/\ell) E^{i} - (m/\ell) E^{i + 1} \\
   \text{d} & I^{    1} &{} / \text{d} \tau
-  &{} = {}& (m/\ell) E^{m} - (h n/(1 - \ell)) I^{1} \\
+  &{} = (m/\ell) E^{m} - (h n/(1 - \ell)) I^{1} \\
   \text{d} & I^{j + 1} &{} / \text{d} \tau
-  &{} = {}& (h n/(1 - \ell)) I^{j} - (h n/(1 - \ell)) I^{j + 1} \\
+  &{} = (h n/(1 - \ell)) I^{j} - (h n/(1 - \ell)) I^{j + 1} \\
   \text{d} & R         &{} / \text{d} \tau
-  &{} = {}& (h n/(1 - \ell)) I^{n}
+  &{} = (h n/(1 - \ell)) I^{n}
   \end{alignedat}
 }{
   dS       /dtau = -(h * R0/(1 - ell)) * S * sum(I)
