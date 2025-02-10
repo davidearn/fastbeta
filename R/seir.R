@@ -366,10 +366,11 @@ function (from = 0, to = from + 1, by = 1,
 	          min(weights) >= 0,
 	          sum(weights) > 0)
 	root <- match.arg(root)
-	init <- c(init[1L], log(weights) - log(sum(weights)) + log(init[2L]), 0,
+	p <- init[2L]
+	init <- c(init[1L], log(weights) - log(sum(weights)) + log(p), 0,
 	          use.names = FALSE)
 	if (min(init) == -Inf)
-		init[init == -Inf] <- -1024
+		init[init == -Inf] <- log(0x1p-64) + log(p)
 
 	i.S <- 1L
 	i.I <- (1L + m + 1L):(1L + m + n)
