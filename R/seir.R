@@ -334,7 +334,7 @@ function (length.out = 1L,
 
 seir.canonical <-
 function (from = 0, to = from + 1, by = 1,
-          R0, ell = if (m == 0L) 0 else (2 * n)/(3 * n + 1),
+          R0, ell = (2 * n)/(3 * n + 1),
           m = 1L, n = 1L, init = c(1 - p, p), p = 0x1p-64,
           weights = rep(c(1, 0), c(1L, m + n - 1L)),
           root = c("none", "peak"), ...)
@@ -347,9 +347,13 @@ function (from = 0, to = from + 1, by = 1,
 	          n >= 1L && n < 4096L,
 	          is.double(R0), length(R0) == 1L, is.finite(R0),
 	          R0 > 0,
+	          {
+	              if (m == 0L)
+	                  ell <- 0
+	              TRUE
+	          },
 	          is.double(ell), length(ell) == 1L, is.finite(ell),
-	          if (m == 0L) ell == 0 else ell > 0 && ell < 1,
-	          missing(init) || missing(y0),
+	          m == 0L || (ell > 0 && ell < 1),
 	          is.double(init),
 	          length(init) == 2L,
 	          all(is.finite(init)),
