@@ -460,13 +460,14 @@ function (from = 0, to = from + 1, by = 1,
 		parms    = NULL,
 		jacfunc  = Dg,
 		jactype  = "fullusr",
-		rootfunc = switch(root, "peak" = Rg)
+		rootfunc = switch(root, "peak" = Rg),
 		hmax     = by,
 		ynames   = FALSE,
 		initfunc = NULL,
 		initpar  = NULL,
 		...)
 
+	## FIXME: diff(t[length(t) - 1:0]) != by if terminated
 	if (attr(x., "istate")[1L] < 0L)
 		warning("integration terminated due to unsuccessful solver call")
 	if (root != "none")
@@ -476,9 +477,11 @@ function (from = 0, to = from + 1, by = 1,
 	x <- x.[, -1L, drop = FALSE]
 	x[, (1L + 1L):(1L + m + n)] <- exp(x[, (1L + 1L):(1L + m + n)])
 
-	oldClass(x) <- c("mts", "ts", "matrix", "array")
+	oldClass(x) <- c("seir.canonical", "mts", "ts", "matrix", "array")
 	tsp(x) <- c(t[1L], t[length(t)], 1/by)
 	dimnames(x) <- list(NULL, rep.int(c("S", "E", "I", "Y"), c(1L, m, n, 1L)))
+	attr(x, "R0") <- R0
+	attr(x, "ell") <- ell
 	x
 }
 
@@ -598,4 +601,54 @@ function (length.out = 1L,
 	call[[1L]] <- quote(seir)
 	call[["m"]] <- 0L
 	eval(call, parent.frame())
+}
+
+summary.seir.canonical <-
+function (object, ...)
+{
+	tau <- time(object)
+	nms <- colnames(object)
+	m <- length(je <- which(nms == "E"))
+	n <- length(ji <- which(nms == "I"))
+	x <- as.double(object[, "S"])
+	y <- as.double(object[, "Y"])
+	ye <- if (m > 0L) rowSums(object[, je, drop = FALSE])
+	yi <-             rowSums(object[, ji, drop = FALSE])
+	ans <- list(tau = tau, x = x, y = y, ye = ye, yi = yi,
+	            rate = NULL, peak = NULL, peak.info = NULL)
+	end <-
+		if (y[length(y)] > 0)
+			length(y)
+		else {
+			## End at last nonzero Y as Y underflowed to zero
+			w <- which(y > 0)
+			max(2L, w[length(w)])
+		}
+	## Return early if head(Y) nonincreasing or tail(Y) nondecreasing
+	if (y[1L] >= y[2L] || y[end - 1L] <= y[end])
+		return(ans)
+	w <- which.max(y)
+	ye.sub <- if (m > 0L) as.double(object[w, je])
+	yi.sub <-             as.double(object[w, ji])
+	curvature <-
+		{
+			R0 <- attr(object, "R0")
+			ell <- attr(object, "ell")
+			h <- (n + 1)/(2 * n)
+			q <- h * R0/(1 - ell)
+			u <- x[w]
+			v <- yi[w]
+
+			-q * q * u * v * v + (q * u - 1) *
+				((if (m > 0L) m/ell * ye.sub[m] else q * u * v) - h * n/(1 - ell) * yi.sub[n])
+		}
+	peak.info <- list(ye.sub = ye.sub, yi.sub = yi.sub,
+	                  curvature = curvature)
+	peak <- c(tau = tau[w], x = x[w], y = y[w],
+	          ye = if (m > 0L) ye[w] else NaN, yi = yi[w])
+	rate <- c(NaN, (log(y[end]) - log(y[end - 1L]))/(tau[end] - tau[end - 1L]))
+	ans[["rate"]] <- rate
+	ans[["peak"]] <- peak
+	ans[["peak.info"]] <- peak.info
+	ans
 }
