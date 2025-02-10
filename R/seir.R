@@ -607,7 +607,7 @@ function (length.out = 1L,
 summary.seir.canonical <-
 function (object, ...)
 {
-	tau <- time(object)
+	tau <- as.double(time(object))
 	nms <- colnames(object)
 	m <- length(je <- which(nms == "E"))
 	n <- length(ji <- which(nms == "I"))
@@ -618,15 +618,15 @@ function (object, ...)
 	ans <- list(tau = tau, x = x, y = y, ye = ye, yi = yi,
 	            rate = NULL, peak = NULL, peak.info = NULL)
 	end <-
-		if (y[length(y)] > 0)
-			length(y)
+		if (yi[length(yi)] > 0)
+			length(yi)
 		else {
-			## End at last nonzero Y as Y underflowed to zero
-			w <- which(y > 0)
+			## End at last nonzero I as I underflowed to zero
+			w <- which(yi > 0)
 			max(2L, w[length(w)])
 		}
-	## Return early if head(Y) nonincreasing or tail(Y) nondecreasing
-	if (y[1L] >= y[2L] || y[end - 1L] <= y[end])
+	## Return early if head(I) nonincreasing or tail(I) nondecreasing
+	if (yi[1L] >= yi[2L] || yi[end - 1L] <= yi[end])
 		return(ans)
 	w <- which.max(y)
 	ye.sub <- if (m > 0L) as.double(object[w, je])
