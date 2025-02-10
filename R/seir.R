@@ -340,12 +340,13 @@ function (from = 0, to = from + 1, by = 1,
           root = c("none", "peak"), ...)
 {
 	tau <- seq.int(from = from, to = to, by = by)
-	m <- as.integer(m)
-	n <- as.integer(n)
 	stopifnot(length(tau) >= 2L, tau[1L] < tau[2L],
-	          length(m) == 1L, !is.na(m), m >= 0L && m < 4096L,
-	          length(n) == 1L, !is.na(n), n >= 1L && n < 4096L,
-	          is.double(R0), length(R0) == 1L, is.finite(R0), R0 > 0,
+	          is.integer(m), length(m) == 1L, !is.na(m),
+	          m >= 0L && m < 4096L,
+	          is.integer(n), length(n) == 1L, !is.na(n),
+	          n >= 1L && n < 4096L,
+	          is.double(R0), length(R0) == 1L, is.finite(R0),
+	          R0 > 0,
 	          is.double(ell), length(ell) == 1L, is.finite(ell),
 	          if (m == 0L) ell == 0 else ell > 0 && ell < 1,
 	          missing(init) || missing(y0),
@@ -361,16 +362,10 @@ function (from = 0, to = from + 1, by = 1,
 	          min(weights) >= 0,
 	          sum(weights) > 0)
 	root <- match.arg(root)
-	init <- c(init[1L], weights/sum(weights) * init[2L], 1 - sum(init), 0,
+	init <- c(init[1L], log(weights) - log(sum(weights)) + log(init[2L]), 0,
 	          use.names = FALSE)
-	if (min(init[-1L]) == 0) {
-		## E[i], I[j], R are handled on a logarithmic scale
-		warning(warningCondition("setting zero-valued E[i], I[j] to 2^-256",
-		                         class = "zeroReplacedWarning"))
-		init[-1L][init[-1L] == 0] <- 0x1p-256 # == 2^-256
-		init <- init/sum(init)
-	}
-	init[-1L] <- log(init[-1L])
+	if (min(init) == -Inf)
+		init[init == -Inf] <- -1024
 
 	i.S <- 1L
 	i.I <- (1L + m + 1L):(1L + m + n)
@@ -382,7 +377,6 @@ function (from = 0, to = from + 1, by = 1,
 	q.2 <- h * n/(1 - ell)
 	q.3 <- if (m) q.1 else q.2
 	q.4 <- h * R0/(1 - ell)
-
 	a.1 <- rep.int(c(q.1, q.2),        c(m, n - 1L)                   )
 	a.2 <- rep.int(c(q.1, q.2), if (m) c(m - 1L, n) else c(0L, n - 1L))
 
