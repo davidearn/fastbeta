@@ -41,7 +41,7 @@ value <- L1[["value"]]
 stopifnot(exprs = {
 	is.double(value)
 	length(value) == p
-	identical(names(value), rep.int(c("S", "E", "I", "R"), c(1L, m, n, 1L)))
+	identical(names(value), rep(c("S", "E", "I", "R"), c(1L, m, n, 1L)))
 	!anyNA(value)
 	min(value) >= 0
 })

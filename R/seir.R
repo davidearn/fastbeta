@@ -96,7 +96,7 @@ function (length.out = 1L,
 			               length.out = p)
 			k.2 <- seq.int(from = (p + 2L) * (p + 2L) + 2L, by = p + 3L,
 			               length.out = p - 1L)
-			D[k.2] <- rep.int(c(sigma, gamma, delta), c(m, n, 1L))
+			D[k.2] <- rep(c(sigma, gamma, delta), c(m, n, 1L))
 
 			ff <-
 			function (x, theta, t)
@@ -152,7 +152,7 @@ function (length.out = 1L,
 			ik <- i[k]
 			w <- which(ik == 0L)
 			ik[w] <- ik[w - 1L]
-			i <- rep.int(ik, k - c(0L, k[-length(k)]))
+			i <- rep(ik, k - c(0L, k[-length(k)]))
 		}
 		x <- x.[i, -1L, drop = FALSE] # discarding time
 
@@ -206,7 +206,7 @@ function (length.out = 1L,
 			k.0 <- k.1 + p + 2L
 			i.1 <- 2L:(p - 1L)
 			i.0 <- 3L:p
-			a.1 <- rep.int(c(sigma, gamma), c(m, n)); a.11 <- a.1[1L]
+			a.1 <- rep(c(sigma, gamma), c(m, n)); a.11 <- a.1[1L]
 			a.0 <- c(a.1[-1L], delta)
 
 			gg <-
@@ -292,7 +292,7 @@ function (length.out = 1L,
 				z <- rbinom(length.out - 1L, z, prob)
 			if (!m.d)
 				## FIXME? 'rmultinom' is more efficient, but not vectorized ...
-				z <- tabulate(rep.int(seq_len(length.out - 1L), z) +
+				z <- tabulate(rep(seq_len(length.out - 1L), z) +
 				              sample(seq.int(from = 0L, length.out = length(delay)),
 				                     size = sum(z),
 				                     replace = TRUE,
@@ -327,8 +327,8 @@ function (length.out = 1L,
 	tsp(x) <- c(0, length.out - 1, 1)
 	dimnames(x) <-
 		list(NULL,
-		     rep.int(c("S", "E", "I", "R", "Z", "B", "Z.obs"),
-		             c(1L, m, n, 1L, 1L, 1L, if (doObs) 1L else 0L)))
+		     rep(c("S", "E", "I", "R", "Z", "B", "Z.obs"),
+		         c(1L, m, n, 1L, 1L, 1L, if (doObs) 1L else 0L)))
 	x
 }
 
@@ -382,8 +382,8 @@ function (from = 0, to = from + 1, by = 1,
 	q.2 <- h * n/(1 - ell)
 	q.3 <- if (m) q.1 else q.2
 	q.4 <- h * R0/(1 - ell)
-	a.1 <- rep.int(c(q.1, q.2),        c(m, n - 1L)                   )
-	a.2 <- rep.int(c(q.1, q.2), if (m) c(m - 1L, n) else c(0L, n - 1L))
+	a.1 <-        rep(c(q.1, q.2), c(m, n - 1L))
+	a.2 <- if (m) rep(c(q.1, q.2), c(m - 1L, n)) else a.1
 
 	## D[i, j] = d(rate of change in state i)/d(state j)
 	##
@@ -480,7 +480,7 @@ function (from = 0, to = from + 1, by = 1,
 
 	oldClass(x) <- c("seir.canonical", "mts", "ts", "matrix", "array")
 	tsp(x) <- c(t[1L], t[length(t)], 1/by)
-	dimnames(x) <- list(NULL, rep.int(c("S", "E", "I", "Y"), c(1L, m, n, 1L)))
+	dimnames(x) <- list(NULL, rep(c("S", "E", "I", "Y"), c(1L, m, n, 1L)))
 	attr(x, "R0") <- R0
 	attr(x, "ell") <- ell
 	x
@@ -520,7 +520,7 @@ function (beta, nu = 0, mu = 0, sigma = 1, gamma = 1, delta = 0,
 		R <- (N - S) / (1 + delta * ((if (m > 0L) 1 / sigma else 0) + 1 / gamma))
 		I <- R * delta / (n * gamma)
 		E <- R * delta / (m * sigma)
-		ans <- rep.int(c(S, E, I, R), c(1L, m, n, 1L))
+		ans <- rep(c(S, E, I, R), c(1L, m, n, 1L))
 	}
 	else {
 		N <- nu / mu
@@ -528,12 +528,12 @@ function (beta, nu = 0, mu = 0, sigma = 1, gamma = 1, delta = 0,
 		b <- 1 + mu / (n * gamma)
 		S <- mu / beta * a^m / (1 - b^-n)
 		R <- (N - S) / (a^m * b^n + delta / mu * (a^m * b^n - 1))
-		I <- cumprod(rep.int(c(R       * (delta + mu) / (n * gamma), b), c(1L, n - 1L)))[n:1L]
+		I <- cumprod(rep(c(R       * (delta + mu) / (n * gamma), b), c(1L, n - 1L)))[n:1L]
 		E <- if (m > 0L)
-		     cumprod(rep.int(c(R * b^n * (delta + mu) / (m * sigma), a), c(1L, m - 1L)))[m:1L]
+		     cumprod(rep(c(R * b^n * (delta + mu) / (m * sigma), a), c(1L, m - 1L)))[m:1L]
 		ans <- c(S, E, I, R)
 	}
-	names(ans) <- rep.int(c("S", "E", "I", "R"), c(1L, m, n, 1L))
+	names(ans) <- rep(c("S", "E", "I", "R"), c(1L, m, n, 1L))
 	ans
 }
 
@@ -542,7 +542,7 @@ function (beta, nu = 0, mu = 0, sigma = 1, gamma = 1, delta = 0,
           m = 1L, n = 1L)
 {
 	p <- m + n + 2L
-	nms <- rep.int(c("S", "E", "I", "R"), c(1L, m, n, 1L))
+	nms <- rep(c("S", "E", "I", "R"), c(1L, m, n, 1L))
 	sigma <- sigma * m
 	gamma <- gamma * n
 	delta <- delta * 1
@@ -551,7 +551,7 @@ function (beta, nu = 0, mu = 0, sigma = 1, gamma = 1, delta = 0,
 	i.I <- seq.int(m + 2L, length.out = n)
 	i.R <- p
 	k <- seq.int(from = p + 3L, by = p + 1L, length.out = p - 2L)
-	a <- rep.int(c(sigma, gamma), c(m, n))
+	a <- rep(c(sigma, gamma), c(m, n))
 	D <- array(0, c(p, p), list(nms, nms))
 	D[i.S, i.R] <- delta
 	D[k    ] <- a
