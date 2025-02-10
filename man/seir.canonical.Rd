@@ -8,7 +8,7 @@ the more general SEIR equations handled by \code{\link{seir}}; see
 }
 \usage{
 seir.canonical(from = 0, to = from + 1, by = 1,
-               R0, ell = if (m == 0L) 0 else (2 * n)/(3 * n + 1),
+               R0, ell = (2 * n)/(3 * n + 1),
                m = 1L, n = 1L, init = c(1 - p, p), p = 0x1p-64,
                weights = rep(c(1, 0), c(1L, m + n - 1L)),
                root = c("none", "peak"), \dots)
@@ -19,10 +19,12 @@ seir.canonical(from = 0, to = from + 1, by = 1,
   equally spaced vector of time points in units of the generation
   interval.}
 \item{R0}{
-  a positive number; the basic reproduction number.}
+  a positive number giving the basic reproduction number.}
 \item{ell}{
-  a number in \eqn{[0,1)}, equal to zero if and only if \code{m=0}; the
-  ratio of the mean latent period and mean generation interval.}
+  a number in \eqn{(0,1)} giving the ratio of the mean latent period and
+  mean generation interval when \code{m} is nonzero.  The default value
+  implies that the mean latent period and mean infectious period are
+  equal.}
 \item{m}{
   a non-negative integer indicating a number of latent stages.}
 \item{n}{
@@ -31,19 +33,19 @@ seir.canonical(from = 0, to = from + 1, by = 1,
   a numeric vector of length 2 giving initial susceptible and infected
   proportions.}
 \item{p}{
-  a number in \eqn{(0,1]} defining the default value of \code{init}.  It
-  is an error to set both of \code{init} and \code{p}.}
+  a number in \eqn{(0,1]} used only to define \code{init} when
+  \code{init} is unset.}
 \item{weights}{
   a numeric vector of length \code{m+n} containing non-negative weights,
   defining the initial distribution of infected individuals among the
   latent and infectious stages.  By default, all infected individuals
   occupy the first stage.}
 \item{root}{
-  a character string.  \code{"none"}: Return the numerical solution as a
-  \dQuote{multiple time series} object.  \code{"peak"}: Return the time
-  in units of the generation interval at which \eqn{Y} attains a local
-  maximum, \code{NaN} if \eqn{Y'} has no root between \code{from} and
-  \code{to}.}
+  a character string determining what is returned.  \code{"none"}: the
+  numerical solution as a multiple time series object.  \code{"peak"}:
+  the time in units of the generation interval at which \eqn{Y} attains
+  a local maximum, \code{NaN} if \eqn{Y'} has no root between
+  \code{from} and \code{to}.}
 \item{\dots}{
   optional arguments passed to \code{\link[deSolve]{lsoda}}.}
 }
@@ -120,6 +122,7 @@ equations is augmented with a final equation
 }
 due to the usefulness of the solution \eqn{Y} in applications.
 }
+\seealso{\code{\link{seir}}.}
 \examples{
 ## TODO
 }
