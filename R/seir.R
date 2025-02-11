@@ -335,7 +335,8 @@ function (length.out = 1L,
 seir.canonical <-
 function (from = 0, to = from + 1, by = 1,
           R0, ell = (2 * n)/(3 * n + 1),
-          m = 1L, n = 1L, init = c(1 - p, p), p = 0x1p-64,
+          m = 1L, n = 1L,
+          init = c(1 - p, p), p = .Machine[["double.neg.eps"]],
           weights = rep(c(1, 0), c(1L, m + n - 1L)),
           root = c("none", "peak"), ...)
 {
