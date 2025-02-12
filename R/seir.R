@@ -430,7 +430,7 @@ function (from = 0, to = from + 1, by = 1,
 		list(c(-q.4 * s.1 * x.S,
 		       q.4 * s.2 * x.S - q.3,
 		       a.1 * exp(x[i.1] - x[i.2]) - a.2,
-		       q.4 * s.1 * x.S - s.1))
+		       q.4 * s.1 * x.S - s.1/(1 - ell)))
 	}
 	Dg <-
 	function (t, x, theta)
@@ -444,7 +444,7 @@ function (from = 0, to = from + 1, by = 1,
 		D[  p, i.S] <<-  q.4 * s.1
 		D[i.S, i.I] <<- -q.4 * u.1 * x.S
 		D[ 2L, i.I] <<-  q.4 * u.2 * x.S
-		D[  p, i.I] <<-  q.4 * u.1 * x.S - u.1
+		D[  p, i.I] <<-  q.4 * u.1 * x.S - u.1/(1 - ell)
 		D[ 2L,  2L] <<- -q.4 * (if (m) s.2 else s.2 - 1) * x.S
 		D[k.2] <<- -(D[k.1] <<- a.1 * exp(x[i.1] - x[i.2]))
 		D
@@ -453,7 +453,7 @@ function (from = 0, to = from + 1, by = 1,
 	switch(root,
 	"peak" =
 	function (t, x, theta)
-		q.4 * x[i.S] - 1
+		q.4 * x[i.S] - 1/(1 - ell)
 	)
 
 	x. <- deSolve::lsoda(
@@ -494,7 +494,7 @@ function (from = 0, to = from + 1, by = 1,
 		if (m > 0L)
 		attr(ans, "E.full") <- E.full
 		attr(ans, "I.full") <- I.full
-		attr(ans, "curvature") <- -q.4 * q.4 * S * I * I + (q.4 * S - 1) * ((if (m > 0L) q.1 * E.full[m] else q.4 * S * I) - q.2 * I.full[n])
+		attr(ans, "curvature") <- -q.4 * q.4 * S * I * I + (q.4 * S - 1/(1 - ell)) * ((if (m > 0L) q.1 * E.full[m] else q.4 * S * I) - q.2 * I.full[n])
 	}
 	ans
 }
