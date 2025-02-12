@@ -157,5 +157,38 @@ due to the usefulness of the solution \eqn{Y} in applications.
 }
 \seealso{\code{\link{seir}}.}
 \examples{
-## TODO
+\dontshow{
+## for R_DEFAULT_PACKAGES=NULL
+library(   stats, pos = "package:base", verbose = FALSE)
+library(graphics, pos = "package:base", verbose = FALSE)
+}
+if (requireNamespace("deSolve")) withAutoprint({
+
+to <- 100; by <- 0.01; R0 <- 16; ell <- 1/3
+
+peak <- seir.canonical(to = to, by = by, R0 = R0, ell = ell,
+                       root = "peak")
+peak
+
+to <- 4 * peak[["tau"]] # a more principled endpoint
+
+soln <- seir.canonical(to = to, by = by, R0 = R0, ell = ell)
+head(soln)
+
+plot(soln) # dispatching stats:::plot.ts
+
+plot(soln[, "Y"])
+abline(v = peak[["tau"]], h = peak[["Y"]],
+       lty = 2, lwd = 2, col = "red")
+
+xoff <- function (x, k) x - x[k]
+prev <- soln[, "E"] + soln[, "I"]
+lamb <- summary(soln)
+k <- c(16L, nrow(soln)) # c(1L, nrow(soln)) suffers due to transient
+plot(prev, log = "y")
+for (i in 1:2)
+	lines(prev[k[i]] * exp(lamb[i] * xoff(time(prev), k[i])),
+	      lty = 2, lwd = 2, col = "red")
+
+})
 }

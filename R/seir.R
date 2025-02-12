@@ -341,7 +341,8 @@ function (from = 0, to = from + 1, by = 1,
           root = c("none", "peak"), ...)
 {
 	tau <- seq.int(from = from, to = to, by = by)
-	stopifnot(length(tau) >= 2L, tau[1L] < tau[2L],
+	stopifnot(requireNamespace("deSolve"),
+	          length(tau) >= 2L, tau[1L] < tau[2L],
 	          is.integer(m), length(m) == 1L, !is.na(m),
 	          m >= 0L && m < 4096L,
 	          is.integer(n), length(n) == 1L, !is.na(n),
@@ -627,15 +628,19 @@ function (object, tol = 1e-6, ...)
 	if (length(w) == 0L || w[1L] != 1L || (end <- w[length(w)]) <= 2L)
 		return(ans)
 	p <- log(p[1L:end])
-	r <- (p[2L:end] - p[1L:(end - 1L)]) * tsp(object)[3L]
-	d <- r[2L:(end - 1L)]/r[1L:(end - 2L)] - 1
+	ph <- p[1L:(end - 1L)]
+	pt <- p[2L:(end - 0L)]
+	r <- (pt - ph) * tsp(object)[3L]
+	rh <- r[1L:(end - 2L)]
+	rt <- r[2L:(end - 1L)]
+	d <- (rt - rh)/abs(rh)
 	if (r[1L] > 0) {
-		w <- which(r[1L:(end - 2L)] > 0 & d >= -tol & d < 0)
+		w <- which(rh > 0 & d >= -tol & d < 0)
 		if (length(w) > 0L)
 			ans[1L] <- r[w[which.max(d[w])]]
 	}
 	if (r[end - 1L] < 0) {
-		w <- which(r[2L:(end - 1L)] < 0 & d >= -tol & d < 0)
+		w <- which(rt < 0 & d >= -tol & d < 0)
 		if (length(w) > 0L)
 			ans[2L] <- r[w[which.max(d[w])]]
 	}
