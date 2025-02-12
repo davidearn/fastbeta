@@ -56,7 +56,7 @@ stopifnot(exprs = {
 	is.double(X)
 	stats::is.mts(X)
 	identical(dim(X), c(length.out, p + 3L))
-	identical(dimnames(X), list(NULL, rep.int(c("S", "E", "I", "R", "Z", "B", "Z.obs"), c(1L, m, n, 1L, 1L, 1L, 1L))))
+	identical(dimnames(X), list(NULL, rep(c("S", "E", "I", "R", "Z", "B", "Z.obs"), c(1L, m, n, 1L, 1L, 1L, 1L))))
 	identical(stats::tsp(X), c(0, length.out - 1, 1))
 	!anyNA(X[-1L, ])
 	min(0, X, na.rm = TRUE) >= 0

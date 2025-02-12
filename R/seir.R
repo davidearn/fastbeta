@@ -96,7 +96,7 @@ function (length.out = 1L,
 			               length.out = p)
 			k.2 <- seq.int(from = (p + 2L) * (p + 2L) + 2L, by = p + 3L,
 			               length.out = p - 1L)
-			D[k.2] <- rep.int(c(sigma, gamma, delta), c(m, n, 1L))
+			D[k.2] <- rep(c(sigma, gamma, delta), c(m, n, 1L))
 
 			ff <-
 			function (x, theta, t)
@@ -152,7 +152,7 @@ function (length.out = 1L,
 			ik <- i[k]
 			w <- which(ik == 0L)
 			ik[w] <- ik[w - 1L]
-			i <- rep.int(ik, k - c(0L, k[-length(k)]))
+			i <- rep(ik, k - c(0L, k[-length(k)]))
 		}
 		x <- x.[i, -1L, drop = FALSE] # discarding time
 
@@ -206,7 +206,7 @@ function (length.out = 1L,
 			k.0 <- k.1 + p + 2L
 			i.1 <- 2L:(p - 1L)
 			i.0 <- 3L:p
-			a.1 <- rep.int(c(sigma, gamma), c(m, n)); a.11 <- a.1[1L]
+			a.1 <- rep(c(sigma, gamma), c(m, n)); a.11 <- a.1[1L]
 			a.0 <- c(a.1[-1L], delta)
 
 			gg <-
@@ -292,7 +292,7 @@ function (length.out = 1L,
 				z <- rbinom(length.out - 1L, z, prob)
 			if (!m.d)
 				## FIXME? 'rmultinom' is more efficient, but not vectorized ...
-				z <- tabulate(rep.int(seq_len(length.out - 1L), z) +
+				z <- tabulate(rep(seq_len(length.out - 1L), z) +
 				              sample(seq.int(from = 0L, length.out = length(delay)),
 				                     size = sum(z),
 				                     replace = TRUE,
@@ -327,20 +327,22 @@ function (length.out = 1L,
 	tsp(x) <- c(0, length.out - 1, 1)
 	dimnames(x) <-
 		list(NULL,
-		     rep.int(c("S", "E", "I", "R", "Z", "B", "Z.obs"),
-		             c(1L, m, n, 1L, 1L, 1L, if (doObs) 1L else 0L)))
+		     rep(c("S", "E", "I", "R", "Z", "B", "Z.obs"),
+		         c(1L, m, n, 1L, 1L, 1L, if (doObs) 1L else 0L)))
 	x
 }
 
 seir.canonical <-
 function (from = 0, to = from + 1, by = 1,
           R0, ell = (2 * n)/(3 * n + 1),
-          m = 1L, n = 1L, init = c(1 - p, p), p = 0x1p-64,
+          m = 1L, n = 1L,
+          init = c(1 - p, p), p = .Machine[["double.neg.eps"]],
           weights = rep(c(1, 0), c(1L, m + n - 1L)),
           root = c("none", "peak"), ...)
 {
 	tau <- seq.int(from = from, to = to, by = by)
-	stopifnot(length(tau) >= 2L, tau[1L] < tau[2L],
+	stopifnot(requireNamespace("deSolve"),
+	          length(tau) >= 2L, tau[1L] < tau[2L],
 	          is.integer(m), length(m) == 1L, !is.na(m),
 	          m >= 0L && m < 4096L,
 	          is.integer(n), length(n) == 1L, !is.na(n),
@@ -366,10 +368,11 @@ function (from = 0, to = from + 1, by = 1,
 	          min(weights) >= 0,
 	          sum(weights) > 0)
 	root <- match.arg(root)
-	init <- c(init[1L], log(weights) - log(sum(weights)) + log(init[2L]), 0,
+	p <- init[2L]
+	init <- c(init[1L], log(weights) - log(sum(weights)) + log(p), p,
 	          use.names = FALSE)
 	if (min(init) == -Inf)
-		init[init == -Inf] <- -1024
+		init[init == -Inf] <- log(0x1p-64) + log(p)
 
 	i.S <- 1L
 	i.I <- (1L + m + 1L):(1L + m + n)
@@ -381,8 +384,8 @@ function (from = 0, to = from + 1, by = 1,
 	q.2 <- h * n/(1 - ell)
 	q.3 <- if (m) q.1 else q.2
 	q.4 <- h * R0/(1 - ell)
-	a.1 <- rep.int(c(q.1, q.2),        c(m, n - 1L)                   )
-	a.2 <- rep.int(c(q.1, q.2), if (m) c(m - 1L, n) else c(0L, n - 1L))
+	a.1 <-        rep(c(q.1, q.2), c(m, n - 1L))
+	a.2 <- if (m) rep(c(q.1, q.2), c(m - 1L, n)) else a.1
 
 	## D[i, j] = d(rate of change in state i)/d(state j)
 	##
@@ -466,23 +469,34 @@ function (from = 0, to = from + 1, by = 1,
 		initfunc = NULL,
 		initpar  = NULL,
 		...)
+	dimnames(x.) <- NULL
 
 	## FIXME: diff(t[length(t) - 1:0]) != by if terminated
 	if (attr(x., "istate")[1L] < 0L)
 		warning("integration terminated due to unsuccessful solver call")
-	if (root != "none")
-		return(if (is.null(tmp <- attr(x., "troot"))) NaN else tmp)
 
-	t <- x.[, 1L]
-	x <- x.[, -1L, drop = FALSE]
-	x[, (1L + 1L):(1L + m + n)] <- exp(x[, (1L + 1L):(1L + m + n)])
-
-	oldClass(x) <- c("seir.canonical", "mts", "ts", "matrix", "array")
-	tsp(x) <- c(t[1L], t[length(t)], 1/by)
-	dimnames(x) <- list(NULL, rep.int(c("S", "E", "I", "Y"), c(1L, m, n, 1L)))
-	attr(x, "R0") <- R0
-	attr(x, "ell") <- ell
-	x
+	if (root == "none") {
+		ans <- x.[, -1L, drop = FALSE]
+		ans[, (1L + 1L):(1L + m + n)] <- exp(ans[, (1L + 1L):(1L + m + n)])
+		oldClass(ans) <- c("seir.canonical", "mts", "ts", "matrix", "array")
+		tsp(ans) <- c(x.[c(1L, nrow(x.)), 1L], 1/by)
+		dimnames(ans) <- list(NULL, rep(c("S", "E", "I", "Y"), c(1L, m, n, 1L)))
+	} else {
+		if (is.null(attr(x., "troot")))
+			return(c(tau = NaN, S = NaN, E = NaN, I = NaN, Y = NaN))
+		r <- x.[nrow(x.), ]
+		tau <- r[1L]
+		S <- r[2L]
+		E <- if (m > 0L) sum(E.full <- exp(r[(2L + 1L    ):(2L + m    )])) else NaN
+		I <-             sum(I.full <- exp(r[(2L + 1L + m):(2L + m + n)]))
+		Y <- r[2L + m + n + 1L]
+		ans <- c(tau = tau, S = S, E = E, I = I, Y = Y)
+		if (m > 0L)
+		attr(ans, "E.full") <- E.full
+		attr(ans, "I.full") <- I.full
+		attr(ans, "curvature") <- -q.4 * q.4 * S * I * I + (q.4 * S - 1) * ((if (m > 0L) q.1 * E.full[m] else q.4 * S * I) - q.2 * I.full[n])
+	}
+	ans
 }
 
 seir.R0 <-
@@ -519,7 +533,7 @@ function (beta, nu = 0, mu = 0, sigma = 1, gamma = 1, delta = 0,
 		R <- (N - S) / (1 + delta * ((if (m > 0L) 1 / sigma else 0) + 1 / gamma))
 		I <- R * delta / (n * gamma)
 		E <- R * delta / (m * sigma)
-		ans <- rep.int(c(S, E, I, R), c(1L, m, n, 1L))
+		ans <- rep(c(S, E, I, R), c(1L, m, n, 1L))
 	}
 	else {
 		N <- nu / mu
@@ -527,12 +541,12 @@ function (beta, nu = 0, mu = 0, sigma = 1, gamma = 1, delta = 0,
 		b <- 1 + mu / (n * gamma)
 		S <- mu / beta * a^m / (1 - b^-n)
 		R <- (N - S) / (a^m * b^n + delta / mu * (a^m * b^n - 1))
-		I <- cumprod(rep.int(c(R       * (delta + mu) / (n * gamma), b), c(1L, n - 1L)))[n:1L]
+		I <- cumprod(rep(c(R       * (delta + mu) / (n * gamma), b), c(1L, n - 1L)))[n:1L]
 		E <- if (m > 0L)
-		     cumprod(rep.int(c(R * b^n * (delta + mu) / (m * sigma), a), c(1L, m - 1L)))[m:1L]
+		     cumprod(rep(c(R * b^n * (delta + mu) / (m * sigma), a), c(1L, m - 1L)))[m:1L]
 		ans <- c(S, E, I, R)
 	}
-	names(ans) <- rep.int(c("S", "E", "I", "R"), c(1L, m, n, 1L))
+	names(ans) <- rep(c("S", "E", "I", "R"), c(1L, m, n, 1L))
 	ans
 }
 
@@ -541,7 +555,7 @@ function (beta, nu = 0, mu = 0, sigma = 1, gamma = 1, delta = 0,
           m = 1L, n = 1L)
 {
 	p <- m + n + 2L
-	nms <- rep.int(c("S", "E", "I", "R"), c(1L, m, n, 1L))
+	nms <- rep(c("S", "E", "I", "R"), c(1L, m, n, 1L))
 	sigma <- sigma * m
 	gamma <- gamma * n
 	delta <- delta * 1
@@ -550,7 +564,7 @@ function (beta, nu = 0, mu = 0, sigma = 1, gamma = 1, delta = 0,
 	i.I <- seq.int(m + 2L, length.out = n)
 	i.R <- p
 	k <- seq.int(from = p + 3L, by = p + 1L, length.out = p - 2L)
-	a <- rep.int(c(sigma, gamma), c(m, n))
+	a <- rep(c(sigma, gamma), c(m, n))
 	D <- array(0, c(p, p), list(nms, nms))
 	D[i.S, i.R] <- delta
 	D[k    ] <- a
@@ -604,51 +618,31 @@ function (length.out = 1L,
 }
 
 summary.seir.canonical <-
-function (object, ...)
+function (object, tol = 1e-6, ...)
 {
-	tau <- time(object)
+	stopifnot(is.double(tol), length(tol) == 1L, !is.na(tol), tol > 0)
+	ans <- c(NaN, NaN)
 	nms <- colnames(object)
-	m <- length(je <- which(nms == "E"))
-	n <- length(ji <- which(nms == "I"))
-	x <- as.double(object[, "S"])
-	y <- as.double(object[, "Y"])
-	ye <- if (m > 0L) rowSums(object[, je, drop = FALSE])
-	yi <-             rowSums(object[, ji, drop = FALSE])
-	ans <- list(tau = tau, x = x, y = y, ye = ye, yi = yi,
-	            rate = NULL, peak = NULL, peak.info = NULL)
-	end <-
-		if (y[length(y)] > 0)
-			length(y)
-		else {
-			## End at last nonzero Y as Y underflowed to zero
-			w <- which(y > 0)
-			max(2L, w[length(w)])
-		}
-	## Return early if head(Y) nonincreasing or tail(Y) nondecreasing
-	if (y[1L] >= y[2L] || y[end - 1L] <= y[end])
+	p <- rowSums(object[, nms == "E" | nms == "I", drop = FALSE])
+	w <- which(p > 0)
+	if (length(w) == 0L || w[1L] != 1L || (end <- w[length(w)]) <= 2L)
 		return(ans)
-	w <- which.max(y)
-	ye.sub <- if (m > 0L) as.double(object[w, je])
-	yi.sub <-             as.double(object[w, ji])
-	curvature <-
-		{
-			R0 <- attr(object, "R0")
-			ell <- attr(object, "ell")
-			h <- (n + 1)/(2 * n)
-			q <- h * R0/(1 - ell)
-			u <- x[w]
-			v <- yi[w]
-
-			-q * q * u * v * v + (q * u - 1) *
-				((if (m > 0L) m/ell * ye.sub[m] else q * u * v) - h * n/(1 - ell) * yi.sub[n])
-		}
-	peak.info <- list(ye.sub = ye.sub, yi.sub = yi.sub,
-	                  curvature = curvature)
-	peak <- c(tau = tau[w], x = x[w], y = y[w],
-	          ye = if (m > 0L) ye[w] else NaN, yi = yi[w])
-	rate <- c(NaN, (log(y[end]) - log(y[end - 1L]))/(tau[end] - tau[end - 1L]))
-	ans[["rate"]] <- rate
-	ans[["peak"]] <- peak
-	ans[["peak.info"]] <- peak.info
+	p <- log(p[1L:end])
+	ph <- p[1L:(end - 1L)]
+	pt <- p[2L:(end - 0L)]
+	r <- (pt - ph) * tsp(object)[3L]
+	rh <- r[1L:(end - 2L)]
+	rt <- r[2L:(end - 1L)]
+	d <- (rt - rh)/abs(rh)
+	if (r[1L] > 0) {
+		w <- which(rh > 0 & d >= -tol & d < 0)
+		if (length(w) > 0L)
+			ans[1L] <- r[w[which.max(d[w])]]
+	}
+	if (r[end - 1L] < 0) {
+		w <- which(rt < 0 & d >= -tol & d < 0)
+		if (length(w) > 0L)
+			ans[2L] <- r[w[which.max(d[w])]]
+	}
 	ans
 }

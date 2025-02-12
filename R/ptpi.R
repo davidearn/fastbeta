@@ -51,7 +51,7 @@ function (series, sigma = 1, gamma = 1, delta = 0,
 	}
 	ans <- .Call(R_ptpi, series, sigma, gamma, delta, m, n, init,
 	             a, b, tol, iter.max, backcalc, complete)
-	names(ans[["value"]]) <- rep.int(c("S", "E", "I", "R"), c(1L, m, n, 1L))
+	names(ans[["value"]]) <- rep(c("S", "E", "I", "R"), c(1L, m, n, 1L))
 	if (complete) {
 		oldClass(ans[["x"]]) <- c("mts", "ts", "array")
 		tsp(ans[["x"]]) <- c(tsp[1L] + c(a, b - 1L) / tsp[3L], tsp[3L])

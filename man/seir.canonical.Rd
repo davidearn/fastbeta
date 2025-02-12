@@ -1,5 +1,6 @@
 \name{seir.canonical}
 \alias{seir.canonical}
+\alias{summary.seir.canonical}
 \title{Solve the Canonical SEIR Equations}
 \description{
 Numerically integrates the canonical SEIR equations, a special case of
@@ -9,9 +10,12 @@ the more general SEIR equations handled by \code{\link{seir}}; see
 \usage{
 seir.canonical(from = 0, to = from + 1, by = 1,
                R0, ell = (2 * n)/(3 * n + 1),
-               m = 1L, n = 1L, init = c(1 - p, p), p = 0x1p-64,
+               m = 1L, n = 1L,
+               init = c(1 - p, p), p = .Machine[["double.neg.eps"]],
                weights = rep(c(1, 0), c(1L, m + n - 1L)),
                root = c("none", "peak"), \dots)
+
+\method{summary}{seir.canonical}(object, tol = 1e-6, \dots)
 }
 \arguments{
 \item{from, to, by}{
@@ -22,7 +26,7 @@ seir.canonical(from = 0, to = from + 1, by = 1,
   a positive number giving the basic reproduction number.}
 \item{ell}{
   a number in \eqn{(0,1)} giving the ratio of the mean latent period and
-  mean generation interval when \code{m} is nonzero.  The default value
+  mean generation interval when \code{m} is positive.  The default value
   implies that the mean latent period and mean infectious period are
   equal.}
 \item{m}{
@@ -43,17 +47,46 @@ seir.canonical(from = 0, to = from + 1, by = 1,
 \item{root}{
   a character string determining what is returned.  \code{"none"}: the
   numerical solution as a multiple time series object.  \code{"peak"}:
-  the time in units of the generation interval at which \eqn{Y} attains
-  a local maximum, \code{NaN} if \eqn{Y'} has no root between
-  \code{from} and \code{to}.}
+  information about the time and state when \eqn{Y} attains a local
+  maximum.}
 \item{\dots}{
   optional arguments passed to \code{\link[deSolve]{lsoda}}.}
+\item{object}{
+  an \R{} object inheriting from class \code{seir.canonical}, typically
+  the value of a call to \code{seir.canonical}.}
+\item{tol}{
+  a positive number giving an upper bound on the relative change (from
+  one time point to the next) in the slope of log prevalence, defining
+  time windows in which growth or decay of prevalence is considered to
+  be exponential.}
 }
 \value{
-A \dQuote{multiple time series} object, inheriting from class
+If \code{root = "none"},
+a \dQuote{multiple time series} object, inheriting from class
+\code{seir.canonical} and transitively from class
 \code{\link[=ts]{mts}}.  Beneath the class, it is a
-\code{length(seq(from, to, by))}-by-\code{(1+m+n+1)} numeric matrix
-with columns \code{S}, \code{E}, \code{I}, and \code{Y}.
+\code{length(seq(from, to, by))}-by-\code{(1+m+n+1)} numeric matrix with
+columns \code{S}, \code{E}, \code{I}, and \code{Y}.
+
+If \code{root = "peak"},
+a numeric vector of length 5 of the form \code{c(tau, S, E, I, Y)}
+containing the time in units of the generation interval at which \eqn{Y}
+attains a local maximum and the values at that time of \eqn{S},
+\eqn{\sum_{i} E^{i}}{sum(E)}, \eqn{\sum_{j} I^{j}}{sum(I)}, and \eqn{Y}.
+Attributes \code{E.full}, \code{I.full}, and \code{curvature} store the
+corresponding values of \eqn{E^{i}}{E[i]}, \eqn{I^{j}}{I[j]}, and
+\eqn{Y''}.  If \eqn{Y} does not attain a local maximum between times
+\code{from} and \code{to}, then all of the elements are \code{NaN} and
+there are no attributes.  If \code{m} is zero, then the third element is
+\code{NaN} and there is no attribute \code{E.full}.
+
+The method for \code{\link{summary}} returns a numeric vector of length
+2 containing the left and right \dQuote{tail exponents}, defined as the
+asymptotic values of the slope of log prevalence.  \code{NaN} elements
+indicate that a tail exponent cannot be approximated from the prevalence
+time series represented by \code{object}, because the time window does
+not cover enough of the tail, where the meaning of \dQuote{enough} is
+set by \code{tol}.
 }
 \details{
 The general SEIR equations handled by \code{\link{seir}} are
@@ -116,13 +149,46 @@ without loss of generality, \code{seir.canonical} assumes \eqn{N = 1}
 and drops the last equation.  The resulting system of \eqn{1 + m + n}
 equations is augmented with a final equation
 \deqn{
-  \text{d}Y/\text{d}\tau = ((\mathcal{R}_{0}/(1 - \ell)) S - 1) \sum_{j} I^{j}
+  \text{d}Y/\text{d}\tau = ((h \mathcal{R}_{0}/(1 - \ell)) S - 1) \sum_{j} I^{j}
 }{
-  dY/tau = ((R0/(1 - ell)) * S - 1) * sum(I)
+  dY/tau = ((h * R0/(1 - ell)) * S - 1) * sum(I)
 }
 due to the usefulness of the solution \eqn{Y} in applications.
 }
 \seealso{\code{\link{seir}}.}
 \examples{
-## TODO
+\dontshow{
+## for R_DEFAULT_PACKAGES=NULL
+library(   stats, pos = "package:base", verbose = FALSE)
+library(graphics, pos = "package:base", verbose = FALSE)
+}
+if (requireNamespace("deSolve")) withAutoprint({
+
+to <- 100; by <- 0.01; R0 <- 16; ell <- 1/3
+
+peak <- seir.canonical(to = to, by = by, R0 = R0, ell = ell,
+                       root = "peak")
+peak
+
+to <- 4 * peak[["tau"]] # a more principled endpoint
+
+soln <- seir.canonical(to = to, by = by, R0 = R0, ell = ell)
+head(soln)
+
+plot(soln) # dispatching stats:::plot.ts
+
+plot(soln[, "Y"])
+abline(v = peak[["tau"]], h = peak[["Y"]],
+       lty = 2, lwd = 2, col = "red")
+
+xoff <- function (x, k) x - x[k]
+prev <- soln[, "E"] + soln[, "I"]
+lamb <- summary(soln)
+k <- c(16L, nrow(soln)) # c(1L, nrow(soln)) suffers due to transient
+plot(prev, log = "y")
+for (i in 1:2)
+	lines(prev[k[i]] * exp(lamb[i] * xoff(time(prev), k[i])),
+	      lty = 2, lwd = 2, col = "red")
+
+})
 }

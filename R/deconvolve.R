@@ -45,7 +45,7 @@ function (x, prob = 1, delay = 1,
 	if (min(prob) == 0)
 		prob[prob == 0] <- NaN # want divide-by-0 to give NaN, not Inf
 
-	u <- rep.int(c(0, 1, 0), c(d, n, d))
+	u <- rep(c(0, 1, 0), c(d, n, d))
 	i2  <- (d + 1L):(d + n)
 	i23 <- (d + 1L):(d + n + d)
 
@@ -98,7 +98,7 @@ function (x, prob = 1, delay = 1,
 		if (length(q0))
 			r[q0] <- NaN
 		if (n < n.)
-			r <- `[<-`(rep.int(NaN, d + n.), i[1L]:i[2L], r)
+			r <- `[<-`(rep(NaN, d + n.), i[1L]:i[2L], r)
 		if (!missing(prob))
 			r <- r / prob
 		list(value = r, chisq = (s - 2 * sum(x)) / n, iter = iter)

@@ -25,7 +25,7 @@ function (series, sigma = 1, gamma = 1, delta = 0,
 	tsp(x) <- tsp(series)
 	dimnames(x) <-
 		list(NULL,
-		     rep.int(c("S", "E", "I", "R", "beta"), c(1L, m, n, 1L, 1L)))
+		     rep(c("S", "E", "I", "R", "beta"), c(1L, m, n, 1L, 1L)))
 	x
 }
 
@@ -69,7 +69,7 @@ function (r,
 			         prob = prob, ...)
 		else {
 			if (length(prob) > 1L)
-				prob <- c(rep.int(1, length(delay) - 1L), prob)
+				prob <- c(rep(1, length(delay) - 1L), prob)
 			fastbeta(series, sigma, gamma, delta, m, n, init,
 			         prob = prob, delay = delay, ...)
 		}
@@ -215,8 +215,8 @@ function (pos,
 	mu.t  <- 0.5 * 1 * series[t, 3L]
 
 	q <- c(1, sigma, gamma, delta, 0)
-	a <- rep.int(q, c(0L, m, n, 1L, 1L))
-	b <- rep.int(q, c(1L, m, n, 1L, 0L))
+	a <- rep(q, c(0L, m, n, 1L, 1L))
+	b <- rep(q, c(1L, m, n, 1L, 0L))
 
 	r.0 <- (1 - mu.s - a) / (1 + mu.t + a)
 	r.1 <- b / (1 + mu.t + a)
@@ -241,7 +241,7 @@ function (pos,
 	for (i in 2L:p)
 		L[i + 1L, ] <- tmp <- L[i + 1L, ] + r.1[i] * tmp
 
-	nms <- rep.int(c("1", "E", "I", "R", "S"), c(1L, m, n, 1L, 1L))
+	nms <- rep(c("1", "E", "I", "R", "S"), c(1L, m, n, 1L, 1L))
 	dimnames(L) <- list(nms, nms)
 	L
 }
