@@ -368,7 +368,7 @@ function (from = 0, to = from + 1, by = 1,
 	          sum(weights) > 0)
 	root <- match.arg(root)
 	p <- init[2L]
-	init <- c(init[1L], log(weights) - log(sum(weights)) + log(p), 0,
+	init <- c(init[1L], log(weights) - log(sum(weights)) + log(p), p,
 	          use.names = FALSE)
 	if (min(init) == -Inf)
 		init[init == -Inf] <- log(0x1p-64) + log(p)
@@ -468,23 +468,34 @@ function (from = 0, to = from + 1, by = 1,
 		initfunc = NULL,
 		initpar  = NULL,
 		...)
+	dimnames(x.) <- NULL
 
 	## FIXME: diff(t[length(t) - 1:0]) != by if terminated
 	if (attr(x., "istate")[1L] < 0L)
 		warning("integration terminated due to unsuccessful solver call")
-	if (root != "none")
-		return(if (is.null(tmp <- attr(x., "troot"))) NaN else tmp)
 
-	t <- x.[, 1L]
-	x <- x.[, -1L, drop = FALSE]
-	x[, (1L + 1L):(1L + m + n)] <- exp(x[, (1L + 1L):(1L + m + n)])
-
-	oldClass(x) <- c("seir.canonical", "mts", "ts", "matrix", "array")
-	tsp(x) <- c(t[1L], t[length(t)], 1/by)
-	dimnames(x) <- list(NULL, rep(c("S", "E", "I", "Y"), c(1L, m, n, 1L)))
-	attr(x, "R0") <- R0
-	attr(x, "ell") <- ell
-	x
+	if (root == "none") {
+		ans <- x.[, -1L, drop = FALSE]
+		ans[, (1L + 1L):(1L + m + n)] <- exp(ans[, (1L + 1L):(1L + m + n)])
+		oldClass(ans) <- c("seir.canonical", "mts", "ts", "matrix", "array")
+		tsp(ans) <- c(x.[c(1L, nrow(x.)), 1L], 1/by)
+		dimnames(ans) <- list(NULL, rep(c("S", "E", "I", "Y"), c(1L, m, n, 1L)))
+	} else {
+		if (is.null(attr(x., "troot")))
+			return(c(tau = NaN, S = NaN, E = NaN, I = NaN, Y = NaN))
+		r <- x.[nrow(x.), ]
+		tau <- r[1L]
+		S <- r[2L]
+		E <- if (m > 0L) sum(E.full <- exp(r[(2L + 1L    ):(2L + m    )])) else NaN
+		I <-             sum(I.full <- exp(r[(2L + 1L + m):(2L + m + n)]))
+		Y <- r[2L + m + n + 1L]
+		ans <- c(tau = tau, S = S, E = E, I = I, Y = Y)
+		if (m > 0L)
+		attr(ans, "E.full") <- E.full
+		attr(ans, "I.full") <- I.full
+		attr(ans, "curvature") <- -q.4 * q.4 * S * I * I + (q.4 * S - 1) * ((if (m > 0L) q.1 * E.full[m] else q.4 * S * I) - q.2 * I.full[n])
+	}
+	ans
 }
 
 seir.R0 <-
@@ -606,51 +617,27 @@ function (length.out = 1L,
 }
 
 summary.seir.canonical <-
-function (object, ...)
+function (object, tol = 1e-6, ...)
 {
-	tau <- as.double(time(object))
+	stopifnot(is.double(tol), length(tol) == 1L, !is.na(tol), tol > 0)
+	ans <- c(NaN, NaN)
 	nms <- colnames(object)
-	m <- length(je <- which(nms == "E"))
-	n <- length(ji <- which(nms == "I"))
-	x <- as.double(object[, "S"])
-	y <- as.double(object[, "Y"])
-	ye <- if (m > 0L) rowSums(object[, je, drop = FALSE])
-	yi <-             rowSums(object[, ji, drop = FALSE])
-	ans <- list(tau = tau, x = x, y = y, ye = ye, yi = yi,
-	            rate = NULL, peak = NULL, peak.info = NULL)
-	end <-
-		if (yi[length(yi)] > 0)
-			length(yi)
-		else {
-			## End at last nonzero I as I underflowed to zero
-			w <- which(yi > 0)
-			max(2L, w[length(w)])
-		}
-	## Return early if head(I) nonincreasing or tail(I) nondecreasing
-	if (yi[1L] >= yi[2L] || yi[end - 1L] <= yi[end])
+	p <- rowSums(object[, nms == "E" | nms == "I", drop = FALSE])
+	w <- which(p > 0)
+	if (length(w) == 0L || w[1L] != 1L || (end <- w[length(w)]) <= 2L)
 		return(ans)
-	w <- which.max(y)
-	ye.sub <- if (m > 0L) as.double(object[w, je])
-	yi.sub <-             as.double(object[w, ji])
-	curvature <-
-		{
-			R0 <- attr(object, "R0")
-			ell <- attr(object, "ell")
-			h <- (n + 1)/(2 * n)
-			q <- h * R0/(1 - ell)
-			u <- x[w]
-			v <- yi[w]
-
-			-q * q * u * v * v + (q * u - 1) *
-				((if (m > 0L) m/ell * ye.sub[m] else q * u * v) - h * n/(1 - ell) * yi.sub[n])
-		}
-	peak.info <- list(ye.sub = ye.sub, yi.sub = yi.sub,
-	                  curvature = curvature)
-	peak <- c(tau = tau[w], x = x[w], y = y[w],
-	          ye = if (m > 0L) ye[w] else NaN, yi = yi[w])
-	rate <- c(NaN, (log(y[end]) - log(y[end - 1L]))/(tau[end] - tau[end - 1L]))
-	ans[["rate"]] <- rate
-	ans[["peak"]] <- peak
-	ans[["peak.info"]] <- peak.info
+	p <- log(p[1L:end])
+	r <- (p[2L:end] - p[1L:(end - 1L)]) * tsp(object)[3L]
+	d <- r[2L:(end - 1L)]/r[1L:(end - 2L)] - 1
+	if (r[1L] > 0) {
+		w <- which(r[1L:(end - 2L)] > 0 & d >= -tol & d < 0)
+		if (length(w) > 0L)
+			ans[1L] <- r[w[which.max(d[w])]]
+	}
+	if (r[end - 1L] < 0) {
+		w <- which(r[2L:(end - 1L)] < 0 & d >= -tol & d < 0)
+		if (length(w) > 0L)
+			ans[2L] <- r[w[which.max(d[w])]]
+	}
 	ans
 }

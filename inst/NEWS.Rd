@@ -40,7 +40,7 @@
 \title{News for \R{} Package \pkg{fastbeta}}
 \newcommand{\GH}{\href{https://github.com/davidearn/fastbeta/issues/#1}{GH##1}}
 
-\section{Changes in version 0.3.2 (2025-02-08)}{
+\section{Changes in version 0.3.2 (2025-02-12)}{
   \subsection{Significant User-Visible Changes}{
     \itemize{
       \item .
@@ -63,6 +63,9 @@
       dynamics, without loss of immunity) of \code{seir} usage.  The
       nondimensional parameters are the basic reproduction number and
       the ratio of the mean latent period and mean generation interval.
+
+      \item A method for \code{summary} approximating the tail exponents
+      of prevalence from the return value of \code{seir.canonical}.
     }
   }
   \subsection{Installation}{
