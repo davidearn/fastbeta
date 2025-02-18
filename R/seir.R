@@ -338,7 +338,7 @@ function (from = 0, to = from + 1, by = 1,
           m = 1L, n = 1L,
           init = c(1 - p, p), p = .Machine[["double.neg.eps"]],
           weights = rep(c(1, 0), c(1L, m + n - 1L)),
-          root = c("none", "peak"), ...)
+          root = c("none", "peak"), aggregate = FALSE, ...)
 {
 	tau <- seq.int(from = from, to = to, by = by)
 	stopifnot(requireNamespace("deSolve"),
@@ -430,7 +430,7 @@ function (from = 0, to = from + 1, by = 1,
 		list(c(-q.4 * s.1 * x.S,
 		       q.4 * s.2 * x.S - q.3,
 		       a.1 * exp(x[i.1] - x[i.2]) - a.2,
-		       q.4 * s.1 * x.S - s.1 * h/(1 - ell)))
+		       q.4 * s.1 * x.S - q.5 * s.1))
 	}
 	Dg <-
 	function (t, x, theta)
@@ -444,7 +444,7 @@ function (from = 0, to = from + 1, by = 1,
 		D[  p, i.S] <<-  q.4 * s.1
 		D[i.S, i.I] <<- -q.4 * u.1 * x.S
 		D[ 2L, i.I] <<-  q.4 * u.2 * x.S
-		D[  p, i.I] <<-  q.4 * u.1 * x.S - u.1 * h/(1 - ell)
+		D[  p, i.I] <<-  q.4 * u.1 * x.S - q.5 * u.1
 		D[ 2L,  2L] <<- -q.4 * (if (m) s.2 else s.2 - 1) * x.S
 		D[k.2] <<- -(D[k.1] <<- a.1 * exp(x[i.1] - x[i.2]))
 		D
@@ -453,7 +453,7 @@ function (from = 0, to = from + 1, by = 1,
 	switch(root,
 	"peak" =
 	function (t, x, theta)
-		q.4 * x[i.S] - h/(1 - ell)
+		q.4 * x[i.S] - q.5
 	)
 
 	x. <- deSolve::lsoda(
@@ -478,6 +478,11 @@ function (from = 0, to = from + 1, by = 1,
 	if (root == "none") {
 		ans <- x.[, -1L, drop = FALSE]
 		ans[, (1L + 1L):(1L + m + n)] <- exp(ans[, (1L + 1L):(1L + m + n)])
+		if (aggregate) {
+			ans <- seir.aggregate(ans, m, n)
+			m <- 1L
+			n <- 1L
+		}
 		oldClass(ans) <- c("seir.canonical", "mts", "ts", "matrix", "array")
 		tsp(ans) <- c(x.[c(1L, nrow(x.)), 1L], 1/by)
 		dimnames(ans) <- list(NULL, rep(c("S", "E", "I", "Y"), c(1L, m, n, 1L)))
@@ -494,10 +499,10 @@ function (from = 0, to = from + 1, by = 1,
 		if (m > 0L)
 		attr(ans, "E.full") <- E.full
 		attr(ans, "I.full") <- I.full
-		attr(ans, "curvature") <- -q.4 * q.4 * S * I * I + (q.4 * S - h/(1 - ell)) * ((if (m > 0L) q.1 * E.full[m] else q.4 * S * I) - q.2 * I.full[n])
+		attr(ans, "curvature") <- -q.4 * q.4 * S * I * I + (q.4 * S - q.5) * ((if (m > 0L) q.1 * E.full[m] else q.4 * S * I) - q.2 * I.full[n])
 	}
 	ans
-}
+} # (q.4 * S - 1) * I
 
 seir.R0 <-
 function (beta, nu = 0, mu = 0, sigma = 1, gamma = 1, delta = 0,
