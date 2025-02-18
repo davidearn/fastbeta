@@ -383,7 +383,7 @@ function (from = 0, to = from + 1, by = 1,
 	q.1 <- 1 * m/ell
 	q.2 <- h * n/(1 - ell)
 	q.3 <- if (m) q.1 else q.2
-	q.4 <- h * R0/(1 - ell)
+	q.4 <- R0 * (q.5 <- h/(1 - ell))
 	a.1 <-        rep(c(q.1, q.2), c(m, n - 1L))
 	a.2 <- if (m) rep(c(q.1, q.2), c(m - 1L, n)) else a.1
 
