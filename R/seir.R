@@ -630,7 +630,7 @@ function (object, tol = 1e-6, ...)
 	nms <- colnames(object)
 	p <- rowSums(object[, nms == "E" | nms == "I", drop = FALSE])
 	w <- which(p > 0)
-	if (length(w) == 0L || w[1L] != 1L || (end <- w[length(w)]) <= 2L)
+	if (length(w) == 0L || w[1L] != 1L || (end <- w[length(w)]) < 3L)
 		return(ans)
 	p <- log(p[1L:end])
 	ph <- p[1L:(end - 1L)]
@@ -639,15 +639,19 @@ function (object, tol = 1e-6, ...)
 	rh <- r[1L:(end - 2L)]
 	rt <- r[2L:(end - 1L)]
 	d <- (rt - rh)/abs(rh)
-	if (r[1L] > 0) {
-		w <- which(rh > 0 & d >= -tol & d < 0)
-		if (length(w) > 0L)
-			ans[1L] <- r[w[which.max(d[w])]]
+	if (any(ok <- rt > 0 & d >= -tol & d < 0)) {
+		rle.ok <- rle(ok)
+		ptr <- c(0L, cumsum(rle.ok$lengths))
+		j <- which.max(rle.ok$lengths * rle.ok$values)
+		i <- (ptr[j] + 1L):ptr[j + 1L]
+		ans[1L] <- rh[i[which.max(d[i])]]
 	}
-	if (r[end - 1L] < 0) {
-		w <- which(rt < 0 & d >= -tol & d < 0)
-		if (length(w) > 0L)
-			ans[2L] <- r[w[which.max(d[w])]]
+	if (any(ok <- rh < 0 & d >= -tol & d < 0)) {
+		rle.ok <- rle(ok)
+		ptr <- c(0L, cumsum(rle.ok$lengths))
+		j <- which.max(rle.ok$lengths * rle.ok$values)
+		i <- (ptr[j] + 1L):ptr[j + 1L]
+		ans[2L] <- rt[i[which.max(d[i])]]
 	}
 	ans
 }

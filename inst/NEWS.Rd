@@ -40,7 +40,7 @@
 \title{News for \R{} Package \pkg{fastbeta}}
 \newcommand{\GH}{\href{https://github.com/davidearn/fastbeta/issues/#1}{GH##1}}
 
-\section{Changes in version 0.3.2 (2025-02-12)}{
+\section{Changes in version 0.3.2 (2025-02-20)}{
   \subsection{Significant User-Visible Changes}{
     \itemize{
       \item .
