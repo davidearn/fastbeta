@@ -480,6 +480,7 @@ function (from = 0, to = from + 1, by = 1,
 		ans[, (1L + 1L):(1L + m + n)] <- exp(ans[, (1L + 1L):(1L + m + n)])
 		if (aggregate) {
 			ans <- seir.aggregate(ans, m, n)
+			if (m > 0L)
 			m <- 1L
 			n <- 1L
 		}
