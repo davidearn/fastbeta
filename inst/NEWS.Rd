@@ -40,22 +40,7 @@
 \title{News for \R{} Package \pkg{fastbeta}}
 \newcommand{\GH}{\href{https://github.com/davidearn/fastbeta/issues/#1}{GH##1}}
 
-\section{Changes in version 0.3.2 (2025-02-20)}{
-  \subsection{Significant User-Visible Changes}{
-    \itemize{
-      \item .
-    }
-  }
-  \subsection{Deprecated and Defunct}{
-    \itemize{
-      \item .
-    }
-  }
-  \subsection{Bug Fixes}{
-    \itemize{
-      \item .
-    }
-  }
+\section{Changes in version 0.3.2 (2025-03-23)}{
   \subsection{New Features}{
     \itemize{
       \item Function \code{seir.canonical} providing a nondimensional
@@ -66,21 +51,6 @@
 
       \item A method for \code{summary} approximating the tail exponents
       of prevalence from the return value of \code{seir.canonical}.
-    }
-  }
-  \subsection{Installation}{
-    \itemize{
-      \item .
-    }
-  }
-  \subsection{Documentation}{
-    \itemize{
-      \item .
-    }
-  }
-  \subsection{Internals}{
-    \itemize{
-      \item .
     }
   }
 }
