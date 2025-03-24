@@ -338,7 +338,7 @@ function (from = 0, to = from + 1, by = 1,
           m = 1L, n = 1L,
           init = c(1 - p, p), p = .Machine[["double.neg.eps"]],
           weights = rep(c(1, 0), c(1L, m + n - 1L)),
-          root = c("none", "peak"), ...)
+          root = c("none", "peak"), aggregate = FALSE, ...)
 {
 	tau <- seq.int(from = from, to = to, by = by)
 	stopifnot(requireNamespace("deSolve"),
@@ -383,7 +383,7 @@ function (from = 0, to = from + 1, by = 1,
 	q.1 <- 1 * m/ell
 	q.2 <- h * n/(1 - ell)
 	q.3 <- if (m) q.1 else q.2
-	q.4 <- h * R0/(1 - ell)
+	q.4 <- R0 * (q.5 <- h/(1 - ell))
 	a.1 <-        rep(c(q.1, q.2), c(m, n - 1L))
 	a.2 <- if (m) rep(c(q.1, q.2), c(m - 1L, n)) else a.1
 
@@ -430,7 +430,7 @@ function (from = 0, to = from + 1, by = 1,
 		list(c(-q.4 * s.1 * x.S,
 		       q.4 * s.2 * x.S - q.3,
 		       a.1 * exp(x[i.1] - x[i.2]) - a.2,
-		       q.4 * s.1 * x.S - s.1))
+		       q.4 * s.1 * x.S - q.5 * s.1))
 	}
 	Dg <-
 	function (t, x, theta)
@@ -444,7 +444,7 @@ function (from = 0, to = from + 1, by = 1,
 		D[  p, i.S] <<-  q.4 * s.1
 		D[i.S, i.I] <<- -q.4 * u.1 * x.S
 		D[ 2L, i.I] <<-  q.4 * u.2 * x.S
-		D[  p, i.I] <<-  q.4 * u.1 * x.S - u.1
+		D[  p, i.I] <<-  q.4 * u.1 * x.S - q.5 * u.1
 		D[ 2L,  2L] <<- -q.4 * (if (m) s.2 else s.2 - 1) * x.S
 		D[k.2] <<- -(D[k.1] <<- a.1 * exp(x[i.1] - x[i.2]))
 		D
@@ -453,7 +453,7 @@ function (from = 0, to = from + 1, by = 1,
 	switch(root,
 	"peak" =
 	function (t, x, theta)
-		q.4 * x[i.S] - 1
+		q.4 * x[i.S] - q.5
 	)
 
 	x. <- deSolve::lsoda(
@@ -478,6 +478,12 @@ function (from = 0, to = from + 1, by = 1,
 	if (root == "none") {
 		ans <- x.[, -1L, drop = FALSE]
 		ans[, (1L + 1L):(1L + m + n)] <- exp(ans[, (1L + 1L):(1L + m + n)])
+		if (aggregate) {
+			ans <- seir.aggregate(ans, m, n)
+			if (m > 0L)
+			m <- 1L
+			n <- 1L
+		}
 		oldClass(ans) <- c("seir.canonical", "mts", "ts", "matrix", "array")
 		tsp(ans) <- c(x.[c(1L, nrow(x.)), 1L], 1/by)
 		dimnames(ans) <- list(NULL, rep(c("S", "E", "I", "Y"), c(1L, m, n, 1L)))
@@ -494,10 +500,10 @@ function (from = 0, to = from + 1, by = 1,
 		if (m > 0L)
 		attr(ans, "E.full") <- E.full
 		attr(ans, "I.full") <- I.full
-		attr(ans, "curvature") <- -q.4 * q.4 * S * I * I + (q.4 * S - 1) * ((if (m > 0L) q.1 * E.full[m] else q.4 * S * I) - q.2 * I.full[n])
+		attr(ans, "curvature") <- -q.4 * q.4 * S * I * I + (q.4 * S - q.5) * ((if (m > 0L) q.1 * E.full[m] else q.4 * S * I) - q.2 * I.full[n])
 	}
 	ans
-}
+} # (q.4 * S - 1) * I
 
 seir.R0 <-
 function (beta, nu = 0, mu = 0, sigma = 1, gamma = 1, delta = 0,
@@ -625,7 +631,7 @@ function (object, tol = 1e-6, ...)
 	nms <- colnames(object)
 	p <- rowSums(object[, nms == "E" | nms == "I", drop = FALSE])
 	w <- which(p > 0)
-	if (length(w) == 0L || w[1L] != 1L || (end <- w[length(w)]) <= 2L)
+	if (length(w) == 0L || w[1L] != 1L || (end <- w[length(w)]) < 3L)
 		return(ans)
 	p <- log(p[1L:end])
 	ph <- p[1L:(end - 1L)]
@@ -634,15 +640,19 @@ function (object, tol = 1e-6, ...)
 	rh <- r[1L:(end - 2L)]
 	rt <- r[2L:(end - 1L)]
 	d <- (rt - rh)/abs(rh)
-	if (r[1L] > 0) {
-		w <- which(rh > 0 & d >= -tol & d < 0)
-		if (length(w) > 0L)
-			ans[1L] <- r[w[which.max(d[w])]]
+	if (any(ok <- rt > 0 & d >= -tol & d < 0)) {
+		rle.ok <- rle(ok)
+		ptr <- c(0L, cumsum(rle.ok$lengths))
+		j <- which.max(rle.ok$lengths * rle.ok$values)
+		i <- (ptr[j] + 1L):ptr[j + 1L]
+		ans[1L] <- rh[i[which.max(d[i])]]
 	}
-	if (r[end - 1L] < 0) {
-		w <- which(rt < 0 & d >= -tol & d < 0)
-		if (length(w) > 0L)
-			ans[2L] <- r[w[which.max(d[w])]]
+	if (any(ok <- rh < 0 & d >= -tol & d < 0)) {
+		rle.ok <- rle(ok)
+		ptr <- c(0L, cumsum(rle.ok$lengths))
+		j <- which.max(rle.ok$lengths * rle.ok$values)
+		i <- (ptr[j] + 1L):ptr[j + 1L]
+		ans[2L] <- rt[i[which.max(d[i])]]
 	}
 	ans
 }

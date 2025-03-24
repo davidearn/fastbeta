@@ -13,7 +13,7 @@ seir.canonical(from = 0, to = from + 1, by = 1,
                m = 1L, n = 1L,
                init = c(1 - p, p), p = .Machine[["double.neg.eps"]],
                weights = rep(c(1, 0), c(1L, m + n - 1L)),
-               root = c("none", "peak"), \dots)
+               root = c("none", "peak"), aggregate = FALSE, \dots)
 
 \method{summary}{seir.canonical}(object, tol = 1e-6, \dots)
 }
@@ -49,6 +49,9 @@ seir.canonical(from = 0, to = from + 1, by = 1,
   numerical solution as a multiple time series object.  \code{"peak"}:
   information about the time and state when \eqn{Y} attains a local
   maximum.}
+\item{aggregate}{
+  a logical indicating if latent and infectious compartments should be
+  aggregated when \code{root = "none"}.}
 \item{\dots}{
   optional arguments passed to \code{\link[deSolve]{lsoda}}.}
 \item{object}{
@@ -149,9 +152,9 @@ without loss of generality, \code{seir.canonical} assumes \eqn{N = 1}
 and drops the last equation.  The resulting system of \eqn{1 + m + n}
 equations is augmented with a final equation
 \deqn{
-  \text{d}Y/\text{d}\tau = ((h \mathcal{R}_{0}/(1 - \ell)) S - 1) \sum_{j} I^{j}
+  \text{d}Y/\text{d}\tau = (h/(1 - \ell)) (\mathcal{R}_{0} S - 1) \sum_{j} I^{j}
 }{
-  dY/tau = ((h * R0/(1 - ell)) * S - 1) * sum(I)
+  dY/tau = (h/(1 - ell)) * (R0 * S - 1) * sum(I)
 }
 due to the usefulness of the solution \eqn{Y} in applications.
 }
