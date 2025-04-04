@@ -32,14 +32,14 @@ data {
 
 	/* Number of time points */
 	int<lower=1> T;
-	/* Number of nodes */
+	/* Number of knots */
 	int<lower=1> K;
-	/* Radial basis function values */
-	matrix[T, K] B;
-	/* Hyperparameter: standard deviation of weights */
-	real<lower=0.0> hp1;
+	/* Model matrix */
+	matrix[T, K] X;
+	/* Penalty matrix */
+	matrix[K, K] S;
 	/* Hyperparameter: negative binomial dispersion */
-	real<lower=0.0> hp2;
+	real<lower=0.0> disp;
 }
 
 transformed data {
@@ -74,9 +74,8 @@ transformed parameters {
 }
 
 model {
-	w ~ normal(0.0, hp1);
 	for (t in 1:T)
-		series1[t] ~ neg_binomial_2(mu[1+t], hp2);
+		series1[t] ~ neg_binomial_2(mu[1+t], disp);
 }
 
 /*
