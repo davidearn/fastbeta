@@ -11,7 +11,7 @@ sir.canonical(from = 0, to = from + 1, by = 1,
               R0, ell, n = max(length(R0), length(ell)),
               init = c(1 - p, p), p = .Machine[["double.neg.eps"]],
               weights = rep(c(1, 0), c(1L, n - 1L)),
-              root = c("none", "peak"), aggregate = FALSE, \dots)
+              aggregate = FALSE, root = c("none", "peak"), \dots)
 
 \method{summary}{sir.canonical}(object, tol = 1e-6, \dots)
 }
@@ -36,21 +36,20 @@ sir.canonical(from = 0, to = from + 1, by = 1,
   a numeric vector of length 2 giving initial susceptible and infected
   proportions.}
 \item{p}{
-  a number in \eqn{(0, 1]} used only to define \code{init} when
-  \code{init} is unset.}
+  a number in \eqn{(0, 1]} used only to define the default expression
+  for \code{init}, which is \code{c(1 - p, p)}.}
 \item{weights}{
   a numeric vector of length \code{n} containing non-negative weights,
   defining the initial distribution of infected individuals among the
   infected compartments.  By default, all infected individuals occupy
   the first compartment.}
+\item{aggregate}{
+  a logical indicating if infected compartments should be aggregated.}
 \item{root}{
   a character string determining what is returned.  \code{"none"}: the
   numerical solution as a multiple time series object.  \code{"peak"}:
   information about the time and state when \eqn{Y} attains a local
   maximum.}
-\item{aggregate}{
-  a logical indicating if infected compartments should be aggregated
-  when \code{root = "none"}.}
 \item{\dots}{
   optional arguments passed to \code{\link[deSolve]{lsoda}}.}
 \item{object}{
@@ -67,23 +66,25 @@ If \code{root = "none"},
 a \dQuote{multiple time series} object, inheriting from class
 \code{sir.canonical} and transitively from class \code{\link[=ts]{mts}}.
 Beneath the class, it is a
-\code{length(seq(from, to, by))}-by-\code{(1+n+1)} numeric matrix with
-columns \code{S}, \code{I}, and \code{Y}. % FIXME: aggregate=TRUE
+\code{length(seq(from, to, by))}-by-\code{(1+n+1)} numeric matrix of the
+form \code{cbind(S, I, Y)}.
 
 If \code{root = "peak"},
-a numeric vector of length 6 of the form
-\code{c(tau, S, I, Y, I.E, I.I)}
-containing the time in units of the mean time spent infectious at which
-\eqn{Y} attains a local maximum and the values at that time of
-\eqn{S},
-\eqn{\sum_{j} I_{j}}{sum(I)},
-\eqn{Y},
-\eqn{\sum_{j:\mathcal{R}_{0,j} = 0} I_{j}}{sum(I[R0 == 0])}, and
-\eqn{\sum_{j:\mathcal{R}_{0,j} > 0} I_{j}}{sum(I[R0 > 0])}.
-Attributes \code{I} and \code{curvature} store the corresponding values
-of \eqn{I_{j}}{I[j]} and \eqn{Y''}.  If \eqn{Y} does not attain a local
-maximum between times \code{from} and \code{to}, then the value is
-\code{NULL}.
+a numeric vector of length \code{1+1+n+1} of the form
+\code{c(tau, S, I, Y)} storing the time in units of the mean time spent
+infectious at which \eqn{Y} attains a local maximum and the state at
+that time.  Attribute \code{curvature} stores the curvature of \eqn{Y}
+at the maximum point.  If \eqn{Y} does not attain a local maximum
+between times \code{from} and \code{to}, then the value is \code{NULL}.
+
+If \code{aggregate = TRUE},
+then infected compartments are aggregated so that the number of columns
+(\code{"none"}) or elements (\code{"peak"}) named \code{I} is 1 rather
+than \code{n}.  This column or element stores prevalence, the proportion
+of the population that is infected.  For convenience, there are
+2 additional columns or elements named \code{I.E} and \code{I.I}.
+These store the non-infectious and infectious components of prevalence,
+as indicated by \code{sign(R0)}, hence \code{I.E + I.I = I}.
 
 The method for \code{\link{summary}} returns a numeric vector of length
 2 containing the left and right \dQuote{tail exponents}, defined as the
@@ -94,7 +95,8 @@ not cover enough of the tail, where the meaning of \dQuote{enough} is
 set by \code{tol}.
 }
 \details{
-The standard SIR equations with age-structured transmission are
+The standard SIR equations with transmission structured by age of
+infection are
 \deqn{
   \begin{alignedat}{4}
   \text{d} & S         &{} / \text{d} t
@@ -114,8 +116,7 @@ The standard SIR equations with age-structured transmission are
 }
 where \eqn{N = S + \sum_{j} I_{j} + R}{N = sum(S, I, R)} is the
 (constant, positive) population size.  Without loss of generality,
-the canonical SIR equations with age-structured transmission are
-obtained by substituting \eqn{N = 1},
+the canonical SIR equations obtained by substituting \eqn{N = 1},
 \eqn{\mathcal{R}_{0,j} = \beta_{j}/\gamma_{j}}{R0 = beta/gamma}, and
 \eqn{\ell_{j} = (1/\gamma_{j})/\sum_{j:\mathcal{R}_{0,j} > 0} (1/\gamma_{j})}{ell = (1/gamma)/sum(1/gamma[R0 > 0])}
 and choosing
@@ -163,10 +164,10 @@ library(graphics, pos = "package:base", verbose = FALSE)
 }
 if (requireNamespace("deSolve")) withAutoprint({
 
-to <- 100; by <- 0.01; R0 <- 16; ell <- 1/3
+to <- 100; by <- 0.01; R0 <- c(0, 16); ell <- c(1, 2)
 
 peak <- sir.canonical(to = to, by = by, R0 = R0, ell = ell,
-                      root = "peak")
+                      aggregate = TRUE, root = "peak")
 peak
 
 to <- 4 * peak[["tau"]] # a more principled endpoint
@@ -177,17 +178,16 @@ head(soln)
 
 plot(soln) # dispatching stats:::plot.ts
 
-plot(soln[, "Y"])
+plot(soln[, "Y"], ylab = "Y")
 abline(v = peak[["tau"]], h = peak[["Y"]],
        lty = 2, lwd = 2, col = "red")
 
 xoff <- function (x, k) x - x[k]
-prev <- soln[, "I"]
 lamb <- summary(soln)
 k <- c(16L, nrow(soln)) # c(1L, nrow(soln)) suffers due to transient
-plot(prev, log = "y", ylab = "Prevalence")
+plot(soln[, "I"], log = "y", ylab = "Prevalence")
 for (i in 1:2)
-	lines(prev[k[i]] * exp(lamb[i] * xoff(time(prev), k[i])),
+	lines(soln[k[i], "I"] * exp(lamb[i] * xoff(time(soln), k[i])),
 	      lty = 2, lwd = 2, col = "red")
 
 })

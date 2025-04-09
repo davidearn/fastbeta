@@ -3,7 +3,7 @@ function (from = 0, to = from + 1, by = 1,
           R0, ell, n = max(length(R0), length(ell)),
           init = c(1 - p, p), p = .Machine[["double.neg.eps"]],
           weights = rep(c(1, 0), c(1L, n - 1L)),
-          root = c("none", "peak"), aggregate = FALSE, ...)
+          aggregate = FALSE, root = c("none", "peak"), ...)
 {
 	tau <- seq.int(from = from, to = to, by = by)
 	stopifnot(requireNamespace("deSolve"),
@@ -124,27 +124,31 @@ function (from = 0, to = from + 1, by = 1,
 	if (root == "none") {
 		ans <- x.[, -1L, drop = FALSE]
 		ans[, (1L + 1L):(1L + n)] <- exp(ans[, (1L + 1L):(1L + n)])
-		if (aggregate)
+		if (!aggregate)
+			dimnames(ans) <- list(NULL, rep(c("S", "I", "Y"), c(1L, n, 1L)))
+		else {
 			ans <- cbind(seir.aggregate(ans, 0L, n),
 			             rowSums(ans[, 1L + which(R0 == 0), drop = FALSE]),
 			             rowSums(ans[, 1L + which(R0 >  0), drop = FALSE]),
 			             deparse.level = 0L)
-		oldClass(ans) <- c("sir.canonical", "mts", "ts", "matrix", "array")
+			dimnames(ans) <- list(NULL, c("S", "I", "Y", "I.E", "I.I"))
+		}
 		tsp(ans) <- c(x.[c(1L, nrow(x.)), 1L], 1/by)
-		if (aggregate)
-		dimnames(ans) <- list(NULL, c("S", "I", "Y", "I.E", "I.I"))
-		else
-		dimnames(ans) <- list(NULL, rep(c("S", "I", "Y"), c(1L, n, 1L)))
+		oldClass(ans) <- c("sir.canonical", "mts", "ts", "matrix", "array")
 	} else {
 		if (is.null(attr(x., "troot")))
 			return(NULL)
-		r <- x.[nrow(x.), ]
-		tau <- r[1L]
-		S <- r[2L]
-		I <- exp(r[(2L + 1L):(2L + n)])
-		Y <- r[2L + n + 1L]
-		ans <- c(tau = tau, S = S, I = sum(I), Y = Y, I.E = sum(I[R0 == 0]), I.I = sum(I[R0 > 0]))
-		attr(ans, "I") <- I
+		ans <- x.[nrow(x.), ]
+		S <- ans[2L]
+		I <- exp(ans[(2L + 1L):(2L + n)])
+		ans[(2L + 1L):(2L + n)] <- I
+		if (!aggregate)
+			names(ans) <- rep(c("tau", "S", "I", "Y"), c(1L, 1L, n, 1L))
+		else {
+			ans <- c(ans[1L], S, sum(I), ans[2L + n + 1L],
+			         sum(I[R0 == 0]), sum(I[R0 > 0]))
+			names(ans) <- c("tau", "S", "I", "Y", "I.E", "I.I")
+		}
 		attr(ans, "curvature") <- (a.3 * (-sum(a.4 * I) * S)) * sum(a.5 * I) + (a.3 * S - 1) * sum(a.5 * c(sum(a.4 * I) * S - a.0 * I[1L], a.1 * I[-n] - a.2 * I[-1L]))
 	}
 	ans
