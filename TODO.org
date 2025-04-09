@@ -1,4 +1,4 @@
-* TODO fastbeta 0.3.2
+* TODO fastbeta 0.3.3
 
 ** TODO less boilerplate in examples and tests
 	The main problems stem from subscripting the time series that are

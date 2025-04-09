@@ -156,8 +156,7 @@ intervals according to multinomial samples taken with probabilities
 \code{delay}.
 }
 \seealso{
-\code{\link{seir.auxiliary}}, \code{\link{seir.canonical}},
-\code{\link{seir.library}}.
+\code{\link{seir.auxiliary}}, \code{\link{seir.library}}.
 }
 \references{
 Cao, Y., Gillespie, D. T., & Petzold, L. R. (2007).
