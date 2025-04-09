@@ -40,7 +40,7 @@
 \title{News for \R{} Package \pkg{fastbeta}}
 \newcommand{\GH}{\href{https://github.com/davidearn/fastbeta/issues/#1}{GH##1}}
 
-\section{Changes in version 0.3.3 (2025-03-24)}{
+\section{Changes in version 0.3.3 (2025-04-09)}{
   \subsection{Significant User-Visible Changes}{
     \itemize{
       \item .
@@ -48,7 +48,10 @@
   }
   \subsection{Deprecated and Defunct}{
     \itemize{
-      \item .
+      \item \code{seir.canonical} is removed in favour of more general
+      \code{sir.canonical}.  The method for \code{summary} for class
+      \code{seir.canonical} is removed in favour of a method for class
+      \code{sir.canonical}. % TODO
     }
   }
   \subsection{Bug Fixes}{
@@ -58,7 +61,9 @@
   }
   \subsection{New Features}{
     \itemize{
-      \item .
+      \item Function \code{sir.canonical} generalizing
+      \code{seir.canonical} in order to support transmission structured
+      by age of infection.
     }
   }
   \subsection{Installation}{
