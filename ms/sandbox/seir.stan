@@ -14,6 +14,8 @@ functions {
 }
 
 data {
+	/* Number of time points */
+	int<lower=2> T;
 	/* Incidence */
 	array[T] int<lower=0> series1;
 	/* Births */
@@ -29,53 +31,57 @@ data {
 	int<lower=1> n;
 	/* Initial state (S, E, I, R, cumulative incidence) */
 	vector[1+m+n+1+1] init;
-
-	/* Number of time points */
-	int<lower=1> T;
-	/* Number of knots */
-	int<lower=1> K;
+	/* Nullity, rank */
+	int<lower=1> R0;
+	int<lower=1> R1;
 	/* Model matrix */
-	matrix[T, K] X;
-	/* Penalty matrix */
-	matrix[K, K] S;
-	/* Hyperparameter: negative binomial dispersion */
-	real<lower=0.0> disp;
+	matrix[T, R0] X0;
+	matrix[T, R1] X1;
 }
 
 transformed data {
 	/* rep(c(sigma, gamma, delta), c(m, n, 1)) */
 	array[m+n+1] real<lower=0.0> a;
 	for (i in 1:m) {
-		a[0+i] = sigma;
+		a[i+0+0] = sigma;
 	}
 	for (j in 1:n) {
-		a[m+j] = gamma;
+		a[m+j+0] = gamma;
 	}
-	a[m+n+1] = delta;
+	for (k in 1:1) {
+		a[m+n+k] = delta;
+	}
 	/* Unit time step */
 	array[1] real step = { 1.0 };
 }
 
 parameters {
-	/* Radial basis weights */
-	vector[T] w;
+	/* Coefficients */
+	vector[R0] b0;
+	vector[R1] b1;
+	/* Random effect standard deviation */
+	real<lower=0.0> sd;
+	/* Negative binomial dispersion */
+	real<lower=0.0> dispersion;
 }
 
 transformed parameters {
 	/* Transmission */
-	vector[T] real<lower=0.0> beta = exp(B * w);
+	vector[T] real<lower=0.0> beta = exp(X0 * b0 + X1 * b1);
 	/* List of state vectors */
-	array[1+T] array[1] vector mu;
+	array[T] array[1] vector mu;
 	mu[1][1] = init;
-	for (t in 1:T) {
-		mu[1+t] = ode_rk45(dot, mu[t], 0.0, step,
-		                   beta[t], series2[t], series3[t], a, m, n);
+	for (t in 2:T) {
+		mu[t] = ode_rk45(dot, mu[t-1], 0.0, step,
+		                 beta[t-1], series2[t-1], series3[t-1], a, m, n);
 	}
 }
 
 model {
-	for (t in 1:T)
-		series1[t] ~ neg_binomial_2(mu[1+t], disp);
+	for (j in 1:R1)
+		b1[j] ~ normal(0.0, sd);
+	for (t in 2:T)
+		series1[t] ~ neg_binomial_2(mu[t], dispersion);
 }
 
 /*
