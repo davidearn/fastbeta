@@ -22,7 +22,7 @@ function (from = 0, to = from + 1, by = 1,
 	          sum(weights) > 0)
 	if (!is.null(root))
 	stopifnot(is.function(root),
-	          is.pairlist(formals(root)),
+	          !is.primitive(root),
 	          all(names(formals(root)) %in% c("tau", "S", "I", "Y", "dS", "dI", "dY", "R0", "ell")))
 
 	if (length(R0) != n)
