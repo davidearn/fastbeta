@@ -1,19 +1,20 @@
-\name{sir.canonical}
-\alias{sir.canonical}
-\alias{summary.sir.canonical}
-\title{Solve the Canonical SIR Equations}
+\name{sir.aoi}
+\alias{sir.aoi}
+\alias{summary.sir.aoi}
+\title{Solve the SIR Equations Structured by Age of Infection}
 \description{
-Numerically integrates the canonical SIR equations with transmission
-structured by age of infection.
+Numerically integrates the SIR equations with rates of transmission and
+recovery structured by age of infection.
 }
 \usage{
-sir.canonical(from = 0, to = from + 1, by = 1,
-              R0, ell, n = max(length(R0), length(ell)),
-              init = c(1 - p, p), p = .Machine[["double.neg.eps"]],
-              weights = rep(c(1, 0), c(1L, n - 1L)),
-              aggregate = FALSE, root = c("none", "peak"), \dots)
+sir.aoi(from = 0, to = from + 1, by = 1,
+        R0, ell, n = max(length(R0), length(ell)),
+        init = c(1 - init.infected, init.infected),
+        init.infected = .Machine[["double.neg.eps"]],
+        weights = rep(c(1, 0), c(1L, n - 1L)),
+        aggregate = FALSE, root = NULL, \dots)
 
-\method{summary}{sir.canonical}(object, tol = 1e-6, \dots)
+\method{summary}{sir.aoi}(object, tol = 1e-6, \dots)
 }
 \arguments{
 \item{from, to, by}{
@@ -35,9 +36,9 @@ sir.canonical(from = 0, to = from + 1, by = 1,
 \item{init}{
   a numeric vector of length 2 giving initial susceptible and infected
   proportions.}
-\item{p}{
+\item{init.infected}{
   a number in \eqn{(0, 1]} used only to define the default expression
-  for \code{init}, which is \code{c(1 - p, p)}.}
+  for \code{init}; see \sQuote{Usage}.}
 \item{weights}{
   a numeric vector of length \code{n} containing non-negative weights,
   defining the initial distribution of infected individuals among the
@@ -46,15 +47,14 @@ sir.canonical(from = 0, to = from + 1, by = 1,
 \item{aggregate}{
   a logical indicating if infected compartments should be aggregated.}
 \item{root}{
-  a character string determining what is returned.  \code{"none"}: the
-  numerical solution as a multiple time series object.  \code{"peak"}:
-  information about the time and state when \eqn{Y} attains a local
-  maximum.}
+  a function returning a numeric vector of length 1, with formal
+  arguments \code{(tau, S, I, Y, dS, dI, dY, R0, ell)} (or a subset);
+  otherwise, \code{NULL}.}
 \item{\dots}{
   optional arguments passed to \code{\link[deSolve]{lsoda}}.}
 \item{object}{
-  an \R{} object inheriting from class \code{sir.canonical}, typically
-  the value of a call to \code{sir.canonical}.}
+  an \R{} object inheriting from class \code{sir.aoi}, typically
+  the value of a call to \code{sir.aoi}.}
 \item{tol}{
   a positive number giving an upper bound on the relative change (from
   one time point to the next) in the slope of log prevalence, defining
@@ -62,29 +62,28 @@ sir.canonical(from = 0, to = from + 1, by = 1,
   be exponential.}
 }
 \value{
-If \code{root = "none"},
-a \dQuote{multiple time series} object, inheriting from class
-\code{sir.canonical} and transitively from class \code{\link[=ts]{mts}}.
-Beneath the class, it is a
-\code{length(seq(from, to, by))}-by-\code{(1+n+1)} numeric matrix of the
-form \code{cbind(S, I, Y)}.
+\item{root = NULL}{
+  a \dQuote{multiple time series} object, inheriting from class
+  \code{sir.aoi} and transitively from class \code{\link[=ts]{mts}}.
+  Beneath the class, it is a
+  \code{length(seq(from, to, by))}-by-\code{(1+n+1)} numeric matrix
+  of the form \code{cbind(S, I, Y)}.}
+\item{root = function(tau, S, I, Y, dS, dI, dY, R0, ell)}{
+  a numeric vector of length \code{1+1+n+1} of the form
+  \code{c(tau, S, I, Y)} storing the root of the function \code{root} in
+  units of the mean time spent infectious and the state at that time.
+  Attribute \code{curvature} stores the curvature of \eqn{Y} at the
+  root.  If a root is not found between times \code{from} and \code{to},
+  then the value is \code{NULL}.}
 
-If \code{root = "peak"},
-a numeric vector of length \code{1+1+n+1} of the form
-\code{c(tau, S, I, Y)} storing the time in units of the mean time spent
-infectious at which \eqn{Y} attains a local maximum and the state at
-that time.  Attribute \code{curvature} stores the curvature of \eqn{Y}
-at the maximum point.  If \eqn{Y} does not attain a local maximum
-between times \code{from} and \code{to}, then the value is \code{NULL}.
-
-If \code{aggregate = TRUE},
-then infected compartments are aggregated so that the number of columns
-(\code{"none"}) or elements (\code{"peak"}) named \code{I} is 1 rather
-than \code{n}.  This column or element stores prevalence, the proportion
-of the population that is infected.  For convenience, there are
-2 additional columns or elements named \code{I.E} and \code{I.I}.
-These store the non-infectious and infectious components of prevalence,
-as indicated by \code{sign(R0)}, hence \code{I.E + I.I = I}.
+If \code{aggregate = TRUE}, then infected compartments are aggregated so
+that the number of columns (elements, if \code{root} is a function)
+named \code{I} is 1 rather than \code{n}.  This column or element stores
+prevalence, the proportion of the population that is infected.
+For convenience, there are 2 additional columns (elements) named
+\code{I.E} and \code{I.I}.  These store the non-infectious and
+infectious components of prevalence, as indicated by \code{sign(R0)},
+hence \code{I.E + I.I = I}.
 
 The method for \code{\link{summary}} returns a numeric vector of length
 2 containing the left and right \dQuote{tail exponents}, defined as the
@@ -95,8 +94,8 @@ not cover enough of the tail, where the meaning of \dQuote{enough} is
 set by \code{tol}.
 }
 \details{
-The standard SIR equations with transmission structured by age of
-infection are
+The standard SIR equations with rates of transmission and recovery
+structured by age of infection are
 \deqn{
   \begin{alignedat}{4}
   \text{d} & S         &{} / \text{d} t
@@ -115,13 +114,14 @@ infection are
   dR       /dt = gamma[n] * I[n]
 }
 where \eqn{N = S + \sum_{j} I_{j} + R}{N = sum(S, I, R)} is the
-(constant, positive) population size.  Without loss of generality,
-the canonical SIR equations obtained by substituting \eqn{N = 1},
+(constant, positive) population size.  Nondimensionalization using
+parameters
+\eqn{N = 1},
 \eqn{\mathcal{R}_{0,j} = \beta_{j}/\gamma_{j}}{R0 = beta/gamma}, and
 \eqn{\ell_{j} = (1/\gamma_{j})/\sum_{j:\mathcal{R}_{0,j} > 0} (1/\gamma_{j})}{ell = (1/gamma)/sum(1/gamma[R0 > 0])}
-and choosing
-\eqn{\tau = t/\sum_{j:\mathcal{R}_{0,j} > 0} (1/\gamma_{j})}{tau = t/sum(1/gamma[R0 > 0])}
-as the independent variable:
+and time unit
+\eqn{\tau = t/\sum_{j:\mathcal{R}_{0,j} > 0} (1/\gamma_{j})}{tau = t/sum(1/gamma[R0 > 0])},
+gives
 \deqn{
   \begin{alignedat}{4}
   \text{d} & S         &{} / \text{d} \tau
@@ -139,8 +139,9 @@ as the independent variable:
   dI[j + 1]/dtau = (1/ell[j]) * I[j] - (1/ell[j + 1]) * I[j + 1]
   dR       /dtau = (1/ell[n]) * I[n]
 }
-\code{sir.canonical} drops the last equation, which is redundant as
-\eqn{R = 1 - S - \sum_{j} I_{j}}{R = 1 - sum(S, I)}, and augments the
+\code{sir.aoi} works with the nondimensional equations, dropping the
+last equation (which is redundant given
+\eqn{R = 1 - S - \sum_{j} I_{j}}{R = 1 - sum(S, I)}) and augments the
 resulting system of \eqn{1 + n} equations with a new equation
 \deqn{
   \text{d}Y/\text{d}\tau = (\sum_{j} \mathcal{R}_{0, j} S - 1) \sum_{j:\mathcal{R}_{0,j} > 0} I_{j}
@@ -150,9 +151,9 @@ resulting system of \eqn{1 + n} equations with a new equation
 due to the usefulness of the solution \eqn{Y} in applications.
 }
 \note{
-\code{sir.canonical} is not a special case of \code{\link{sir}} nor a
+\code{sir.aoi} is not a special case of \code{\link{sir}} nor a
 generalization.  The two functions were developed independently and for
-different purposes: \code{sir.canonical} to validate analytical results
+different purposes: \code{sir.aoi} to validate analytical results
 concerning the SIR equations as formulated here, \code{sir} to simulate
 incidence time series suitable for testing \code{\link{fastbeta}}.
 }
@@ -166,14 +167,14 @@ if (requireNamespace("deSolve")) withAutoprint({
 
 to <- 100; by <- 0.01; R0 <- c(0, 16); ell <- c(1, 2)
 
-peak <- sir.canonical(to = to, by = by, R0 = R0, ell = ell,
-                      aggregate = TRUE, root = "peak")
+peak <- sir.aoi(to = to, by = by, R0 = R0, ell = ell,
+                aggregate = TRUE, root = function(dY) dY)
 peak
 
 to <- 4 * peak[["tau"]] # a more principled endpoint
 
-soln <- sir.canonical(to = to, by = by, R0 = R0, ell = ell,
-                      aggregate = TRUE)
+soln <- sir.aoi(to = to, by = by, R0 = R0, ell = ell,
+                aggregate = TRUE)
 head(soln)
 
 plot(soln) # dispatching stats:::plot.ts
