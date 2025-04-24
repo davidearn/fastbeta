@@ -68,7 +68,7 @@ sir.aoi(from = 0, to = from + 1, by = 1,
   Beneath the class, it is a
   \code{length(seq(from, to, by))}-by-\code{(1+n+1)} numeric matrix
   of the form \code{cbind(S, I, Y)}.}
-\item{root = function(tau, S, I, Y, dS, dI, dY, R0, ell)}{
+\item{root = function (tau, S, I, Y, dS, dI, dY, R0, ell)}{
   a numeric vector of length \code{1+1+n+1} of the form
   \code{c(tau, S, I, Y)} storing the root of the function \code{root} in
   units of the mean time spent infectious and the state at that time.
