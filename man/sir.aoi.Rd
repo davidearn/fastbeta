@@ -12,7 +12,7 @@ sir.aoi(from = 0, to = from + 1, by = 1,
         init = c(1 - init.infected, init.infected),
         init.infected = .Machine[["double.neg.eps"]],
         weights = rep(c(1, 0), c(1L, n - 1L)),
-        aggregate = FALSE, root = NULL, \dots)
+        root = NULL, aggregate = FALSE, \dots)
 
 \method{summary}{sir.aoi}(object, tol = 1e-6, \dots)
 }
@@ -44,12 +44,12 @@ sir.aoi(from = 0, to = from + 1, by = 1,
   defining the initial distribution of infected individuals among the
   infected compartments.  By default, all infected individuals occupy
   the first compartment.}
-\item{aggregate}{
-  a logical indicating if infected compartments should be aggregated.}
 \item{root}{
   a function returning a numeric vector of length 1, with formal
   arguments \code{(tau, S, I, Y, dS, dI, dY, R0, ell)} (or a subset);
   otherwise, \code{NULL}.}
+\item{aggregate}{
+  a logical indicating if infected compartments should be aggregated.}
 \item{\dots}{
   optional arguments passed to \code{\link[deSolve]{lsoda}}.}
 \item{object}{
@@ -168,7 +168,8 @@ if (requireNamespace("deSolve")) withAutoprint({
 to <- 100; by <- 0.01; R0 <- c(0, 16); ell <- c(1, 2)
 
 peak <- sir.aoi(to = to, by = by, R0 = R0, ell = ell,
-                aggregate = TRUE, root = function(dY) dY)
+                root = function (S, R0) sum(R0) * S - 1,
+                aggregate = TRUE)
 peak
 
 to <- 4 * peak[["tau"]] # a more principled endpoint
@@ -190,6 +191,24 @@ plot(soln[, "I"], log = "y", ylab = "Prevalence")
 for (i in 1:2)
 	lines(soln[k[i], "I"] * exp(lamb[i] * xoff(time(soln), k[i])),
 	      lty = 2, lwd = 2, col = "red")
+
+wrap <-
+function (root)
+	sir.aoi(to = to, by = by, R0 = R0, ell = ell,
+	        root = root, aggregate = TRUE)
+Ymax <- peak[["Y"]]
+
+## NB: want *simple* roots, not *multiple* roots
+F <- list(function (Y) (Y - Ymax * 0.5)  ,
+          function (Y) (Y - Ymax * 0.5)^2,
+          function (Y) (Y - Ymax      )  ,
+          function (Y) (Y - Ymax      )^2)
+lapply(F, wrap)
+
+## NB: critical values can be attained twice
+F <- list(function (Y, dY) if (dY > 0) Y - Ymax * 0.5 else 1,
+          function (Y, dY) if (dY < 0) Y - Ymax * 0.5 else 1)
+lapply(F, wrap)
 
 })
 }
