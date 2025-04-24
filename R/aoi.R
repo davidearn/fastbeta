@@ -1,10 +1,10 @@
-sir.aoi <- # R0=1.125, ell=4, m=1, n=1
+sir.aoi <-
 function (from = 0, to = from + 1, by = 1,
           R0, ell, n = max(length(R0), length(ell)),
           init = c(1 - init.infected, init.infected),
           init.infected = .Machine[["double.neg.eps"]],
           weights = rep(c(1, 0), c(1L, n - 1L)),
-          aggregate = FALSE, root = NULL, ...)
+          root = NULL, aggregate = FALSE, ...)
 {
 	tau <- seq.int(from = from, to = to, by = by)
 	stopifnot(requireNamespace("deSolve"),

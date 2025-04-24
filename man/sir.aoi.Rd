@@ -12,7 +12,7 @@ sir.aoi(from = 0, to = from + 1, by = 1,
         init = c(1 - init.infected, init.infected),
         init.infected = .Machine[["double.neg.eps"]],
         weights = rep(c(1, 0), c(1L, n - 1L)),
-        aggregate = FALSE, root = NULL, \dots)
+        root = NULL, aggregate = FALSE, \dots)
 
 \method{summary}{sir.aoi}(object, tol = 1e-6, \dots)
 }
@@ -44,12 +44,12 @@ sir.aoi(from = 0, to = from + 1, by = 1,
   defining the initial distribution of infected individuals among the
   infected compartments.  By default, all infected individuals occupy
   the first compartment.}
-\item{aggregate}{
-  a logical indicating if infected compartments should be aggregated.}
 \item{root}{
   a function returning a numeric vector of length 1, with formal
   arguments \code{(tau, S, I, Y, dS, dI, dY, R0, ell)} (or a subset);
   otherwise, \code{NULL}.}
+\item{aggregate}{
+  a logical indicating if infected compartments should be aggregated.}
 \item{\dots}{
   optional arguments passed to \code{\link[deSolve]{lsoda}}.}
 \item{object}{
@@ -168,7 +168,8 @@ if (requireNamespace("deSolve")) withAutoprint({
 to <- 100; by <- 0.01; R0 <- c(0, 16); ell <- c(1, 2)
 
 peak <- sir.aoi(to = to, by = by, R0 = R0, ell = ell,
-                aggregate = TRUE, root = function(dY) dY)
+                root = function (S, R0) sum(R0) * S - 1,
+                aggregate = TRUE)
 peak
 
 to <- 4 * peak[["tau"]] # a more principled endpoint
