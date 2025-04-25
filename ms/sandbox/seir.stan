@@ -17,23 +17,29 @@ functions {
 data {
 	/* Number of time points */
 	int<lower=2> T;
+
 	/* Time series */
 	array[T] int<lower=0> incidence;
 	array[T] int<lower=0> birth;
 	array[T] real<lower=0.0> death;
+
 	/* Constants */
 	real<lower=0.0> sigma;
 	real<lower=0.0> gamma;
 	real<lower=0.0> delta;
+
 	/* Number of E[i], I[j] compartments */
 	int<lower=0> m;
 	int<lower=1> n;
+
 	/* State (S, E, I, R) at first time point */
 	vector<lower=0.0>[1+m+n+1] init;
+
 	/* Nullity, rank */
 	int<lower=1> R0;
 	int<lower=1> R1;
-	/* Model matrix */
+
+	/* Model matrices */
 	matrix[T, R0] X0;
 	matrix[T, R1] X1;
 }
@@ -50,33 +56,39 @@ transformed data {
 }
 
 parameters {
-	/* Coefficients */
+	real log_sd;
+	real log_size;
 	vector[R0] b0;
 	vector[R1] b1;
-	/* Random effect standard deviation */
-	real<lower=0.0> sd;
-	/* Negative binomial dispersion parameter */
-	real<lower=0.0> dispersion;
 }
 
 transformed parameters {
+	/* Random effect standard deviation */
+	real<lower=0.0> sd = exp(log_sd);
+
+	/* Negative binomial dispersion parameter */
+	real<lower=0.0> size = exp(log_size);
+
 	/* Spline */
-	vector<lower=0.0>[T] beta = gamma/init[1] * exp(X0 * b0 + X1 * b1);
+	vector<lower=0.0>[T] trans = gamma/init[1] * exp(X0 * b0 + X1 * b1);
+
 	/* State (S, log(E), log(I), log(R), cumulative incidence) */
 	matrix[T, 1+m+n+1+1] state;
-	state[1, :] = append_row(append_row(init[1], log(init[(1+1):(1+m+n+1)])), 0.0)';
+
+	state[1, :] =
+	append_row(append_row(init[1], log(init[(1+1):(1+m+n+1)])), 0.0)';
 	for (t in 2:T)
-	state[t, :] = ode_rk45(dot, state[t-1, :]', 0.0, step,
-	                       beta[t-1], birth[t-1], death[t-1], a,
-	                       m, n)[1]';
+	state[t, :] =
+	ode_rk45(dot, state[t-1, :]', 0.0, step,
+	         trans[t-1], birth[t-1], death[t-1], a, m, n)[1]';
 }
 
 model {
 	for (j in 1:R1)
 		b1[j] ~ normal(0.0, sd);
 	for (t in 2:T) {
-		real location = state[t, 1+m+n+1+1] - state[t-1, 1+m+n+1+1];
-		incidence[t] ~ neg_binomial_2(location, dispersion);
+		real mu = state[t, 1+m+n+1+1] - state[t-1, 1+m+n+1+1];
+		incidence[t] ~ neg_binomial_2(mu, size);
 	}
 }
 
