@@ -71,4 +71,6 @@ L <- list(T = T,
           R1 = ncol(Z.),
           X0 = X.,
           X1 = Z.)
+
+options(mc.cores = parallel::detectCores())
 fit <- rstan::stan("seir.stan", data = L, init = "0")

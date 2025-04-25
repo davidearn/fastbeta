@@ -64,7 +64,7 @@ transformed parameters {
 	vector<lower=0.0>[T] beta = gamma/init[1] * exp(X0 * b0 + X1 * b1);
 	/* State (S, log(E), log(I), log(R), cumulative incidence) */
 	matrix[T, 1+m+n+1+1] state;
-	state[1, :] = append_col(append_col(init[1], log(init[(1+1):(1+m+n+1)])), 0.0);
+	state[1, :] = append_row(append_row(init[1], log(init[(1+1):(1+m+n+1)])), 0.0)';
 	for (t in 2:T)
 	state[t, :] = ode_rk45(dot, state[t-1, :]', 0.0, step,
 	                       beta[t-1], birth[t-1], death[t-1], a,
