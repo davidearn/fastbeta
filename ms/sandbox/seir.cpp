@@ -44,7 +44,7 @@ vector<Type> dot(Type t,
 	Type s1 = (y.segment(1 + m, n)       ).exp().sum();
 	Type s2 = (y.segment(1 + m, n) - y(1)).exp().sum();
 	vector<Type> dydt(1 + m + n + 1 + 1);
-	dydt(0) = dtheta(1) + dtheta(3 + m + n) * exp(y(1 + m + n + 1)) -
+	dydt(0) = dtheta(1) + dtheta(3 + m + n) * exp(y(1 + m + n)) -
 		(dtheta(0) * s1 + dtheta(2)) * y(0);
 	dydt(1) = dtheta(0) * s2 * y(0) - (dtheta(3) + dtheta(2));
 	for (int k = 0; k < m + n; ++k)
@@ -81,7 +81,9 @@ Type objective_function<Type>::operator() ()
 	DATA_VECTOR(init);
 
 	/* Nullity, rank */
+#if 0
 	DATA_INTEGER(R0);
+#endif
 	DATA_INTEGER(R1);
 
 	/* Model matrices */
@@ -92,7 +94,6 @@ Type objective_function<Type>::operator() ()
 	DATA_VECTOR(rka);
 	DATA_VECTOR(rkb);
 	DATA_VECTOR(rkc);
-	DATA_SCALAR(rkh);
 
 
 	/* .... Transformed data ........................................ */
@@ -119,7 +120,7 @@ Type objective_function<Type>::operator() ()
 	/* .... Transformed parameters .................................. */
 
 	/* Spline */
-	vector<Type> trans = exp(intercept + X0 * b0 + X1 * b1);
+	vector<Type> log_trans = intercept + X0 * b0 + X1 * b1;
 
 	/* State (S, log(E), log(I), log(R), cumulative incidence) */
 	matrix<Type> state(1 + m + n + 1 + 1, T);
@@ -134,13 +135,20 @@ Type objective_function<Type>::operator() ()
 	state(1 + m + n + 1, 0) = Type(0.0);
 
 	matrix<Type> F(state.rows(), rkb.size());
+	vector<Type> y = state.col(0);
 	for (int t = 1; t < T; ++t) {
-		dtheta(0) = trans(t - 1);
+		dtheta(0) = exp(log_trans(t - 1));
 		dtheta(1) = birth(t - 1);
 		dtheta(2) = death(t - 1);
-		state.col(t) = rungekutta(dot, F, Type(0.0), state.col(t - 1),
-		                          dtheta, itheta, rka, rkb, rkc, rkh);
+		y = rungekutta(dot, F, Type(0.0), y, dtheta, itheta,
+		               rka, rkb, rkc, Type(1.0));
+		state.col(t) = y;
 	}
+
+	REPORT(log_trans);
+	REPORT(state);
+	ADREPORT(log_trans);
+	ADREPORT(state);
 
 
 	/* .... Model ................................................... */
@@ -150,10 +158,13 @@ Type objective_function<Type>::operator() ()
 	for (int j = 0; j < R1; ++j)
 		ans -= dnorm(b1(j), Type(0.0), sd, 1);
 
+#if 0
+	Type size = exp(log_size);
+#endif
 	for (int t = 1; t < T; ++t) {
 		Type log_mu = log(state(1 + m + n + 1, t - 0) -
 		                  state(1 + m + n + 1, t - 1));
-		ans -= dnbinom_robust(incidence(t),
+		ans -= dnbinom_robust(Type(incidence(t)),
 		                      log_mu, Type(2.0) * log_mu - log_size, 1);
 	}
 

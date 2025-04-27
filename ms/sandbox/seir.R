@@ -2,7 +2,7 @@
 
 iperm <- function (p) { p[p] <- seq_along(p); p }
 
-basis.dimension <- 8L # number of basis functions
+basis.dimension <- 32L # number of basis functions
 basis.order <- 4L # number of polynomial coefficients
 penalty.order <- 2L # order of difference penalty
 
@@ -110,5 +110,4 @@ data <- list(T = T,
                           4.0/     5.0,
                           8.0/     9.0,
                           1.0/     1.0,
-                          1.0/     1.0),
-             rhk = 1)
+                          1.0/     1.0))

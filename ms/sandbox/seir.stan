@@ -73,7 +73,7 @@ parameters {
 
 transformed parameters {
 	/* Spline */
-	vector[T] trans = exp(intercept + X0 * b0 + X1 * b1);
+	vector[T] log_trans = intercept + X0 * b0 + X1 * b1;
 
 	/* State (S, log(E), log(I), log(R), cumulative incidence) */
 	matrix[1+m+n+1+1, T] state;
@@ -84,7 +84,7 @@ transformed parameters {
 	for (t in 2:T)
 		state[:, t] =
 		ode_rk45(dot, state[:, t-1], 0.0, times,
-		         trans[t-1], birth[t-1], death[t-1],
+		         exp(log_trans[t-1]), birth[t-1], death[t-1],
 		         dtheta, itheta)[1];
 }
 
