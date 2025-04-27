@@ -30,7 +30,8 @@ sir.aoi(from = 0, to = from + 1, by = 1,
   a numeric vector of length \code{n} such that \code{ell[j]} is the
   ratio of the mean time spent in infected compartment \code{j} and the
   mean time spent infectious.  \code{ell} of length 1 is recycled to
-  length \code{n}.  \code{ell/sum(ell[R0 > 0])} is used internally.}
+  length \code{n}.  \code{ell} is valid up to a positive factor as
+  \code{ell/sum(ell[R0 > 0])} is used internally.}
 \item{n}{
   a positive integer giving the number of infected compartments.}
 \item{init}{
