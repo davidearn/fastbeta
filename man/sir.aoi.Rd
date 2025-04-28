@@ -8,7 +8,7 @@ recovery structured by age of infection.
 }
 \usage{
 sir.aoi(from = 0, to = from + 1, by = 1,
-        R0, ell, n = max(length(R0), length(ell)),
+        R0, ell = 1, n = max(length(R0), length(ell)),
         init = c(1 - init.infected, init.infected),
         init.infected = .Machine[["double.neg.eps"]],
         weights = rep(c(1, 0), c(1L, n - 1L)),
@@ -24,16 +24,19 @@ sir.aoi(from = 0, to = from + 1, by = 1,
 \item{R0}{
   a numeric vector of length \code{n} such that \code{sum(R0)} is the
   basic reproduction number and \code{R0[j]} is the contribution of
-  infected compartment \code{j}.  \code{R0} of length 1 is recycled to
-  length \code{n}.}
+  infected compartment \code{j}.  Otherwise, a numeric vector of length
+  1, handled as equivalent to \code{rep(R0/n, n)}.}
 \item{ell}{
   a numeric vector of length \code{n} such that \code{ell[j]} is the
   ratio of the mean time spent in infected compartment \code{j} and the
-  mean time spent infectious.  \code{ell} of length 1 is recycled to
-  length \code{n}.  \code{ell} is valid up to a positive factor as
-  \code{ell/sum(ell[R0 > 0])} is used internally.}
+  mean time spent infectious; internally, \code{ell/sum(ell[R0 > 0])}
+  is used, hence \code{ell} is determined only up to a positive factor.
+  Otherwise (and by default), a numeric vector of length 1, handled as
+  equivalent to \code{rep(1, n)}.}
 \item{n}{
-  a positive integer giving the number of infected compartments.}
+  a positive integer giving the number of infected compartments.
+  Setting \code{n} and thus overriding the default expression is
+  necessary only if the lengths of \code{R0} and \code{ell} are both 1.}
 \item{init}{
   a numeric vector of length 2 giving initial susceptible and infected
   proportions.}

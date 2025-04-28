@@ -1,6 +1,6 @@
 sir.aoi <-
 function (from = 0, to = from + 1, by = 1,
-          R0, ell, n = max(length(R0), length(ell)),
+          R0, ell = 1, n = max(length(R0), length(ell)),
           init = c(1 - init.infected, init.infected),
           init.infected = .Machine[["double.neg.eps"]],
           weights = rep(c(1, 0), c(1L, n - 1L)),
@@ -26,9 +26,9 @@ function (from = 0, to = from + 1, by = 1,
 	          all(names(formals(root)) %in% c("tau", "S", "I", "Y", "dS", "dI", "dY", "R0", "ell")))
 
 	if (length(R0) != n)
-		R0 <- rep_len(R0, n)
+		R0 <- rep_len(R0/n, n)
 	if (length(ell) != n)
-		ell <- rep_len(ell, n)
+		ell <- rep_len(1, n)
 	ell <- ell/sum(ell[R0 > 0])
 
 	p <- init[2L]
