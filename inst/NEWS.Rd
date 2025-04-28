@@ -40,7 +40,7 @@
 \title{News for \R{} Package \pkg{fastbeta}}
 \newcommand{\GH}{\href{https://github.com/davidearn/fastbeta/issues/#1}{GH##1}}
 
-\section{Changes in version 0.3.3 (2025-04-28)}{
+\section{Changes in version 0.4.0 (2025-04-28)}{
   \subsection{Deprecated and Defunct}{
     \itemize{
       \item \code{seir.canonical} is removed in favour of more general
