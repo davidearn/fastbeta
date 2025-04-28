@@ -169,7 +169,7 @@ library(graphics, pos = "package:base", verbose = FALSE)
 }
 if (requireNamespace("deSolve")) withAutoprint({
 
-to <- 100; by <- 0.01; R0 <- c(0, 16); ell <- c(1, 2)
+to <- 100; by <- 0.01; R0 <- c(0, 16); ell <- c(0.5, 1)
 
 peak <- sir.aoi(to = to, by = by, R0 = R0, ell = ell,
                 root = function (S, R0) sum(R0) * S - 1,
