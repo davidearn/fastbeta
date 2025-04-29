@@ -1,4 +1,4 @@
-* TODO fastbeta 0.3.3
+* TODO fastbeta 0.4.x
 
 ** TODO less boilerplate in examples and tests
 	The main problems stem from subscripting the time series that are
@@ -9,10 +9,3 @@
 	Notably, for deterministic simulations, it should be tested that
 	the back-calculated time series are equal to the latent ones within
 	a tolerance.  This applies to 'fastbeta', 'ptpi', and 'deconvolve'.
-
-* DONE fastbeta 0.3.1
-
-** DONE 'seir': provide option to aggregate infected subcompartments
-	rowSums(x[, colnames(x) == "E"]), ditto "I"
-** DONE 'fastbeta.matrix': export and document
-** DONE 'seir': handle early termination due to root finding
