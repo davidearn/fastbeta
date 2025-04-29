@@ -1,5 +1,5 @@
 source("seir.R"); stopifnot(is.list(data))
-dll <- "seir"
+dll <- "seir.tmb"
 cpp <- paste0(dll, ".cpp")
 lib <- paste0(dll, .Platform[["dynlib.ext"]])
 TMB::compile(cpp)
