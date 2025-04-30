@@ -1,27 +1,27 @@
 functions {
 	vector dot(real t, vector y,
-	           real beta, data real nu, data real mu,
+	           real log_beta, data real nu, data real mu,
 	           data vector dtheta, data array[] int itheta)
 	{
 		int m = itheta[1];
 		int n = itheta[2];
-		real s1 = sum(exp(y[(1+m+1):(1+m+n)]       ));
-		real s2 = sum(exp(y[(1+m+1):(1+m+n)] - y[2]));
+		real log_lambda = log_beta + logsumexp(y[(1+m+1):(1+m+n)]);
 		vector[1+m+n+1+1] dydt;
-		dydt[1] = nu + dtheta[m+n+1] * exp(y[1+m+n+1]) -
-			(beta * s1 + mu) * y[1];
-		dydt[2] = beta * s2 * y[1] - (dtheta[1] + mu);
-		for (k in 1:(m + n))
-		dydt[2+k] = dtheta[0+k] * exp(y[1+k] - y[2+k]) -
-			(dtheta[1+k] + mu);
-		dydt[2+m+n+1] = beta * s1 * y[1];
+		dydt[1] = nu * exp(-y[1]) +
+			dtheta[m+n+1] * exp(y[1+m+n+1] - y[1]) -
+			(exp(log_lambda) + mu);
+		dydt[2] = exp(log_lambda + y[1] - y[2]) - (dtheta[1] + mu);
+		dydt[(2+1):(2+m+n)] =
+			dtheta[(0+1):(0+m+n)] * exp(y[(1+1):(1+m+n)] - y[(2+1):(2+m+n)]) -
+			(dtheta[(1+1):(1+m+n)]);
+		dydt[2+m+n+1] = exp(log_lambda + y[1]);
 		return dydt;
 	}
 }
 
 data {
 	/* Number of time points */
-	int<lower=2> T;
+	int<lower=1> T;
 
 	/* Time series */
 	array[T] int<lower=0> incidence;
@@ -38,10 +38,10 @@ data {
 	int<lower=0> m;
 	int<lower=1> n;
 
-	/* State (S, E, I, R) at first time point */
-	vector<lower=0.0>[1+m+n+1] init;
+	/* State (log S, log E, log I, log R, cumulative incidence) */
+	vector[1+m+n+1+1] init;
 
-	/* Nullity, rank */
+	/* Nullity, rank of spline penalty matrix */
 	int<lower=1> R0;
 	int<lower=1> R1;
 
@@ -75,29 +75,22 @@ transformed parameters {
 	/* Spline */
 	vector[T] log_trans = intercept + X0 * b0 + X1 * b1;
 
-	/* State (S, log(E), log(I), log(R), cumulative incidence) */
-	matrix[1+m+n+1+1, T] state;
+	/* State (log S, log E, log I, log R, cumulative incidence) */
+	matrix[1+m+n+1+1, 1+T] state;
 
-	state[:, 1] =
-	append_row(append_row(init[1], log(init[(1+1):(1+m+n+1)])), 0.0);
-
-	for (t in 2:T)
-		state[:, t] =
-		ode_rk45(dot, state[:, t-1], 0.0, times,
-		         exp(log_trans[t-1]), birth[t-1], death[t-1],
+	state[:, 1] = init;
+	for (t in 1:T)
+		state[:, 1+t] =
+		ode_rk45(dot, state[:, t], 0.0, times,
+		         exp(log_trans[t]), birth[t], death[t],
 		         dtheta, itheta)[1];
 }
 
 model {
-	real sd = exp(log_sd);
-	for (j in 1:R1)
-		b1[j] ~ normal(0.0, sd);
-
-	real size = exp(log_size);
-	for (t in 2:T) {
-		real mu = state[1+m+n+1+1, t] - state[1+m+n+1+1, t-1];
-		incidence[t] ~ neg_binomial_2(mu, size);
-	}
+	b1 ~ normal(0.0, exp(log_sd));
+	incidence ~ neg_binomial_2(state[1+m+n+1+1, (1+1):(1+T)] -
+	                           state[1+m+n+1+1, (0+1):(0+T)],
+	                           exp(log_size));
 }
 
 /*

@@ -55,7 +55,7 @@ mu   <- function (t) rep(mu.0, length(t))
 
 set.seed(0L)
 init <- fastbeta::seir.ee(beta.0, nu.0, mu.0, sigma, gamma, delta, m, n)
-series <- fastbeta::seir(T + 1L, beta, nu, mu, sigma, gamma, delta, m, n,
+series <- fastbeta::seir(1L + T, beta, nu, mu, sigma, gamma, delta, m, n,
                          init, epsilon = 0.002)[-1L, ]
 
 
@@ -65,13 +65,13 @@ data <- list(T = T,
              incidence = as.integer(series[, 1L + m + n + 1L + 1L]),
              birth = as.double(series[, 1L + m + n + 1L + 2L]),
              death = mu(times),
-             intercept = log(gamma) - log(series[1L, 1L]),
+             intercept = log(gamma) - log(as.double(series[1L, 1L])),
              sigma = sigma,
              gamma = gamma,
              delta = delta,
              m = m,
              n = n,
-             init = as.double(series[1L, 1L:(1L + m + n + 1L)]),
+             init = c(log(as.double(series[1L, 1L:(1L + m + n + 1L)])), 0),
              R0 = ncol(X.),
              R1 = ncol(Z.),
              X0 = X.,
