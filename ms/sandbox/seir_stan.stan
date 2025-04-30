@@ -5,14 +5,14 @@ functions {
 	{
 		int m = itheta[1];
 		int n = itheta[2];
-		real log_lambda = log_beta + logsumexp(y[(1+m+1):(1+m+n)]);
+		real log_lambda = log_beta + log_sum_exp(y[(1+m+1):(1+m+n)]);
 		vector[1+m+n+1+1] dydt;
 		dydt[1] = nu * exp(-y[1]) +
 			dtheta[m+n+1] * exp(y[1+m+n+1] - y[1]) -
 			(exp(log_lambda) + mu);
 		dydt[2] = exp(log_lambda + y[1] - y[2]) - (dtheta[1] + mu);
 		dydt[(2+1):(2+m+n)] =
-			dtheta[(0+1):(0+m+n)] * exp(y[(1+1):(1+m+n)] - y[(2+1):(2+m+n)]) -
+			dtheta[(0+1):(0+m+n)] .* exp(y[(1+1):(1+m+n)] - y[(2+1):(2+m+n)]) -
 			(dtheta[(1+1):(1+m+n)]);
 		dydt[2+m+n+1] = exp(log_lambda + y[1]);
 		return dydt;
@@ -82,7 +82,7 @@ transformed parameters {
 	for (t in 1:T)
 		state[:, 1+t] =
 		ode_rk45(dot, state[:, t], 0.0, times,
-		         exp(log_trans[t]), birth[t], death[t],
+		         log_trans[t], birth[t], death[t],
 		         dtheta, itheta)[1];
 }
 
