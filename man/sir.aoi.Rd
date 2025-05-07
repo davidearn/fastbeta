@@ -84,10 +84,10 @@ If \code{aggregate = TRUE}, then infected compartments are aggregated so
 that the number of columns (elements, if \code{root} is a function)
 named \code{I} is 1 rather than \code{n}.  This column or element stores
 prevalence, the proportion of the population that is infected.
-For convenience, there are 2 additional columns (elements) named
-\code{I.E} and \code{I.I}.  These store the non-infectious and
-infectious components of prevalence, as indicated by \code{sign(R0)},
-hence \code{I.E + I.I = I}.
+For convenience, there are 3 additional columns (elements) named
+\code{I.E}, \code{I.I}, and \code{foi}.  These store the non-infectious
+and infectious components of prevalence, so that \code{I.E + I.I = I},
+and the force of infection.
 
 The method for \code{\link{summary}} returns a numeric vector of length
 2 containing the left and right \dQuote{tail exponents}, defined as the

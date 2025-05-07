@@ -59,7 +59,8 @@
   }
   \subsection{New Features}{
     \itemize{
-      \item .
+      \item \code{sir.aoi(\dots, aggregate = TRUE)} includes the force
+      of infection.
     }
   }
   \subsection{Installation}{

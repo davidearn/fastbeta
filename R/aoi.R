@@ -147,8 +147,9 @@ function (from = 0, to = from + 1, by = 1,
 			ans <- cbind(seir.aggregate(ans, 0L, n),
 			             rowSums(ans[, 1L + which(R0 == 0), drop = FALSE]),
 			             rowSums(ans[, 1L + which(R0 >  0), drop = FALSE]),
+			             rowSums(ans[, 1L +     seq_len(n), drop = FALSE] * rep(a.4, each = nrow(ans))),
 			             deparse.level = 0L)
-			dimnames(ans) <- list(NULL, c("S", "I", "Y", "I.E", "I.I"))
+			dimnames(ans) <- list(NULL, c("S", "I", "Y", "I.E", "I.I", "foi"))
 		}
 		tsp(ans) <- c(x[c(1L, nrow(x)), 1L], 1/by)
 		oldClass(ans) <- c("sir.aoi", "mts", "ts", "matrix", "array")
@@ -163,8 +164,9 @@ function (from = 0, to = from + 1, by = 1,
 			names(ans) <- rep(c("tau", "S", "I", "Y"), c(1L, 1L, n, 1L))
 		else {
 			ans <- c(ans[1L], S, sum(I), Y,
-			         sum(I[R0 == 0]), sum(I[R0 > 0]))
-			names(ans) <- c("tau", "S", "I", "Y", "I.E", "I.I")
+			         sum(I[R0 == 0]), sum(I[R0 > 0]),
+			         sum(a.4 * I))
+			names(ans) <- c("tau", "S", "I", "Y", "I.E", "I.I", "foi")
 		}
 		attr(ans, "curvature") <- (-sum(a.4 * I) * S) * sum(a.4 * I) + (S - a.5) * sum(a.4 * c(sum(a.4 * I) * S - a.3 * I[1L], a.1 * I[j.1] - a.2 * I[j.2]))
 	}
