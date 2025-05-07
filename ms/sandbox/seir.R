@@ -56,7 +56,10 @@ mu   <- function (t) rep(mu.0, length(t))
 set.seed(0L)
 init <- fastbeta::seir.ee(beta.0, nu.0, mu.0, sigma, gamma, delta, m, n)
 series <- fastbeta::seir(1L + T, beta, nu, mu, sigma, gamma, delta, m, n,
-                         init, epsilon = 0.002)[-1L, ]
+                         init, epsilon = 0.002)
+series <- tail(series, n = -1L)
+tsp(series) <- tsp(series) - c(1, 1, 0) # sigh
+stopifnot(all(time(series) == times))
 
 
 ## .... Set up data ....................................................
