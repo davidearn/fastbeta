@@ -103,17 +103,17 @@ structured by age of infection are
 \deqn{
   \begin{alignedat}{4}
   \text{d} & S         &{} / \text{d} t
-  &{} = -\textstyle\sum_{j} (\beta_{j}/N) S I_{j} \\
+  &{} = -(\textstyle\sum_{j} (\beta_{j}/N) I_{j}) S \\
   \text{d} & I_{    1} &{} / \text{d} t
-  &{} = \textstyle\sum_{j} (\beta_{j}/N) S I_{j} - \gamma_{1} I_{1} \\
+  &{} = (\textstyle\sum_{j} (\beta_{j}/N) I_{j}) S - \gamma_{1} I_{1} \\
   \text{d} & I_{j + 1} &{} / \text{d} t
   &{} = \gamma_{j} I_{j} - \gamma_{j + 1} I_{j + 1} \\
   \text{d} & R         &{} / \text{d} t
   &{} = \gamma_{n} I_{n}
   \end{alignedat}
 }{
-  dS       /dt = -sum((beta/N) * S * I)
-  dI[    1]/dt = sum((beta/N) * S * I) - gamma[1] * I[1]
+  dS       /dt = -sum((beta/N) * I) * S
+  dI[    1]/dt = sum((beta/N) * I) * S - gamma[1] * I[1]
   dI[j + 1]/dt = gamma[j] * I[j] - gamma[j + 1] * I[j + 1]
   dR       /dt = gamma[n] * I[n]
 }
@@ -129,17 +129,17 @@ gives
 \deqn{
   \begin{alignedat}{4}
   \text{d} & S         &{} / \text{d} \tau
-  &{} = -\textstyle\sum_{j} (\mathcal{R}_{0,j}/\ell_{j}) S I_{j} \\
+  &{} = -(\textstyle\sum_{j} (\mathcal{R}_{0,j}/\ell_{j}) I_{j}) S \\
   \text{d} & I_{    1} &{} / \text{d} \tau
-  &{} = \textstyle\sum_{j} (\mathcal{R}_{0,j}/\ell_{j}) S I_{j} - (1/\ell_{1}) I_{1} \\
+  &{} = (\textstyle\sum_{j} (\mathcal{R}_{0,j}/\ell_{j}) I_{j}) S - (1/\ell_{1}) I_{1} \\
   \text{d} & I_{j + 1} &{} / \text{d} \tau
   &{} = (1/\ell_{j}) I_{j} - (1/\ell_{j+1}) I_{j + 1} \\
   \text{d} & R         &{} / \text{d} \tau
   &{} = (1/\ell_{n}) I_{n} \\
   \end{alignedat}
 }{
-  dS       /dtau = -sum((R0/ell) * S * I)
-  dI[    1]/dtau = sum((R0/ell) * S * I) - (1/ell[1]) * I[1]
+  dS       /dtau = -sum((R0/ell) * I) * S
+  dI[    1]/dtau = sum((R0/ell) * I) * S - (1/ell[1]) * I[1]
   dI[j + 1]/dtau = (1/ell[j]) * I[j] - (1/ell[j + 1]) * I[j + 1]
   dR       /dtau = (1/ell[n]) * I[n]
 }
@@ -148,9 +148,9 @@ last equation (which is redundant given
 \eqn{R = 1 - S - \sum_{j} I_{j}}{R = 1 - sum(S, I)}) and augments the
 resulting system of \eqn{1 + n} equations with a new equation
 \deqn{
-  \text{d}Y/\text{d}\tau = (\sum_{j} \mathcal{R}_{0, j} S - 1) \sum_{j:\mathcal{R}_{0,j} > 0} I_{j}
+  \text{d}Y/\text{d}\tau = (\textstyle\sum_{j} (\mathcal{R}_{0,j}/\ell_{j}) I_{j}) (S - 1/\textstyle\sum_{j} \mathcal{R}_{0, j})
 }{
-  dY/tau = (sum(R0) * S - 1) * sum(I[R0 > 0])
+  dY/tau = sum((R0/ell) * I) * (S - 1/sum(R0))
 }
 due to the usefulness of the solution \eqn{Y} in applications.
 }
