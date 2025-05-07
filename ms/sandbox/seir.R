@@ -2,14 +2,14 @@
 
 iperm <- function (p) { p[p] <- seq_along(p); p }
 
-basis.dimension <- 32L # number of basis functions
+basis.dimension <- 8L # number of basis functions
 basis.order <- 4L # number of polynomial coefficients
 penalty.order <- 2L # order of difference penalty
 
 stopifnot(basis.dimension >= basis.order,
           basis.dimension > penalty.order)
 
-T <- 250L # number of time points
+T <- 105L # number of time points
 times <- seq.int(from = 0, by = 1, length.out = T)
 
 K <- basis.dimension + basis.order # number of knots
