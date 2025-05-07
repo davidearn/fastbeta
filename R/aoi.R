@@ -11,7 +11,7 @@ function (from = 0, to = from + 1, by = 1,
 	          length(tau) >= 2L, tau[1L] < tau[2L],
 	          is.integer(n), length(n) == 1L, n >= 1L, n < 4096L,
 	          is.double(R0), length(R0) == 1L || length(R0) == n,
-	          all(is.finite(R0)), min(R0) >= 0,
+	          all(is.finite(R0)), min(R0) >= 0, max(R0) > 0,
 	          is.double(ell), length(ell) == 1L || length(ell) == n,
 	          all(is.finite(ell)), min(ell) > 0,
 	          is.double(init), length(init) == 2L,
@@ -69,9 +69,8 @@ function (from = 0, to = from + 1, by = 1,
 	a.2 <- 1/ell[j.2]
 	a.3 <- 1/ell[1L]
 	a.4 <- R0/ell
-	a.5 <- sign(R0)
-	a.6 <- sum(R0)
-	a.7 <- rep(c(0, 1), c(1L, n + 1L))
+	a.5 <- 1/sum(R0)
+	a.6 <- rep(c(0, a.5), c(1L, n + 1L))
 
 	gg <-
 	function (t, x, theta)
@@ -79,13 +78,13 @@ function (from = 0, to = from + 1, by = 1,
 		log.S <- x[i.S]
 		log.I <- x[i.I]
 		log.Y <- x[i.Y]
-		w <- exp(log.I)
-		s <- sum(a.4 * w)
-		t <- sum(a.5 * w)
-		list(c(-s,
-		       exp(log.S - log.I[1L]) * s - a.3,
+		u <- sum(a.4 * exp(log.I                      ))
+		v <- sum(a.4 * exp(log.I - (log.I[1L] - log.S)))
+		w <- sum(a.4 * exp(log.I -  log.Y             ))
+		list(c(-u,
+		       v - a.3,
 		       a.1 * exp(log.I[j.1] - log.I[j.2]) - a.2,
-		       (a.6 * exp(log.S - log.Y) - exp(-log.Y)) * t))
+		       w * (exp(log.S) - a.5)))
 	}
 	Dg <-
 	function (t, x, theta)
@@ -93,13 +92,13 @@ function (from = 0, to = from + 1, by = 1,
 		log.S <- x[i.S]
 		log.I <- x[i.I]
 		log.Y <- x[i.Y]
-		w <- exp(log.I)
-		s <- sum(u <- a.4 * w)
-		t <- sum(v <- a.5 * w)
+		u <- sum(uu <- a.4 * exp(log.I                      ))
+		v <- sum(vv <- a.4 * exp(log.I - (log.I[1L] - log.S)))
+		w <- sum(ww <- a.4 * exp(log.I -  log.Y             ))
 		D[k.2] <<- -(D[k.1] <<- a.1 * exp(log.I[j.1] - log.I[j.2]))
-		D[k.3] <<- -u
-		D[k.4] <<- exp(log.S - log.I[1L]) * c(s, u, u[1L] - s)
-		D[k.5] <<- (a.6 * exp(log.S - log.Y) - a.7 * exp(-log.Y)) * c(t, v, -t)
+		D[k.3] <<- -uu
+		D[k.4] <<- c(v, vv, -v + vv[1L])
+		D[k.5] <<- c(w, ww, -w) * (exp(log.S) - a.6)
 		D
 	}
 	Rg <-
@@ -110,10 +109,10 @@ function (from = 0, to = from + 1, by = 1,
 		delayedAssign("Y", exp(x[i.Y]))
 		root(tau = t,
 		     S = S, I = I, Y = Y,
-		     dS = -S * sum(a.4 * I),
-		     dI = c(S * sum(a.4 * I) - a.3 * I[1L],
+		     dS = -sum(a.4 * I) * S,
+		     dI = c(sum(a.4 * I) * S - a.3 * I[1L],
 		            a.1 * I[j.1] - a.2 * I[j.2]),
-		     dY = (a.6 * S - 1) * sum(a.5 * I),
+		     dY = sum(a.4 * I) * (S - a.5),
 		     R0 = R0, ell = ell)
 	}
 	if (!is.null(root)) {
@@ -167,7 +166,7 @@ function (from = 0, to = from + 1, by = 1,
 			         sum(I[R0 == 0]), sum(I[R0 > 0]))
 			names(ans) <- c("tau", "S", "I", "Y", "I.E", "I.I")
 		}
-		attr(ans, "curvature") <- (a.6 * (-sum(a.4 * I) * S)) * sum(a.5 * I) + (a.6 * S - 1) * sum(a.5 * c(sum(a.4 * I) * S - a.3 * I[1L], a.1 * I[j.1] - a.2 * I[j.2]))
+		attr(ans, "curvature") <- (-sum(a.4 * I) * S) * sum(a.4 * I) + (S - a.5) * sum(a.4 * c(sum(a.4 * I) * S - a.3 * I[1L], a.1 * I[j.1] - a.2 * I[j.2]))
 	}
 	ans
 }

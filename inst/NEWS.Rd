@@ -40,7 +40,7 @@
 \title{News for \R{} Package \pkg{fastbeta}}
 \newcommand{\GH}{\href{https://github.com/davidearn/fastbeta/issues/#1}{GH##1}}
 
-\section{Changes in version 0.4.1 (2025-04-28)}{
+\section{Changes in version 0.4.1 (2025-05-07)}{
   \subsection{Significant User-Visible Changes}{
     \itemize{
       \item .
@@ -53,7 +53,8 @@
   }
   \subsection{Bug Fixes}{
     \itemize{
-      \item .
+      \item Expression for \eqn{\text{d}Y/\text{d}\tau}{dY/dtau} used by
+      \code{sir.aoi} was wrong.
     }
   }
   \subsection{New Features}{
