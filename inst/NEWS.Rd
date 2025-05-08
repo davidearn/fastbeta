@@ -43,8 +43,7 @@
 \section{Changes in version 0.4.1 (2025-05-08)}{
   \subsection{Significant User-Visible Changes}{
     \itemize{
-      \item \code{summary.sir.aoi} computes tail exponents of \eqn{Y},
-      rather than \eqn{\sum_{j} I_{j}}{sum(I)}.
+      \item .
     }
   }
   \subsection{Deprecated and Defunct}{
