@@ -40,10 +40,11 @@
 \title{News for \R{} Package \pkg{fastbeta}}
 \newcommand{\GH}{\href{https://github.com/davidearn/fastbeta/issues/#1}{GH##1}}
 
-\section{Changes in version 0.4.1 (2025-05-07)}{
+\section{Changes in version 0.4.1 (2025-05-08)}{
   \subsection{Significant User-Visible Changes}{
     \itemize{
-      \item .
+      \item \code{summary.sir.aoi} computes tail exponents of \eqn{Y},
+      rather than \eqn{\sum_{j} I_{j}}{sum(I)}.
     }
   }
   \subsection{Deprecated and Defunct}{
