@@ -61,6 +61,8 @@
     \itemize{
       \item \code{sir.aoi(\dots, aggregate = TRUE)} includes the force
       of infection.
+
+      \item Function \code{cbind.ts} for working around \PR{18583}.
     }
   }
   \subsection{Installation}{
