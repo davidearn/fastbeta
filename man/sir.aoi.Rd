@@ -181,8 +181,10 @@ to <- 4 * peak[["tau"]] # a more principled endpoint
 soln <- sir.aoi(to = to, by = by, R0 = R0, ell = ell,
                 aggregate = TRUE)
 head(soln)
+tail(soln)
 
 plot(soln) # dispatching stats:::plot.ts
+plot(soln, log = "y")
 
 plot(soln[, "Y"], ylab = "Y")
 abline(v = peak[["tau"]], h = peak[["Y"]],

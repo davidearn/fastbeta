@@ -15,9 +15,11 @@ function (from = 0, to = from + 1, by = 1,
 	          is.double(ell), length(ell) == 1L || length(ell) == n,
 	          all(is.finite(ell)), min(ell) > 0,
 	          is.double(init), length(init) == 2L,
-	          all(is.finite(init)), min(init) > 0, sum(init) <= 1,
+	          all(is.finite(init)), init[1L] >= 0, init[2L] > 0,
+	          sum(init) <= 1,
 	          is.double(weights), length(weights) == n,
-	          all(is.finite(weights)), min(weights) >= 0, sum(weights) > 0)
+	          all(is.finite(weights)), min(weights) >= 0,
+	          sum(weights) > 0)
 	if (!is.null(root))
 	stopifnot(is.function(root),
 	          !is.primitive(root),
@@ -29,12 +31,11 @@ function (from = 0, to = from + 1, by = 1,
 		ell <- rep_len(1, n)
 	ell <- ell/sum(ell[R0 > 0])
 
-	p <- log(init[1L])
-	q <- log(init[2L])
-	init <- c(p, log(weights) - log(sum(weights)) + q, q,
+	q <- init[2L]
+	init <- c(init[1L], log(weights) - log(sum(weights)) + log(q), q,
 	          use.names = FALSE)
 	if (min(init) == -Inf)
-		init[init == -Inf] <- log(0x1p-64) + q
+		init[init == -Inf] <- log(0x1p-64) + log(q)
 
 	i.S <- 1L
 	i.I <- (1L + 1L):(1L + n)
@@ -48,12 +49,12 @@ function (from = 0, to = from + 1, by = 1,
 	## nonzero pattern in n = 4 case :
 	##
 	##       S I I I I Y
-	##     S   3 3 3 3 .
+	##     S 3 3 3 3 3 .
 	##     I 4 4 4 4 4 .
 	##     I . 1 2 . . .
 	##     I . . 1 2 . .
 	##     I . . . 1 2 .
-	##     Y 5 5 5 5 5 5
+	##     Y 5 5 5 5 5 .
 	##
 	## where log(.) is suppressed only for pretty printing
 
@@ -61,52 +62,47 @@ function (from = 0, to = from + 1, by = 1,
 	k.1 <- seq.int(from = d + i.I[1L] + 1L, by = d + 1L,
 	               length.out = n - 1L)
 	k.2 <- k.1 + d
-	k.3 <- i.S + (i.I - 1L) * d
+	k.3 <- i.S     + (c(i.S, i.I         ) - 1L) * d
 	k.4 <- i.I[1L] + (c(i.S, i.I, i.I[1L]) - 1L) * d
-	k.5 <- i.Y + (c(i.S, i.I, i.Y) - 1L) * d
+	k.5 <- i.Y     + (c(i.S, i.I         ) - 1L) * d
 
 	a.1 <- 1/ell[j.1]
 	a.2 <- 1/ell[j.2]
 	a.3 <- 1/ell[1L]
 	a.4 <- R0/ell
 	a.5 <- 1/sum(R0)
-	a.6 <- rep(c(0, a.5), c(1L, n + 1L))
 
 	gg <-
 	function (t, x, theta)
 	{
-		log.S <- x[i.S]
+		    S <- x[i.S]
 		log.I <- x[i.I]
-		log.Y <- x[i.Y]
-		u <- sum(a.4 * exp(log.I                      ))
-		v <- sum(a.4 * exp(log.I - (log.I[1L] - log.S)))
-		w <- sum(a.4 * exp(log.I -  log.Y             ))
-		list(c(-u,
-		       v - a.3,
+		u <- sum(a.4 * exp(log.I            ))
+		v <- sum(a.4 * exp(log.I - log.I[1L]))
+		list(c(-u * S,
+		       v * S - a.3,
 		       a.1 * exp(log.I[j.1] - log.I[j.2]) - a.2,
-		       w * (exp(log.S) - a.5)))
+		       u * (S - a.5)))
 	}
 	Dg <-
 	function (t, x, theta)
 	{
-		log.S <- x[i.S]
+		    S <- x[i.S]
 		log.I <- x[i.I]
-		log.Y <- x[i.Y]
-		u <- sum(uu <- a.4 * exp(log.I                      ))
-		v <- sum(vv <- a.4 * exp(log.I - (log.I[1L] - log.S)))
-		w <- sum(ww <- a.4 * exp(log.I -  log.Y             ))
+		u <- sum(uu <- a.4 * exp(log.I            ))
+		v <- sum(vv <- a.4 * exp(log.I - log.I[1L]))
 		D[k.2] <<- -(D[k.1] <<- a.1 * exp(log.I[j.1] - log.I[j.2]))
-		D[k.3] <<- -uu
-		D[k.4] <<- c(v, vv, -v + vv[1L])
-		D[k.5] <<- c(w, ww, -w) * (exp(log.S) - a.6)
+		D[k.3] <<- -c(u, uu * S)
+		D[k.4] <<-  c(v, vv * S, (vv[1L] - v) * S)
+		D[k.5] <<-  c(u, uu * (S - a.5))
 		D
 	}
 	Rg <-
 	function (t, x, theta)
 	{
-		delayedAssign("S", exp(x[i.S]))
+		delayedAssign("S",     x[i.S] )
 		delayedAssign("I", exp(x[i.I]))
-		delayedAssign("Y", exp(x[i.Y]))
+		delayedAssign("Y",     x[i.Y] )
 		root(tau = t,
 		     S = S, I = I, Y = Y,
 		     dS = -sum(a.4 * I) * S,
@@ -140,7 +136,8 @@ function (from = 0, to = from + 1, by = 1,
 		warning("integration terminated due to unsuccessful solver call")
 
 	if (is.null(root)) {
-		ans <- exp(x[, -1L, drop = FALSE])
+		ans <- x[, -1L, drop = FALSE]
+		ans[, i.I] <- exp(ans[, i.I, drop = FALSE])
 		if (!aggregate)
 			dimnames(ans) <- list(NULL, rep(c("S", "I", "Y"), c(1L, n, 1L)))
 		else {
@@ -156,16 +153,15 @@ function (from = 0, to = from + 1, by = 1,
 	} else {
 		if (is.null(attr(x, "troot")))
 			return(NULL)
-		ans <- c(x[nrow(x), 1L], exp(x[nrow(x), -1L]))
-		S <- ans[1L + i.S]
-		I <- ans[1L + i.I]
-		Y <- ans[1L + i.Y]
+		ans <- x[nrow(x), ]
+		S <-     ans[1L + i.S]
+		I <- exp(ans[1L + i.I])
+		Y <-     ans[1L + i.Y]
 		if (!aggregate)
 			names(ans) <- rep(c("tau", "S", "I", "Y"), c(1L, 1L, n, 1L))
 		else {
 			ans <- c(ans[1L], S, sum(I), Y,
-			         sum(I[R0 == 0]), sum(I[R0 > 0]),
-			         sum(a.4 * I))
+			         sum(I[R0 == 0]), sum(I[R0 > 0]), sum(a.4 * I))
 			names(ans) <- c("tau", "S", "I", "Y", "I.E", "I.I", "foi")
 		}
 		attr(ans, "curvature") <- (-sum(a.4 * I) * S) * sum(a.4 * I) + (S - a.5) * sum(a.4 * c(sum(a.4 * I) * S - a.3 * I[1L], a.1 * I[j.1] - a.2 * I[j.2]))
