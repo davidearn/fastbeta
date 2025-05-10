@@ -55,7 +55,8 @@ sir.aoi(from = 0, to = from + 1, by = 1,
 \item{aggregate}{
   a logical indicating if infected compartments should be aggregated.}
 \item{\dots}{
-  optional arguments passed to \code{\link[deSolve]{lsoda}}.}
+  optional arguments passed to \code{\link[deSolve]{lsoda}}; use
+  \code{atol}, \code{rtol}, and \code{hmax} for control of local error.}
 \item{object}{
   an \R{} object inheriting from class \code{sir.aoi}, typically
   the value of a call to \code{sir.aoi}.}
