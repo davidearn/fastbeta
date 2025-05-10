@@ -31,12 +31,6 @@ function (from = 0, to = from + 1, by = 1,
 		ell <- rep_len(1, n)
 	ell <- ell/sum(ell[R0 > 0])
 
-	q <- init[2L]
-	init <- c(init[1L], log(weights) - log(sum(weights)) + log(q), q,
-	          use.names = FALSE)
-	if (min(init) == -Inf)
-		init[init == -Inf] <- log(0x1p-64) + log(q)
-
 	i.S <- 1L
 	i.I <- (1L + 1L):(1L + n)
 	i.Y <- d <- 1L + n + 1L
@@ -54,7 +48,7 @@ function (from = 0, to = from + 1, by = 1,
 	##     I . 1 2 . . .
 	##     I . . 1 2 . .
 	##     I . . . 1 2 .
-	##     Y 5 5 5 5 5 .
+	##     Y 5 5 5 5 5 5
 	##
 	## where log(.) is suppressed only for pretty printing
 
@@ -64,7 +58,7 @@ function (from = 0, to = from + 1, by = 1,
 	k.2 <- k.1 + d
 	k.3 <- i.S     + (c(i.S, i.I         ) - 1L) * d
 	k.4 <- i.I[1L] + (c(i.S, i.I, i.I[1L]) - 1L) * d
-	k.5 <- i.Y     + (c(i.S, i.I         ) - 1L) * d
+	k.5 <- i.Y     + (c(i.S, i.I, i.Y    ) - 1L) * d
 
 	a.1 <- 1/ell[j.1]
 	a.2 <- 1/ell[j.2]
@@ -72,29 +66,39 @@ function (from = 0, to = from + 1, by = 1,
 	a.4 <- R0/ell
 	a.5 <- 1/sum(R0)
 
+	q <- log(init[2L])
+	init <- c(init[1L], log(weights) - log(sum(weights)) + q, q,
+	          use.names = FALSE)
+	if (min(init) == -Inf) {
+		init[init == -Inf] <- log(0x1p-64) + q
+		init[i.Y] <- log(sum(exp(init[i.I])))
+	}
+
 	gg <-
 	function (t, x, theta)
 	{
 		    S <- x[i.S]
 		log.I <- x[i.I]
+		log.Y <- x[i.Y]
 		u <- sum(a.4 * exp(log.I            ))
 		v <- sum(a.4 * exp(log.I - log.I[1L]))
 		list(c(-u * S,
 		       v * S - a.3,
 		       a.1 * exp(log.I[j.1] - log.I[j.2]) - a.2,
-		       u * (S - a.5)))
+		       u * (S - a.5) * exp(-log.Y)))
 	}
 	Dg <-
 	function (t, x, theta)
 	{
 		    S <- x[i.S]
 		log.I <- x[i.I]
+		log.Y <- x[i.Y]
 		u <- sum(uu <- a.4 * exp(log.I            ))
 		v <- sum(vv <- a.4 * exp(log.I - log.I[1L]))
 		D[k.2] <<- -(D[k.1] <<- a.1 * exp(log.I[j.1] - log.I[j.2]))
 		D[k.3] <<- -c(u, uu * S)
-		D[k.4] <<-  c(v, vv * S, (vv[1L] - v) * S)
-		D[k.5] <<-  c(u, uu * (S - a.5))
+		D[k.4] <<-  c(v, vv * S, -(v - vv[1L]) * S)
+		D[k.5] <<-  c(u, uu * (S - a.5), -u * (S - a.5)) * exp(-log.Y)
 		D
 	}
 	Rg <-
@@ -102,7 +106,7 @@ function (from = 0, to = from + 1, by = 1,
 	{
 		delayedAssign("S",     x[i.S] )
 		delayedAssign("I", exp(x[i.I]))
-		delayedAssign("Y",     x[i.Y] )
+		delayedAssign("Y", exp(x[i.Y]))
 		root(tau = t,
 		     S = S, I = I, Y = Y,
 		     dS = -sum(a.4 * I) * S,
@@ -137,7 +141,7 @@ function (from = 0, to = from + 1, by = 1,
 
 	if (is.null(root)) {
 		ans <- x[, -1L, drop = FALSE]
-		ans[, i.I] <- exp(ans[, i.I, drop = FALSE])
+		ans[, c(i.I, i.Y)] <- exp(ans[, c(i.I, i.Y), drop = FALSE])
 		if (!aggregate)
 			dimnames(ans) <- list(NULL, rep(c("S", "I", "Y"), c(1L, n, 1L)))
 		else {
@@ -156,7 +160,7 @@ function (from = 0, to = from + 1, by = 1,
 		ans <- x[nrow(x), ]
 		S <-     ans[1L + i.S]
 		I <- exp(ans[1L + i.I])
-		Y <-     ans[1L + i.Y]
+		Y <- exp(ans[1L + i.Y])
 		if (!aggregate)
 			names(ans) <- rep(c("tau", "S", "I", "Y"), c(1L, 1L, n, 1L))
 		else {
