@@ -1,3 +1,5 @@
 ^README[.]md$
 ^TODO[.]org$
+[.]diff$
+[.]patch$
 [.]rds$
