@@ -128,7 +128,6 @@ function (from = 0, to = from + 1, by = 1,
 		jacfunc  = Dg,
 		jactype  = "fullusr",
 		rootfunc = if (!is.null(root)) Rg,
-		hmax     = by,
 		ynames   = FALSE,
 		initfunc = NULL,
 		initpar  = NULL,
@@ -179,7 +178,7 @@ function (object, tol = 1e-6, ...)
 	stopifnot(is.double(tol), length(tol) == 1L, !is.na(tol), tol > 0)
 	ans <- c(NaN, NaN)
 	nms <- colnames(object)
-	p <- rowSums(object[, nms == "I", drop = FALSE])
+	p <- as.double(object[, "Y"])
 	w <- which(p > 0)
 	if (length(w) == 0L || w[1L] != 1L || (end <- w[length(w)]) < 3L)
 		return(ans)

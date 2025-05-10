@@ -61,9 +61,9 @@ sir.aoi(from = 0, to = from + 1, by = 1,
   the value of a call to \code{sir.aoi}.}
 \item{tol}{
   a positive number giving an upper bound on the relative change (from
-  one time point to the next) in the slope of log prevalence, defining
-  time windows in which growth or decay of prevalence is considered to
-  be exponential.}
+  one time point to the next) in the slope of \eqn{\log(Y)}, defining
+  time windows in which growth or decay of \eqn{Y} is considered to be
+  exponential.}
 }
 \value{
 \item{root = NULL}{
@@ -91,8 +91,8 @@ and the force of infection.
 
 The method for \code{\link{summary}} returns a numeric vector of length
 2 containing the left and right \dQuote{tail exponents}, defined as the
-asymptotic values of the slope of log prevalence.  \code{NaN} elements
-indicate that a tail exponent cannot be approximated from the prevalence
+asymptotic values of the slope of \eqn{\log(Y)}.  \code{NaN} elements
+indicate that a tail exponent cannot be approximated from the \eqn{Y}
 time series represented by \code{object}, because the time window does
 not cover enough of the tail, where the meaning of \dQuote{enough} is
 set by \code{tol}.
@@ -179,23 +179,26 @@ peak
 to <- 4 * peak[["tau"]] # a more principled endpoint
 
 soln <- sir.aoi(to = to, by = by, R0 = R0, ell = ell,
-                aggregate = TRUE)
+                aggregate = TRUE, atol = 0, rtol = 1e-12)
+##                                ^^^^      ^^^^
+## 'atol', 'rtol', 'hmax' are passed to deSolve::lsoda
+
 head(soln)
 tail(soln)
 
 plot(soln) # dispatching stats:::plot.ts
 plot(soln, log = "y")
 
-plot(soln[, "Y"], ylab = "Y")
-abline(v = peak[["tau"]], h = peak[["Y"]],
-       lty = 2, lwd = 2, col = "red")
+(lamb <- summary(soln)) # left and right tail exponents
 
 xoff <- function (x, k) x - x[k]
-lamb <- summary(soln)
-k <- c(16L, nrow(soln)) # c(1L, nrow(soln)) suffers due to transient
-plot(soln[, "I"], log = "y", ylab = "Prevalence")
+k <- c(16L, nrow(soln)) # c(1L, nrow(soln)) worse due to transient
+
+plot(soln[, "Y"], log = "y", ylab = "Y")
+abline(v = peak[["tau"]], h = peak[["Y"]],
+       lty = 2, lwd = 2, col = "red")
 for (i in 1:2)
-	lines(soln[k[i], "I"] * exp(lamb[i] * xoff(time(soln), k[i])),
+	lines(soln[k[i], "Y"] * exp(lamb[i] * xoff(time(soln), k[i])),
 	      lty = 2, lwd = 2, col = "red")
 
 wrap <-
