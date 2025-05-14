@@ -12,9 +12,10 @@ sir.aoi(from = 0, to = from + 1, by = 1,
         init = c(1 - init.infected, init.infected),
         init.infected = .Machine[["double.neg.eps"]],
         weights = rep(c(1, 0), c(1L, n - 1L)),
-        root = NULL, aggregate = FALSE, \dots)
+        H = identity, Hargs = list(), root = NULL,
+        aggregate = FALSE, \dots)
 
-\method{summary}{sir.aoi}(object, tol = 1e-6, \dots)
+\method{summary}{sir.aoi}(object, name = "Y", tol = 1e-6, \dots)
 }
 \arguments{
 \item{from, to, by}{
@@ -48,6 +49,15 @@ sir.aoi(from = 0, to = from + 1, by = 1,
   defining the initial distribution of infected individuals among the
   infected compartments.  By default, all infected individuals occupy
   the first compartment.}
+\item{H}{
+  a function returning a numeric vector of length equal to that of the
+  first formal argument.  The body must be symbolically differentiable
+  with respect to the first formal argument; see \code{\link{D}}.}
+\item{Hargs}{
+  a list of arguments passed to \code{H}.  In typical usage,
+  \code{H} defines a parametric family of functions of one variable,
+  and \code{Hargs} supplies parameter values.  For example:
+  \code{H = function(x, h) x^h}, \code{Hargs = list(h = 0.996)}.}
 \item{root}{
   a function returning a numeric vector of length 1, with formal
   arguments \code{(tau, S, I, Y, dS, dI, dY, R0, ell)} (or a subset);
@@ -60,10 +70,15 @@ sir.aoi(from = 0, to = from + 1, by = 1,
 \item{object}{
   an \R{} object inheriting from class \code{sir.aoi}, typically
   the value of a call to \code{sir.aoi}.}
+\item{name}{
+  a character string, either \code{"Y"} or \code{"I"}.  Tail exponents
+  of \eqn{V} are approximated, where \eqn{V = Y} if \code{name = "Y"}
+  and \eqn{V = \sum_{j} I_{j}}{V = sum(I)} (prevalence) if
+  \code{name = "I"}.}
 \item{tol}{
   a positive number giving an upper bound on the relative change (from
-  one time point to the next) in the slope of \eqn{\log(Y)}, defining
-  time windows in which growth or decay of \eqn{Y} is considered to be
+  one time point to the next) in the slope of \eqn{\log(V)}, defining
+  time windows in which growth or decay of \eqn{V} is considered to be
   exponential.}
 }
 \value{
@@ -85,44 +100,46 @@ If \code{aggregate = TRUE}, then infected compartments are aggregated so
 that the number of columns (elements, if \code{root} is a function)
 named \code{I} is 1 rather than \code{n}.  This column or element stores
 prevalence, the proportion of the population that is infected.
-For convenience, there are 3 additional columns (elements) named
-\code{I.E}, \code{I.I}, and \code{foi}.  These store the non-infectious
-and infectious components of prevalence, so that \code{I.E + I.I = I},
-and the force of infection.
+For convenience, there are 4 additional columns (elements) named
+\code{I.E}, \code{I.I}, \code{foi}, and \code{inc}.  These store the
+non-infectious and infectious components of prevalence (so that
+\code{I.E + I.I = I}), the force of infection, and incidence.
 
 The method for \code{\link{summary}} returns a numeric vector of length
-2 containing the left and right \dQuote{tail exponents}, defined as the
-asymptotic values of the slope of \eqn{\log(Y)}.  \code{NaN} elements
-indicate that a tail exponent cannot be approximated from the \eqn{Y}
-time series represented by \code{object}, because the time window does
-not cover enough of the tail, where the meaning of \dQuote{enough} is
-set by \code{tol}.
+2 containing the left and right \dQuote{tail exponents} of the variable
+\eqn{V} indicated by \code{name}, defined as the asymptotic values of
+the slope of \eqn{\log(V)}.  \code{NaN} elements indicate that a tail
+exponent cannot be approximated because the time window represented by
+\code{object} does not cover enough of the tail, where the meaning of
+\dQuote{enough} is set by \code{tol}.
 }
 \details{
-The standard SIR equations with rates of transmission and recovery
-structured by age of infection are
+The SIR equations with rates of transmission and recovery structured by
+age of infection are
 \deqn{
   \begin{alignedat}{4}
   \text{d} & S         &{} / \text{d} t
-  &{} = -(\textstyle\sum_{j} (\beta_{j}/N) I_{j}) S \\
+  &{} = -(\textstyle\sum_{j} \beta_{j} I_{j}) H(S) \\
   \text{d} & I_{    1} &{} / \text{d} t
-  &{} = (\textstyle\sum_{j} (\beta_{j}/N) I_{j}) S - \gamma_{1} I_{1} \\
+  &{} = (\textstyle\sum_{j} \beta_{j} I_{j}) H(S) - \gamma_{1} I_{1} \\
   \text{d} & I_{j + 1} &{} / \text{d} t
   &{} = \gamma_{j} I_{j} - \gamma_{j + 1} I_{j + 1} \\
   \text{d} & R         &{} / \text{d} t
   &{} = \gamma_{n} I_{n}
   \end{alignedat}
 }{
-  dS       /dt = -sum((beta/N) * I) * S
-  dI[    1]/dt = sum((beta/N) * I) * S - gamma[1] * I[1]
+  dS       /dt = -sum(beta * I) * H(S)
+  dI[    1]/dt = sum(beta * I) * H(S) - gamma[1] * I[1]
   dI[j + 1]/dt = gamma[j] * I[j] - gamma[j + 1] * I[j + 1]
   dR       /dt = gamma[n] * I[n]
 }
-where \eqn{N = S + \sum_{j} I_{j} + R}{N = sum(S, I, R)} is the
-(constant, positive) population size.  Nondimensionalization using
-parameters
-\eqn{N = 1},
-\eqn{\mathcal{R}_{0,j} = \beta_{j}/\gamma_{j}}{R0 = beta/gamma}, and
+where \eqn{S, I_{j}, R \ge 0}{min(S, I, R) >= 0},
+\eqn{S + \sum_{j} I_{j} + R = 1}{sum(S, I, R) = 1}, and \eqn{H} is the
+susceptible heterogeneity function.  In general, \eqn{H} is nonlinear;
+in the standard SIR equations, \eqn{H} is the identity function.
+
+Nondimensionalization using parameters
+\eqn{\mathcal{R}_{0,j} = \beta_{j}/\gamma_{j}}{R0 = beta/gamma} and
 \eqn{\ell_{j} = (1/\gamma_{j})/\sum_{j:\mathcal{R}_{0,j} > 0} (1/\gamma_{j})}{ell = (1/gamma)/sum(1/gamma[R0 > 0])}
 and time unit
 \eqn{\tau = t/\sum_{j:\mathcal{R}_{0,j} > 0} (1/\gamma_{j})}{tau = t/sum(1/gamma[R0 > 0])},
@@ -130,17 +147,17 @@ gives
 \deqn{
   \begin{alignedat}{4}
   \text{d} & S         &{} / \text{d} \tau
-  &{} = -(\textstyle\sum_{j} (\mathcal{R}_{0,j}/\ell_{j}) I_{j}) S \\
+  &{} = -(\textstyle\sum_{j} (\mathcal{R}_{0,j}/\ell_{j}) I_{j}) H(S) \\
   \text{d} & I_{    1} &{} / \text{d} \tau
-  &{} = (\textstyle\sum_{j} (\mathcal{R}_{0,j}/\ell_{j}) I_{j}) S - (1/\ell_{1}) I_{1} \\
+  &{} = (\textstyle\sum_{j} (\mathcal{R}_{0,j}/\ell_{j}) I_{j}) H(S) - (1/\ell_{1}) I_{1} \\
   \text{d} & I_{j + 1} &{} / \text{d} \tau
   &{} = (1/\ell_{j}) I_{j} - (1/\ell_{j+1}) I_{j + 1} \\
   \text{d} & R         &{} / \text{d} \tau
   &{} = (1/\ell_{n}) I_{n} \\
   \end{alignedat}
 }{
-  dS       /dtau = -sum((R0/ell) * I) * S
-  dI[    1]/dtau = sum((R0/ell) * I) * S - (1/ell[1]) * I[1]
+  dS       /dtau = -sum((R0/ell) * I) * H(S)
+  dI[    1]/dtau = sum((R0/ell) * I) * H(S) - (1/ell[1]) * I[1]
   dI[j + 1]/dtau = (1/ell[j]) * I[j] - (1/ell[j + 1]) * I[j + 1]
   dR       /dtau = (1/ell[n]) * I[n]
 }
@@ -149,9 +166,9 @@ last equation (which is redundant given
 \eqn{R = 1 - S - \sum_{j} I_{j}}{R = 1 - sum(S, I)}) and augments the
 resulting system of \eqn{1 + n} equations with a new equation
 \deqn{
-  \text{d}Y/\text{d}\tau = (\textstyle\sum_{j} (\mathcal{R}_{0,j}/\ell_{j}) I_{j}) (S - 1/\textstyle\sum_{j} \mathcal{R}_{0, j})
+  \text{d}Y/\text{d}\tau = (\textstyle\sum_{j} (\mathcal{R}_{0,j}/\ell_{j}) I_{j}) (H(S) - H(1/\textstyle\sum_{j} \mathcal{R}_{0, j}))
 }{
-  dY/tau = sum((R0/ell) * I) * (S - 1/sum(R0))
+  dY/tau = sum((R0/ell) * I) * (H(S) - H(1/sum(R0)))
 }
 due to the usefulness of the solution \eqn{Y} in applications.
 }

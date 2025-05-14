@@ -4,7 +4,8 @@ function (from = 0, to = from + 1, by = 1,
           init = c(1 - init.infected, init.infected),
           init.infected = .Machine[["double.neg.eps"]],
           weights = rep(c(1, 0), c(1L, n - 1L)),
-          root = NULL, aggregate = FALSE, ...)
+          H = identity, Hargs = list(), root = NULL,
+          aggregate = FALSE, ...)
 {
 	tau <- seq.int(from = from, to = to, by = by)
 	stopifnot(requireNamespace("deSolve"),
@@ -19,11 +20,20 @@ function (from = 0, to = from + 1, by = 1,
 	          sum(init) <= 1,
 	          is.double(weights), length(weights) == n,
 	          all(is.finite(weights)), min(weights) >= 0,
-	          sum(weights) > 0)
+	          sum(weights) > 0,
+	          is.function(H),
+	          !is.null(formals(H)),
+	          names(formals(H))[1L] != "...",
+	          is.list(Hargs),
+	          is.null(names(Hargs)) || !any(names(Hargs) == names(formals(H))[1L]))
 	if (!is.null(root))
 	stopifnot(is.function(root),
-	          !is.primitive(root),
+	          !is.null(formals(root)),
 	          all(names(formals(root)) %in% c("tau", "S", "I", "Y", "dS", "dI", "dY", "R0", "ell")))
+
+	H. <- as.function(c(alist(. =), list(as.call(c(expression(H, .), Hargs)))))
+	Hprime  <- H ; body(Hprime) <- D(body(H), names(formals(H))[1L])
+	Hprime. <- H.; body(Hprime.)[[1L]] <- quote(Hprime)
 
 	if (length(R0) != n)
 		R0 <- rep_len(R0/n, n)
@@ -64,7 +74,7 @@ function (from = 0, to = from + 1, by = 1,
 	a.2 <- 1/ell[j.2]
 	a.3 <- 1/ell[1L]
 	a.4 <- R0/ell
-	a.5 <- 1/sum(R0)
+	a.5 <- H.(1/sum(R0))
 
 	q <- log(init[2L])
 	init <- c(init[1L], log(weights) - log(sum(weights)) + q, q,
@@ -77,28 +87,30 @@ function (from = 0, to = from + 1, by = 1,
 	gg <-
 	function (t, x, theta)
 	{
-		    S <- x[i.S]
+		    S <- x[i.S]; h <- H.(S)
 		log.I <- x[i.I]
 		log.Y <- x[i.Y]
 		u <- sum(a.4 * exp(log.I            ))
 		v <- sum(a.4 * exp(log.I - log.I[1L]))
-		list(c(-u * S,
-		       v * S - a.3,
+		w <- sum(a.4 * exp(log.I - log.Y    ))
+		list(c(-u * h,
+		       v * h - a.3,
 		       a.1 * exp(log.I[j.1] - log.I[j.2]) - a.2,
-		       u * (S - a.5) * exp(-log.Y)))
+		       w * (h - a.5)))
 	}
 	Dg <-
 	function (t, x, theta)
 	{
-		    S <- x[i.S]
+		    S <- x[i.S]; h <- H.(S); hh <- Hprime.(S)
 		log.I <- x[i.I]
 		log.Y <- x[i.Y]
 		u <- sum(uu <- a.4 * exp(log.I            ))
 		v <- sum(vv <- a.4 * exp(log.I - log.I[1L]))
+		w <- sum(ww <- a.4 * exp(log.I - log.Y    ))
 		D[k.2] <<- -(D[k.1] <<- a.1 * exp(log.I[j.1] - log.I[j.2]))
-		D[k.3] <<- -c(u, uu * S)
-		D[k.4] <<-  c(v, vv * S, -(v - vv[1L]) * S)
-		D[k.5] <<-  c(u, uu * (S - a.5), -u * (S - a.5)) * exp(-log.Y)
+		D[k.3] <<- -c(u * hh, uu * h)
+		D[k.4] <<-  c(v * hh, vv * h, -(v - vv[1L]) * h)
+		D[k.5] <<-  c(w * hh, ww * (h - a.5), -w * (h - a.5))
 		D
 	}
 	Rg <-
@@ -109,10 +121,10 @@ function (from = 0, to = from + 1, by = 1,
 		delayedAssign("Y", exp(x[i.Y]))
 		root(tau = t,
 		     S = S, I = I, Y = Y,
-		     dS = -sum(a.4 * I) * S,
-		     dI = c(sum(a.4 * I) * S - a.3 * I[1L],
+		     dS = -sum(a.4 * I) * H.(S),
+		     dI = c(sum(a.4 * I) * H.(S) - a.3 * I[1L],
 		            a.1 * I[j.1] - a.2 * I[j.2]),
-		     dY = sum(a.4 * I) * (S - a.5),
+		     dY = sum(a.4 * I) * (H.(S) - a.5),
 		     R0 = R0, ell = ell)
 	}
 	if (!is.null(root)) {
@@ -140,16 +152,21 @@ function (from = 0, to = from + 1, by = 1,
 
 	if (is.null(root)) {
 		ans <- x[, -1L, drop = FALSE]
-		ans[, c(i.I, i.Y)] <- exp(ans[, c(i.I, i.Y), drop = FALSE])
-		if (!aggregate)
+		S <-     ans[, i.S, drop = FALSE]
+		I <- exp(ans[, i.I, drop = FALSE])
+		Y <- exp(ans[, i.Y, drop = FALSE])
+		if (!aggregate) {
+			ans[, i.I] <- I
+			ans[, i.Y] <- Y
 			dimnames(ans) <- list(NULL, rep(c("S", "I", "Y"), c(1L, n, 1L)))
-		else {
-			ans <- cbind(seir.aggregate(ans, 0L, n),
-			             rowSums(ans[, 1L + which(R0 == 0), drop = FALSE]),
-			             rowSums(ans[, 1L + which(R0 >  0), drop = FALSE]),
-			             rowSums(ans[, 1L +     seq_len(n), drop = FALSE] * rep(a.4, each = nrow(ans))),
+		} else {
+			ans <- cbind(S, rowSums(I), Y,
+			             rowSums(I[, R0 == 0, drop = FALSE]),
+			             rowSums(I[, R0 >  0, drop = FALSE]),
+			             rowSums(I * rep(a.4, each = nrow(ans))),
+			             rowSums(I * rep(a.4, each = nrow(ans))) * H.(S),
 			             deparse.level = 0L)
-			dimnames(ans) <- list(NULL, c("S", "I", "Y", "I.E", "I.I", "foi"))
+			dimnames(ans) <- list(NULL, c("S", "I", "Y", "I.E", "I.I", "foi", "inc"))
 		}
 		tsp(ans) <- c(x[c(1L, nrow(x)), 1L], 1/by)
 		oldClass(ans) <- c("sir.aoi", "mts", "ts", "matrix", "array")
@@ -160,25 +177,31 @@ function (from = 0, to = from + 1, by = 1,
 		S <-     ans[1L + i.S]
 		I <- exp(ans[1L + i.I])
 		Y <- exp(ans[1L + i.Y])
-		if (!aggregate)
+		if (!aggregate) {
+			ans[1L + i.I] <- I
+			ans[1L + i.Y] <- Y
 			names(ans) <- rep(c("tau", "S", "I", "Y"), c(1L, 1L, n, 1L))
-		else {
+		} else {
 			ans <- c(ans[1L], S, sum(I), Y,
-			         sum(I[R0 == 0]), sum(I[R0 > 0]), sum(a.4 * I))
-			names(ans) <- c("tau", "S", "I", "Y", "I.E", "I.I", "foi")
+			         sum(I[R0 == 0]),
+			         sum(I[R0 >  0]),
+			         sum(I * a.4),
+			         sum(I * a.4) * H.(S))
+			names(ans) <- c("tau", "S", "I", "Y", "I.E", "I.I", "foi", "inc")
 		}
-		attr(ans, "curvature") <- (-sum(a.4 * I) * S) * sum(a.4 * I) + (S - a.5) * sum(a.4 * c(sum(a.4 * I) * S - a.3 * I[1L], a.1 * I[j.1] - a.2 * I[j.2]))
+		attr(ans, "curvature") <- (sum(a.4 * I) * Hprime.(S) * -sum(a.4 * I) * H.(S)) + (sum(a.4 * c(sum(a.4 * I) * H.(S) - a.3 * I[1L], a.1 * I[j.1] - a.2 * I[j.2])) * (H.(S) - a.5))
 	}
 	ans
 }
 
 summary.sir.aoi <-
-function (object, tol = 1e-6, ...)
+function (object, name = "Y", tol = 1e-6, ...)
 {
-	stopifnot(is.double(tol), length(tol) == 1L, !is.na(tol), tol > 0)
+	stopifnot(is.character(name), length(name) == 1L, name == "Y" || name == "I",
+	          is.double(tol), length(tol) == 1L, tol > 0)
 	ans <- c(NaN, NaN)
 	nms <- colnames(object)
-	p <- as.double(object[, "Y"])
+	p <- rowSums(object[, colnames(object) == name, drop = FALSE])
 	w <- which(p > 0)
 	if (length(w) == 0L || w[1L] != 1L || (end <- w[length(w)]) < 3L)
 		return(ans)
