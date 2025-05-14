@@ -74,7 +74,7 @@ function (from = 0, to = from + 1, by = 1,
 	a.2 <- 1/ell[j.2]
 	a.3 <- 1/ell[1L]
 	a.4 <- R0/ell
-	a.5 <- H.(1/sum(R0))
+	a.5 <- 1/sum(R0)
 
 	q <- log(init[2L])
 	init <- c(init[1L], log(weights) - log(sum(weights)) + q, q,
