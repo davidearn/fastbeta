@@ -40,7 +40,7 @@
 \title{News for \R{} Package \pkg{fastbeta}}
 \newcommand{\GH}{\href{https://github.com/davidearn/fastbeta/issues/#1}{GH##1}}
 
-\section{Changes in version 0.4.1 (2025-05-14)}{
+\section{Changes in version 0.4.1 (2025-05-15)}{
   \subsection{Significant User-Visible Changes}{
     \itemize{
       \item .
@@ -61,6 +61,9 @@
     \itemize{
       \item \code{sir.aoi(\dots, aggregate = TRUE)} includes the force
       of infection and incidence.
+
+      \item \code{sir.aoi} accepts new argument \code{eps} in order to
+      support equations with equal, nonzero rates of birth and death.
 
       \item \code{sir.aoi} accepts new arguments \code{H} and
       \code{Hargs}, enabling the user to set a susceptible

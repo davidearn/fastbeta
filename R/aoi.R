@@ -1,6 +1,6 @@
 sir.aoi <-
 function (from = 0, to = from + 1, by = 1,
-          R0, ell = 1, n = max(length(R0), length(ell)),
+          R0, ell = 1, eps = 0, n = max(length(R0), length(ell)),
           init = c(1 - init.infected, init.infected),
           init.infected = .Machine[["double.neg.eps"]],
           weights = rep(c(1, 0), c(1L, n - 1L)),
@@ -15,6 +15,8 @@ function (from = 0, to = from + 1, by = 1,
 	          all(is.finite(R0)), min(R0) >= 0, max(R0) > 0,
 	          is.double(ell), length(ell) == 1L || length(ell) == n,
 	          all(is.finite(ell)), min(ell) > 0,
+	          is.double(eps), length(eps) == 1L,
+	          is.finite(eps), eps >= 0,
 	          is.double(init), length(init) == 2L,
 	          all(is.finite(init)), init[1L] >= 0, init[2L] > 0,
 	          sum(init) <= 1,
@@ -71,10 +73,11 @@ function (from = 0, to = from + 1, by = 1,
 	k.5 <- i.Y     + (c(i.S, i.I, i.Y    ) - 1L) * d
 
 	a.1 <- 1/ell[j.1]
-	a.2 <- 1/ell[j.2]
-	a.3 <- 1/ell[1L]
+	a.2 <- 1/ell[j.2] + eps
+	a.3 <- 1/ell[1L] + eps
 	a.4 <- R0/ell
 	a.5 <- 1/sum(R0)
+	a.6 <- eps
 
 	q <- log(init[2L])
 	init <- c(init[1L], log(weights) - log(sum(weights)) + q, q,
@@ -93,7 +96,7 @@ function (from = 0, to = from + 1, by = 1,
 		u <- sum(a.4 * exp(log.I            ))
 		v <- sum(a.4 * exp(log.I - log.I[1L]))
 		w <- sum(a.4 * exp(log.I - log.Y    ))
-		list(c(-u * h,
+		list(c(a.6 * (1 - S) - u * h,
 		       v * h - a.3,
 		       a.1 * exp(log.I[j.1] - log.I[j.2]) - a.2,
 		       w * (h - a.5)))
@@ -108,7 +111,7 @@ function (from = 0, to = from + 1, by = 1,
 		v <- sum(vv <- a.4 * exp(log.I - log.I[1L]))
 		w <- sum(ww <- a.4 * exp(log.I - log.Y    ))
 		D[k.2] <<- -(D[k.1] <<- a.1 * exp(log.I[j.1] - log.I[j.2]))
-		D[k.3] <<- -c(u * hh, uu * h)
+		D[k.3] <<- -c(u * hh + a.6, uu * h)
 		D[k.4] <<-  c(v * hh, vv * h, -(v - vv[1L]) * h)
 		D[k.5] <<-  c(w * hh, ww * (h - a.5), -w * (h - a.5))
 		D
@@ -121,7 +124,7 @@ function (from = 0, to = from + 1, by = 1,
 		delayedAssign("Y", exp(x[i.Y]))
 		root(tau = t,
 		     S = S, I = I, Y = Y,
-		     dS = -sum(a.4 * I) * H.(S),
+		     dS = a.6 * (1 - S) - sum(a.4 * I) * H.(S),
 		     dI = c(sum(a.4 * I) * H.(S) - a.3 * I[1L],
 		            a.1 * I[j.1] - a.2 * I[j.2]),
 		     dY = sum(a.4 * I) * (H.(S) - a.5),
@@ -170,6 +173,7 @@ function (from = 0, to = from + 1, by = 1,
 		}
 		tsp(ans) <- c(x[c(1L, nrow(x)), 1L], 1/by)
 		oldClass(ans) <- c("sir.aoi", "mts", "ts", "matrix", "array")
+		attr(ans, "eps") <- eps
 	} else {
 		if (is.null(attr(x, "troot")))
 			return(NULL)
@@ -189,7 +193,7 @@ function (from = 0, to = from + 1, by = 1,
 			         sum(I * a.4) * H.(S))
 			names(ans) <- c("tau", "S", "I", "Y", "I.E", "I.I", "foi", "inc")
 		}
-		attr(ans, "curvature") <- (sum(a.4 * I) * Hprime.(S) * -sum(a.4 * I) * H.(S)) + (sum(a.4 * c(sum(a.4 * I) * H.(S) - a.3 * I[1L], a.1 * I[j.1] - a.2 * I[j.2])) * (H.(S) - a.5))
+		attr(ans, "curvature") <- (sum(a.4 * I) * Hprime.(S) * (a.6 * (1 - S) - sum(a.4 * I) * H.(S))) + (sum(a.4 * c(sum(a.4 * I) * H.(S) - a.3 * I[1L], a.1 * I[j.1] - a.2 * I[j.2])) * (H.(S) - a.5))
 	}
 	ans
 }
@@ -197,7 +201,8 @@ function (from = 0, to = from + 1, by = 1,
 summary.sir.aoi <-
 function (object, name = "Y", tol = 1e-6, ...)
 {
-	stopifnot(is.character(name), length(name) == 1L, name == "Y" || name == "I",
+	stopifnot(attr(object, "eps") == 0,
+	          is.character(name), length(name) == 1L, name == "Y" || name == "I",
 	          is.double(tol), length(tol) == 1L, tol > 0)
 	ans <- c(NaN, NaN)
 	nms <- colnames(object)

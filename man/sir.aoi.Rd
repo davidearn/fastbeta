@@ -8,7 +8,7 @@ recovery structured by age of infection.
 }
 \usage{
 sir.aoi(from = 0, to = from + 1, by = 1,
-        R0, ell = 1, n = max(length(R0), length(ell)),
+        R0, ell = 1, eps = 0, n = max(length(R0), length(ell)),
         init = c(1 - init.infected, init.infected),
         init.infected = .Machine[["double.neg.eps"]],
         weights = rep(c(1, 0), c(1L, n - 1L)),
@@ -34,6 +34,10 @@ sir.aoi(from = 0, to = from + 1, by = 1,
   is used, hence \code{ell} is determined only up to a positive factor.
   Otherwise (and by default), a numeric vector of length 1, handled as
   equivalent to \code{rep(1, n)}.}
+\item{eps}{
+  a non-negative number giving the the ratio of the mean time spent
+  infectious and the mean life expectancy; \code{eps = 0} implies that
+  life expectancy is infinite (that there are no deaths).}
 \item{n}{
   a positive integer giving the number of infected compartments.
   Setting \code{n} and thus overriding the default expression is
@@ -119,19 +123,19 @@ age of infection are
 \deqn{
   \begin{alignedat}{4}
   \text{d} & S         &{} / \text{d} t
-  &{} = -(\textstyle\sum_{j} \beta_{j} I_{j}) H(S) \\
+  &{} = \mu (1 - S) - (\textstyle\sum_{j} \beta_{j} I_{j}) H(S) \\
   \text{d} & I_{    1} &{} / \text{d} t
-  &{} = (\textstyle\sum_{j} \beta_{j} I_{j}) H(S) - \gamma_{1} I_{1} \\
+  &{} = (\textstyle\sum_{j} \beta_{j} I_{j}) H(S) - (\gamma_{1} + \mu) I_{1} \\
   \text{d} & I_{j + 1} &{} / \text{d} t
-  &{} = \gamma_{j} I_{j} - \gamma_{j + 1} I_{j + 1} \\
+  &{} = \gamma_{j} I_{j} - (\gamma_{j + 1} + \mu) I_{j + 1} \\
   \text{d} & R         &{} / \text{d} t
-  &{} = \gamma_{n} I_{n}
+  &{} = \gamma_{n} I_{n} - \mu R
   \end{alignedat}
 }{
-  dS       /dt = -sum(beta * I) * H(S)
-  dI[    1]/dt = sum(beta * I) * H(S) - gamma[1] * I[1]
-  dI[j + 1]/dt = gamma[j] * I[j] - gamma[j + 1] * I[j + 1]
-  dR       /dt = gamma[n] * I[n]
+  dS       /dt = mu * (1 - S) - sum(beta * I) * H(S)
+  dI[    1]/dt = sum(beta * I) * H(S) - (gamma[1] + mu) * I[1]
+  dI[j + 1]/dt = gamma[j] * I[j] - (gamma[j + 1] + mu) * I[j + 1]
+  dR       /dt = gamma[n] * I[n] - mu * R
 }
 where \eqn{S, I_{j}, R \ge 0}{min(S, I, R) >= 0},
 \eqn{S + \sum_{j} I_{j} + R = 1}{sum(S, I, R) = 1}, and \eqn{H} is the
@@ -139,36 +143,39 @@ susceptible heterogeneity function.  In general, \eqn{H} is nonlinear;
 in the standard SIR equations, \eqn{H} is the identity function.
 
 Nondimensionalization using parameters
-\eqn{\mathcal{R}_{0,j} = \beta_{j}/\gamma_{j}}{R0 = beta/gamma} and
-\eqn{\ell_{j} = (1/\gamma_{j})/\sum_{j:\mathcal{R}_{0,j} > 0} (1/\gamma_{j})}{ell = (1/gamma)/sum(1/gamma[R0 > 0])}
-and time unit
-\eqn{\tau = t/\sum_{j:\mathcal{R}_{0,j} > 0} (1/\gamma_{j})}{tau = t/sum(1/gamma[R0 > 0])},
-gives
+\eqn{\mathcal{R}_{0,j} = \beta_{j}/(\gamma_{j} + \mu)}{R0 = beta/(gamma + mu)},
+\eqn{\ell_{j} = (1/(\gamma_{j} + \mu))/t_{+}}{ell = (1/(gamma + mu))/tp}, and
+\eqn{\varepsilon = t_{+}/(1/\mu)}{eps = tp/(1/mu)}
+and independent variable
+\eqn{\tau = t/t_{+}}{tau = t/tp},
+where
+\eqn{t_{+} = \sum_{j:\mathcal{R}_{0,j} > 0} 1/(\gamma_{j} + \mu)}{tp = sum(1/(gamma[R0 > 0] + mu))}
+designates as a natural time unit the mean time spent infectious, gives
 \deqn{
   \begin{alignedat}{4}
   \text{d} & S         &{} / \text{d} \tau
-  &{} = -(\textstyle\sum_{j} (\mathcal{R}_{0,j}/\ell_{j}) I_{j}) H(S) \\
+  &{} = \varepsilon (1 - S) - (\textstyle\sum_{j} (\mathcal{R}_{0,j}/\ell_{j}) I_{j}) H(S) \\
   \text{d} & I_{    1} &{} / \text{d} \tau
-  &{} = (\textstyle\sum_{j} (\mathcal{R}_{0,j}/\ell_{j}) I_{j}) H(S) - (1/\ell_{1}) I_{1} \\
+  &{} = (\textstyle\sum_{j} (\mathcal{R}_{0,j}/\ell_{j}) I_{j}) H(S) - (1/\ell_{1} + \varepsilon) I_{1} \\
   \text{d} & I_{j + 1} &{} / \text{d} \tau
-  &{} = (1/\ell_{j}) I_{j} - (1/\ell_{j+1}) I_{j + 1} \\
+  &{} = (1/\ell_{j}) I_{j} - (1/\ell_{j+1} + \varepsilon) I_{j + 1} \\
   \text{d} & R         &{} / \text{d} \tau
-  &{} = (1/\ell_{n}) I_{n} \\
+  &{} = (1/\ell_{n}) I_{n} - \varepsilon R
   \end{alignedat}
 }{
-  dS       /dtau = -sum((R0/ell) * I) * H(S)
-  dI[    1]/dtau = sum((R0/ell) * I) * H(S) - (1/ell[1]) * I[1]
-  dI[j + 1]/dtau = (1/ell[j]) * I[j] - (1/ell[j + 1]) * I[j + 1]
-  dR       /dtau = (1/ell[n]) * I[n]
+  dS       /dtau = eps * (1 - S) - sum((R0/ell) * I) * H(S)
+  dI[    1]/dtau = sum((R0/ell) * I) * H(S) - (1/ell[1] + eps) * I[1]
+  dI[j + 1]/dtau = (1/ell[j]) * I[j] - (1/ell[j + 1] + eps) * I[j + 1]
+  dR       /dtau = (1/ell[n]) * I[n] - eps * R
 }
 \code{sir.aoi} works with the nondimensional equations, dropping the
 last equation (which is redundant given
 \eqn{R = 1 - S - \sum_{j} I_{j}}{R = 1 - sum(S, I)}) and augments the
 resulting system of \eqn{1 + n} equations with a new equation
 \deqn{
-  \text{d}Y/\text{d}\tau = (\textstyle\sum_{j} (\mathcal{R}_{0,j}/\ell_{j}) I_{j}) (H(S) - H(1/\textstyle\sum_{j} \mathcal{R}_{0, j}))
+  \text{d}Y/\text{d}\tau = (\textstyle\sum_{j} (\mathcal{R}_{0,j}/\ell_{j}) I_{j}) (H(S) - 1/(\textstyle\sum_{j} \mathcal{R}_{0, j}))
 }{
-  dY/tau = sum((R0/ell) * I) * (H(S) - H(1/sum(R0)))
+  dY/tau = sum((R0/ell) * I) * (H(S) - 1/sum(R0))
 }
 due to the usefulness of the solution \eqn{Y} in applications.
 }
