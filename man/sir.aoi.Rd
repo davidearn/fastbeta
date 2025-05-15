@@ -102,7 +102,7 @@ sir.aoi(from = 0, to = from + 1, by = 1,
 
 If \code{aggregate = TRUE}, then infected compartments are aggregated so
 that the number of columns (elements, if \code{root} is a function)
-named \code{I} is 1 rather than \code{n}.  This column or element stores
+named \code{I} is 1 rather than \code{n}.  This column (element) stores
 prevalence, the proportion of the population that is infected.
 For convenience, there are 4 additional columns (elements) named
 \code{I.E}, \code{I.I}, \code{foi}, and \code{inc}.  These store the
