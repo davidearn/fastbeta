@@ -81,9 +81,9 @@ sir.aoi(from = 0, to = from + 1, by = 1,
   \code{name = "I"}.}
 \item{tol}{
   a positive number giving an upper bound on the relative change (from
-  one time point to the next) in the slope of \eqn{\log(V)}, defining
-  time windows in which growth or decay of \eqn{V} is considered to be
-  exponential.}
+  one time point to the next) in the slope of \eqn{\log(V)}{log(V)},
+  defining time windows in which growth or decay of \eqn{V} is
+  considered to be exponential.}
 }
 \value{
 \item{root = NULL}{
@@ -112,10 +112,10 @@ non-infectious and infectious components of prevalence (so that
 The method for \code{\link{summary}} returns a numeric vector of length
 2 containing the left and right \dQuote{tail exponents} of the variable
 \eqn{V} indicated by \code{name}, defined as the asymptotic values of
-the slope of \eqn{\log(V)}.  \code{NaN} elements indicate that a tail
-exponent cannot be approximated because the time window represented by
-\code{object} does not cover enough of the tail, where the meaning of
-\dQuote{enough} is set by \code{tol}.
+the slope of \eqn{\log(V)}{log(V)}.  \code{NaN} elements indicate that
+a tail exponent cannot be approximated because the time window
+represented by \code{object} does not cover enough of the tail, where
+the meaning of \dQuote{enough} is set by \code{tol}.
 }
 \details{
 The SIR equations with rates of transmission and recovery structured by
