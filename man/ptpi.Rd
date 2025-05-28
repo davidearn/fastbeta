@@ -113,8 +113,7 @@ plot(seir.ts01)
 ## We suppose that we have perfect knowledge of incidence,
 ## births, and the data-generating parameters, except for
 ## the initial state, which we "guess"
-series <- cbind(seir.ts01[, c("Z", "B")], mu = a[["mu"]](0))
-colnames(series) <- c("Z", "B", "mu") # FIXME: stats:::cbind.ts mangles dimnames
+series <- cbind.ts(seir.ts01[, c("Z", "B")], mu = a[["mu"]](0))
 
 plot(series[, "Z"])
 start <- 23; end <- 231

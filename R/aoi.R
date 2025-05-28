@@ -1,10 +1,11 @@
 sir.aoi <-
 function (from = 0, to = from + 1, by = 1,
-          R0, ell = 1, n = max(length(R0), length(ell)),
+          R0, ell = 1, eps = 0, n = max(length(R0), length(ell)),
           init = c(1 - init.infected, init.infected),
           init.infected = .Machine[["double.neg.eps"]],
           weights = rep(c(1, 0), c(1L, n - 1L)),
-          root = NULL, aggregate = FALSE, ...)
+          H = identity, Hargs = list(), root = NULL,
+          aggregate = FALSE, ...)
 {
 	tau <- seq.int(from = from, to = to, by = by)
 	stopifnot(requireNamespace("deSolve"),
@@ -14,27 +15,33 @@ function (from = 0, to = from + 1, by = 1,
 	          all(is.finite(R0)), min(R0) >= 0, max(R0) > 0,
 	          is.double(ell), length(ell) == 1L || length(ell) == n,
 	          all(is.finite(ell)), min(ell) > 0,
+	          is.double(eps), length(eps) == 1L,
+	          is.finite(eps), eps >= 0,
 	          is.double(init), length(init) == 2L,
-	          all(is.finite(init)), min(init) > 0, sum(init) <= 1,
+	          all(is.finite(init)), init[1L] >= 0, init[2L] > 0,
+	          sum(init) <= 1,
 	          is.double(weights), length(weights) == n,
-	          all(is.finite(weights)), min(weights) >= 0, sum(weights) > 0)
+	          all(is.finite(weights)), min(weights) >= 0,
+	          sum(weights) > 0,
+	          is.function(H),
+	          !is.null(formals(H)),
+	          names(formals(H))[1L] != "...",
+	          is.list(Hargs),
+	          is.null(names(Hargs)) || !any(names(Hargs) == names(formals(H))[1L]))
 	if (!is.null(root))
 	stopifnot(is.function(root),
-	          !is.primitive(root),
+	          !is.null(formals(root)),
 	          all(names(formals(root)) %in% c("tau", "S", "I", "Y", "dS", "dI", "dY", "R0", "ell")))
+
+	H. <- as.function(c(alist(. =), list(as.call(c(expression(H, .), Hargs)))))
+	Hprime  <- H ; body(Hprime) <- D(body(H), names(formals(H))[1L])
+	Hprime. <- H.; body(Hprime.)[[1L]] <- quote(Hprime)
 
 	if (length(R0) != n)
 		R0 <- rep_len(R0/n, n)
 	if (length(ell) != n)
 		ell <- rep_len(1, n)
 	ell <- ell/sum(ell[R0 > 0])
-
-	p <- log(init[1L])
-	q <- log(init[2L])
-	init <- c(p, log(weights) - log(sum(weights)) + q, q,
-	          use.names = FALSE)
-	if (min(init) == -Inf)
-		init[init == -Inf] <- log(0x1p-64) + q
 
 	i.S <- 1L
 	i.I <- (1L + 1L):(1L + n)
@@ -48,7 +55,7 @@ function (from = 0, to = from + 1, by = 1,
 	## nonzero pattern in n = 4 case :
 	##
 	##       S I I I I Y
-	##     S   3 3 3 3 .
+	##     S 3 3 3 3 3 .
 	##     I 4 4 4 4 4 .
 	##     I . 1 2 . . .
 	##     I . . 1 2 . .
@@ -61,58 +68,66 @@ function (from = 0, to = from + 1, by = 1,
 	k.1 <- seq.int(from = d + i.I[1L] + 1L, by = d + 1L,
 	               length.out = n - 1L)
 	k.2 <- k.1 + d
-	k.3 <- i.S + (i.I - 1L) * d
+	k.3 <- i.S     + (c(i.S, i.I         ) - 1L) * d
 	k.4 <- i.I[1L] + (c(i.S, i.I, i.I[1L]) - 1L) * d
-	k.5 <- i.Y + (c(i.S, i.I, i.Y) - 1L) * d
+	k.5 <- i.Y     + (c(i.S, i.I, i.Y    ) - 1L) * d
 
 	a.1 <- 1/ell[j.1]
-	a.2 <- 1/ell[j.2]
-	a.3 <- 1/ell[1L]
+	a.2 <- 1/ell[j.2] + eps
+	a.3 <- 1/ell[1L] + eps
 	a.4 <- R0/ell
 	a.5 <- 1/sum(R0)
-	a.6 <- rep(c(0, a.5), c(1L, n + 1L))
+	a.6 <- eps
+
+	q <- log(init[2L])
+	init <- c(init[1L], log(weights) - log(sum(weights)) + q, q,
+	          use.names = FALSE)
+	if (min(init) == -Inf) {
+		init[init == -Inf] <- log(0x1p-64) + q
+		init[i.Y] <- log(sum(exp(init[i.I])))
+	}
 
 	gg <-
 	function (t, x, theta)
 	{
-		log.S <- x[i.S]
+		    S <- x[i.S]; h <- H.(S)
 		log.I <- x[i.I]
 		log.Y <- x[i.Y]
-		u <- sum(a.4 * exp(log.I                      ))
-		v <- sum(a.4 * exp(log.I - (log.I[1L] - log.S)))
-		w <- sum(a.4 * exp(log.I -  log.Y             ))
-		list(c(-u,
-		       v - a.3,
+		u <- sum(a.4 * exp(log.I            ))
+		v <- sum(a.4 * exp(log.I - log.I[1L]))
+		w <- sum(a.4 * exp(log.I - log.Y    ))
+		list(c(a.6 * (1 - S) - u * h,
+		       v * h - a.3,
 		       a.1 * exp(log.I[j.1] - log.I[j.2]) - a.2,
-		       w * (exp(log.S) - a.5)))
+		       w * (h - a.5)))
 	}
 	Dg <-
 	function (t, x, theta)
 	{
-		log.S <- x[i.S]
+		    S <- x[i.S]; h <- H.(S); hh <- Hprime.(S)
 		log.I <- x[i.I]
 		log.Y <- x[i.Y]
-		u <- sum(uu <- a.4 * exp(log.I                      ))
-		v <- sum(vv <- a.4 * exp(log.I - (log.I[1L] - log.S)))
-		w <- sum(ww <- a.4 * exp(log.I -  log.Y             ))
+		u <- sum(uu <- a.4 * exp(log.I            ))
+		v <- sum(vv <- a.4 * exp(log.I - log.I[1L]))
+		w <- sum(ww <- a.4 * exp(log.I - log.Y    ))
 		D[k.2] <<- -(D[k.1] <<- a.1 * exp(log.I[j.1] - log.I[j.2]))
-		D[k.3] <<- -uu
-		D[k.4] <<- c(v, vv, -v + vv[1L])
-		D[k.5] <<- c(w, ww, -w) * (exp(log.S) - a.6)
+		D[k.3] <<- -c(u * hh + a.6, uu * h)
+		D[k.4] <<-  c(v * hh, vv * h, -(v - vv[1L]) * h)
+		D[k.5] <<-  c(w * hh, ww * (h - a.5), -w * (h - a.5))
 		D
 	}
 	Rg <-
 	function (t, x, theta)
 	{
-		delayedAssign("S", exp(x[i.S]))
+		delayedAssign("S",     x[i.S] )
 		delayedAssign("I", exp(x[i.I]))
 		delayedAssign("Y", exp(x[i.Y]))
 		root(tau = t,
 		     S = S, I = I, Y = Y,
-		     dS = -sum(a.4 * I) * S,
-		     dI = c(sum(a.4 * I) * S - a.3 * I[1L],
+		     dS = a.6 * (1 - S) - sum(a.4 * I) * H.(S),
+		     dI = c(sum(a.4 * I) * H.(S) - a.3 * I[1L],
 		            a.1 * I[j.1] - a.2 * I[j.2]),
-		     dY = sum(a.4 * I) * (S - a.5),
+		     dY = sum(a.4 * I) * (H.(S) - a.5),
 		     R0 = R0, ell = ell)
 	}
 	if (!is.null(root)) {
@@ -128,7 +143,6 @@ function (from = 0, to = from + 1, by = 1,
 		jacfunc  = Dg,
 		jactype  = "fullusr",
 		rootfunc = if (!is.null(root)) Rg,
-		hmax     = by,
 		ynames   = FALSE,
 		initfunc = NULL,
 		initpar  = NULL,
@@ -140,46 +154,59 @@ function (from = 0, to = from + 1, by = 1,
 		warning("integration terminated due to unsuccessful solver call")
 
 	if (is.null(root)) {
-		ans <- exp(x[, -1L, drop = FALSE])
-		if (!aggregate)
+		ans <- x[, -1L, drop = FALSE]
+		S <-     ans[, i.S, drop = FALSE]
+		I <- exp(ans[, i.I, drop = FALSE])
+		Y <- exp(ans[, i.Y, drop = FALSE])
+		if (!aggregate) {
+			ans[, i.I] <- I
+			ans[, i.Y] <- Y
 			dimnames(ans) <- list(NULL, rep(c("S", "I", "Y"), c(1L, n, 1L)))
-		else {
-			ans <- cbind(seir.aggregate(ans, 0L, n),
-			             rowSums(ans[, 1L + which(R0 == 0), drop = FALSE]),
-			             rowSums(ans[, 1L + which(R0 >  0), drop = FALSE]),
-			             rowSums(ans[, 1L +     seq_len(n), drop = FALSE] * rep(a.4, each = nrow(ans))),
+		} else {
+			ans <- cbind(S, rowSums(I), Y,
+			             rowSums(I[, R0 == 0, drop = FALSE]),
+			             rowSums(I[, R0 >  0, drop = FALSE]),
+			             rowSums(I * rep(a.4, each = nrow(ans))),
+			             rowSums(I * rep(a.4, each = nrow(ans))) * H.(S),
 			             deparse.level = 0L)
-			dimnames(ans) <- list(NULL, c("S", "I", "Y", "I.E", "I.I", "foi"))
+			dimnames(ans) <- list(NULL, c("S", "I", "Y", "I.E", "I.I", "foi", "inc"))
 		}
 		tsp(ans) <- c(x[c(1L, nrow(x)), 1L], 1/by)
 		oldClass(ans) <- c("sir.aoi", "mts", "ts", "matrix", "array")
+		attr(ans, "eps") <- eps
 	} else {
 		if (is.null(attr(x, "troot")))
 			return(NULL)
-		ans <- c(x[nrow(x), 1L], exp(x[nrow(x), -1L]))
-		S <- ans[1L + i.S]
-		I <- ans[1L + i.I]
-		Y <- ans[1L + i.Y]
-		if (!aggregate)
+		ans <- x[nrow(x), ]
+		S <-     ans[1L + i.S]
+		I <- exp(ans[1L + i.I])
+		Y <- exp(ans[1L + i.Y])
+		if (!aggregate) {
+			ans[1L + i.I] <- I
+			ans[1L + i.Y] <- Y
 			names(ans) <- rep(c("tau", "S", "I", "Y"), c(1L, 1L, n, 1L))
-		else {
+		} else {
 			ans <- c(ans[1L], S, sum(I), Y,
-			         sum(I[R0 == 0]), sum(I[R0 > 0]),
-			         sum(a.4 * I))
-			names(ans) <- c("tau", "S", "I", "Y", "I.E", "I.I", "foi")
+			         sum(I[R0 == 0]),
+			         sum(I[R0 >  0]),
+			         sum(I * a.4),
+			         sum(I * a.4) * H.(S))
+			names(ans) <- c("tau", "S", "I", "Y", "I.E", "I.I", "foi", "inc")
 		}
-		attr(ans, "curvature") <- (-sum(a.4 * I) * S) * sum(a.4 * I) + (S - a.5) * sum(a.4 * c(sum(a.4 * I) * S - a.3 * I[1L], a.1 * I[j.1] - a.2 * I[j.2]))
+		attr(ans, "curvature") <- (sum(a.4 * I) * Hprime.(S) * (a.6 * (1 - S) - sum(a.4 * I) * H.(S))) + (sum(a.4 * c(sum(a.4 * I) * H.(S) - a.3 * I[1L], a.1 * I[j.1] - a.2 * I[j.2])) * (H.(S) - a.5))
 	}
 	ans
 }
 
 summary.sir.aoi <-
-function (object, tol = 1e-6, ...)
+function (object, name = "Y", tol = 1e-6, ...)
 {
-	stopifnot(is.double(tol), length(tol) == 1L, !is.na(tol), tol > 0)
+	stopifnot(attr(object, "eps") == 0,
+	          is.character(name), length(name) == 1L, name == "Y" || name == "I",
+	          is.double(tol), length(tol) == 1L, tol > 0)
 	ans <- c(NaN, NaN)
 	nms <- colnames(object)
-	p <- rowSums(object[, nms == "I", drop = FALSE])
+	p <- rowSums(object[, colnames(object) == name, drop = FALSE])
 	w <- which(p > 0)
 	if (length(w) == 0L || w[1L] != 1L || (end <- w[length(w)]) < 3L)
 		return(ans)

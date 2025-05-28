@@ -198,10 +198,10 @@ str(X)
 plot(X)
 
 r <- 10L
-Y <- do.call(cbind, replicate(r, simplify = FALSE,
+Y <- do.call(cbind.ts, replicate(r, simplify = FALSE,
 	seir(length.out, beta, nu, mu, sigma, gamma, delta, init = init,
 	     prob = prob, delay = delay, epsilon = 0.002)[, "Z.obs"]))
-str(Y) # FIXME: stats:::cbind.ts mangles dimnames
+str(Y)
 plot(window(Y, start = tsp(Y)[1L] + length(delay) / tsp(Y)[3L]),
      ##        ^^^^^
      ## discards points showing edge effects due to 'delay'

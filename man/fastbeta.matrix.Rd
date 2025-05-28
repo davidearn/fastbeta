@@ -54,8 +54,7 @@ plot(seir.ts02)
 
 ## We suppose that we have perfect knowledge of incidence,
 ## births, and the data-generating parameters
-series <- cbind(seir.ts02[, c("Z", "B")], mu = a[["mu"]](0))
-colnames(series) <- c("Z", "B", "mu") # FIXME: stats:::cbind.ts mangles dimnames
+series <- cbind.ts(seir.ts02[, c("Z", "B")], mu = a[["mu"]](0))
 
 args <- c(list(series = series),
           a[c("sigma", "gamma", "delta", "init", "m", "n")])

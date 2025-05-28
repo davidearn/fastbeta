@@ -40,7 +40,7 @@
 \title{News for \R{} Package \pkg{fastbeta}}
 \newcommand{\GH}{\href{https://github.com/davidearn/fastbeta/issues/#1}{GH##1}}
 
-\section{Changes in version 0.4.1 (2025-05-07)}{
+\section{Changes in version 0.4.1 (2025-05-15)}{
   \subsection{Significant User-Visible Changes}{
     \itemize{
       \item .
@@ -53,14 +53,27 @@
   }
   \subsection{Bug Fixes}{
     \itemize{
-      \item Expression for \eqn{\text{d}Y/\text{d}\tau}{dY/dtau} used by
-      \code{sir.aoi} was wrong.
+      \item The expression for \eqn{\text{d}Y/\text{d}\tau}{dY/dtau}
+      used by \code{sir.aoi} was wrong.
     }
   }
   \subsection{New Features}{
     \itemize{
       \item \code{sir.aoi(\dots, aggregate = TRUE)} includes the force
-      of infection.
+      of infection and incidence.
+
+      \item \code{sir.aoi} accepts new argument \code{eps} in order to
+      support equations with equal, nonzero rates of birth and death.
+
+      \item \code{sir.aoi} accepts new arguments \code{H} and
+      \code{Hargs}, enabling the user to set a susceptible
+      hetereogeneity function.
+
+      \item The method for generic function \code{summary} and class
+      \code{sir.aoi} accepts new argument \code{name}, enabling
+      approximation of tail exponents of different variables.
+
+      \item Function \code{cbind.ts} for working around \PR{18583}.
     }
   }
   \subsection{Installation}{
@@ -84,9 +97,9 @@
   \subsection{Deprecated and Defunct}{
     \itemize{
       \item \code{seir.canonical} is removed in favour of more general
-      \code{sir.aoi}.  The method for \code{summary} for class
-      \code{seir.canonical} is removed in favour of a method for class
-      \code{sir.aoi}.
+      \code{sir.aoi}.  The method for generic function \code{summary}
+      and class \code{seir.canonical} is removed in favour of a method
+      for class \code{sir.aoi}.
     }
   }
   \subsection{New Features}{
@@ -107,8 +120,9 @@
       nondimensional parameters are the basic reproduction number and
       the ratio of the mean latent period and mean generation interval.
 
-      \item A method for \code{summary} approximating the tail exponents
-      of prevalence from the return value of \code{seir.canonical}.
+      \item A method for generic function \code{summary} and class
+      \code{seir.canonical} approximating the tail exponents of
+      prevalence.
     }
   }
 }
