@@ -33,6 +33,8 @@ matplot(times, cbind(beta(times), pe, ci, deparse.level = 0L),
         lty = c(1, 2, 3, 3), lwd = c(2, 2, 1, 1), col = c(1, 2, 2, 2),
         type = "l", xlab = "Time", ylab = "Transmission rate")
 
+options(mc.cores = parallel::detectCores())
+
 set.seed(0L)
 fit <- tmbstan::tmbstan(obj, init = "0")
 sit <- rstan::summary(fit, probs = c(0.025, 0.5, 0.975))
