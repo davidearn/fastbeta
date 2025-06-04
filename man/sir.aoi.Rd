@@ -69,8 +69,8 @@ sir.aoi(from = 0, to = from + 1, by = 1,
 \item{aggregate}{
   a logical indicating if infected compartments should be aggregated.}
 \item{\dots}{
-  optional arguments passed to \code{\link[deSolve]{lsoda}}; use
-  \code{atol}, \code{rtol}, and \code{hmax} for control of local error.}
+  optional arguments passed to \code{\link[deSolve]{ode}}, used to
+  select a numerical integration method and set control parameters.}
 \item{object}{
   an \R{} object inheriting from class \code{sir.aoi}, typically
   the value of a call to \code{sir.aoi}.}
@@ -206,7 +206,7 @@ to <- 4 * peak[["tau"]] # a more principled endpoint
 soln <- sir.aoi(to = to, by = by, R0 = R0, ell = ell,
                 aggregate = TRUE, atol = 0, rtol = 1e-12)
 ##                                ^^^^      ^^^^
-## 'atol', 'rtol', 'hmax' are passed to deSolve::lsoda
+## 'atol', 'rtol', ... are passed to deSolve::ode
 
 head(soln)
 tail(soln)

@@ -135,7 +135,7 @@ function (from = 0, to = from + 1, by = 1,
 		body(Rg)[[5L]] <- call[c(1L, match(names(formals(root)), names(call), 0L))]
 	}
 
-	x <- deSolve::lsoda(
+	x <- deSolve::ode(
 		y        = init,
 		times    = tau,
 		func     = gg,
