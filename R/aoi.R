@@ -4,8 +4,9 @@ function (from = 0, to = from + 1, by = 1,
           init = c(1 - init.infected, init.infected),
           init.infected = .Machine[["double.neg.eps"]],
           weights = rep(c(1, 0), c(1L, n - 1L)),
-          H = identity, Hargs = list(), root = NULL,
-          aggregate = FALSE, ...)
+          H = identity, Hargs = list(),
+          method = c("lsoda", "lsode", "vode", "daspk", "radau"),
+          root = NULL, aggregate = FALSE, ...)
 {
 	tau <- seq.int(from = from, to = to, by = by)
 	stopifnot(requireNamespace("deSolve"),
@@ -28,8 +29,10 @@ function (from = 0, to = from + 1, by = 1,
 	          names(formals(H))[1L] != "...",
 	          is.list(Hargs),
 	          is.null(names(Hargs)) || !any(names(Hargs) == names(formals(H))[1L]))
+	method <- if (is.list(method) && is.object(method) && inherits(method, "rkMethod")) { method.rk <- method; "rk" } else match.arg(method)
 	if (!is.null(root))
-	stopifnot(is.function(root),
+	stopifnot(method %in% c("lsoda", "lsode", "radau"),
+	          is.function(root),
 	          !is.null(formals(root)),
 	          all(names(formals(root)) %in% c("tau", "S", "I", "Y", "dS", "dI", "dY", "R0", "ell")))
 
@@ -135,18 +138,11 @@ function (from = 0, to = from + 1, by = 1,
 		body(Rg)[[5L]] <- call[c(1L, match(names(formals(root)), names(call), 0L))]
 	}
 
-	x <- deSolve::ode(
-		y        = init,
-		times    = tau,
-		func     = gg,
-		parms    = NULL,
-		jacfunc  = Dg,
-		jactype  = "fullusr",
-		rootfunc = if (!is.null(root)) Rg,
-		ynames   = FALSE,
-		initfunc = NULL,
-		initpar  = NULL,
-		...)
+	args <- c(list(y = init, times = tau, func = gg, parms = NULL),
+	          switch(method, "rk" = list(method = method.rk), list(jacfunc = Dg, jactype = "fullusr")),
+	          switch(method, "lsoda" =, "lsode" =, "radau" = if (!is.null(root)) list(rootfun = Rg)),
+	          list(ynames = FALSE, ...))
+	x <- do.call(eval(substitute(deSolve::name, list(name = as.name(method)))), args)
 	dimnames(x) <- NULL
 
 	## FIXME: diff(t[length(t) - 1:0]) != by if terminated

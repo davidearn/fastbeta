@@ -12,8 +12,9 @@ sir.aoi(from = 0, to = from + 1, by = 1,
         init = c(1 - init.infected, init.infected),
         init.infected = .Machine[["double.neg.eps"]],
         weights = rep(c(1, 0), c(1L, n - 1L)),
-        H = identity, Hargs = list(), root = NULL,
-        aggregate = FALSE, \dots)
+        H = identity, Hargs = list(),
+        method = c("lsoda", "lsode", "vode", "daspk", "radau"),
+        root = NULL, aggregate = FALSE, \dots)
 
 \method{summary}{sir.aoi}(object, name = "Y", tol = 1e-6, \dots)
 }
@@ -62,15 +63,21 @@ sir.aoi(from = 0, to = from + 1, by = 1,
   \code{H} defines a parametric family of functions of one variable,
   and \code{Hargs} supplies parameter values.  For example:
   \code{H = function(x, h) x^h}, \code{Hargs = list(h = 0.996)}.}
+\item{method}{
+  a character string indicating a numerical integration method as the
+  name of a solver in package \pkg{deSolve}.  Otherwise, an object of
+  class \code{rkMethod} specifying a Runge-Kutta method, obtained as
+  the return value of a call to \link[deSolve]{rkMethod}.}
 \item{root}{
   a function returning a numeric vector of length 1, with formal
   arguments \code{(tau, S, I, Y, dS, dI, dY, R0, ell)} (or a subset);
-  otherwise, \code{NULL}.}
+  otherwise, \code{NULL}.  Rootfinding is supported by three solvers:
+  \code{"lsoda"}, \code{"lsode"}, and \code{"radau"}.}
 \item{aggregate}{
   a logical indicating if infected compartments should be aggregated.}
 \item{\dots}{
-  optional arguments passed to \code{\link[deSolve]{ode}}, used to
-  select a numerical integration method and set control parameters.}
+  optional arguments passed to the solver indicated by \code{method},
+  used to set control parameters.}
 \item{object}{
   an \R{} object inheriting from class \code{sir.aoi}, typically
   the value of a call to \code{sir.aoi}.}

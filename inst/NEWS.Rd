@@ -40,7 +40,7 @@
 \title{News for \R{} Package \pkg{fastbeta}}
 \newcommand{\GH}{\href{https://github.com/davidearn/fastbeta/issues/#1}{GH##1}}
 
-\section{Changes in version 0.4.1 (2025-06-04)}{
+\section{Changes in version 0.4.1 (2025-06-05)}{
   \subsection{Significant User-Visible Changes}{
     \itemize{
       \item .
@@ -59,9 +59,8 @@
   }
   \subsection{New Features}{
     \itemize{
-      \item \code{sir.aoi} calls function \code{ode} from package
-      \pkg{deSolve} so that solvers different from \code{lsoda} can be
-      tried.
+      \item \code{sir.aoi} accepts new argument \code{method}, allowing
+      the user to select a solver different from \code{lsoda}.
 
       \item \code{sir.aoi(\dots, aggregate = TRUE)} includes the force
       of infection and incidence.
