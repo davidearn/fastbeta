@@ -12,6 +12,7 @@ sir.aoi(from = 0, to = from + 1, by = 1,
         init = c(1 - init.infected, init.infected),
         init.infected = .Machine[["double.neg.eps"]],
         weights = rep(c(1, 0), c(1L, n - 1L)),
+        F = function (x) 1, Fargs = list(),
         H = identity, Hargs = list(),
         method = c("lsoda", "lsode", "vode", "daspk", "radau"),
         root = NULL, aggregate = FALSE, \dots)
@@ -54,14 +55,16 @@ sir.aoi(from = 0, to = from + 1, by = 1,
   defining the initial distribution of infected individuals among the
   infected compartments.  By default, all infected individuals occupy
   the first compartment.}
-\item{H}{
-  a function returning a numeric vector of length equal to that of the
-  first formal argument.  The body must be symbolically differentiable
-  with respect to the first formal argument; see \code{\link{D}}.}
-\item{Hargs}{
-  a list of arguments passed to \code{H}.  In typical usage,
-  \code{H} defines a parametric family of functions of one variable,
-  and \code{Hargs} supplies parameter values.  For example:
+\item{F, H}{
+  functions returning a numeric vector of length 1 or of length equal
+  that of the first formal argument.  The body must be symbolically
+  differentiable with respect to the first formal argument; see
+  \code{\link{D}}.}
+\item{Fargs, Hargs}{
+  lists of arguments passed to \code{F} or \code{H}.  In typical usage,
+  \code{F} and \code{H} define parametric families of functions of one
+  variable, and \code{Fargs} and \code{Hargs} supply parameter values.
+  For example:
   \code{H = function(x, h) x^h}, \code{Hargs = list(h = 0.996)}.}
 \item{method}{
   a character string indicating a numerical integration method as the
@@ -130,24 +133,27 @@ age of infection are
 \deqn{
   \begin{alignedat}{4}
   \text{d} & S         &{} / \text{d} t
-  &{} = \mu (1 - S) - (\textstyle\sum_{j} \beta_{j} I_{j}) H(S) \\
+  &{} = \mu (1 - S) - (\textstyle\sum_{j} \beta_{j} I_{j}) F H(S) \\
   \text{d} & I_{    1} &{} / \text{d} t
-  &{} = (\textstyle\sum_{j} \beta_{j} I_{j}) H(S) - (\gamma_{1} + \mu) I_{1} \\
+  &{} = (\textstyle\sum_{j} \beta_{j} I_{j}) F H(S) - (\gamma_{1} + \mu) I_{1} \\
   \text{d} & I_{j + 1} &{} / \text{d} t
   &{} = \gamma_{j} I_{j} - (\gamma_{j + 1} + \mu) I_{j + 1} \\
   \text{d} & R         &{} / \text{d} t
   &{} = \gamma_{n} I_{n} - \mu R
   \end{alignedat}
 }{
-  dS       /dt = mu * (1 - S) - sum(beta * I) * H(S)
-  dI[    1]/dt = sum(beta * I) * H(S) - (gamma[1] + mu) * I[1]
+  dS       /dt = mu * (1 - S) - sum(beta * I) * F * H(S)
+  dI[    1]/dt = sum(beta * I) * F * H(S) - (gamma[1] + mu) * I[1]
   dI[j + 1]/dt = gamma[j] * I[j] - (gamma[j + 1] + mu) * I[j + 1]
   dR       /dt = gamma[n] * I[n] - mu * R
 }
-where \eqn{S, I_{j}, R \ge 0}{min(S, I, R) >= 0},
-\eqn{S + \sum_{j} I_{j} + R = 1}{sum(S, I, R) = 1}, and \eqn{H} is the
-susceptible heterogeneity function.  In general, \eqn{H} is nonlinear;
-in the standard SIR equations, \eqn{H} is the identity function.
+where
+\eqn{S, I_{j}, R \ge 0}{min(S, I, R) >= 0},
+\eqn{S + \sum_{j} I_{j} + R = 1}{sum(S, I, R) = 1},
+\eqn{F} is a forcing function, and
+\eqn{H} is a susceptible heterogeneity function.
+In general, \eqn{F} and \eqn{H} are nonlinear.  In the standard
+SIR equations, \eqn{F} is 1 and \eqn{H} is the identity function.
 
 Nondimensionalization using parameters
 \eqn{\mathcal{R}_{0,j} = \beta_{j}/(\gamma_{j} + \mu)}{R0 = beta/(gamma + mu)},
@@ -161,17 +167,17 @@ designates as a natural time unit the mean time spent infectious, gives
 \deqn{
   \begin{alignedat}{4}
   \text{d} & S         &{} / \text{d} \tau
-  &{} = \varepsilon (1 - S) - (\textstyle\sum_{j} (\mathcal{R}_{0,j}/\ell_{j}) I_{j}) H(S) \\
+  &{} = \varepsilon (1 - S) - (\textstyle\sum_{j} (\mathcal{R}_{0,j}/\ell_{j}) I_{j}) F H(S) \\
   \text{d} & I_{    1} &{} / \text{d} \tau
-  &{} = (\textstyle\sum_{j} (\mathcal{R}_{0,j}/\ell_{j}) I_{j}) H(S) - (1/\ell_{1} + \varepsilon) I_{1} \\
+  &{} = (\textstyle\sum_{j} (\mathcal{R}_{0,j}/\ell_{j}) I_{j}) F H(S) - (1/\ell_{1} + \varepsilon) I_{1} \\
   \text{d} & I_{j + 1} &{} / \text{d} \tau
   &{} = (1/\ell_{j}) I_{j} - (1/\ell_{j+1} + \varepsilon) I_{j + 1} \\
   \text{d} & R         &{} / \text{d} \tau
   &{} = (1/\ell_{n}) I_{n} - \varepsilon R
   \end{alignedat}
 }{
-  dS       /dtau = eps * (1 - S) - sum((R0/ell) * I) * H(S)
-  dI[    1]/dtau = sum((R0/ell) * I) * H(S) - (1/ell[1] + eps) * I[1]
+  dS       /dtau = eps * (1 - S) - sum((R0/ell) * I) * F * H(S)
+  dI[    1]/dtau = sum((R0/ell) * I) * F * H(S) - (1/ell[1] + eps) * I[1]
   dI[j + 1]/dtau = (1/ell[j]) * I[j] - (1/ell[j + 1] + eps) * I[j + 1]
   dR       /dtau = (1/ell[n]) * I[n] - eps * R
 }
@@ -240,16 +246,16 @@ function (root)
 Ymax <- peak[["Y"]]
 
 ## NB: want *simple* roots, not *multiple* roots
-F <- list(function (Y) (Y - Ymax * 0.5)  ,
+L <- list(function (Y) (Y - Ymax * 0.5)  ,
           function (Y) (Y - Ymax * 0.5)^2,
           function (Y) (Y - Ymax      )  ,
           function (Y) (Y - Ymax      )^2)
-lapply(F, wrap)
+lapply(L, wrap)
 
 ## NB: critical values can be attained twice
-F <- list(function (Y, dY) if (dY > 0) Y - Ymax * 0.5 else 1,
+L <- list(function (Y, dY) if (dY > 0) Y - Ymax * 0.5 else 1,
           function (Y, dY) if (dY < 0) Y - Ymax * 0.5 else 1)
-lapply(F, wrap)
+lapply(L, wrap)
 
 })
 }

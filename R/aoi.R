@@ -4,6 +4,7 @@ function (from = 0, to = from + 1, by = 1,
           init = c(1 - init.infected, init.infected),
           init.infected = .Machine[["double.neg.eps"]],
           weights = rep(c(1, 0), c(1L, n - 1L)),
+          F = function (x) 1, Fargs = list(),
           H = identity, Hargs = list(),
           method = c("lsoda", "lsode", "vode", "daspk", "radau"),
           root = NULL, aggregate = FALSE, ...)
@@ -24,6 +25,11 @@ function (from = 0, to = from + 1, by = 1,
 	          is.double(weights), length(weights) == n,
 	          all(is.finite(weights)), min(weights) >= 0,
 	          sum(weights) > 0,
+	          is.function(F),
+	          !is.null(formals(F)),
+	          names(formals(F))[1L] != "...",
+	          is.list(Fargs),
+	          is.null(names(Fargs)) || !any(names(Fargs) == names(formals(F))[1L]),
 	          is.function(H),
 	          !is.null(formals(H)),
 	          names(formals(H))[1L] != "...",
@@ -36,8 +42,11 @@ function (from = 0, to = from + 1, by = 1,
 	          !is.null(formals(root)),
 	          all(names(formals(root)) %in% c("tau", "S", "I", "Y", "dS", "dI", "dY", "R0", "ell")))
 
+	F. <- as.function(c(alist(. =), list(as.call(c(expression(F, .), Fargs)))))
 	H. <- as.function(c(alist(. =), list(as.call(c(expression(H, .), Hargs)))))
+	Fprime  <- F ; body(Fprime) <- D(body(F), names(formals(F))[1L])
 	Hprime  <- H ; body(Hprime) <- D(body(H), names(formals(H))[1L])
+	Fprime. <- F.; body(Fprime.)[[1L]] <- quote(Fprime)
 	Hprime. <- H.; body(Hprime.)[[1L]] <- quote(Hprime)
 
 	if (length(R0) != n)
@@ -93,12 +102,13 @@ function (from = 0, to = from + 1, by = 1,
 	gg <-
 	function (t, x, theta)
 	{
-		    S <- x[i.S]; h <- H.(S)
+		    S <- x[i.S]
 		log.I <- x[i.I]
 		log.Y <- x[i.Y]
-		u <- sum(a.4 * exp(log.I            ))
-		v <- sum(a.4 * exp(log.I - log.I[1L]))
-		w <- sum(a.4 * exp(log.I - log.Y    ))
+		f <- a.4 * F.(t); h <- H.(S)
+		u <- sum(f * exp(log.I            ))
+		v <- sum(f * exp(log.I - log.I[1L]))
+		w <- sum(f * exp(log.I - log.Y    ))
 		list(c(a.6 * (1 - S) - u * h,
 		       v * h - a.3,
 		       a.1 * exp(log.I[j.1] - log.I[j.2]) - a.2,
@@ -107,12 +117,13 @@ function (from = 0, to = from + 1, by = 1,
 	Dg <-
 	function (t, x, theta)
 	{
-		    S <- x[i.S]; h <- H.(S); hh <- Hprime.(S)
+		    S <- x[i.S]
 		log.I <- x[i.I]
 		log.Y <- x[i.Y]
-		u <- sum(uu <- a.4 * exp(log.I            ))
-		v <- sum(vv <- a.4 * exp(log.I - log.I[1L]))
-		w <- sum(ww <- a.4 * exp(log.I - log.Y    ))
+		f <- a.4 * F.(t); h <- H.(S); hh <- Hprime.(S)
+		u <- sum(uu <- f * exp(log.I            ))
+		v <- sum(vv <- f * exp(log.I - log.I[1L]))
+		w <- sum(ww <- f * exp(log.I - log.Y    ))
 		D[k.2] <<- -(D[k.1] <<- a.1 * exp(log.I[j.1] - log.I[j.2]))
 		D[k.3] <<- -c(u * hh + a.6, uu * h)
 		D[k.4] <<-  c(v * hh, vv * h, -(v - vv[1L]) * h)
@@ -127,10 +138,10 @@ function (from = 0, to = from + 1, by = 1,
 		delayedAssign("Y", exp(x[i.Y]))
 		root(tau = t,
 		     S = S, I = I, Y = Y,
-		     dS = a.6 * (1 - S) - sum(a.4 * I) * H.(S),
-		     dI = c(sum(a.4 * I) * H.(S) - a.3 * I[1L],
+		     dS = a.6 * (1 - S) - sum(a.4 * I) * F.(t) * H.(S),
+		     dI = c(sum(a.4 * I) * F.(t) * H.(S) - a.3 * I[1L],
 		            a.1 * I[j.1] - a.2 * I[j.2]),
-		     dY = sum(a.4 * I) * (H.(S) - a.5),
+		     dY = sum(a.4 * I) * F.(t) * (H.(S) - a.5),
 		     R0 = R0, ell = ell)
 	}
 	if (!is.null(root)) {
@@ -145,11 +156,12 @@ function (from = 0, to = from + 1, by = 1,
 	x <- do.call(eval(substitute(deSolve::name, list(name = as.name(method)))), args)
 	dimnames(x) <- NULL
 
-	## FIXME: diff(t[length(t) - 1:0]) != by if terminated
+	## FIXME: x[nrow(x), 1L] - x[nrow(x) - 1L, 1L] != by if terminated
 	if (attr(x, "istate")[1L] < 0L)
 		warning("integration terminated due to unsuccessful solver call")
 
 	if (is.null(root)) {
+		tau <- x[, 1L]
 		ans <- x[, -1L, drop = FALSE]
 		S <-     ans[, i.S, drop = FALSE]
 		I <- exp(ans[, i.I, drop = FALSE])
@@ -162,17 +174,18 @@ function (from = 0, to = from + 1, by = 1,
 			ans <- cbind(S, rowSums(I), Y,
 			             rowSums(I[, R0 == 0, drop = FALSE]),
 			             rowSums(I[, R0 >  0, drop = FALSE]),
-			             rowSums(I * rep(a.4, each = nrow(ans))),
-			             rowSums(I * rep(a.4, each = nrow(ans))) * H.(S),
+			             rowSums(rep(a.4, each = nrow(ans)) * I) * F.(tau),
+			             rowSums(rep(a.4, each = nrow(ans)) * I) * F.(tau) * H.(S),
 			             deparse.level = 0L)
 			dimnames(ans) <- list(NULL, c("S", "I", "Y", "I.E", "I.I", "foi", "inc"))
 		}
-		tsp(ans) <- c(x[c(1L, nrow(x)), 1L], 1/by)
+		tsp(ans) <- c(tau[c(1L, length(tau))], 1/by)
 		oldClass(ans) <- c("sir.aoi", "mts", "ts", "matrix", "array")
 		attr(ans, "eps") <- eps
 	} else {
 		if (is.null(attr(x, "troot")))
 			return(NULL)
+		tau <- x[nrow(x), 1L]
 		ans <- x[nrow(x), ]
 		S <-     ans[1L + i.S]
 		I <- exp(ans[1L + i.I])
@@ -182,14 +195,14 @@ function (from = 0, to = from + 1, by = 1,
 			ans[1L + i.Y] <- Y
 			names(ans) <- rep(c("tau", "S", "I", "Y"), c(1L, 1L, n, 1L))
 		} else {
-			ans <- c(ans[1L], S, sum(I), Y,
+			ans <- c(tau, S, sum(I), Y,
 			         sum(I[R0 == 0]),
 			         sum(I[R0 >  0]),
-			         sum(I * a.4),
-			         sum(I * a.4) * H.(S))
+			         sum(a.4 * I) * F.(tau),
+			         sum(a.4 * I) * F.(tau) * H.(S))
 			names(ans) <- c("tau", "S", "I", "Y", "I.E", "I.I", "foi", "inc")
 		}
-		attr(ans, "curvature") <- (sum(a.4 * I) * Hprime.(S) * (a.6 * (1 - S) - sum(a.4 * I) * H.(S))) + (sum(a.4 * c(sum(a.4 * I) * H.(S) - a.3 * I[1L], a.1 * I[j.1] - a.2 * I[j.2])) * (H.(S) - a.5))
+		attr(ans, "curvature") <- (sum(a.4 * I) * Fprime.(tau) * (H.(S) - a.5)) + (sum(a.4 * I) * F.(tau) * Hprime.(S) * (a.6 * (1 - S) - sum(a.4 * I) * H.(S))) + (sum(a.4 * c(sum(a.4 * I) * H.(S) - a.3 * I[1L], a.1 * I[j.1] - a.2 * I[j.2])) * F.(tau) * (H.(S) - a.5))
 	}
 	ans
 }
