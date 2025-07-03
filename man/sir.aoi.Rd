@@ -85,10 +85,10 @@ sir.aoi(from = 0, to = from + 1, by = 1,
   an \R{} object inheriting from class \code{sir.aoi}, typically
   the value of a call to \code{sir.aoi}.}
 \item{name}{
-  a character string, either \code{"Y"} or \code{"I"}.  Tail exponents
-  of \eqn{V} are approximated, where \eqn{V = Y} if \code{name = "Y"}
-  and \eqn{V = \sum_{j} I_{j}}{V = sum(I)} (prevalence) if
-  \code{name = "I"}.}
+  a character string in \code{colnames(object)}, not \code{"S"}.  Tail
+  exponents of \eqn{V} are approximated, where, for example, \eqn{V = Y}
+  if \code{name = "Y"} and \eqn{V = \sum_{j} I_{j}}{V = sum(I)}
+  (prevalence) if \code{name = "I"}.}
 \item{tol}{
   a positive number giving an upper bound on the relative change (from
   one time point to the next) in the slope of \eqn{\log(V)}{log(V)},

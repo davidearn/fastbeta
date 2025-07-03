@@ -211,7 +211,8 @@ summary.sir.aoi <-
 function (object, name = "Y", tol = 1e-6, ...)
 {
 	stopifnot(attr(object, "eps") == 0,
-	          is.character(name), length(name) == 1L, name == "Y" || name == "I",
+	          is.character(name), length(name) == 1L,
+	          name %in% colnames(object), name != "S",
 	          is.double(tol), length(tol) == 1L, tol > 0)
 	ans <- c(NaN, NaN)
 	nms <- colnames(object)
