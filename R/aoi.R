@@ -112,7 +112,7 @@ function (from = 0, to = from + 1, by = 1,
 		list(c(a.6 * (1 - S) - u * h,
 		       v * h - a.3,
 		       a.1 * exp(log.I[j.1] - log.I[j.2]) - a.2,
-		       w * (h - a.5)))
+		       w * (h - a.5/F.(t))))
 	}
 	Dg <-
 	function (t, x, theta)
