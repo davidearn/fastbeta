@@ -105,14 +105,14 @@ function (from = 0, to = from + 1, by = 1,
 		    S <- x[i.S]
 		log.I <- x[i.I]
 		log.Y <- x[i.Y]
-		f <- a.4 * F.(t); h <- H.(S)
-		u <- sum(f * exp(log.I            ))
-		v <- sum(f * exp(log.I - log.I[1L]))
-		w <- sum(f * exp(log.I - log.Y    ))
+		f <- F.(t); h <- H.(S)
+		u <- sum(a.4 * f * exp(log.I            ))
+		v <- sum(a.4 * f * exp(log.I - log.I[1L]))
+		w <- sum(a.4 * f * exp(log.I - log.Y    ))
 		list(c(a.6 * (1 - S) - u * h,
 		       v * h - a.3,
 		       a.1 * exp(log.I[j.1] - log.I[j.2]) - a.2,
-		       w * (h - a.5/F.(t))))
+		       w * (h - a.5/f)))
 	}
 	Dg <-
 	function (t, x, theta)
@@ -120,14 +120,14 @@ function (from = 0, to = from + 1, by = 1,
 		    S <- x[i.S]
 		log.I <- x[i.I]
 		log.Y <- x[i.Y]
-		f <- a.4 * F.(t); h <- H.(S); hh <- Hprime.(S)
-		u <- sum(uu <- f * exp(log.I            ))
-		v <- sum(vv <- f * exp(log.I - log.I[1L]))
-		w <- sum(ww <- f * exp(log.I - log.Y    ))
+		f <- F.(t); h <- H.(S); hh <- Hprime.(S)
+		u <- sum(uu <- a.4 * f * exp(log.I            ))
+		v <- sum(vv <- a.4 * f * exp(log.I - log.I[1L]))
+		w <- sum(ww <- a.4 * f * exp(log.I - log.Y    ))
 		D[k.2] <<- -(D[k.1] <<- a.1 * exp(log.I[j.1] - log.I[j.2]))
 		D[k.3] <<- -c(u * hh + a.6, uu * h)
 		D[k.4] <<-  c(v * hh, vv * h, -(v - vv[1L]) * h)
-		D[k.5] <<-  c(w * hh, ww * (h - a.5), -w * (h - a.5))
+		D[k.5] <<-  c(w * hh, ww * (h - a.5/f), -w * (h - a.5/f))
 		D
 	}
 	Rg <-
@@ -136,12 +136,14 @@ function (from = 0, to = from + 1, by = 1,
 		delayedAssign("S",     x[i.S] )
 		delayedAssign("I", exp(x[i.I]))
 		delayedAssign("Y", exp(x[i.Y]))
+		delayedAssign("f", F.(t))
+		delayedAssign("h", H.(S))
 		root(tau = t,
 		     S = S, I = I, Y = Y,
-		     dS = a.6 * (1 - S) - sum(a.4 * I) * F.(t) * H.(S),
-		     dI = c(sum(a.4 * I) * F.(t) * H.(S) - a.3 * I[1L],
+		     dS = a.6 * (1 - S) - sum(a.4 * f * I) * h,
+		     dI = c(sum(a.4 * f * I) * h - a.3 * I[1L],
 		            a.1 * I[j.1] - a.2 * I[j.2]),
-		     dY = sum(a.4 * I) * F.(t) * (H.(S) - a.5),
+		     dY = sum(a.4 * f * I) * (h - a.5/f),
 		     R0 = R0, ell = ell)
 	}
 	if (!is.null(root)) {
@@ -174,8 +176,8 @@ function (from = 0, to = from + 1, by = 1,
 			ans <- cbind(S, rowSums(I), Y,
 			             rowSums(I[, R0 == 0, drop = FALSE]),
 			             rowSums(I[, R0 >  0, drop = FALSE]),
-			             rowSums(rep(a.4, each = nrow(ans)) * I) * F.(tau),
-			             rowSums(rep(a.4, each = nrow(ans)) * I) * F.(tau) * H.(S),
+			             rowSums(rep(a.4, each = nrow(ans)) * F.(tau) * I),
+			             rowSums(rep(a.4, each = nrow(ans)) * F.(tau) * I) * H.(S),
 			             deparse.level = 0L)
 			dimnames(ans) <- list(NULL, c("S", "I", "Y", "I.E", "I.I", "foi", "inc"))
 		}
@@ -198,11 +200,12 @@ function (from = 0, to = from + 1, by = 1,
 			ans <- c(tau, S, sum(I), Y,
 			         sum(I[R0 == 0]),
 			         sum(I[R0 >  0]),
-			         sum(a.4 * I) * F.(tau),
-			         sum(a.4 * I) * F.(tau) * H.(S))
+			         sum(a.4 * F.(tau) * I),
+			         sum(a.4 * F.(tau) * I) * H.(S))
 			names(ans) <- c("tau", "S", "I", "Y", "I.E", "I.I", "foi", "inc")
 		}
-		attr(ans, "curvature") <- (sum(a.4 * I) * Fprime.(tau) * (H.(S) - a.5)) + (sum(a.4 * I) * F.(tau) * Hprime.(S) * (a.6 * (1 - S) - sum(a.4 * I) * H.(S))) + (sum(a.4 * c(sum(a.4 * I) * H.(S) - a.3 * I[1L], a.1 * I[j.1] - a.2 * I[j.2])) * F.(tau) * (H.(S) - a.5))
+		f <- F.(tau); ff <- Fprime.(tau); h <- H.(S); hh <- Hprime.(S)
+		attr(ans, "curvature") <- (sum(a.4 * ff * I) * (h - a.5/f)) + (sum(a.4 * f * I) * (hh * (a.6 * (1 - S) - sum(a.4 * f * I) * h) + a.5 * ff/f/f)) + (sum(a.4 * f * c(sum(a.4 * f * I) * h - a.3 * I[1L], a.1 * I[j.1] - a.2 * I[j.2])) * (h - a.5/f))
 	}
 	ans
 }
