@@ -133,17 +133,17 @@ age of infection are
 \deqn{
   \begin{alignedat}{4}
   \text{d} & S         &{} / \text{d} t
-  &{} = \mu (1 - S) - (\textstyle\sum_{j} \beta_{j} I_{j}) F H(S) \\
+  &{} = \mu (1 - S) - (\textstyle\sum_{j} \beta_{j} F I_{j}) H(S) \\
   \text{d} & I_{    1} &{} / \text{d} t
-  &{} = (\textstyle\sum_{j} \beta_{j} I_{j}) F H(S) - (\gamma_{1} + \mu) I_{1} \\
+  &{} = (\textstyle\sum_{j} \beta_{j} F I_{j}) H(S) - (\gamma_{1} + \mu) I_{1} \\
   \text{d} & I_{j + 1} &{} / \text{d} t
   &{} = \gamma_{j} I_{j} - (\gamma_{j + 1} + \mu) I_{j + 1} \\
   \text{d} & R         &{} / \text{d} t
   &{} = \gamma_{n} I_{n} - \mu R
   \end{alignedat}
 }{
-  dS       /dt = mu * (1 - S) - sum(beta * I) * F * H(S)
-  dI[    1]/dt = sum(beta * I) * F * H(S) - (gamma[1] + mu) * I[1]
+  dS       /dt = mu * (1 - S) - sum(beta * F * I) * H(S)
+  dI[    1]/dt = sum(beta * F * I) * H(S) - (gamma[1] + mu) * I[1]
   dI[j + 1]/dt = gamma[j] * I[j] - (gamma[j + 1] + mu) * I[j + 1]
   dR       /dt = gamma[n] * I[n] - mu * R
 }
@@ -167,17 +167,17 @@ designates as a natural time unit the mean time spent infectious, gives
 \deqn{
   \begin{alignedat}{4}
   \text{d} & S         &{} / \text{d} \tau
-  &{} = \varepsilon (1 - S) - (\textstyle\sum_{j} (\mathcal{R}_{0,j}/\ell_{j}) I_{j}) F H(S) \\
+  &{} = \varepsilon (1 - S) - (\textstyle\sum_{j} (\mathcal{R}_{0,j}/\ell_{j}) F I_{j}) H(S) \\
   \text{d} & I_{    1} &{} / \text{d} \tau
-  &{} = (\textstyle\sum_{j} (\mathcal{R}_{0,j}/\ell_{j}) I_{j}) F H(S) - (1/\ell_{1} + \varepsilon) I_{1} \\
+  &{} = (\textstyle\sum_{j} (\mathcal{R}_{0,j}/\ell_{j}) F I_{j}) H(S) - (1/\ell_{1} + \varepsilon) I_{1} \\
   \text{d} & I_{j + 1} &{} / \text{d} \tau
   &{} = (1/\ell_{j}) I_{j} - (1/\ell_{j+1} + \varepsilon) I_{j + 1} \\
   \text{d} & R         &{} / \text{d} \tau
   &{} = (1/\ell_{n}) I_{n} - \varepsilon R
   \end{alignedat}
 }{
-  dS       /dtau = eps * (1 - S) - sum((R0/ell) * I) * F * H(S)
-  dI[    1]/dtau = sum((R0/ell) * I) * F * H(S) - (1/ell[1] + eps) * I[1]
+  dS       /dtau = eps * (1 - S) - sum((R0/ell) * F * I) * H(S)
+  dI[    1]/dtau = sum((R0/ell) * F * I) * H(S) - (1/ell[1] + eps) * I[1]
   dI[j + 1]/dtau = (1/ell[j]) * I[j] - (1/ell[j + 1] + eps) * I[j + 1]
   dR       /dtau = (1/ell[n]) * I[n] - eps * R
 }
@@ -186,9 +186,9 @@ last equation (which is redundant given
 \eqn{R = 1 - S - \sum_{j} I_{j}}{R = 1 - sum(S, I)}) and augments the
 resulting system of \eqn{1 + n} equations with a new equation
 \deqn{
-  \text{d}Y/\text{d}\tau = (\textstyle\sum_{j} (\mathcal{R}_{0,j}/\ell_{j}) I_{j}) (H(S) - 1/(\textstyle\sum_{j} \mathcal{R}_{0, j}))
+  \text{d}Y/\text{d}\tau = (\textstyle\sum_{j} (\mathcal{R}_{0,j}/\ell_{j}) F I_{j}) (H(S) - 1/(\textstyle\sum_{j} \mathcal{R}_{0, j} F))
 }{
-  dY/tau = sum((R0/ell) * I) * (H(S) - 1/sum(R0))
+  dY/tau = sum((R0/ell) * F * I) * (H(S) - 1/sum(R0 * F))
 }
 due to the usefulness of the solution \eqn{Y} in applications.
 }
