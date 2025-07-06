@@ -147,8 +147,8 @@ function (from = 0, to = from + 1, by = 1,
 		     R0 = R0, ell = ell)
 	}
 	if (!is.null(root)) {
-		call <- body(Rg)[[5L]]
-		body(Rg)[[5L]] <- call[c(1L, match(names(formals(root)), names(call), 0L))]
+		call <- body(Rg)[[7L]]
+		body(Rg)[[7L]] <- call[c(1L, match(names(formals(root)), names(call), 0L))]
 	}
 
 	args <- c(list(y = init, times = tau, func = gg, parms = NULL),
