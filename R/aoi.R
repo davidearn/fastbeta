@@ -6,8 +6,8 @@ function (from = 0, to = from + 1, by = 1,
           weights = rep(c(1, 0), c(1L, n - 1L)),
           F = function (x) 1, Fargs = list(),
           H = identity, Hargs = list(),
-          method = c("lsoda", "lsode", "vode", "daspk", "radau"),
-          root = NULL, aggregate = FALSE, ...)
+          root = NULL, root.max = 1L, root.break = TRUE,
+          aggregate = FALSE, ...)
 {
 	tau <- seq.int(from = from, to = to, by = by)
 	stopifnot(requireNamespace("deSolve"),
@@ -35,12 +35,11 @@ function (from = 0, to = from + 1, by = 1,
 	          names(formals(H))[1L] != "...",
 	          is.list(Hargs),
 	          is.null(names(Hargs)) || !any(names(Hargs) == names(formals(H))[1L]))
-	method <- if (is.list(method) && is.object(method) && inherits(method, "rkMethod")) { method.rk <- method; "rk" } else match.arg(method)
 	if (!is.null(root))
-	stopifnot(method %in% c("lsoda", "lsode", "radau"),
-	          is.function(root),
+	stopifnot(is.function(root),
 	          !is.null(formals(root)),
-	          all(names(formals(root)) %in% c("tau", "S", "I", "Y", "dS", "dI", "dY", "R0", "ell")))
+	          all(names(formals(root)) %in% c("tau", "S", "I", "Y", "dS", "dI", "dY", "R0", "ell")),
+	          is.integer(root.max), length(root.max) == 1L, root.max >= 1L)
 
 	F. <- as.function(c(alist(. =), list(as.call(c(expression(F, .), Fargs)))))
 	H. <- as.function(c(alist(. =), list(as.call(c(expression(H, .), Hargs)))))
@@ -100,11 +99,11 @@ function (from = 0, to = from + 1, by = 1,
 	}
 
 	gg <-
-	function (t, x, theta)
+	function (t, y, theta)
 	{
-		    S <- x[i.S]
-		log.I <- x[i.I]
-		log.Y <- x[i.Y]
+		    S <- y[i.S]
+		log.I <- y[i.I]
+		log.Y <- y[i.Y]
 		f <- F.(t); h <- H.(S)
 		u <- sum(a.4 * f * exp(log.I            ))
 		v <- sum(a.4 * f * exp(log.I - log.I[1L]))
@@ -115,11 +114,11 @@ function (from = 0, to = from + 1, by = 1,
 		       w * (h - a.5/f)))
 	}
 	Dg <-
-	function (t, x, theta)
+	function (t, y, theta)
 	{
-		    S <- x[i.S]
-		log.I <- x[i.I]
-		log.Y <- x[i.Y]
+		    S <- y[i.S]
+		log.I <- y[i.I]
+		log.Y <- y[i.Y]
 		f <- F.(t); h <- H.(S); hh <- Hprime.(S)
 		u <- sum(uu <- a.4 * f * exp(log.I            ))
 		v <- sum(vv <- a.4 * f * exp(log.I - log.I[1L]))
@@ -131,11 +130,11 @@ function (from = 0, to = from + 1, by = 1,
 		D
 	}
 	Rg <-
-	function (t, x, theta)
+	function (t, y, theta)
 	{
-		delayedAssign("S",     x[i.S] )
-		delayedAssign("I", exp(x[i.I]))
-		delayedAssign("Y", exp(x[i.Y]))
+		delayedAssign("S",     y[i.S] )
+		delayedAssign("I", exp(y[i.I]))
+		delayedAssign("Y", exp(y[i.Y]))
 		delayedAssign("f", F.(t))
 		delayedAssign("h", H.(S))
 		root(tau = t,
@@ -151,62 +150,80 @@ function (from = 0, to = from + 1, by = 1,
 		body(Rg)[[7L]] <- call[c(1L, match(names(formals(root)), names(call), 0L))]
 	}
 
-	args <- c(list(y = init, times = tau, func = gg, parms = NULL),
-	          switch(method, "rk" = list(method = method.rk), list(jacfunc = Dg, jactype = "fullusr")),
-	          switch(method, "lsoda" =, "lsode" =, "radau" = if (!is.null(root)) list(rootfun = Rg)),
-	          list(ynames = FALSE, ...))
-	x <- do.call(eval(substitute(deSolve::name, list(name = as.name(method)))), args)
-	dimnames(x) <- NULL
+	x <- deSolve::lsoda(y = init,
+	                    times = tau,
+	                    func = gg,
+	                    parms = NULL,
+	                    jacfunc = Dg,
+	                    jactype = "fullusr",
+	                    rootfunc =
+	                        if (!is.null(root))
+	                        	Rg,
+	                    events =
+	                        if (!is.null(root) && !(root.break && root.max == 1L))
+	                        	list(func = function (t, y, theta, ...) y,
+	                        	     root = TRUE,
+	                        	     maxroot = root.max),
+	                    ynames = FALSE, ...)
+	ax <- attributes(x)
+	attributes(x) <- ax["dim"]
 
-	## FIXME: x[nrow(x), 1L] - x[nrow(x) - 1L, 1L] != by if terminated
-	if (attr(x, "istate")[1L] < 0L)
+	status <- ax[["istate"]][1L]
+	if (status < 0L)
 		warning("integration terminated due to unsuccessful solver call")
-
-	if (is.null(root)) {
-		tau <- x[, 1L]
-		ans <- x[, -1L, drop = FALSE]
-		S <-     ans[, i.S, drop = FALSE]
-		I <- exp(ans[, i.I, drop = FALSE])
-		Y <- exp(ans[, i.Y, drop = FALSE])
-		if (!aggregate) {
-			ans[, i.I] <- I
-			ans[, i.Y] <- Y
-			dimnames(ans) <- list(NULL, rep(c("S", "I", "Y"), c(1L, n, 1L)))
-		} else {
-			ans <- cbind(S, rowSums(I), Y,
-			             rowSums(I[, R0 == 0, drop = FALSE]),
-			             rowSums(I[, R0 >  0, drop = FALSE]),
-			             rowSums(rep(a.4, each = nrow(ans)) * F.(tau) * I),
-			             rowSums(rep(a.4, each = nrow(ans)) * F.(tau) * I) * H.(S),
-			             deparse.level = 0L)
-			dimnames(ans) <- list(NULL, c("S", "I", "Y", "I.E", "I.I", "foi", "inc"))
-		}
-		tsp(ans) <- c(tau[c(1L, length(tau))], 1/by)
-		oldClass(ans) <- c("sir.aoi", "mts", "ts", "matrix", "array")
-		attr(ans, "eps") <- eps
-	} else {
-		if (is.null(attr(x, "troot")))
-			return(NULL)
-		tau <- x[nrow(x), 1L]
-		ans <- x[nrow(x), ]
-		S <-     ans[1L + i.S]
-		I <- exp(ans[1L + i.I])
-		Y <- exp(ans[1L + i.Y])
-		if (!aggregate) {
-			ans[1L + i.I] <- I
-			ans[1L + i.Y] <- Y
-			names(ans) <- rep(c("tau", "S", "I", "Y"), c(1L, 1L, n, 1L))
-		} else {
-			ans <- c(tau, S, sum(I), Y,
-			         sum(I[R0 == 0]),
-			         sum(I[R0 >  0]),
-			         sum(a.4 * F.(tau) * I),
-			         sum(a.4 * F.(tau) * I) * H.(S))
-			names(ans) <- c("tau", "S", "I", "Y", "I.E", "I.I", "foi", "inc")
-		}
-		f <- F.(tau); ff <- Fprime.(tau); h <- H.(S); hh <- Hprime.(S)
-		attr(ans, "curvature") <- (sum(a.4 * ff * I) * (h - a.5/f)) + (sum(a.4 * f * I) * (hh * (a.6 * (1 - S) - sum(a.4 * f * I) * h) + a.5 * ff/f/f)) + (sum(a.4 * f * c(sum(a.4 * f * I) * h - a.3 * I[1L], a.1 * I[j.1] - a.2 * I[j.2])) * (h - a.5/f))
+	if (status < 0L || status == 3L) {
+		last <- x[nrow(x), , drop = FALSE]
+		if (!last[1L, 1L] %in% tau)
+		x <- x[-nrow(x), , drop = FALSE]
 	}
+
+	if (root.break && root.max > 1L &&
+	    !is.null(ax[["nroot"]]) && ax[["nroot"]] == root.max &&
+	    x[nrow(x), 1L] > ax[["troot"]][root.max])
+		x <- x[x[, 1L] <= ax[["troot"]][root.max], , drop = FALSE]
+
+	common <-
+	function (t, y)
+	{
+		S <-     y[, i.S, drop = FALSE]
+		I <- exp(y[, i.I, drop = FALSE])
+		Y <- exp(y[, i.Y, drop = FALSE])
+		if (aggregate) {
+			m <- nrow(y)
+			f <- F.(t); h <- H.(S); ff <- Fprime.(t); hh <- Hprime.(S)
+			a.1 <- rep(a.1, each = m)
+			a.2 <- rep(a.2, each = m)
+			a.4 <- rep(a.4, each = m)
+			y <- cbind(S, rowSums(I), Y,
+			           rowSums(I[, R0 == 0, drop = FALSE]),
+			           rowSums(I[, R0 >  0, drop = FALSE]),
+			           rowSums(a.4 * f * I),
+			           rowSums(a.4 * f * I) * h,
+			           rowSums(a.4 * ff * I) * (h - a.5/f) +
+                           rowSums(a.4 * f * I) * (hh * (a.6 * (1 - drop(S)) - rowSums(a.4 * f * I) * h) + a.5 * ff/f/f) +
+                           rowSums(a.4 * f * cbind(rowSums(a.4 * f * I) * h - a.3 * I[, 1L], a.1 * I[, j.1] - a.2 * I[, j.2], deparse.level = 0L)) * (h - a.5/f),
+			           deparse.level = 0L)
+			dimnames(y) <- list(NULL, c("S", "I", "Y", "I.E", "I.I", "foi", "inc", "crv"))
+		} else {
+			y <- cbind(S, I, Y, deparse.level = 0L)
+			dimnames(y) <- list(NULL, rep(c("S", "I", "Y"), c(1L, n, 1L)))
+		}
+		list(tau = t, state = y)
+	}
+
+	ans <- common(x[, 1L], x[, -1L, drop = FALSE])[[2L]]
+	tsp(ans) <- c(x[c(1L, nrow(x)), 1L], 1/by)
+	oldClass(ans) <- c("sir.aoi", "mts", "ts", "matrix", "array")
+	if (!is.null(root)) {
+		attr(ans, "root.info") <-
+		if (status == 3L)
+			common(last[, 1L], last[, -1L, drop = FALSE])
+		else if (is.null(ax[["nroot"]]))
+			common(double(0L), matrix(0, 0L, 1L + n + 1L))
+		else
+			common(ax[["troot"]], t(ax[["valroot"]]))
+	}
+	attr(ans, "eps") <- eps
 	ans
 }
 

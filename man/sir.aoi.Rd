@@ -14,8 +14,8 @@ sir.aoi(from = 0, to = from + 1, by = 1,
         weights = rep(c(1, 0), c(1L, n - 1L)),
         F = function (x) 1, Fargs = list(),
         H = identity, Hargs = list(),
-        method = c("lsoda", "lsode", "vode", "daspk", "radau"),
-        root = NULL, aggregate = FALSE, \dots)
+        root = NULL, root.max = 1L, root.break = TRUE,
+        aggregate = FALSE, \dots)
 
 \method{summary}{sir.aoi}(object, name = "Y", tol = 1e-6, \dots)
 }
@@ -66,28 +66,31 @@ sir.aoi(from = 0, to = from + 1, by = 1,
   variable, and \code{Fargs} and \code{Hargs} supply parameter values.
   For example:
   \code{H = function(x, h) x^h}, \code{Hargs = list(h = 0.996)}.}
-\item{method}{
-  a character string indicating a numerical integration method as the
-  name of a solver in package \pkg{deSolve}.  Otherwise, an object of
-  class \code{rkMethod} specifying a Runge-Kutta method, obtained as
-  the return value of a call to \link[deSolve]{rkMethod}.}
 \item{root}{
   a function returning a numeric vector of length 1, with formal
   arguments \code{(tau, S, I, Y, dS, dI, dY, R0, ell)} (or a subset);
-  otherwise, \code{NULL}.  Rootfinding is supported by three solvers:
-  \code{"lsoda"}, \code{"lsode"}, and \code{"radau"}.}
+  otherwise, \code{NULL}.  Roots of this function in the interval from
+  \code{from} to \code{to} are sought alongside the numerical solution.}
+\item{root.max}{
+  a positive integer giving a stopping condition for the root finder.
+  Root finding continues until the count of roots found is
+  \code{root.max}.}
+\item{root.break}{
+  a logical indicating if the solver should stop once \code{root.max}
+  roots are found.  If \code{TRUE}, then the numerical solution ends
+  at the last time point less than or equal to the last root.}
 \item{aggregate}{
   a logical indicating if infected compartments should be aggregated.}
 \item{\dots}{
-  optional arguments passed to the solver indicated by \code{method},
-  used to set control parameters.}
+  optional arguments passed to the solver, function \code{lsoda} in
+  package \pkg{deSolve}.}
 \item{object}{
   an \R{} object inheriting from class \code{sir.aoi}, typically
   the value of a call to \code{sir.aoi}.}
 \item{name}{
-  a character string in \code{colnames(object)}, not \code{"S"}.  Tail
-  exponents of \eqn{V} are approximated, where, for example, \eqn{V = Y}
-  if \code{name = "Y"} and \eqn{V = \sum_{j} I_{j}}{V = sum(I)}
+  a character string in \code{colnames(object)}.  Tail exponents of
+  \eqn{V} are approximated, where, for example, \eqn{V = Y} if
+  \code{name = "Y"} and \eqn{V = \sum_{j} I_{j}}{V = sum(I)}
   (prevalence) if \code{name = "I"}.}
 \item{tol}{
   a positive number giving an upper bound on the relative change (from
@@ -96,28 +99,25 @@ sir.aoi(from = 0, to = from + 1, by = 1,
   considered to be exponential.}
 }
 \value{
-\item{root = NULL}{
-  a \dQuote{multiple time series} object, inheriting from class
-  \code{sir.aoi} and transitively from class \code{\link[=ts]{mts}}.
-  Beneath the class, it is a
-  \code{length(seq(from, to, by))}-by-\code{(1+n+1)} numeric matrix
-  of the form \code{cbind(S, I, Y)}.}
-\item{root = function (tau, S, I, Y, dS, dI, dY, R0, ell)}{
-  a numeric vector of length \code{1+1+n+1} of the form
-  \code{c(tau, S, I, Y)} storing the root of the function \code{root} in
-  units of the mean time spent infectious and the state at that time.
-  Attribute \code{curvature} stores the curvature of \eqn{Y} at the
-  root.  If a root is not found between times \code{from} and \code{to},
-  then the value is \code{NULL}.}
+A \dQuote{multiple time series} object, inheriting from class
+\code{sir.aoi} and transitively from class \code{\link[=ts]{mts}},
+storing the numerical solution.  Beneath the class, it is a
+\code{T}-by-\code{(1+n+1)} numeric matrix of the form
+\code{cbind(S, I, Y)}, \code{T <= length(seq(from, to, by))}.
 
-If \code{aggregate = TRUE}, then infected compartments are aggregated so
-that the number of columns (elements, if \code{root} is a function)
-named \code{I} is 1 rather than \code{n}.  This column (element) stores
-prevalence, the proportion of the population that is infected.
-For convenience, there are 4 additional columns (elements) named
-\code{I.E}, \code{I.I}, \code{foi}, and \code{inc}.  These store the
-non-infectious and infectious components of prevalence (so that
-\code{I.E + I.I = I}), the force of infection, and incidence.
+If \code{root} is a function, then an attribute \code{root.info} of the
+form \code{list(tau, state = cbind(S, I, Y))} stores the first \code{K}
+roots of that function and the state of the system at each root,
+\code{K <= root.max}.
+
+If \code{aggregate = TRUE}, then infected compartments are aggregated
+so that the number of columns named \code{I} is 1 rather than \code{n}.
+This column stores prevalence, the proportion of the population that is
+infected.  For convenience, there are 5 additional columns named
+\code{I.E}, \code{I.I}, \code{foi}, \code{inc}, and \code{crv}.
+These store the non-infectious and infectious components of prevalence
+(so that \code{I.E + I.I = I}), the force of infection, incidence
+(so that \code{foi * S = inc}), and the curvature of \code{Y}.
 
 The method for \code{\link{summary}} returns a numeric vector of length
 2 containing the left and right \dQuote{tail exponents} of the variable
@@ -209,17 +209,18 @@ if (requireNamespace("deSolve")) withAutoprint({
 
 to <- 100; by <- 0.01; R0 <- c(0, 16); ell <- c(0.5, 1)
 
-peak <- sir.aoi(to = to, by = by, R0 = R0, ell = ell,
-                root = function (S, R0) sum(R0) * S - 1,
-                aggregate = TRUE)
-peak
+soln.peak <- sir.aoi(to = to, by = by, R0 = R0, ell = ell,
+                     root = function (S, R0) sum(R0) * S - 1,
+                     aggregate = TRUE)
+str(soln.peak)
 
-to <- 4 * peak[["tau"]] # a more principled endpoint
+info.peak <- attr(soln.peak, "root.info")
+to <- 4 * info.peak[["tau"]] # a more principled endpoint
 
 soln <- sir.aoi(to = to, by = by, R0 = R0, ell = ell,
                 aggregate = TRUE, atol = 0, rtol = 1e-12)
 ##                                ^^^^      ^^^^
-## 'atol', 'rtol', ... are passed to deSolve::ode
+## 'atol', 'rtol', ... are passed to deSolve::lsoda
 
 head(soln)
 tail(soln)
@@ -233,17 +234,18 @@ xoff <- function (x, k) x - x[k]
 k <- c(16L, nrow(soln)) # c(1L, nrow(soln)) worse due to transient
 
 plot(soln[, "Y"], log = "y", ylab = "Y")
-abline(v = peak[["tau"]], h = peak[["Y"]],
+abline(v = info.peak[["tau"]], h = info.peak[["state"]][, "Y"],
        lty = 2, lwd = 2, col = "red")
 for (i in 1:2)
 	lines(soln[k[i], "Y"] * exp(lamb[i] * xoff(time(soln), k[i])),
 	      lty = 2, lwd = 2, col = "red")
 
 wrap <-
-function (root)
-	sir.aoi(to = to, by = by, R0 = R0, ell = ell,
-	        root = root, aggregate = TRUE)
-Ymax <- peak[["Y"]]
+function (root, ...)
+	attr(sir.aoi(to = to, by = by, R0 = R0, ell = ell,
+	             root = root, aggregate = TRUE, ...),
+	     "root.info")[["tau"]]
+Ymax <- info.peak[["state"]][, "Y"]
 
 ## NB: want *simple* roots, not *multiple* roots
 L <- list(function (Y) (Y - Ymax * 0.5)  ,
@@ -252,10 +254,11 @@ L <- list(function (Y) (Y - Ymax * 0.5)  ,
           function (Y) (Y - Ymax      )^2)
 lapply(L, wrap)
 
-## NB: critical values can be attained twice
-L <- list(function (Y, dY) if (dY > 0) Y - Ymax * 0.5 else 1,
+## NB: critical values can be attained more than once
+L <- list(function (Y, dY)             Y - Ymax * 0.5,
+          function (Y, dY) if (dY > 0) Y - Ymax * 0.5 else 1,
           function (Y, dY) if (dY < 0) Y - Ymax * 0.5 else 1)
-lapply(L, wrap)
+lapply(L, wrap, root.max = 2L)
 
 })
 }

@@ -40,10 +40,19 @@
 \title{News for \R{} Package \pkg{fastbeta}}
 \newcommand{\GH}{\href{https://github.com/davidearn/fastbeta/issues/#1}{GH##1}}
 
-\section{Changes in version 0.4.1 (2025-07-02)}{
+\section{Changes in version 0.4.1 (2025-07-10)}{
   \subsection{Significant User-Visible Changes}{
     \itemize{
-      \item .
+      \item \code{sir.aoi(\dots, root = \var{function})} is a multiple
+      time series object storing the solution until the last root or
+      time point.  Attribute \code{root.info} stores details about the
+      system at the roots in the format \code{list(tau, state)}.
+      Previously, \code{sir.aoi} discarded the solution and returned
+      only details about the system at the first root.
+
+      \item \code{sir.aoi(\dots, root = \var{function})} no longer has
+      an attribute \code{curvature} storing the curvature of \code{Y} at
+      the root.
     }
   }
   \subsection{Deprecated and Defunct}{
@@ -59,11 +68,9 @@
   }
   \subsection{New Features}{
     \itemize{
-      \item \code{sir.aoi} accepts new argument \code{method}, allowing
-      the user to select a solver different from \code{lsoda}.
-
-      \item \code{sir.aoi(\dots, aggregate = TRUE)} includes the force
-      of infection and incidence.
+      \item \code{sir.aoi(\dots, aggregate = TRUE)} has additional
+      columns storing the force of infection, incidence, and the
+      curvature of \code{Y}.
 
       \item \code{sir.aoi} accepts new argument \code{eps} in order to
       support equations with equal, nonzero rates of birth and death.
@@ -74,6 +81,12 @@
       \item \code{sir.aoi} accepts new arguments \code{H} and
       \code{Hargs}, enabling the user to set a susceptible
       hetereogeneity function.
+
+      \item \code{sir.aoi} accepts new arguments \code{root.max} and
+      \code{root.break}, enabling the user to set the number of roots
+      sought and indicate whether the solver should stop once that
+      number of roots is reached.  The default behaviour is to stop once
+      one root is found and agrees with the previous behaviour.
 
       \item The method for generic function \code{summary} and class
       \code{sir.aoi} accepts new argument \code{name}, enabling
