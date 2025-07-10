@@ -129,7 +129,7 @@ matplot(x = seq(to = influenza[n, "date"], by = 1, length.out = d + n),
         col = c(1L, 4L, 2L, 3L), pch = 1L, lty = 1L, lwd = 1,
         xlab = "", ylab = "deaths")
 legend("topleft", NULL,
-       c("observed", sprintf("after %d iterations", j2 - 1L)),
+       c("observed", sprintf("after \%d iterations", j2 - 1L)),
        col = c(1L, 4L, 2L, 3L), pch = 1L, lty = 1L, lwd = 1,
        bty = "n")
 }
