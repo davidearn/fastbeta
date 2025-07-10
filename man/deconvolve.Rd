@@ -92,14 +92,44 @@ matplot(-(d - 1L):n,
         cbind(x0, c(rep(NA, d), x), prob * D0[["value"]], p * ans),
         type = c("p", "p", "p", "l"),
         col = c(1L, 1L, 2L, 4L), pch = c(16L, 1L, 16L, NA),
-        lty = c(0L, 0L, 0L, 1L), lwd = c(NA, NA, NA, 3L),
+        lty = c(0L, 0L, 0L, 1L), lwd = c(NA, NA, NA, 3),
         xlab = "Time", ylab = "Count")
 legend("topleft", NULL,
        c("actual", "actual+delay", "actual+delay+deconvolution", "p*h"),
        col = c(1L, 1L, 2L, 4L), pch = c(16L, 1L, 16L, NA),
-       lty = c(0L, 0L, 0L, 1L), lwd = c(NA, NA, NA, 3L),
+       lty = c(0L, 0L, 0L, 1L), lwd = c(NA, NA, NA, 3),
        bty = "n")
 
 plot(0L:D1[["iter"]], D1[["chisq"]], xlab = "Iterations", ylab = quote(chi^2))
 abline(h = 1, lty = 2L)
+
+data(influenza, package = "fastbeta")
+x <- influenza[["deaths"]]
+n <- nrow(influenza)
+d <- 31L
+r <- 30L
+
+D2 <- deconvolve(x = x,
+                 delay = diff(pgamma(0L:(d + 1L), 5.5, 0.5)),
+                 tol = 0, iter.max = r, complete = TRUE)
+##               ^^^^^^^
+## if you want exactly (never fewer than) 'iter.max' iterations
+##
+stopifnot(D2[["iter"]] == r,
+          identical(dim(D2[["value"]]), c(d + n, 1L + r)),
+          length(D2[["chisq"]]) == 1L + r,
+          min(D2[["chisq"]]) < 1)
+
+## Subscript for the first, critical, and last values:
+j2 <- c(1L, which.max(D2[["chisq"]] < 1), 1L + r)
+
+matplot(x = seq(to = influenza[n, "date"], by = 1, length.out = d + n),
+        y = cbind(c(rep(NA, d), x), D2[["value"]][, j2]),
+        type = "o",
+        col = c(1L, 4L, 2L, 3L), pch = 1L, lty = 1L, lwd = 1,
+        xlab = "", ylab = "deaths")
+legend("topleft", NULL,
+       c("observed", sprintf("after %d iterations", j2 - 1L)),
+       col = c(1L, 4L, 2L, 3L), pch = 1L, lty = 1L, lwd = 1,
+       bty = "n")
 }

@@ -93,6 +93,9 @@
       approximation of tail exponents of different variables.
 
       \item Function \code{cbind.ts} for working around \PR{18583}.
+
+      \item New data set \code{influenza}, used in an example of
+      \code{deconvolve} usage.
     }
   }
   \subsection{Installation}{
