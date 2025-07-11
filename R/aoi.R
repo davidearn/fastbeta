@@ -232,7 +232,7 @@ function (object, name = "Y", tol = 1e-6, ...)
 {
 	stopifnot(attr(object, "eps") == 0,
 	          is.character(name), length(name) == 1L,
-	          name %in% colnames(object), name != "S",
+	          name %in% colnames(object),
 	          is.double(tol), length(tol) == 1L, tol > 0)
 	ans <- c(NaN, NaN)
 	nms <- colnames(object)
