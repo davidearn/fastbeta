@@ -201,7 +201,7 @@ function (from = 0, to = from + 1, by = 1,
 			           rowSums(a.4 * f * I) * h,
 			           rowSums(a.4 * ff * I) * (h - a.5/f) +
                            rowSums(a.4 * f * I) * (hh * (a.6 * (1 - drop(S)) - rowSums(a.4 * f * I) * h) + a.5 * ff/f/f) +
-                           rowSums(a.4 * f * cbind(rowSums(a.4 * f * I) * h - a.3 * I[, 1L], a.1 * I[, j.1] - a.2 * I[, j.2], deparse.level = 0L)) * (h - a.5/f),
+                           rowSums(a.4 * f * cbind(rowSums(a.4 * f * I) * h - a.3 * I[, 1L], a.1 * I[, j.1, drop = FALSE] - a.2 * I[, j.2, drop = FALSE], deparse.level = 0L)) * (h - a.5/f),
 			           deparse.level = 0L)
 			dimnames(y) <- list(NULL, c("S", "I", "Y", "I.E", "I.I", "foi", "inc", "crv"))
 		} else {
