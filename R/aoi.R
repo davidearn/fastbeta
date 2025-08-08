@@ -7,7 +7,7 @@ function (from = 0, to = from + 1, by = 1,
           F = function (x) 1, Fargs = list(),
           H = identity, Hargs = list(),
           root = NULL, root.max = 1L, root.break = TRUE,
-          aggregate = FALSE, ...)
+          aggregate = FALSE, skip.Y = FALSE, ...)
 {
 	tau <- seq.int(from = from, to = to, by = by)
 	stopifnot(requireNamespace("deSolve"),
@@ -38,7 +38,7 @@ function (from = 0, to = from + 1, by = 1,
 	if (!is.null(root))
 	stopifnot(is.function(root),
 	          !is.null(formals(root)),
-	          all(names(formals(root)) %in% c("tau", "S", "I", "Y", "dS", "dI", "dY", "R0", "ell")),
+	          all(names(formals(root)) %in% c("tau", "S", "I", if (!skip.Y) "Y", "dS", "dI", if (!skip.Y) "dY", "R0", "ell")),
 	          is.integer(root.max), length(root.max) == 1L, root.max >= 1L)
 
 	F. <- as.function(c(alist(. =), list(as.call(c(expression(F, .), Fargs)))))
@@ -56,7 +56,7 @@ function (from = 0, to = from + 1, by = 1,
 
 	i.S <- 1L
 	i.I <- (1L + 1L):(1L + n)
-	i.Y <- d <- 1L + n + 1L
+	i.Y <- 1L + n + 1L
 
 	j.1 <- seq.int(from = 1L, length.out = n - 1L)
 	j.2 <- seq.int(from = 2L, length.out = n - 1L)
@@ -75,6 +75,7 @@ function (from = 0, to = from + 1, by = 1,
 	##
 	## where log(.) is suppressed only for pretty printing
 
+	d <- if (skip.Y) 1L + n else 1L + n + 1L
 	D <- matrix(0, d, d)
 	k.1 <- seq.int(from = d + i.I[1L] + 1L, by = d + 1L,
 	               length.out = n - 1L)
@@ -150,6 +151,23 @@ function (from = 0, to = from + 1, by = 1,
 		body(Rg)[[7L]] <- call[c(1L, match(names(formals(root)), names(call), 0L))]
 	}
 
+	if (skip.Y) {
+		init <- init[-i.Y]
+		D <- D[-i.Y, -i.Y, drop = FALSE]
+
+		b <- body(gg)
+		b[[4L]] <- b[[9L]] <- b[[c(10L, 2L, 5L)]] <- NULL
+		body(gg) <- b
+
+		b <- body(Dg)
+		b[[4L]] <- b[[10L]] <- b[[14L]] <- NULL
+		body(Dg) <- b
+
+		b <- body(Rg)
+		b[[4L]] <- NULL
+		body(Rg) <- b
+	}
+
 	x <- deSolve::lsoda(y = init,
 	                    times = tau,
 	                    func = gg,
@@ -187,6 +205,7 @@ function (from = 0, to = from + 1, by = 1,
 	{
 		S <-     y[, i.S, drop = FALSE]
 		I <- exp(y[, i.I, drop = FALSE])
+		if (!skip.Y)
 		Y <- exp(y[, i.Y, drop = FALSE])
 		if (aggregate) {
 			m <- nrow(y)
@@ -194,7 +213,7 @@ function (from = 0, to = from + 1, by = 1,
 			a.1 <- rep(a.1, each = m)
 			a.2 <- rep(a.2, each = m)
 			a.4 <- rep(a.4, each = m)
-			y <- cbind(S, rowSums(I), Y,
+			y <- cbind(S, rowSums(I), if (!skip.Y) Y,
 			           rowSums(I[, R0 == 0, drop = FALSE]),
 			           rowSums(I[, R0 >  0, drop = FALSE]),
 			           rowSums(a.4 * f * I),
@@ -203,10 +222,10 @@ function (from = 0, to = from + 1, by = 1,
                            rowSums(a.4 * f * I) * (hh * (a.6 * (1 - drop(S)) - rowSums(a.4 * f * I) * h) + a.5 * ff/f/f) +
                            rowSums(a.4 * f * cbind(rowSums(a.4 * f * I) * h - a.3 * I[, 1L], a.1 * I[, j.1, drop = FALSE] - a.2 * I[, j.2, drop = FALSE], deparse.level = 0L)) * (h - a.5/f),
 			           deparse.level = 0L)
-			dimnames(y) <- list(NULL, c("S", "I", "Y", "I.E", "I.I", "foi", "inc", "crv"))
+			dimnames(y) <- list(NULL, c("S", "I", if (!skip.Y) "Y", "I.E", "I.I", "foi", "inc", "crv"))
 		} else {
-			y <- cbind(S, I, Y, deparse.level = 0L)
-			dimnames(y) <- list(NULL, rep(c("S", "I", "Y"), c(1L, n, 1L)))
+			y <- cbind(S, I, if (!skip.Y) Y, deparse.level = 0L)
+			dimnames(y) <- list(NULL, rep(c("S", "I", if (!skip.Y) "Y"), c(1L, n, if (!skip.Y) 1L)))
 		}
 		list(tau = t, state = y)
 	}
@@ -219,7 +238,7 @@ function (from = 0, to = from + 1, by = 1,
 		if (status == 3L)
 			common(last[, 1L], last[, -1L, drop = FALSE])
 		else if (is.null(ax[["nroot"]]))
-			common(double(0L), matrix(0, 0L, 1L + n + 1L))
+			common(double(0L), matrix(0, 0L, d))
 		else
 			common(ax[["troot"]], t(ax[["valroot"]]))
 	}
