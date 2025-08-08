@@ -40,7 +40,7 @@
 \title{News for \R{} Package \pkg{fastbeta}}
 \newcommand{\GH}{\href{https://github.com/davidearn/fastbeta/issues/#1}{GH##1}}
 
-\section{Changes in version 0.5.0 (2025-07-10)}{
+\section{Changes in version 0.5.0 (2025-08-08)}{
   \subsection{Significant User-Visible Changes}{
     \itemize{
       \item \code{sir.aoi(\dots, root = \var{function})} is a multiple
@@ -70,7 +70,7 @@
     \itemize{
       \item \code{sir.aoi(\dots, aggregate = TRUE)} has additional
       columns storing the force of infection, incidence, and the
-      curvature of \code{Y}.
+      curvature of \eqn{Y}.
 
       \item \code{sir.aoi} accepts new argument \code{eps} in order to
       support equations with equal, nonzero rates of birth and death.
@@ -87,6 +87,9 @@
       sought and indicate whether the solver should stop once that
       number of roots is reached.  The default behaviour is to stop once
       one root is found and agrees with the previous behaviour.
+
+      \item \code{sir.aoi} accepts new argument \code{skip.Y} indicating
+      if solution of the equation for \eqn{Y} should not be attempted.
 
       \item The method for generic function \code{summary} and class
       \code{sir.aoi} accepts new argument \code{name}, enabling

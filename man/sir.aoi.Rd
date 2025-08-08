@@ -15,7 +15,7 @@ sir.aoi(from = 0, to = from + 1, by = 1,
         F = function (x) 1, Fargs = list(),
         H = identity, Hargs = list(),
         root = NULL, root.max = 1L, root.break = TRUE,
-        aggregate = FALSE, \dots)
+        aggregate = FALSE, skip.Y = FALSE, \dots)
 
 \method{summary}{sir.aoi}(object, name = "Y", tol = 1e-6, \dots)
 }
@@ -81,6 +81,10 @@ sir.aoi(from = 0, to = from + 1, by = 1,
   at the last time point less than or equal to the last root.}
 \item{aggregate}{
   a logical indicating if infected compartments should be aggregated.}
+\item{skip.Y}{
+  a logical indicating if solution of the equation for \eqn{Y} should
+  not be attempted, e.g., because that equation seems stiffer than the
+  rest.}
 \item{\dots}{
   optional arguments passed to the solver, function \code{lsoda} in
   package \pkg{deSolve}.}
