@@ -123,7 +123,8 @@ stopifnot(D2[["iter"]] == r,
 ## Subscript for the first, critical, and last values:
 j2 <- c(1L, which.max(D2[["chisq"]] < 1), 1L + r)
 
-matplot(x = seq(to = influenza[n, "date"], by = 1, length.out = d + n),
+matplot(x = seq(from = influenza[n, "date"] - (d + n - 1L),
+                by = 1, length.out = d + n),
         y = cbind(c(rep(NA, d), x), D2[["value"]][, j2]),
         type = "o",
         col = c(1L, 4L, 2L, 3L), pch = 1L, lty = 1L, lwd = 1,
