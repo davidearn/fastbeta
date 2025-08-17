@@ -23,7 +23,8 @@ A named list with 2 components, \code{series} and \code{delay}.
 \item{nday}{
   number of days from infection to death.}
 \item{goldstein, gpg}{
-  probabilities, not summing to 1; see \sQuote{Source}.}
+  probabilities, not summing to 1 due to rounding and truncation; see
+  \sQuote{Source}.}
 }
 }
 \source{
@@ -77,8 +78,11 @@ library(   utils, pos = "package:base", verbose = FALSE)
 data(pneumonia, package = "fastbeta")
 str(pneumonia)
 
-plot(deaths ~ date, pneumonia$series)
-plot(goldstein ~ nday, pneumonia$delay)
-lines(gpg ~ nday, pneumonia$delay, lty = 2L)
+plot(deaths ~ date, pneumonia$series, xlab = "1918")
+
+plot(goldstein/sum(goldstein) ~ nday, pneumonia$delay, type = "o",
+     lty = 2, pch = 1, xlab = "days", ylab = "probability")
+lines(gpg/sum(gpg) ~ nday, pneumonia$delay, type = "o",
+      lty = 1, pch = 16)
 }
 \docType{data}
