@@ -40,7 +40,7 @@
 \title{News for \R{} Package \pkg{fastbeta}}
 \newcommand{\GH}{\href{https://github.com/davidearn/fastbeta/issues/#1}{GH##1}}
 
-\section{Changes in version 0.5.0 (2025-08-08)}{
+\section{Changes in version 0.5.0 (2025-08-17)}{
   \subsection{Significant User-Visible Changes}{
     \itemize{
       \item \code{sir.aoi(\dots, root = \var{function})} is a multiple
@@ -97,7 +97,7 @@
 
       \item Function \code{cbind.ts} for working around \PR{18583}.
 
-      \item New data set \code{influenza}, used in an example of
+      \item New data set \code{pneumonia}, used in an example of
       \code{deconvolve} usage.
     }
   }

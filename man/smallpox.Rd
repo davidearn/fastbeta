@@ -26,12 +26,12 @@ A data frame with 13923 observations of 5 variables:
 }
 }
 \source{
-A precise description of the data set and its correspondence to the
-original source documents is provided in the reference.
-
-A script generating the \code{smallpox} data frame from a CSV file
+A script generating the \code{smallpox} object from a CSV file
 accompanying the reference is available as
 \code{\link{system.file}("scripts", "smallpox.R", package = "fastbeta")}.
+
+A precise description of the data set and its correspondence to the
+original source documents is provided in the reference.
 }
 \references{
 Krylova, O. & Earn, D. J. D. (2020).

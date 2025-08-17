@@ -33,7 +33,8 @@ deconvolve(x, prob = 1, delay = 1,
   left and right with \code{d-d0} and \code{d0} zeros, choosing
   \code{d0 = which.max(delay)-1}.}
 \item{tol}{
-  a tolerance indicating a stopping condition; see the reference.}
+  a tolerance indicating a stopping condition; see the reference.  Set
+  to 0 if you want to perform no fewer than \code{iter.max} iterations.}
 \item{iter.max}{
   the maximum number of iterations.}
 \item{complete}{
@@ -52,11 +53,10 @@ A list with elements:
 \item{iter}{
   the number of iterations performed.}
 }
-%\details{}
 %\seealso{}
 \references{
 Goldstein, E., Dushoff, J., Ma, J., Plotkin, J. B., Earn, D. J. D.,
-& Lipsitch, M. (2020).
+& Lipsitch, M. (2009).
 Reconstructing influenza incidence by deconvolution of daily mortality
 time series.
 \emph{Proceedings of the National Academy of Sciences U. S. A.},
@@ -70,12 +70,16 @@ library(   stats, pos = "package:base", verbose = FALSE)
 library(graphics, pos = "package:base", verbose = FALSE)
 library(   utils, pos = "package:base", verbose = FALSE)
 }
+##
+## Example 1: simulation
+##
+
 set.seed(2L)
 n <- 200L
 d <- 50L
 p <- 0.1
 prob <- plogis(rlogis(d + n, location = qlogis(p), scale = 0.1))
-delay <- diff(pgamma(0L:(d + 1L), 12, 0.4))
+delay <- c(0, diff(pgamma(0L:d, 12, 0.4)))
 
 h <- function (x, a = 1, b = 1, c = 0) a * exp(-b * (x - c)^2)
 ans <- floor(h(seq(-60, 60, length.out = d + n), a = 1000, b = 0.001))
@@ -100,21 +104,25 @@ legend("topleft", NULL,
        lty = c(0L, 0L, 0L, 1L), lwd = c(NA, NA, NA, 3),
        bty = "n")
 
-plot(0L:D1[["iter"]], D1[["chisq"]], xlab = "Iterations", ylab = quote(chi^2))
+plot(0L:D1[["iter"]], D1[["chisq"]],
+     xlab = "iterations", ylab = quote(chi^2))
 abline(h = 1, lty = 2L)
 
-data(influenza, package = "fastbeta")
-x <- influenza[["deaths"]]
-n <- nrow(influenza)
-d <- 31L
+
+##
+## Example 2: application to pneumonia and influenza
+##
+
+data(pneumonia, package = "fastbeta")
+x <- pneumonia[["series"]][["deaths"]]
+delay <- pneumonia[["delay"]][["gpg"]]
+
+n <- length(x)
+d <- length(delay) - 1L
 r <- 30L
 
-D2 <- deconvolve(x = x,
-                 delay = diff(pgamma(0L:(d + 1L), 5.5, 0.5)),
-                 tol = 0, iter.max = r, complete = TRUE)
-##               ^^^^^^^
-## if you want exactly (never fewer than) 'iter.max' iterations
-##
+D2 <- deconvolve(x = x, delay = delay, tol = 0, iter.max = r,
+                 complete = TRUE)
 stopifnot(D2[["iter"]] == r,
           identical(dim(D2[["value"]]), c(d + n, 1L + r)),
           length(D2[["chisq"]]) == 1L + r,
@@ -123,7 +131,7 @@ stopifnot(D2[["iter"]] == r,
 ## Subscript for the first, critical, and last values:
 j2 <- c(1L, which.max(D2[["chisq"]] < 1), 1L + r)
 
-matplot(x = seq(from = influenza[n, "date"] - (d + n - 1L),
+matplot(x = seq(from = pneumonia[["series"]][1L, "date"] - d,
                 by = 1, length.out = d + n),
         y = cbind(c(rep(NA, d), x), D2[["value"]][, j2]),
         type = "o",
