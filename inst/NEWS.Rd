@@ -1,46 +1,7 @@
-%% \section{Changes in version x.y.z (yyyy-mm-dd)}{
-%%   \subsection{Significant User-Visible Changes}{
-%%     \itemize{
-%%       \item .
-%%     }
-%%   }
-%%   \subsection{Deprecated and Defunct}{
-%%     \itemize{
-%%       \item .
-%%     }
-%%   }
-%%   \subsection{Bug Fixes}{
-%%     \itemize{
-%%       \item .
-%%     }
-%%   }
-%%   \subsection{New Features}{
-%%     \itemize{
-%%       \item .
-%%     }
-%%   }
-%%   \subsection{Installation}{
-%%     \itemize{
-%%       \item .
-%%     }
-%%   }
-%%   \subsection{Documentation}{
-%%     \itemize{
-%%       \item .
-%%     }
-%%   }
-%%   \subsection{Internals}{
-%%     \itemize{
-%%       \item .
-%%     }
-%%   }
-%% }
-
 \name{NEWS}
 \title{News for \R{} Package \pkg{fastbeta}}
 \newcommand{\GH}{\href{https://github.com/davidearn/fastbeta/issues/#1}{GH##1}}
-
-\section{Changes in version 0.5.0 (2025-08-21)}{
+\section{Changes in version 0.5.0 (2025-10-15)}{
   \subsection{Significant User-Visible Changes}{
     \itemize{
       \item \code{sir.aoi(\dots, root = \var{function})} is a multiple
@@ -53,11 +14,6 @@
       \item \code{sir.aoi(\dots, root = \var{function})} no longer has
       an attribute \code{curvature} storing the curvature of \code{Y} at
       the root.
-    }
-  }
-  \subsection{Deprecated and Defunct}{
-    \itemize{
-      \item .
     }
   }
   \subsection{Bug Fixes}{
@@ -105,23 +61,7 @@
       \code{deconvolve} usage.
     }
   }
-  \subsection{Installation}{
-    \itemize{
-      \item .
-    }
-  }
-  \subsection{Documentation}{
-    \itemize{
-      \item .
-    }
-  }
-  \subsection{Internals}{
-    \itemize{
-      \item .
-    }
-  }
 }
-
 \section{Changes in version 0.4.0 (2025-04-28)}{
   \subsection{Deprecated and Defunct}{
     \itemize{
@@ -139,7 +79,6 @@
     }
   }
 }
-
 \section{Changes in version 0.3.2 (2025-03-23)}{
   \subsection{New Features}{
     \itemize{
@@ -155,7 +94,6 @@
     }
   }
 }
-
 \section{Changes in version 0.3.1 (2024-11-22)}{
   \subsection{Significant User-Visible Changes}{
     \itemize{
@@ -208,7 +146,6 @@
     }
   }
 }
-
 \section{Changes in version 0.3.0 (2024-05-17)}{
   \subsection{Significant User-Visible Changes}{
     \itemize{
@@ -260,7 +197,6 @@
     }
   }
 }
-
 \section{Changes in version 0.2.0 (2023-12-11)}{
   \subsection{Significant User-Visible Changes}{
     \itemize{
@@ -308,7 +244,6 @@
     }
   }
 }
-
 \section{Changes in version 0.1.1 (2023-11-28)}{
   \subsection{Bug Fixes}{
     \itemize{
@@ -335,3 +270,41 @@
     }
   }
 }
+
+%% \section{Changes in version x.y.z (yyyy-mm-dd)}{
+%%   \subsection{Significant User-Visible Changes}{
+%%     \itemize{
+%%       \item .
+%%     }
+%%   }
+%%   \subsection{Deprecated and Defunct}{
+%%     \itemize{
+%%       \item .
+%%     }
+%%   }
+%%   \subsection{Bug Fixes}{
+%%     \itemize{
+%%       \item .
+%%     }
+%%   }
+%%   \subsection{New Features}{
+%%     \itemize{
+%%       \item .
+%%     }
+%%   }
+%%   \subsection{Installation}{
+%%     \itemize{
+%%       \item .
+%%     }
+%%   }
+%%   \subsection{Documentation}{
+%%     \itemize{
+%%       \item .
+%%     }
+%%   }
+%%   \subsection{Internals}{
+%%     \itemize{
+%%       \item .
+%%     }
+%%   }
+%% }
