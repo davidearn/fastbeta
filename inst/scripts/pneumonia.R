@@ -1,3 +1,39 @@
+convolveGamma <-
+function (x, shape, scale, tol = 1e-6, max.terms = 1024L,
+          prec = 1024L, verbose = getOption("verbose")) {
+    ## https://doi.org/10.1007/BF02481123
+    loinga <- flint::arb_hypgeom_gamma_lower # [lo]wer [in]complete [ga]mma
+    K <- as.integer(max.terms)
+    if (K < 1L)
+        return(double(length(x)))
+    n <- max(length(shape), length(scale))
+    alpha <- rep_len(shape, n)
+    beta  <- rep_len(scale, n)
+    o <- order(beta)
+    alpha <- alpha[o]
+    beta  <- beta [o]
+    x <- x/beta[1L]
+    C <- prod((beta[1L]/beta)^alpha)
+    gamma. <- colSums(matrix(alpha * (1 - beta[1L]/beta)^rep(seq_len(K - 1L), each = n), nrow = n))
+    rho <- sum(alpha)
+    delta <- double(K)
+    ans <- (ans. <- double(length(x))) +
+        (delta[1L] <- 1) *
+        as.double(loinga(rho, x, 1L, prec))
+    k <- 1L
+    while (k < K && any(abs(ans - ans.) > tol * abs(ans.))) {
+        ans <- (ans. <- ans) +
+            (delta[k + 1L] <- sum(gamma.[1L:k] * delta[k:1L])/k) *
+            as.double(loinga(rho + k, x, 1L, prec))
+        k <- k + 1L
+        if (verbose)
+            cat(sprintf("delta %.4e with term %d\n",
+                        max(abs((ans - ans.)/ans.)[ans. > 0]), k))
+    }
+    `attr<-`(`attr<-`(C * ans, "terms", k),
+             "delta", max(abs((ans - ans.)/ans.)[ans. > 0]))
+}
+
 optimShapeScale <-
 function (F, L) {
     n <- diff(L$y)
@@ -21,8 +57,10 @@ function (F, L) {
           function (x, y, ...) {
               s <- seq(from = min(x$L$x), to = max(x$L$x),
                        length.out = 256L)
-              plot(s, poss(s, x), type = "l",
-                   xlab = x$xlab, ylab = x$ylab, ...)
+              t <- x$F(s,
+                       shape = exp(x$M$par[[1L]]),
+                       scale = exp(x$M$par[[2L]]))
+              plot(s, t, type = "l", xlab = x$xlab, ylab = x$ylab, ...)
               points(x$L$x, x$L$y/max(x$L$y))
               invisible(NULL)
           })
@@ -33,9 +71,6 @@ function (F, L) {
               invisible(x)
           })
 
-poss <-
-function (x, oss)
-    oss$F(x, shape = exp(oss$M$par[[1L]]), scale = exp(oss$M$par[[2L]]))
 
 ## Time from infection to symptom onset
 ## https://doi.org/10.1093/oxfordjournals.aje.a112781
@@ -74,17 +109,22 @@ L3$y <- round(L3$y, digits = 4L)
 
 d <- 255L; tt <- 0L:d; tttt <- 0L:(d + d)
 
-pG1 <- c(0, diff(poss(tt, G1)))
-pG2 <- c(0, diff(poss(tt, G2)))
+cG <- convolveGamma(tt,
+                    shape = exp(c(G1$M$par[[1L]],
+                                  G2$M$par[[1L]])),
+                    scale = exp(c(G1$M$par[[2L]],
+                                  G2$M$par[[2L]])),
+                    verbose = TRUE)
+pG1G2 <- zapsmall(c(0, diff(cG)))
+
 pW1 <- c(0, diff(pweibull(tt - 0.5, shape = 2.21 + 1, scale = 1.10)))
 pN2 <- c(0, diff(L2$y/max(L2$y)), double(1L + d - nrow(L2)))
-pG1G2 <- zapsmall(convolve(pG1, rev(pG2), type = "open"))
 pW1N2 <- zapsmall(convolve(pW1, rev(pN2), type = "open"))
 
 plot(0, 0, type = "n",
      xlim = c(0, 64), ylim = c(0, 0.12),
      xlab = "days", ylab = "probability")
-lines(tttt, pG1G2, col = 1, lwd = 6)
+lines(  tt, pG1G2, col = 1, lwd = 6)
 lines(tttt, pW1N2, col = 2, lwd = 6)
 lines(L3$x,  L3$y, col = 3, lwd = 6)
 
@@ -93,7 +133,7 @@ series <- read.csv("pneumonia.csv",
 series$date <- `storage.mode<-`(as.Date(series$date), "integer")
 series
 
-d <- max(which(pG1G2 > 0)) - 1L
+d <- max(which(pG1G2 > 0), nrow(L3)) - 1L
 delay <- data.frame(nday = .difftime(0:d, "days"),
                     goldstein = c(L3$y, double(1L + d - nrow(L3))),
                     gpg = pG1G2[seq_len(1L + d)])
@@ -101,36 +141,3 @@ delay
 
 pneumonia <- list(series = series, delay = delay)
 save(pneumonia, file = "pneumonia.rda", version = 3L, compress = "xz")
-
-convolveGamma <-
-function (x, shape, scale, tol = 1e-6, max.terms = 1024L) {
-    ## https://doi.org/10.1007/BF02481123
-    ## MJ: not working (hence not used) yet
-    ## MJ: trying to use paper's notation
-    loinga <- flint::arb_hypgeom_gamma_lower
-    K <- as.integer(max.terms)
-    if (K < 1L)
-        return(double(length(x)))
-    alpha <- rep_len(shape, 2L)
-    beta  <- rep_len(scale, 2L)
-    if (beta[2L] < beta[1L]) {
-        alpha <- alpha[2L:1L]
-        beta  <- beta [2L:1L]
-    }
-    x <- x/beta[1L]
-    C <- (beta[1L]/beta[2L])^alpha[2L]
-    gamma. <- alpha[2L] * (1 - beta[1L]/beta[2L])^seq_len(K - 1L)
-    rho <- sum(alpha)
-    delta <- double(K)
-    ans <- (ans. <- 0) +
-        (delta[1L] <- 1) *
-        as.double(loinga(rho, x, 1L, 53L))
-    k <- 1L
-    while (k < K && any(abs(ans - ans.) >= tol * abs(ans.))) {
-        ans <- (ans. <- ans) +
-            (delta[k + 1L] <- sum(gamma.[1L:k] * delta[k:1L])/k) *
-            as.double(loinga(rho + k, x, 1L, 53L))
-        k <- k + 1L
-    }
-    C * ans
-}
