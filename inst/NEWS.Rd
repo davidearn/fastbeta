@@ -2,22 +2,12 @@
 \title{News for \R{} Package \pkg{fastbeta}}
 \newcommand{\GH}{\href{https://github.com/davidearn/fastbeta/issues/#1}{GH##1}}
 \section{Changes in version 0.5.1 (2025-10-15)}{
-  \subsection{Significant User-Visible Changes}{
+  \subsection{Description}{
     \itemize{
       \item .
     }
   }
-  \subsection{Deprecated and Defunct}{
-    \itemize{
-      \item .
-    }
-  }
-  \subsection{Bug Fixes}{
-    \itemize{
-      \item .
-    }
-  }
-  \subsection{New Features}{
+  \subsection{Compatibility}{
     \itemize{
       \item .
     }
@@ -28,6 +18,41 @@
     }
   }
   \subsection{Documentation}{
+    \itemize{
+      \item .
+    }
+  }
+  \subsection{Significant User-Visible Changes}{
+    \itemize{
+      \item .
+    }
+  }
+  \subsection{Deprecated and Defunct}{
+    \itemize{
+      \item .
+    }
+  }
+  \subsection{Classes}{
+    \itemize{
+      \item .
+    }
+  }
+  \subsection{Generic Functions}{
+    \itemize{
+      \item .
+    }
+  }
+  \subsection{Methods}{
+    \itemize{
+      \item .
+    }
+  }
+  \subsection{New Features}{
+    \itemize{
+      \item .
+    }
+  }
+  \subsection{Bug Fixes}{
     \itemize{
       \item .
     }
@@ -51,12 +76,6 @@
       \item \code{sir.aoi(\dots, root = \var{function})} no longer has
       an attribute \code{curvature} storing the curvature of \code{Y} at
       the root.
-    }
-  }
-  \subsection{Bug Fixes}{
-    \itemize{
-      \item The expression for \eqn{\text{d}Y/\text{d}\tau}{dY/dtau}
-      used by \code{sir.aoi} was wrong.
     }
   }
   \subsection{New Features}{
@@ -98,6 +117,12 @@
       \code{deconvolve} usage.
     }
   }
+  \subsection{Bug Fixes}{
+    \itemize{
+      \item The expression for \eqn{\text{d}Y/\text{d}\tau}{dY/dtau}
+      used by \code{sir.aoi} was wrong.
+    }
+  }
 }
 \section{Changes in version 0.4.0 (2025-04-28)}{
   \subsection{Deprecated and Defunct}{
@@ -132,6 +157,12 @@
   }
 }
 \section{Changes in version 0.3.1 (2024-11-22)}{
+  \subsection{Installation}{
+    \itemize{
+      \item Compilation uses \option{-DSTRICT_R_HEADERS} and
+      \option{-DR_NO_REMAP}.
+    }
+  }
   \subsection{Significant User-Visible Changes}{
     \itemize{
       \item Formal argument \code{init} of \code{fastbeta},
@@ -142,20 +173,6 @@
       \code{fastbeta}, \code{fastbeta.bootstrap}, \code{ptpi}, and
       \code{seir} have constant default values (\code{sigma = 1},
       \code{m = 1L}) not depending on the values of other arguments.
-    }
-  }
-  \subsection{Bug Fixes}{
-    \itemize{
-      \item Entry \code{[2, 2]} of the Jacobian matrix constructed by
-      \code{seir(stochastic = FALSE, useCompiled = FALSE)} was wrong.
-
-      \item \code{seir} handles more comprehensively the situation in
-      which the number of rows of the matrix returned by \pkg{deSolve}
-      function \code{lsoda} is less than \code{length.out}.  It now
-      distinguishes termination due to found roots from termination due
-      to an unsuccessful solver call.
-
-      \item Warnings caught by \option{-Wconversion} are squashed.
     }
   }
   \subsection{New Features}{
@@ -176,14 +193,30 @@
       coefficient matrix.
     }
   }
-  \subsection{Installation}{
+  \subsection{Bug Fixes}{
     \itemize{
-      \item Compilation now uses \option{-DSTRICT_R_HEADERS} and
-      \option{-DR_NO_REMAP}.
+      \item Entry \code{[2, 2]} of the Jacobian matrix constructed by
+      \code{seir(stochastic = FALSE, useCompiled = FALSE)} was wrong.
+
+      \item \code{seir} handles more comprehensively the situation in
+      which the number of rows of the matrix returned by \pkg{deSolve}
+      function \code{lsoda} is less than \code{length.out}.  It now
+      distinguishes termination due to found roots from termination due
+      to an unsuccessful solver call.
+
+      \item Warnings caught by \option{-Wconversion} are squashed.
     }
   }
 }
 \section{Changes in version 0.3.0 (2024-05-17)}{
+  \subsection{Installation}{
+    \itemize{
+      \item \code{Suggests: adaptivetau, deSolve} rather than
+      \code{Imports: adaptivetau, deSolve} as those packages are needed
+      only for simulation.  Usage of simulated data sets is now
+      everywhere conditional on successful loading of the dependency.
+    }
+  }
   \subsection{Significant User-Visible Changes}{
     \itemize{
       \item Argument \code{constants} of functions \code{sir},
@@ -206,6 +239,14 @@
       the API of \code{seir}.
     }
   }
+  \subsection{New Features}{
+    \itemize{
+      \item Compartmental model is generalized to support multiple
+      infected compartments, \eqn{m} latent and \eqn{n} infectious,
+      resulting in several backwards incompatible changes to the API;
+      see above.
+    }
+  }
   \subsection{Bug Fixes}{
     \itemize{
       \item More simulations set \code{tl.params = list(epsilon = .)}
@@ -217,24 +258,16 @@
       to avoid \dQuote{incremental} graphical output on some devices.
     }
   }
-  \subsection{New Features}{
-    \itemize{
-      \item Compartmental model is generalized to support multiple
-      infected compartments, \eqn{m} latent and \eqn{n} infectious,
-      resulting in several backwards incompatible changes to the API;
-      see below.
-    }
-  }
-  \subsection{Installation}{
-    \itemize{
-      \item \pkg{adaptivetau} and \pkg{deSolve} are now suggested,
-      not imported, as they are needed only for simulation.
-      Usage of simulated data sets is now everywhere conditional on
-      successful loading of the dependency.
-    }
-  }
 }
 \section{Changes in version 0.2.0 (2023-12-11)}{
+  \subsection{Installation}{
+    \itemize{
+      \item \file{data/*.R} are no longer copied to \file{inst/scripts}
+      at install time by a \command{make} rule in \file{src/Makevars}.
+      There is no need: the scripts are preserved due to the setting of
+      \code{BuildResaveData: no}.  Hence \file{src/Makevars} is removed.
+    }
+  }
   \subsection{Significant User-Visible Changes}{
     \itemize{
       \item \code{sir}
@@ -272,59 +305,44 @@
       incompatible changes to the API; see below.
     }
   }
-  \subsection{Installation}{
-    \itemize{
-      \item \file{data/*.R} are no longer copied to \file{inst/scripts}
-      at install time by a \command{make} rule in \file{src/Makevars}.
-      There is no need: the scripts are preserved due to the setting of
-      \code{BuildResaveData: no}.  Hence \file{src/Makevars} is removed.
-    }
-  }
 }
 \section{Changes in version 0.1.1 (2023-11-28)}{
-  \subsection{Bug Fixes}{
+  \subsection{Description}{
     \itemize{
-      \item Typo in \file{src/sir.c} triggering \option{-Wformat}
-      is fixed.
-    }
-  }
-  \subsection{New Features}{
-    \itemize{
-      \item Changes are logged in \file{inst/NEWS.Rd}.
+      \item \code{Depends: R (>= 4.3.0)} for \verb{amsmath} in PDF
+      output, which was not supported until 4.2.2.
 
-      \item \file{DESCRIPTION} sets \code{BuildResaveData: no},
-      so that \command{R CMD build} works without
-      \option{--no-resave-data} when \pkg{fastbeta} is not installed.
+      \item \code{BuildResaveData: no} so that \command{R CMD build}
+      works without \option{--no-resave-data} when \pkg{fastbeta} is not
+      installed.
     }
   }
   \subsection{Installation}{
     \itemize{
       \item \file{data/*.R} are copied into \file{inst/scripts}
       at install time by a \command{make} rule in \file{src/Makevars}.
-
-      \item \code{Depends: R (>= 4.3.0)} for \verb{amsmath} in PDF
-      output, which was not supported until 4.2.2.
+    }
+  }
+  \subsection{Documentation}{
+    \itemize{
+      \item Changes are logged in \file{inst/NEWS.Rd}.
+    }
+  }
+  \subsection{Bug Fixes}{
+    \itemize{
+      \item Typo in \file{src/sir.c} triggering \option{-Wformat}
+      is fixed.
     }
   }
 }
 
 %% \section{Changes in version x.y.z (yyyy-mm-dd)}{
-%%   \subsection{Significant User-Visible Changes}{
+%%   \subsection{Description}{
 %%     \itemize{
 %%       \item .
 %%     }
 %%   }
-%%   \subsection{Deprecated and Defunct}{
-%%     \itemize{
-%%       \item .
-%%     }
-%%   }
-%%   \subsection{Bug Fixes}{
-%%     \itemize{
-%%       \item .
-%%     }
-%%   }
-%%   \subsection{New Features}{
+%%   \subsection{Compatibility}{
 %%     \itemize{
 %%       \item .
 %%     }
@@ -335,6 +353,26 @@
 %%     }
 %%   }
 %%   \subsection{Documentation}{
+%%     \itemize{
+%%       \item .
+%%     }
+%%   }
+%%   \subsection{Significant User-Visible Changes}{
+%%     \itemize{
+%%       \item .
+%%     }
+%%   }
+%%   \subsection{Deprecated and Defunct}{
+%%     \itemize{
+%%       \item .
+%%     }
+%%   }
+%%   \subsection{New Features}{
+%%     \itemize{
+%%       \item .
+%%     }
+%%   }
+%%   \subsection{Bug Fixes}{
 %%     \itemize{
 %%       \item .
 %%     }
