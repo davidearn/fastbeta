@@ -4,7 +4,7 @@
 \section{Changes in version 0.5.1 (2025-10-15)}{
   \subsection{Description}{
     \itemize{
-      \item .
+      \item David Earn is a contributor.
     }
   }
   \subsection{Compatibility}{
