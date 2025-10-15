@@ -1,6 +1,43 @@
 \name{NEWS}
 \title{News for \R{} Package \pkg{fastbeta}}
 \newcommand{\GH}{\href{https://github.com/davidearn/fastbeta/issues/#1}{GH##1}}
+\section{Changes in version 0.5.1 (2025-10-15)}{
+  \subsection{Significant User-Visible Changes}{
+    \itemize{
+      \item .
+    }
+  }
+  \subsection{Deprecated and Defunct}{
+    \itemize{
+      \item .
+    }
+  }
+  \subsection{Bug Fixes}{
+    \itemize{
+      \item .
+    }
+  }
+  \subsection{New Features}{
+    \itemize{
+      \item .
+    }
+  }
+  \subsection{Installation}{
+    \itemize{
+      \item .
+    }
+  }
+  \subsection{Documentation}{
+    \itemize{
+      \item .
+    }
+  }
+  \subsection{Internals}{
+    \itemize{
+      \item .
+    }
+  }
+}
 \section{Changes in version 0.5.0 (2025-10-15)}{
   \subsection{Significant User-Visible Changes}{
     \itemize{
