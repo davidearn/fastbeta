@@ -1,10 +1,22 @@
 useDynLib(fastbeta, .registration = TRUE)
-export(deconvolve, fastbeta, fastbeta.bootstrap, fastbeta.matrix, ptpi,
-       seir, seir.R0, seir.ee, seir.jacobian, sir, sir.aoi)
-S3method(plot, fastbeta.bootstrap)
-S3method(summary, sir.aoi)
+
 importFrom(grDevices, dev.flush, dev.hold)
 importFrom(graphics, lines, par, polygon)
 importFrom(stats, approxfun, filter, is.mts, plot.ts, quantile, rbinom,
            time, ts, tsp, "tsp<-")
-export(cbind.ts)
+
+export(cbind.ts,
+       deconvolve,
+       fastbeta,
+       fastbeta.bootstrap,
+       fastbeta.matrix,
+       ptpi,
+       seir,
+       seir.R0,
+       seir.ee,
+       seir.jacobian,
+       sir,
+       sir.aoi)
+
+S3method(plot, fastbeta.bootstrap)
+S3method(summary, sir.aoi)
