@@ -6,11 +6,13 @@ function (from = 0, to = from + 1, by = 1,
           weights = rep(c(1, 0), c(1L, n - 1L)),
           F = function (x) 1, Fargs = list(),
           H = identity, Hargs = list(),
+          solver = c("deSolve", "flint"),
           root = NULL, root.max = 1L, root.break = TRUE,
           aggregate = FALSE, skip.Y = FALSE, ...)
 {
 	tau <- seq.int(from = from, to = to, by = by)
-	stopifnot(requireNamespace("deSolve"),
+	stopifnot(requireNamespace(solver <- match.arg(solver)),
+	          solver != "flint" || packageVersion("flint") >= "0.1.3",
 	          length(tau) >= 2L, tau[1L] < tau[2L],
 	          is.integer(n), length(n) == 1L, n >= 1L, n < 4096L,
 	          is.double(R0), length(R0) == 1L || length(R0) == n,
@@ -36,7 +38,8 @@ function (from = 0, to = from + 1, by = 1,
 	          is.list(Hargs),
 	          is.null(names(Hargs)) || !any(names(Hargs) == names(formals(H))[1L]))
 	if (!is.null(root))
-	stopifnot(is.function(root),
+	stopifnot(solver == "deSolve",
+	          is.function(root),
 	          !is.null(formals(root)),
 	          all(names(formals(root)) %in% c("tau", "S", "I", if (!skip.Y) "Y", "dS", "dI", if (!skip.Y) "dY", "R0", "ell")),
 	          is.integer(root.max), length(root.max) == 1L, root.max >= 1L)
@@ -200,6 +203,8 @@ function (from = 0, to = from + 1, by = 1,
 		list(tau = t, state = y)
 	}
 
+	if (solver == "deSolve") {
+
 	x <- deSolve::lsoda(y = init,
 	                    times = tau,
 	                    func = gg,
@@ -233,6 +238,29 @@ function (from = 0, to = from + 1, by = 1,
 		x <- x[x[, 1L] <= ax[["troot"]][root.max], , drop = FALSE]
 
 	cx <- common(x[, 1L], x[, -1L, drop = FALSE])
+
+	} else { # solver == "flint"
+
+	b <- body(gg)
+	b[[length(b)]] <- b[[c(length(b), 1L)]]
+	body(gg) <- b
+
+	a.1 <- flint::arf(a.1)
+	a.2 <- flint::arf(a.2)
+	a.3 <- flint::arf(a.3)
+	a.4 <- flint::arf(a.4)
+	a.5 <- flint::arf(a.5)
+	a.6 <- flint::arf(a.6)
+
+	x <- flint::arf_rk(func = gg,
+	                   t = tau,
+	                   y0 = init,
+	                   ...)
+	x <- lapply(x, flint::asVector, "double", strict = FALSE)
+
+	cx <- common(x[[1L]], x[[2L]])
+
+	}
 
 	ans <- cx[[2L]]
 	tsp(ans) <- c(cx[[1L]][c(1L, length(cx[[1L]]))], 1/by)

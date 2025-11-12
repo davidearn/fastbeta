@@ -4,6 +4,7 @@ importFrom(grDevices, dev.flush, dev.hold)
 importFrom(graphics, lines, par, polygon)
 importFrom(stats, approxfun, filter, is.mts, plot.ts, quantile, rbinom,
            time, ts, tsp, "tsp<-")
+importFrom(utils, packageVersion)
 
 export(cbind.ts,
        deconvolve,

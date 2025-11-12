@@ -1,10 +1,14 @@
 \name{NEWS}
 \title{News for \R{} Package \pkg{fastbeta}}
 \newcommand{\GH}{\href{https://github.com/davidearn/fastbeta/issues/#1}{GH##1}}
-\section{Changes in version 0.5.2 (2025-10-25)}{
+\section{Changes in version 0.5.2 (2025-11-12)}{
   \subsection{Description}{
     \itemize{
-      \item .
+      \item \code{Imports: utils} for function \code{packageVersion}.
+
+      \item \code{Suggests: flint} for class \code{arf}, methods for
+      class \code{arf}, and function \code{arf_rk}, which are used
+      conditionally by \code{sir.aoi(solver = "flint")}.
     }
   }
   \subsection{Compatibility}{
@@ -34,7 +38,11 @@
   }
   \subsection{New Features}{
     \itemize{
-      \item .
+      \item \code{sir.aoi} accepts new argument \code{solver}, allowing
+      the user to request (with \code{solver = "flint"}) that numerical
+      solution of the SIR equations is carried out using an arbitrary
+      precision floating-point type, provided that package \pkg{flint}
+      version 0.1.3 or later can be loaded.
     }
   }
   \subsection{Bug Fixes}{
