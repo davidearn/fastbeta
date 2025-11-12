@@ -146,9 +146,11 @@ function (from = 0, to = from + 1, by = 1,
 		     dY = sum(a.4 * f * I) * (h - a.5/f),
 		     R0 = R0, ell = ell)
 	}
+
 	if (!is.null(root)) {
-		call <- body(Rg)[[7L]]
-		body(Rg)[[7L]] <- call[c(1L, match(names(formals(root)), names(call), 0L))]
+		b <- body(Rg)
+		b[[7L]] <- b[[7L]][c(1L, match(names(formals(root)), names(b[[7L]]), 0L))]
+		body(Rg) <- b
 	}
 
 	if (skip.Y) {
@@ -166,6 +168,36 @@ function (from = 0, to = from + 1, by = 1,
 		b <- body(Rg)
 		b[[4L]] <- NULL
 		body(Rg) <- b
+	}
+
+	common <-
+	function (t, y)
+	{
+		S <-     y[, i.S, drop = FALSE]
+		I <- exp(y[, i.I, drop = FALSE])
+		if (!skip.Y)
+		Y <- exp(y[, i.Y, drop = FALSE])
+		if (aggregate) {
+			m <- nrow(y)
+			f <- F.(t); h <- H.(S); ff <- Fprime.(t); hh <- Hprime.(S)
+			a.1 <- rep(a.1, each = m)
+			a.2 <- rep(a.2, each = m)
+			a.4 <- rep(a.4, each = m)
+			y <- cbind(S, rowSums(I), if (!skip.Y) Y,
+			           rowSums(I[, R0 == 0, drop = FALSE]),
+			           rowSums(I[, R0 >  0, drop = FALSE]),
+			           rowSums(a.4 * f * I),
+			           rowSums(a.4 * f * I) * h,
+			           rowSums(a.4 * ff * I) * (h - a.5/f) +
+			           	rowSums(a.4 * f * I) * (hh * (a.6 * (1 - drop(S)) - rowSums(a.4 * f * I) * h) + a.5 * ff/f/f) +
+			           	rowSums(a.4 * f * cbind(rowSums(a.4 * f * I) * h - a.3 * I[, 1L], a.1 * I[, j.1, drop = FALSE] - a.2 * I[, j.2, drop = FALSE], deparse.level = 0L)) * (h - a.5/f),
+			           deparse.level = 0L)
+			dimnames(y) <- list(NULL, c("S", "I", if (!skip.Y) "Y", "I.E", "I.I", "foi", "inc", "crv"))
+		} else {
+			y <- cbind(S, I, if (!skip.Y) Y, deparse.level = 0L)
+			dimnames(y) <- list(NULL, rep(c("S", "I", if (!skip.Y) "Y"), c(1L, n, if (!skip.Y) 1L)))
+		}
+		list(tau = t, state = y)
 	}
 
 	x <- deSolve::lsoda(y = init,
@@ -200,38 +232,10 @@ function (from = 0, to = from + 1, by = 1,
 	    x[nrow(x), 1L] > ax[["troot"]][root.max])
 		x <- x[x[, 1L] <= ax[["troot"]][root.max], , drop = FALSE]
 
-	common <-
-	function (t, y)
-	{
-		S <-     y[, i.S, drop = FALSE]
-		I <- exp(y[, i.I, drop = FALSE])
-		if (!skip.Y)
-		Y <- exp(y[, i.Y, drop = FALSE])
-		if (aggregate) {
-			m <- nrow(y)
-			f <- F.(t); h <- H.(S); ff <- Fprime.(t); hh <- Hprime.(S)
-			a.1 <- rep(a.1, each = m)
-			a.2 <- rep(a.2, each = m)
-			a.4 <- rep(a.4, each = m)
-			y <- cbind(S, rowSums(I), if (!skip.Y) Y,
-			           rowSums(I[, R0 == 0, drop = FALSE]),
-			           rowSums(I[, R0 >  0, drop = FALSE]),
-			           rowSums(a.4 * f * I),
-			           rowSums(a.4 * f * I) * h,
-			           rowSums(a.4 * ff * I) * (h - a.5/f) +
-                           rowSums(a.4 * f * I) * (hh * (a.6 * (1 - drop(S)) - rowSums(a.4 * f * I) * h) + a.5 * ff/f/f) +
-                           rowSums(a.4 * f * cbind(rowSums(a.4 * f * I) * h - a.3 * I[, 1L], a.1 * I[, j.1, drop = FALSE] - a.2 * I[, j.2, drop = FALSE], deparse.level = 0L)) * (h - a.5/f),
-			           deparse.level = 0L)
-			dimnames(y) <- list(NULL, c("S", "I", if (!skip.Y) "Y", "I.E", "I.I", "foi", "inc", "crv"))
-		} else {
-			y <- cbind(S, I, if (!skip.Y) Y, deparse.level = 0L)
-			dimnames(y) <- list(NULL, rep(c("S", "I", if (!skip.Y) "Y"), c(1L, n, if (!skip.Y) 1L)))
-		}
-		list(tau = t, state = y)
-	}
+	cx <- common(x[, 1L], x[, -1L, drop = FALSE])
 
-	ans <- common(x[, 1L], x[, -1L, drop = FALSE])[[2L]]
-	tsp(ans) <- c(x[c(1L, nrow(x)), 1L], 1/by)
+	ans <- cx[[2L]]
+	tsp(ans) <- c(cx[[1L]][c(1L, length(cx[[1L]]))], 1/by)
 	oldClass(ans) <- c("sir.aoi", "mts", "ts", "matrix", "array")
 	if (!is.null(root)) {
 		attr(ans, "root.info") <-
