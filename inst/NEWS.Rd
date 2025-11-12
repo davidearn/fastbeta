@@ -41,8 +41,8 @@
       \item \code{sir.aoi} accepts new argument \code{solver}, allowing
       the user to request (with \code{solver = "flint"}) that numerical
       solution of the SIR equations is carried out using an arbitrary
-      precision floating-point type, provided that package \pkg{flint}
-      version 0.1.3 or later can be loaded.
+      precision floating-point type, provided that package
+      \CRANpkg{flint} version 0.1.3 or later can be loaded.
     }
   }
   \subsection{Bug Fixes}{
@@ -199,10 +199,10 @@
       \code{seir(stochastic = FALSE, useCompiled = FALSE)} was wrong.
 
       \item \code{seir} handles more comprehensively the situation in
-      which the number of rows of the matrix returned by \pkg{deSolve}
-      function \code{lsoda} is less than \code{length.out}.  It now
-      distinguishes termination due to found roots from termination due
-      to an unsuccessful solver call.
+      which the number of rows of the matrix returned by
+      \CRANpkg{deSolve} function \code{lsoda} is less than
+      \code{length.out}.  It now distinguishes termination due to found
+      roots from termination due to an unsuccessful solver call.
 
       \item Warnings caught by \option{-Wconversion} are squashed.
     }
