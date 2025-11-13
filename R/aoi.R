@@ -7,7 +7,8 @@ function (from = 0, to = from + 1, by = 1,
           F = function (x) 1, Fargs = list(),
           H = identity, Hargs = list(),
           root = NULL, root.max = 1L, root.break = TRUE,
-          aggregate = FALSE, skip.Y = FALSE, ...)
+          aggregate = FALSE, skip.Y = FALSE,
+          rtol = 1e-9, atol = rep(c(1e-9, 0), c(1L, n + !skip.Y)), ...)
 {
 	tau <- seq.int(from = from, to = to, by = by)
 	stopifnot(requireNamespace("deSolve"),
@@ -204,6 +205,8 @@ function (from = 0, to = from + 1, by = 1,
 	                    times = tau,
 	                    func = gg,
 	                    parms = NULL,
+	                    rtol = rtol,
+	                    atol = atol,
 	                    jacfunc = Dg,
 	                    jactype = "fullusr",
 	                    rootfunc =

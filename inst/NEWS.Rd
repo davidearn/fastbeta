@@ -34,7 +34,9 @@
   }
   \subsection{New Features}{
     \itemize{
-      \item .
+      \item \code{sir.aoi} gains formal arguments \code{rtol} and
+      \code{atol} with default expressions suitable for typical calls,
+      overriding those of \CRANpkg{deSolve} function \code{lsoda}.
     }
   }
   \subsection{Bug Fixes}{

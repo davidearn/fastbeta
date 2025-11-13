@@ -3,7 +3,7 @@
 \alias{summary.sir.aoi}
 \title{Solve the SIR Equations Structured by Age of Infection}
 \description{
-Numerically integrates the SIR equations with rates of transmission and
+Numerically solves the SIR equations with rates of transmission and
 recovery structured by age of infection.
 }
 \usage{
@@ -15,7 +15,8 @@ sir.aoi(from = 0, to = from + 1, by = 1,
         F = function (x) 1, Fargs = list(),
         H = identity, Hargs = list(),
         root = NULL, root.max = 1L, root.break = TRUE,
-        aggregate = FALSE, skip.Y = FALSE, \dots)
+        aggregate = FALSE, skip.Y = FALSE,
+        rtol = 1e-9, atol = rep(c(1e-9, 0), c(1L, n + !skip.Y)), \dots)
 
 \method{summary}{sir.aoi}(object, name = "Y", tol = 1e-6, \dots)
 }
@@ -85,9 +86,13 @@ sir.aoi(from = 0, to = from + 1, by = 1,
   a logical indicating if solution of the equation for \eqn{Y} should
   not be attempted, e.g., because that equation seems stiffer than the
   rest.}
-\item{\dots}{
+\item{rtol, atol, \dots}{
   optional arguments passed to the solver, namely function
-  \code{\link[deSolve]{lsoda}} in package \CRANpkg{deSolve}.}
+  \code{\link[deSolve]{lsoda}} in package \CRANpkg{deSolve}.
+  \code{rtol} and \code{atol} must have length 1 or length \code{1+n+1}
+  (one element per equation).  Robust numerical solution can require
+  \code{atol = 0} or \code{atol} of length \code{1+n+1} such that
+  \code{atol[2:(1+n+1)] = 0}.}
 \item{object}{
   an \R{} object inheriting from class \code{sir.aoi}, typically
   the value of a call to \code{sir.aoi}.}
@@ -194,7 +199,8 @@ resulting system of \eqn{1 + n} equations with a new equation
 }{
   dY/tau = sum((R0/ell) * F * I) * (H(S) - 1/sum(R0 * F))
 }
-due to the usefulness of the solution \eqn{Y} in applications.
+due to the usefulness in applications of \eqn{Y}, a quantity known as
+\dQuote{epidemic momentum}.
 }
 \note{
 \code{sir.aoi} is not a special case of \code{\link{sir}} nor a
