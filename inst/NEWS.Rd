@@ -4,11 +4,7 @@
 \section{Changes in version 0.5.2 (2025-11-12)}{
   \subsection{Description}{
     \itemize{
-      \item \code{Imports: utils} for function \code{packageVersion}.
-
-      \item \code{Suggests: flint} for class \code{arf}, methods for
-      class \code{arf}, and function \code{arf_rk}, which are used
-      conditionally by \code{sir.aoi(solver = "flint")}.
+      \item .
     }
   }
   \subsection{Compatibility}{
@@ -38,11 +34,7 @@
   }
   \subsection{New Features}{
     \itemize{
-      \item \code{sir.aoi} accepts new argument \code{solver}, allowing
-      the user to request (with \code{solver = "flint"}) that numerical
-      solution of the SIR equations is carried out using an arbitrary
-      precision floating-point type, provided that package
-      \CRANpkg{flint} version 0.1.3 or later can be loaded.
+      \item .
     }
   }
   \subsection{Bug Fixes}{

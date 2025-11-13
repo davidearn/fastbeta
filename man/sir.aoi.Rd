@@ -14,7 +14,6 @@ sir.aoi(from = 0, to = from + 1, by = 1,
         weights = rep(c(1, 0), c(1L, n - 1L)),
         F = function (x) 1, Fargs = list(),
         H = identity, Hargs = list(),
-        solver = c("deSolve", "flint"),
         root = NULL, root.max = 1L, root.break = TRUE,
         aggregate = FALSE, skip.Y = FALSE, \dots)
 
@@ -67,11 +66,6 @@ sir.aoi(from = 0, to = from + 1, by = 1,
   variable, and \code{Fargs} and \code{Hargs} supply parameter values.
   For example:
   \code{H = function(x, h) x^h}, \code{Hargs = list(h = 0.996)}.}
-\item{solver}{
-  a character string indicating a solver, currently either function
-  \code{\link[deSolve]{lsoda}} in package \CRANpkg{deSolve} or function
-  \code{\link[flint]{arf_rk}} in package \CRANpkg{flint}.  Note that
-  the latter does not support root-finding.}
 \item{root}{
   a function returning a numeric vector of length 1, with formal
   arguments \code{(tau, S, I, Y, dS, dI, dY, R0, ell)} (or a subset);
@@ -92,7 +86,8 @@ sir.aoi(from = 0, to = from + 1, by = 1,
   not be attempted, e.g., because that equation seems stiffer than the
   rest.}
 \item{\dots}{
-  optional arguments passed to the solver.}
+  optional arguments passed to the solver, namely function
+  \code{\link[deSolve]{lsoda}} in package \CRANpkg{deSolve}.}
 \item{object}{
   an \R{} object inheriting from class \code{sir.aoi}, typically
   the value of a call to \code{sir.aoi}.}
