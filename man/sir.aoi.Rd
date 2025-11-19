@@ -3,7 +3,7 @@
 \alias{summary.sir.aoi}
 \title{Solve the SIR Equations Structured by Age of Infection}
 \description{
-Numerically integrates the SIR equations with rates of transmission and
+Numerically solves the SIR equations with rates of transmission and
 recovery structured by age of infection.
 }
 \usage{
@@ -12,8 +12,11 @@ sir.aoi(from = 0, to = from + 1, by = 1,
         init = c(1 - init.infected, init.infected),
         init.infected = .Machine[["double.neg.eps"]],
         weights = rep(c(1, 0), c(1L, n - 1L)),
-        H = identity, Hargs = list(), root = NULL,
-        aggregate = FALSE, \dots)
+        F = function (x) 1, Fargs = list(),
+        H = identity, Hargs = list(),
+        root = NULL, root.max = 1L, root.break = TRUE,
+        aggregate = FALSE, skip.Y = FALSE,
+        rtol = 1e-9, atol = rep(c(1e-9, 0), c(1L, n + !skip.Y)), \dots)
 
 \method{summary}{sir.aoi}(object, name = "Y", tol = 1e-6, \dots)
 }
@@ -53,32 +56,51 @@ sir.aoi(from = 0, to = from + 1, by = 1,
   defining the initial distribution of infected individuals among the
   infected compartments.  By default, all infected individuals occupy
   the first compartment.}
-\item{H}{
-  a function returning a numeric vector of length equal to that of the
-  first formal argument.  The body must be symbolically differentiable
-  with respect to the first formal argument; see \code{\link{D}}.}
-\item{Hargs}{
-  a list of arguments passed to \code{H}.  In typical usage,
-  \code{H} defines a parametric family of functions of one variable,
-  and \code{Hargs} supplies parameter values.  For example:
+\item{F, H}{
+  functions returning a numeric vector of length 1 or of length equal
+  that of the first formal argument.  The body must be symbolically
+  differentiable with respect to the first formal argument; see
+  \code{\link{D}}.}
+\item{Fargs, Hargs}{
+  lists of arguments passed to \code{F} or \code{H}.  In typical usage,
+  \code{F} and \code{H} define parametric families of functions of one
+  variable, and \code{Fargs} and \code{Hargs} supply parameter values.
+  For example:
   \code{H = function(x, h) x^h}, \code{Hargs = list(h = 0.996)}.}
 \item{root}{
   a function returning a numeric vector of length 1, with formal
   arguments \code{(tau, S, I, Y, dS, dI, dY, R0, ell)} (or a subset);
-  otherwise, \code{NULL}.}
+  otherwise, \code{NULL}.  Roots of this function in the interval from
+  \code{from} to \code{to} are sought alongside the numerical solution.}
+\item{root.max}{
+  a positive integer giving a stopping condition for the root finder.
+  Root finding continues until the count of roots found is
+  \code{root.max}.}
+\item{root.break}{
+  a logical indicating if the solver should stop once \code{root.max}
+  roots are found.  If \code{TRUE}, then the numerical solution ends
+  at the last time point less than or equal to the last root.}
 \item{aggregate}{
   a logical indicating if infected compartments should be aggregated.}
-\item{\dots}{
-  optional arguments passed to \code{\link[deSolve]{lsoda}}; use
-  \code{atol}, \code{rtol}, and \code{hmax} for control of local error.}
+\item{skip.Y}{
+  a logical indicating if solution of the equation for \eqn{Y} should
+  not be attempted, e.g., because that equation seems stiffer than the
+  rest.}
+\item{rtol, atol, \dots}{
+  optional arguments passed to the solver, namely function
+  \code{\link[deSolve]{lsoda}} in package \CRANpkg{deSolve}.
+  \code{rtol} and \code{atol} must have length 1 or length \code{1+n+1}
+  (one element per equation).  Robust numerical solution can require
+  \code{atol = 0} or \code{atol} of length \code{1+n+1} such that
+  \code{atol[2:(1+n+1)] = 0}.}
 \item{object}{
   an \R{} object inheriting from class \code{sir.aoi}, typically
   the value of a call to \code{sir.aoi}.}
 \item{name}{
-  a character string, either \code{"Y"} or \code{"I"}.  Tail exponents
-  of \eqn{V} are approximated, where \eqn{V = Y} if \code{name = "Y"}
-  and \eqn{V = \sum_{j} I_{j}}{V = sum(I)} (prevalence) if
-  \code{name = "I"}.}
+  a character string in \code{colnames(object)}.  Tail exponents of
+  \eqn{V} are approximated, where, for example, \eqn{V = Y} if
+  \code{name = "Y"} and \eqn{V = \sum_{j} I_{j}}{V = sum(I)}
+  (prevalence) if \code{name = "I"}.}
 \item{tol}{
   a positive number giving an upper bound on the relative change (from
   one time point to the next) in the slope of \eqn{\log(V)}{log(V)},
@@ -86,28 +108,25 @@ sir.aoi(from = 0, to = from + 1, by = 1,
   considered to be exponential.}
 }
 \value{
-\item{root = NULL}{
-  a \dQuote{multiple time series} object, inheriting from class
-  \code{sir.aoi} and transitively from class \code{\link[=ts]{mts}}.
-  Beneath the class, it is a
-  \code{length(seq(from, to, by))}-by-\code{(1+n+1)} numeric matrix
-  of the form \code{cbind(S, I, Y)}.}
-\item{root = function (tau, S, I, Y, dS, dI, dY, R0, ell)}{
-  a numeric vector of length \code{1+1+n+1} of the form
-  \code{c(tau, S, I, Y)} storing the root of the function \code{root} in
-  units of the mean time spent infectious and the state at that time.
-  Attribute \code{curvature} stores the curvature of \eqn{Y} at the
-  root.  If a root is not found between times \code{from} and \code{to},
-  then the value is \code{NULL}.}
+A \dQuote{multiple time series} object, inheriting from class
+\code{sir.aoi} and transitively from class \code{\link[=ts]{mts}},
+storing the numerical solution.  Beneath the class, it is a
+\code{T}-by-\code{(1+n+1)} numeric matrix of the form
+\code{cbind(S, I, Y)}, \code{T <= length(seq(from, to, by))}.
 
-If \code{aggregate = TRUE}, then infected compartments are aggregated so
-that the number of columns (elements, if \code{root} is a function)
-named \code{I} is 1 rather than \code{n}.  This column (element) stores
-prevalence, the proportion of the population that is infected.
-For convenience, there are 4 additional columns (elements) named
-\code{I.E}, \code{I.I}, \code{foi}, and \code{inc}.  These store the
-non-infectious and infectious components of prevalence (so that
-\code{I.E + I.I = I}), the force of infection, and incidence.
+If \code{root} is a function, then an attribute \code{root.info} of the
+form \code{list(tau, state = cbind(S, I, Y))} stores the first \code{K}
+roots of that function and the state of the system at each root,
+\code{K <= root.max}.
+
+If \code{aggregate = TRUE}, then infected compartments are aggregated
+so that the number of columns named \code{I} is 1 rather than \code{n}.
+This column stores prevalence, the proportion of the population that is
+infected.  For convenience, there are 5 additional columns named
+\code{I.E}, \code{I.I}, \code{foi}, \code{inc}, and \code{crv}.
+These store the non-infectious and infectious components of prevalence
+(so that \code{I.E + I.I = I}), the force of infection, incidence
+(so that \code{foi * S = inc}), and the curvature of \code{Y}.
 
 The method for \code{\link{summary}} returns a numeric vector of length
 2 containing the left and right \dQuote{tail exponents} of the variable
@@ -123,24 +142,27 @@ age of infection are
 \deqn{
   \begin{alignedat}{4}
   \text{d} & S         &{} / \text{d} t
-  &{} = \mu (1 - S) - (\textstyle\sum_{j} \beta_{j} I_{j}) H(S) \\
+  &{} = \mu (1 - S) - (\textstyle\sum_{j} \beta_{j} F I_{j}) H(S) \\
   \text{d} & I_{    1} &{} / \text{d} t
-  &{} = (\textstyle\sum_{j} \beta_{j} I_{j}) H(S) - (\gamma_{1} + \mu) I_{1} \\
+  &{} = (\textstyle\sum_{j} \beta_{j} F I_{j}) H(S) - (\gamma_{1} + \mu) I_{1} \\
   \text{d} & I_{j + 1} &{} / \text{d} t
   &{} = \gamma_{j} I_{j} - (\gamma_{j + 1} + \mu) I_{j + 1} \\
   \text{d} & R         &{} / \text{d} t
   &{} = \gamma_{n} I_{n} - \mu R
   \end{alignedat}
 }{
-  dS       /dt = mu * (1 - S) - sum(beta * I) * H(S)
-  dI[    1]/dt = sum(beta * I) * H(S) - (gamma[1] + mu) * I[1]
+  dS       /dt = mu * (1 - S) - sum(beta * F * I) * H(S)
+  dI[    1]/dt = sum(beta * F * I) * H(S) - (gamma[1] + mu) * I[1]
   dI[j + 1]/dt = gamma[j] * I[j] - (gamma[j + 1] + mu) * I[j + 1]
   dR       /dt = gamma[n] * I[n] - mu * R
 }
-where \eqn{S, I_{j}, R \ge 0}{min(S, I, R) >= 0},
-\eqn{S + \sum_{j} I_{j} + R = 1}{sum(S, I, R) = 1}, and \eqn{H} is the
-susceptible heterogeneity function.  In general, \eqn{H} is nonlinear;
-in the standard SIR equations, \eqn{H} is the identity function.
+where
+\eqn{S, I_{j}, R \ge 0}{min(S, I, R) >= 0},
+\eqn{S + \sum_{j} I_{j} + R = 1}{sum(S, I, R) = 1},
+\eqn{F} is a forcing function, and
+\eqn{H} is a susceptible heterogeneity function.
+In general, \eqn{F} and \eqn{H} are nonlinear.  In the standard
+SIR equations, \eqn{F} is 1 and \eqn{H} is the identity function.
 
 Nondimensionalization using parameters
 \eqn{\mathcal{R}_{0,j} = \beta_{j}/(\gamma_{j} + \mu)}{R0 = beta/(gamma + mu)},
@@ -154,17 +176,17 @@ designates as a natural time unit the mean time spent infectious, gives
 \deqn{
   \begin{alignedat}{4}
   \text{d} & S         &{} / \text{d} \tau
-  &{} = \varepsilon (1 - S) - (\textstyle\sum_{j} (\mathcal{R}_{0,j}/\ell_{j}) I_{j}) H(S) \\
+  &{} = \varepsilon (1 - S) - (\textstyle\sum_{j} (\mathcal{R}_{0,j}/\ell_{j}) F I_{j}) H(S) \\
   \text{d} & I_{    1} &{} / \text{d} \tau
-  &{} = (\textstyle\sum_{j} (\mathcal{R}_{0,j}/\ell_{j}) I_{j}) H(S) - (1/\ell_{1} + \varepsilon) I_{1} \\
+  &{} = (\textstyle\sum_{j} (\mathcal{R}_{0,j}/\ell_{j}) F I_{j}) H(S) - (1/\ell_{1} + \varepsilon) I_{1} \\
   \text{d} & I_{j + 1} &{} / \text{d} \tau
   &{} = (1/\ell_{j}) I_{j} - (1/\ell_{j+1} + \varepsilon) I_{j + 1} \\
   \text{d} & R         &{} / \text{d} \tau
   &{} = (1/\ell_{n}) I_{n} - \varepsilon R
   \end{alignedat}
 }{
-  dS       /dtau = eps * (1 - S) - sum((R0/ell) * I) * H(S)
-  dI[    1]/dtau = sum((R0/ell) * I) * H(S) - (1/ell[1] + eps) * I[1]
+  dS       /dtau = eps * (1 - S) - sum((R0/ell) * F * I) * H(S)
+  dI[    1]/dtau = sum((R0/ell) * F * I) * H(S) - (1/ell[1] + eps) * I[1]
   dI[j + 1]/dtau = (1/ell[j]) * I[j] - (1/ell[j + 1] + eps) * I[j + 1]
   dR       /dtau = (1/ell[n]) * I[n] - eps * R
 }
@@ -173,11 +195,12 @@ last equation (which is redundant given
 \eqn{R = 1 - S - \sum_{j} I_{j}}{R = 1 - sum(S, I)}) and augments the
 resulting system of \eqn{1 + n} equations with a new equation
 \deqn{
-  \text{d}Y/\text{d}\tau = (\textstyle\sum_{j} (\mathcal{R}_{0,j}/\ell_{j}) I_{j}) (H(S) - 1/(\textstyle\sum_{j} \mathcal{R}_{0, j}))
+  \text{d}Y/\text{d}\tau = (\textstyle\sum_{j} (\mathcal{R}_{0,j}/\ell_{j}) F I_{j}) (H(S) - 1/(\textstyle\sum_{j} \mathcal{R}_{0, j} F))
 }{
-  dY/tau = sum((R0/ell) * I) * (H(S) - 1/sum(R0))
+  dY/tau = sum((R0/ell) * F * I) * (H(S) - 1/sum(R0 * F))
 }
-due to the usefulness of the solution \eqn{Y} in applications.
+due to the usefulness in applications of \eqn{Y}, a quantity known as
+\dQuote{epidemic momentum}.
 }
 \note{
 \code{sir.aoi} is not a special case of \code{\link{sir}} nor a
@@ -196,17 +219,18 @@ if (requireNamespace("deSolve")) withAutoprint({
 
 to <- 100; by <- 0.01; R0 <- c(0, 16); ell <- c(0.5, 1)
 
-peak <- sir.aoi(to = to, by = by, R0 = R0, ell = ell,
-                root = function (S, R0) sum(R0) * S - 1,
-                aggregate = TRUE)
-peak
+soln.peak <- sir.aoi(to = to, by = by, R0 = R0, ell = ell,
+                     root = function (S, R0) sum(R0) * S - 1,
+                     aggregate = TRUE)
+str(soln.peak)
 
-to <- 4 * peak[["tau"]] # a more principled endpoint
+info.peak <- attr(soln.peak, "root.info")
+to <- 4 * info.peak[["tau"]] # a more principled endpoint
 
 soln <- sir.aoi(to = to, by = by, R0 = R0, ell = ell,
                 aggregate = TRUE, atol = 0, rtol = 1e-12)
 ##                                ^^^^      ^^^^
-## 'atol', 'rtol', 'hmax' are passed to deSolve::lsoda
+## 'atol', 'rtol', ... are passed to deSolve::lsoda
 
 head(soln)
 tail(soln)
@@ -220,29 +244,31 @@ xoff <- function (x, k) x - x[k]
 k <- c(16L, nrow(soln)) # c(1L, nrow(soln)) worse due to transient
 
 plot(soln[, "Y"], log = "y", ylab = "Y")
-abline(v = peak[["tau"]], h = peak[["Y"]],
+abline(v = info.peak[["tau"]], h = info.peak[["state"]][, "Y"],
        lty = 2, lwd = 2, col = "red")
 for (i in 1:2)
 	lines(soln[k[i], "Y"] * exp(lamb[i] * xoff(time(soln), k[i])),
 	      lty = 2, lwd = 2, col = "red")
 
 wrap <-
-function (root)
-	sir.aoi(to = to, by = by, R0 = R0, ell = ell,
-	        root = root, aggregate = TRUE)
-Ymax <- peak[["Y"]]
+function (root, ...)
+	attr(sir.aoi(to = to, by = by, R0 = R0, ell = ell,
+	             root = root, aggregate = TRUE, ...),
+	     "root.info")[["tau"]]
+Ymax <- info.peak[["state"]][, "Y"]
 
 ## NB: want *simple* roots, not *multiple* roots
-F <- list(function (Y) (Y - Ymax * 0.5)  ,
+L <- list(function (Y) (Y - Ymax * 0.5)  ,
           function (Y) (Y - Ymax * 0.5)^2,
           function (Y) (Y - Ymax      )  ,
           function (Y) (Y - Ymax      )^2)
-lapply(F, wrap)
+lapply(L, wrap)
 
-## NB: critical values can be attained twice
-F <- list(function (Y, dY) if (dY > 0) Y - Ymax * 0.5 else 1,
+## NB: critical values can be attained more than once
+L <- list(function (Y, dY)             Y - Ymax * 0.5,
+          function (Y, dY) if (dY > 0) Y - Ymax * 0.5 else 1,
           function (Y, dY) if (dY < 0) Y - Ymax * 0.5 else 1)
-lapply(F, wrap)
+lapply(L, wrap, root.max = 2L)
 
 })
 }

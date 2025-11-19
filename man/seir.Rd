@@ -7,8 +7,8 @@ Simulates incidence time series based on an SEIR model with user-defined
 forcing and a simple model for observation error.
 
 Note that simulation code depends on availability of suggested packages
-\pkg{adaptivetau} and \pkg{deSolve}.  If the dependency cannot be loaded
-then an error is signaled.
+\CRANpkg{adaptivetau} and \CRANpkg{deSolve}.  If the dependency cannot
+be loaded then an error is signaled.
 }
 \usage{
 seir(length.out = 1L,

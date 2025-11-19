@@ -9,8 +9,8 @@ use primarily in examples, tests, and vignettes.  Users should not rely
 on simulation details, which may change between package versions.
 
 Note that simulation code depends on availability of suggested packages
-\pkg{adaptivetau} and \pkg{deSolve}.  If the dependency cannot be loaded
-then the value of the data set is \code{NULL}.
+\CRANpkg{adaptivetau} and \CRANpkg{deSolve}.  If the dependency cannot
+be loaded then the value of the data set is \code{NULL}.
 }
 \usage{
 ## if (requireNamespace("deSolve"))

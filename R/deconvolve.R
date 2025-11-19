@@ -1,7 +1,7 @@
 ## FIXME: return fast if (missing(delay) || length(delay) == 1L)?
 deconvolve <-
 function (x, prob = 1, delay = 1,
-          start, tol = 1, iter.max = 32L, complete = FALSE)
+          start, x.pad = 0, tol = 1, iter.max = 32L, complete = FALSE)
 {
 	stopifnot(is.numeric(x),
 	          length(x) >= 1L,
@@ -23,8 +23,11 @@ function (x, prob = 1, delay = 1,
 	if ((delay.sum <- sum(delay)) != 1)
 		delay <- delay / delay.sum
 	if (missing(start)) {
+		stopifnot(is.numeric(x.pad),
+		          length(x.pad) == 1L,
+		          x.pad >= 0)
 		d. <- which.max(delay) - 1L
-		start <- c(double(d - d.), x, double(d.))
+		start <- c(rep(x.pad, d - d.), x, rep(x.pad, d.))
 	}
 	else {
 		stopifnot(is.numeric(start),
