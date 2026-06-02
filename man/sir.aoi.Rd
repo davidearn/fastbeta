@@ -11,7 +11,7 @@ sir.aoi(from = 0, to = from + 1, by = 1,
         R0, ell = 1, eps = 0, n = max(length(R0), length(ell)),
         init = c(1 - init.infected, init.infected),
         init.infected = .Machine[["double.neg.eps"]],
-        weights = rep(c(1, 0), c(1L, n - 1L)),
+        weights = rep(c(1, 0), c(1L, n - 1L)), xm = 1,
         F = function (x) 1, Fargs = list(),
         H = identity, Hargs = list(),
         root = NULL, root.max = 1L, root.break = TRUE,
@@ -51,6 +51,10 @@ sir.aoi(from = 0, to = from + 1, by = 1,
 \item{init.infected}{
   a number in \eqn{(0, 1]} used only to define the default expression
   for \code{init}; see \sQuote{Usage}.}
+\item{xm}{
+  a number in \eqn{(\code{init[1]}, 1]} giving the
+  \dQuote{early susceptible root}.  The initial value of \eqn{Y} is
+  computed as \code{xm - init[1] - log(xm/init[1])/sum(R0)}.}
 \item{weights}{
   a numeric vector of length \code{n} containing non-negative weights,
   defining the initial distribution of infected individuals among the

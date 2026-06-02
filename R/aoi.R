@@ -3,7 +3,7 @@ function (from = 0, to = from + 1, by = 1,
           R0, ell = 1, eps = 0, n = max(length(R0), length(ell)),
           init = c(1 - init.infected, init.infected),
           init.infected = .Machine[["double.neg.eps"]],
-          weights = rep(c(1, 0), c(1L, n - 1L)),
+          weights = rep(c(1, 0), c(1L, n - 1L)), xm = 1,
           F = function (x) 1, Fargs = list(),
           H = identity, Hargs = list(),
           root = NULL, root.max = 1L, root.break = TRUE,
@@ -36,6 +36,10 @@ function (from = 0, to = from + 1, by = 1,
 	          names(formals(H))[1L] != "...",
 	          is.list(Hargs),
 	          is.null(names(Hargs)) || !any(names(Hargs) == names(formals(H))[1L]))
+	if (!skip.Y)
+	stopifnot(is.double(xm), length(xm) == 1L,
+	          is.finite(xm), xm > init[1L], xm <= 1,
+	          sum(R0) > 1, init[1L] > 1/sum(R0))
 	if (!is.null(root))
 	stopifnot(is.function(root),
 	          !is.null(formals(root)),
@@ -92,13 +96,18 @@ function (from = 0, to = from + 1, by = 1,
 	a.5 <- 1/sum(R0)
 	a.6 <- eps
 
-	q <- log(init[2L])
-	init <- c(init[1L], log(weights) - log(sum(weights)) + q, q,
-	          use.names = FALSE)
-	if (min(init) == -Inf) {
-		init[init == -Inf] <- log(0x1p-64) + q
-		init[i.Y] <- log(sum(exp(init[i.I])))
+	init.S <- xi <- init[1L]
+	init.I <- log(weights/sum(weights) * init[2L])
+	if (min(init.I) == -Inf)
+		init.I[init.I == -Inf] <- log(0x1p-64 * init[2L])
+	if (skip.Y)
+		init.Y <- NaN
+	else {
+		yi <- xm - xi - log(xm/xi) * a.5
+		stopifnot(yi > 0)
+		init.Y <- log(yi)
 	}
+	init <- c(init.S, init.I, init.Y, use.names = FALSE)
 
 	gg <-
 	function (t, y, theta)

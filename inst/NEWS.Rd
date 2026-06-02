@@ -24,7 +24,13 @@
   }
   \subsection{Significant User-Visible Changes}{
     \itemize{
-      \item .
+      \item \code{sir.aoi} gains formal argument \code{xm} and computes
+      the initial value of \eqn{Y} as
+      \code{xm - init[1] - log(xm/init[1])/sum(R0)} when \code{skip.Y}
+      is \code{FALSE}.  Previously, it used \code{init[2]}.
+
+      \item \code{sir.aoi} tests \code{sum(R0) > 1} and
+      \code{init[1] > 1/sum(R0)} when \code{skip.Y} is \code{FALSE}.
     }
   }
   \subsection{Deprecated and Defunct}{
