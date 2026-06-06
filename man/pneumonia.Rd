@@ -70,11 +70,6 @@ shock.
 \emph{71}(24), 1962-1967.
 }
 \examples{
-\dontshow{
-## for R_DEFAULT_PACKAGES=NULL
-library(graphics, pos = "package:base", verbose = FALSE)
-library(   utils, pos = "package:base", verbose = FALSE)
-}
 data(pneumonia, package = "fastbeta")
 str(pneumonia)
 

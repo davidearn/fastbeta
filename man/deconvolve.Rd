@@ -86,12 +86,6 @@ time series.
 \doi{10.1073/pnas.0902958106}
 }
 \examples{
-\dontshow{
-## for R_DEFAULT_PACKAGES=NULL
-library(   stats, pos = "package:base", verbose = FALSE)
-library(graphics, pos = "package:base", verbose = FALSE)
-library(   utils, pos = "package:base", verbose = FALSE)
-}
 ##
 ## Example 1: simulation
 ##

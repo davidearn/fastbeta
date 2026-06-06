@@ -40,11 +40,6 @@ A lower triangular matrix of size \code{1+m+n+1+1}.
 %\seealso{}
 %\references{}
 \examples{
-\dontshow{
-## for R_DEFAULT_PACKAGES=NULL
-library(stats, pos = "package:base", verbose = FALSE)
-library(utils, pos = "package:base", verbose = FALSE)
-}
 if (requireNamespace("adaptivetau")) withAutoprint({
 
 data(seir.ts02, package = "fastbeta")

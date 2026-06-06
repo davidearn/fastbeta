@@ -167,11 +167,6 @@ automatic tau selection.
 \doi{10.1063/1.2745299}
 }
 \examples{
-\dontshow{
-## for R_DEFAULT_PACKAGES=NULL
-library(stats, pos = "package:base", verbose = FALSE)
-library(utils, pos = "package:base", verbose = FALSE)
-}
 if (requireNamespace("adaptivetau")) withAutoprint({
 
 beta <- function (t, a = 1e-01, b = 1e-05) b * (1 + a * sinpi(t / 26))

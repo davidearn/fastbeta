@@ -214,11 +214,6 @@ concerning the SIR equations as formulated here, \code{sir} to simulate
 incidence time series suitable for testing \code{\link{fastbeta}}.
 }
 \examples{
-\dontshow{
-## for R_DEFAULT_PACKAGES=NULL
-library(   stats, pos = "package:base", verbose = FALSE)
-library(graphics, pos = "package:base", verbose = FALSE)
-}
 if (requireNamespace("deSolve")) withAutoprint({
 
 to <- 100; by <- 0.01; R0 <- c(0, 16); ell <- c(0.5, 1)

@@ -27,10 +27,6 @@ A \dQuote{multiple time series} object, inheriting from class
 \code{\link[=ts]{mts}}.
 }
 \examples{
-\dontshow{
-## for R_DEFAULT_PACKAGES=NULL
-library(stats, pos = "package:base", verbose = FALSE)
-}
 n <- 3L
 x <- matrix(0, n, n, dimnames = list(NULL, LETTERS[seq_len(n)]))
 y <- seq_len(n)

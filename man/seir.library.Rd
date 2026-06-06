@@ -35,10 +35,6 @@ see, e.g.
 }
 \seealso{\code{\link{seir}}.}
 \examples{
-\dontshow{
-## for R_DEFAULT_PACKAGES=NULL
-library(utils, pos = "package:base", verbose = FALSE)
-}
 if (requireNamespace("deSolve")) withAutoprint({
 
 data(seir.ts01, package = "fastbeta")

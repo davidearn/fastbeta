@@ -52,10 +52,6 @@ and \code{r} bootstrap estimates.  It is completely parallel to argument
 %\seealso{}
 %\references{}
 \examples{
-\dontshow{
-## for R_DEFAULT_PACKAGES=NULL
-library(utils, pos = "package:base", verbose = FALSE)
-}
 if (requireNamespace("adaptivetau")) withAutoprint({
 
 data(seir.ts02, package = "fastbeta")
