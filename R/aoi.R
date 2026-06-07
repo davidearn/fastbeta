@@ -181,9 +181,12 @@ function (from = 0, to = from + 1, by = 1,
 	}
 
 	if (decreasing <- (t0 <- tau[1L]) > tau[2L]) {
-		gg. <- gg; gg <- function (t, y, theta) -gg.(t0 - t, y, theta)
-		Dg. <- Dg; Dg <- function (t, y, theta) -Dg.(t0 - t, y, theta)
-		Rg. <- Rg; Rg <- function (t, y, theta)  Rg.(t0 - t, y, theta)
+		gg. <- gg
+		Dg. <- Dg
+		Rg. <- Rg
+		gg <- function (t, y, theta) list(-gg.(t0 - t, y, theta)[[1L]])
+		Dg <- function (t, y, theta)      -Dg.(t0 - t, y, theta)
+		Rg <- function (t, y, theta)       Rg.(t0 - t, y, theta)
 	}
 
 	x <- deSolve::lsoda(y = init,
