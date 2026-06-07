@@ -262,7 +262,7 @@ function (from = 0, to = from + 1, by = 1,
 	cx <- common(x[, 1L], x[, -1L, drop = FALSE])
 
 	ans <- cx[[2L]]
-	tsp(ans) <- c(cx[[1L]][c(1L, length(cx[[1L]]))], 1/by)
+	tsp(ans) <- c(cx[[1L]][c(1L, length(cx[[1L]]))], abs(1/by))
 	oldClass(ans) <- c("sir.aoi", "mts", "ts", "matrix", "array")
 	if (!is.null(root)) {
 		attr(ans, "root.info") <-
