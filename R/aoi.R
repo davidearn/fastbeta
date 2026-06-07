@@ -186,6 +186,40 @@ function (from = 0, to = from + 1, by = 1,
 		Rg. <- Rg; Rg <- function (t, y, theta)  Rg.(t0 - t, y, theta)
 	}
 
+	x <- deSolve::lsoda(y = init,
+	                    times = if (decreasing) t0 - tau else tau,
+	                    func = gg,
+	                    parms = NULL,
+	                    rtol = rtol,
+	                    atol = atol,
+	                    jacfunc = Dg,
+	                    jactype = "fullusr",
+	                    rootfunc =
+	                        if (!is.null(root))
+	                        	Rg,
+	                    events =
+	                        if (!is.null(root) && !(root.break && root.max == 1L))
+	                        	list(func = function (t, y, theta) y,
+	                        	     root = TRUE,
+	                        	     maxroot = root.max),
+	                    ynames = FALSE, ...)
+	ax <- attributes(x)
+	attributes(x) <- ax["dim"]
+
+	status <- ax[["istate"]][1L]
+	if (status < 0L)
+		warning("integration terminated due to unsuccessful solver call")
+	if (status < 0L || status == 3L) {
+		last <- x[nrow(x), , drop = FALSE]
+		if (!last[1L, 1L] %in% tau)
+		x <- x[-nrow(x), , drop = FALSE]
+	}
+
+	if (root.break && root.max > 1L &&
+	    !is.null(ax[["nroot"]]) && ax[["nroot"]] == root.max &&
+	    x[nrow(x), 1L] > ax[["troot"]][root.max])
+		x <- x[x[, 1L] <= ax[["troot"]][root.max], , drop = FALSE]
+
 	common <-
 	function (t, y)
 	{
@@ -215,40 +249,6 @@ function (from = 0, to = from + 1, by = 1,
 		}
 		list(tau = t, state = y)
 	}
-
-	x <- deSolve::lsoda(y = init,
-	                    times = if (decreasing) t0 - tau else tau,
-	                    func = gg,
-	                    parms = NULL,
-	                    rtol = rtol,
-	                    atol = atol,
-	                    jacfunc = Dg,
-	                    jactype = "fullusr",
-	                    rootfunc =
-	                        if (!is.null(root))
-	                        	Rg,
-	                    events =
-	                        if (!is.null(root) && !(root.break && root.max == 1L))
-	                        	list(func = function (t, y, theta, ...) y,
-	                        	     root = TRUE,
-	                        	     maxroot = root.max),
-	                    ynames = FALSE, ...)
-	ax <- attributes(x)
-	attributes(x) <- ax["dim"]
-
-	status <- ax[["istate"]][1L]
-	if (status < 0L)
-		warning("integration terminated due to unsuccessful solver call")
-	if (status < 0L || status == 3L) {
-		last <- x[nrow(x), , drop = FALSE]
-		if (!last[1L, 1L] %in% tau)
-		x <- x[-nrow(x), , drop = FALSE]
-	}
-
-	if (root.break && root.max > 1L &&
-	    !is.null(ax[["nroot"]]) && ax[["nroot"]] == root.max &&
-	    x[nrow(x), 1L] > ax[["troot"]][root.max])
-		x <- x[x[, 1L] <= ax[["troot"]][root.max], , drop = FALSE]
 
 	if (decreasing) {
 		x <- x[nrow(x):1L, , drop = FALSE]
