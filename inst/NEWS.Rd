@@ -1,7 +1,7 @@
 \name{NEWS}
 \title{News for \R{} Package \pkg{fastbeta}}
 \newcommand{\GH}{\href{https://github.com/davidearn/fastbeta/issues/#1}{GH##1}}
-\section{Changes in version 0.5.2 (2026-06-06)}{
+\section{Changes in version 0.5.2 (2026-06-02)}{
   \subsection{Description}{
     \itemize{
       \item .
@@ -43,9 +43,6 @@
       \item \code{sir.aoi} gains formal arguments \code{rtol} and
       \code{atol} with default expressions suitable for typical calls,
       overriding those of \CRANpkg{deSolve} function \code{lsoda}.
-
-      \item \code{sir.aoi} supports solution backward in time with
-      \code{to < from}.
     }
   }
   \subsection{Bug Fixes}{

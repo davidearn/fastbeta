@@ -22,10 +22,9 @@ sir.aoi(from = 0, to = from + 1, by = 1,
 }
 \arguments{
 \item{from, to, by}{
-  passed to \code{\link{seq.int}} in order to generate an equally spaced
-  vector of time points in units of the mean time spent infectious.
-  Solution proceeds forward in time if \code{from < to} and backward in
-  time if \code{to < from}.}
+  passed to \code{\link{seq.int}} in order to generate an increasing,
+  equally spaced vector of time points in units of the mean time spent
+  infectious.}
 \item{R0}{
   a numeric vector of length \code{n} such that \code{sum(R0)} is the
   basic reproduction number and \code{R0[j]} is the contribution of
