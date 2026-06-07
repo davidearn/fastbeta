@@ -1,5 +1,5 @@
 sir.aoi <-
-function (from = 0, to = from + 1, by = 1,
+function (from = 0, to = from + 1, by = if (from < to) 1 else -1,
           R0, ell = 1, eps = 0, n = max(length(R0), length(ell)),
           init = c(1 - init.infected, init.infected),
           init.infected = .Machine[["double.neg.eps"]],
@@ -12,7 +12,7 @@ function (from = 0, to = from + 1, by = 1,
 {
 	tau <- seq.int(from = from, to = to, by = by)
 	stopifnot(requireNamespace("deSolve"),
-	          length(tau) >= 2L, tau[1L] < tau[2L],
+	          length(tau) >= 2L, tau[1L] != tau[2L],
 	          is.integer(n), length(n) == 1L, n >= 1L, n < 4096L,
 	          is.double(R0), length(R0) == 1L || length(R0) == n,
 	          all(is.finite(R0)), min(R0) >= 0, max(R0) > 0,
@@ -210,9 +210,19 @@ function (from = 0, to = from + 1, by = 1,
 	}
 
 	if (root.break && root.max > 1L &&
-	    !is.null(ax[["nroot"]]) && ax[["nroot"]] == root.max &&
-	    x[nrow(x), 1L] > ax[["troot"]][root.max])
-		x <- x[x[, 1L] <= ax[["troot"]][root.max], , drop = FALSE]
+	    !is.null(ax[["nroot"]]) && ax[["nroot"]] == root.max) {
+		z <- ax[["troot"]][root.max]
+		if (from < to) {
+			if (x[nrow(x), 1L] > z)
+				x <- x[x[, 1L] <= z, , drop = FALSE]
+		} else {
+			if (x[nrow(x), 1L] < z)
+				x <- x[x[, 1L] >= z, , drop = FALSE]
+		}
+	}
+
+	if (to < from)
+		x <- x[nrow(x):1L, , drop = FALSE]
 
 	common <-
 	function (t, y)
@@ -247,7 +257,7 @@ function (from = 0, to = from + 1, by = 1,
 	cx <- common(x[, 1L], x[, -1L, drop = FALSE])
 
 	ans <- cx[[2L]]
-	tsp(ans) <- c(cx[[1L]][c(1L, length(cx[[1L]]))], 1/by)
+	tsp(ans) <- c(cx[[1L]][c(1L, length(cx[[1L]]))], abs(1/by))
 	oldClass(ans) <- c("sir.aoi", "mts", "ts", "matrix", "array")
 	if (!is.null(root)) {
 		attr(ans, "root.info") <-

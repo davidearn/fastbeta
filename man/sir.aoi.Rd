@@ -7,7 +7,7 @@ Numerically solves the SIR equations with rates of transmission and
 recovery structured by age of infection.
 }
 \usage{
-sir.aoi(from = 0, to = from + 1, by = 1,
+sir.aoi(from = 0, to = from + 1, by = if (from < to) 1 else -1,
         R0, ell = 1, eps = 0, n = max(length(R0), length(ell)),
         init = c(1 - init.infected, init.infected),
         init.infected = .Machine[["double.neg.eps"]],
@@ -22,9 +22,10 @@ sir.aoi(from = 0, to = from + 1, by = 1,
 }
 \arguments{
 \item{from, to, by}{
-  passed to \code{\link{seq.int}} in order to generate an increasing,
-  equally spaced vector of time points in units of the mean time spent
-  infectious.}
+  passed to \code{\link{seq.int}} in order to generate an equally spaced
+  vector of time points in units of the mean time spent infectious.
+  Solution proceeds forward in time if \code{from < to} and backward in
+  time if \code{to < from}.}
 \item{R0}{
   a numeric vector of length \code{n} such that \code{sum(R0)} is the
   basic reproduction number and \code{R0[j]} is the contribution of
