@@ -12,7 +12,7 @@ function (from = 0, to = from + 1, by = 1,
 {
 	tau <- seq.int(from = from, to = to, by = by)
 	stopifnot(requireNamespace("deSolve"),
-	          length(tau) >= 2L, tau[1L] < tau[2L],
+	          length(tau) >= 2L, tau[1L] != tau[2L],
 	          is.integer(n), length(n) == 1L, n >= 1L, n < 4096L,
 	          is.double(R0), length(R0) == 1L || length(R0) == n,
 	          all(is.finite(R0)), min(R0) >= 0, max(R0) > 0,
@@ -180,6 +180,12 @@ function (from = 0, to = from + 1, by = 1,
 		body(Rg) <- b
 	}
 
+	if (decreasing <- (t0 <- tau[1L]) > tau[2L]) {
+		gg. <- gg; gg <- function (t, y, theta) -gg.(t0 - t, y, theta)
+		Dg. <- Dg; Dg <- function (t, y, theta) -Dg.(t0 - t, y, theta)
+		Rg. <- Rg; Rg <- function (t, y, theta)  Rg.(t0 - t, y, theta)
+	}
+
 	common <-
 	function (t, y)
 	{
@@ -211,7 +217,7 @@ function (from = 0, to = from + 1, by = 1,
 	}
 
 	x <- deSolve::lsoda(y = init,
-	                    times = tau,
+	                    times = if (decreasing) t0 - tau else tau,
 	                    func = gg,
 	                    parms = NULL,
 	                    rtol = rtol,
@@ -243,6 +249,12 @@ function (from = 0, to = from + 1, by = 1,
 	    !is.null(ax[["nroot"]]) && ax[["nroot"]] == root.max &&
 	    x[nrow(x), 1L] > ax[["troot"]][root.max])
 		x <- x[x[, 1L] <= ax[["troot"]][root.max], , drop = FALSE]
+
+	if (decreasing) {
+		x <- x[nrow(x):1L, , drop = FALSE]
+		common. <- common
+		common <- function (t, y) common.(t0 - t, y)
+	}
 
 	cx <- common(x[, 1L], x[, -1L, drop = FALSE])
 
