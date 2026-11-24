@@ -15,9 +15,9 @@ SEXP R_adseir_jac(SEXP, SEXP);
 SEXP R_deseir_initialize(SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP,
                          SEXP);
 SEXP R_deseir_finalize(void);
-void R_deseir_dot(int *, double *, double *, double *, double *, int *);
-void R_deseir_jac(int *, double *, double *, int *, int *, double *,
-                  int *, double *, int *);
+void R_deseir_dot(const int *, const double *, const double *, double *, double *, const int *);
+void R_deseir_jac(const int *, const double *, const double *, const int *, const int *, double *,
+                  const int *, double *, const int *);
 
 static const R_CallMethodDef CallMethods[] =
 {
